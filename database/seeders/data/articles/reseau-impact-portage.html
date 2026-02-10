@@ -1,0 +1,40 @@
+<h2>Impact de la portabilité sur le routage réseau</h2>
+
+<p>La portabilité des numéros mobiles modifie en profondeur la manière dont les appels sont <strong>routés à travers le réseau</strong>. Sans portabilité, le préfixe d'un numéro suffit à identifier l'opérateur. Avec la PNM, un mécanisme de consultation supplémentaire est nécessaire.</p>
+
+<h3>Routage classique vs. routage avec portabilité</h3>
+<p>Dans un réseau sans portabilité, le routage est simple :</p>
+<ul>
+    <li>Le MSC analyse le <strong>préfixe du numéro appelé</strong> (ex : 0690 = Digicel Guadeloupe)</li>
+    <li>L'appel est acheminé directement vers l'opérateur correspondant au préfixe</li>
+</ul>
+<p>Avec la portabilité, cette logique ne fonctionne plus car un numéro <code>0690XXXXXX</code> (préfixe historiquement Digicel) peut être hébergé chez Orange ou SFR/Only. Le réseau doit donc <strong>interroger une base de données</strong> avant de router l'appel.</p>
+
+<h3>Mécanisme de routage des numéros portés</h3>
+<p>Lorsqu'un appel est émis vers un numéro potentiellement porté :</p>
+<ul>
+    <li>Le MSC de l'opérateur appelant interroge son <strong>HLR</strong></li>
+    <li>Le HLR consulte la <strong>table de routage PNM</strong> (alimentée par MOBI) pour vérifier si le numéro a été porté</li>
+    <li>Si le numéro est porté, le HLR retourne un <strong>préfixe de routage</strong> spécifique indiquant l'opérateur hébergeant</li>
+    <li>Le MSC redirige l'appel vers l'opérateur hébergeant via l'<strong>interconnexion</strong> appropriée</li>
+    <li>L'opérateur hébergeant achemine l'appel jusqu'à l'abonné sur son réseau</li>
+</ul>
+
+<h3>Mises à jour du HLR lors d'un portage</h3>
+<p>Lors de la bascule technique (jour JP), plusieurs mises à jour sont effectuées :</p>
+<ul>
+    <li><strong>HLR de l'OPR</strong> : création du profil abonné avec le MSISDN porté, association avec la nouvelle IMSI/SIM</li>
+    <li><strong>HLR de l'OPD</strong> : suppression du profil abonné, désactivation de l'ancienne SIM</li>
+    <li><strong>Tables de routage MOBI</strong> : mise à jour de l'association MSISDN → opérateur hébergeant, diffusée à tous les opérateurs</li>
+</ul>
+
+<h3>Rôle de MOBI</h3>
+<p><strong>MOBI</strong> est le système de gestion des tables de routage PNM. Il reçoit les commandes de mise à jour via l'ESB DataPower :</p>
+<ul>
+    <li><strong>EMA</strong> (Enregistrement MSISDN Ajout) : ajoute un numéro porté dans les tables de routage avec le nouvel opérateur hébergeant</li>
+    <li><strong>EMM</strong> (Enregistrement MSISDN Modification) : modifie le routage d'un numéro déjà porté (portage inverse)</li>
+    <li><strong>EMS</strong> (Enregistrement MSISDN Suppression) : retire un numéro des tables de portage (restitution à l'OPA)</li>
+</ul>
+
+<h3>Impacts sur la qualité de service</h3>
+<p>La portabilité peut engendrer un <strong>léger surcoût en temps de routage</strong> (quelques millisecondes pour la consultation HLR). En cas de désynchronisation des tables de routage entre opérateurs, un numéro porté peut temporairement être <strong>injoignable</strong>. C'est pourquoi la synchronisation hebdomadaire (PNMSYNC) est essentielle pour détecter et corriger ces divergences.</p>

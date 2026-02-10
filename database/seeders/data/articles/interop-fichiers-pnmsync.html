@@ -1,0 +1,56 @@
+<h2>Fichiers PNMSYNC — Synchronisation hebdomadaire</h2>
+
+<p>Les fichiers <strong>PNMSYNC</strong> sont le mécanisme de synchronisation inter-opérateurs permettant de vérifier que tous les opérateurs ont une <strong>vision cohérente</strong> des numéros portés. Ce processus, exécuté chaque dimanche, est essentiel pour détecter et corriger les divergences.</p>
+
+<h3>Objectif de la synchronisation</h3>
+<p>Au fil des vacations quotidiennes, des incohérences peuvent apparaître entre les bases de données des opérateurs :</p>
+<ul>
+    <li>Un fichier PNMDATA perdu ou corrompu pendant le transfert sFTP</li>
+    <li>Un ticket traité côté émetteur mais pas côté récepteur</li>
+    <li>Une bascule HLR effectuée sans confirmation dans PortaDB</li>
+    <li>Une erreur de traitement silencieuse dans un script</li>
+</ul>
+<p>La synchronisation PNMSYNC permet de <strong>comparer les bases</strong> de chaque opérateur et d'identifier ces divergences avant qu'elles n'impactent le routage des appels.</p>
+
+<h3>Processus du dimanche</h3>
+<p>La synchronisation suit un processus en plusieurs étapes :</p>
+
+<p><strong>1. Extraction (dimanche matin) :</strong></p>
+<ul>
+    <li>Chaque opérateur extrait de sa base la <strong>liste complète des MSISDN portés</strong></li>
+    <li>Pour chaque MSISDN, le fichier contient : le numéro, l'opérateur hébergeant actuel, l'opérateur attributaire, la date du dernier portage</li>
+    <li>Le fichier est nommé selon la convention : <code>PNMSYNC_[OPE]_[DATE].dat</code></li>
+</ul>
+
+<p><strong>2. Échange (dimanche matin) :</strong></p>
+<ul>
+    <li>Chaque opérateur dépose son fichier PNMSYNC sur les serveurs sFTP des deux autres opérateurs</li>
+    <li>Chaque opérateur collecte les fichiers PNMSYNC des deux autres</li>
+</ul>
+
+<p><strong>3. Comparaison (dimanche après-midi) :</strong></p>
+<ul>
+    <li>PortaSync compare la liste reçue de chaque opérateur avec sa propre base PortaDB</li>
+    <li>Les MSISDN présents dans une base mais absents de l'autre sont identifiés comme <strong>divergences</strong></li>
+    <li>Les MSISDN avec un opérateur hébergeant différent sont signalés comme <strong>incohérences de routage</strong></li>
+</ul>
+
+<p><strong>4. Rapport et correction :</strong></p>
+<ul>
+    <li>Un <strong>rapport de divergences</strong> est généré automatiquement</li>
+    <li>Les divergences mineures (nombre limité) sont corrigées automatiquement dans PortaDB</li>
+    <li>Les divergences majeures ou systématiques sont <strong>escaladées au comité technique GPMAG</strong></li>
+</ul>
+
+<h3>Contenu d'un fichier PNMSYNC</h3>
+<p>Chaque enregistrement du fichier PNMSYNC contient :</p>
+<ul>
+    <li><code>MSISDN</code> : numéro porté au format international</li>
+    <li><code>OPH</code> : code de l'opérateur hébergeant actuel</li>
+    <li><code>OPA</code> : code de l'opérateur attributaire</li>
+    <li><code>DATE_PORTAGE</code> : date du dernier portage effectif</li>
+    <li><code>NUM_DOSSIER</code> : référence du dernier dossier de portage</li>
+</ul>
+
+<h3>Importance opérationnelle</h3>
+<p>Un taux de divergence supérieur à <strong>0.1%</strong> est considéré comme anormal et déclenche une investigation. Les divergences non résolues peuvent entraîner des <strong>appels mal routés</strong> (l'appelant entend un message d'erreur ou est dirigé vers le mauvais opérateur), d'où l'importance critique de ce processus hebdomadaire.</p>

@@ -1,0 +1,64 @@
+<h2>Processus standard de portage — Étape par étape</h2>
+
+<p>Le portage d'un numéro mobile suit un processus normalisé par le GPMAG, avec des étapes précises et des délais réglementaires. Voici le déroulé complet d'un portage standard.</p>
+
+<h3>Phase 1 : Demande du client (JD — Jour de la Demande)</h3>
+<p>Le processus démarre lorsqu'un client se présente en boutique ou effectue une demande en ligne chez le <strong>nouvel opérateur (OPR)</strong>.</p>
+<ul>
+    <li>Le client fournit son <strong>RIO</strong>, obtenu en appelant le <strong>3179</strong> (serveur vocal interactif gratuit)</li>
+    <li>Le conseiller saisit la demande dans le système CRM</li>
+    <li>Le système vérifie le format du RIO et identifie l'opérateur donneur via le <strong>code opérateur</strong> (2 premiers caractères)</li>
+    <li>Une <strong>pré-vérification d'éligibilité</strong> est effectuée localement</li>
+</ul>
+
+<h3>Phase 2 : Émission du ticket 1110 (JD)</h3>
+<p>Le système de portabilité de l'OPR génère automatiquement un <strong>ticket 1110</strong> (demande de portage simple). Ce ticket contient :</p>
+<ul>
+    <li>Le <strong>MSISDN</strong> (numéro du client au format international : <code>590690XXXXXX</code>)</li>
+    <li>Le <strong>RIO</strong> fourni par le client</li>
+    <li>La <strong>date de portage souhaitée (JP)</strong>, calculée comme <strong>JD + 2 jours ouvrés</strong></li>
+    <li>Les identifiants OPR, OPD et OPA</li>
+</ul>
+<p>Ce ticket est intégré dans un <strong>fichier PNMDATA</strong> et transmis à l'OPD lors de la prochaine vacation sFTP.</p>
+
+<h3>Phase 3 : Réponse de l'OPD — Ticket 1210 (JD ou JD+1)</h3>
+<p>L'OPD reçoit le ticket 1110 et effectue ses <strong>contrôles d'éligibilité</strong> :</p>
+<ul>
+    <li>Vérification du RIO (correspondance numéro/opérateur/clé)</li>
+    <li>Vérification que le numéro est <strong>actif</strong> sur son réseau</li>
+    <li>Vérification qu'aucun <strong>portage n'est déjà en cours</strong> pour ce numéro</li>
+    <li>Vérification de l'absence de <strong>restriction légale</strong> (opposition judiciaire, etc.)</li>
+</ul>
+<p>L'OPD émet alors un <strong>ticket 1210</strong> :</p>
+<ul>
+    <li><strong>Acceptation</strong> : le portage est confirmé pour la date JP proposée</li>
+    <li><strong>Refus</strong> : le ticket 1210 contient un <strong>code motif de refus</strong> détaillé (voir article dédié)</li>
+</ul>
+
+<h3>Phase 4 : Bascule technique — Ticket 1410 (JP)</h3>
+<p>Le jour JP, l'OPR exécute la <strong>bascule technique</strong>. C'est le moment critique du portage :</p>
+<ul>
+    <li>Le script <strong>TraitementBascule.sh</strong> est déclenché automatiquement</li>
+    <li>L'OPR envoie des commandes <strong>EMA/EMM</strong> vers le MOBI pour mettre à jour le routage</li>
+    <li>Le <strong>HLR/HSS</strong> de l'OPR est mis à jour avec le profil du nouveau client</li>
+    <li>La SIM du client est activée sur le réseau de l'OPR</li>
+    <li>L'OPR émet un <strong>ticket 1410</strong> (notification de bascule effective) à l'OPD</li>
+</ul>
+<p>La bascule s'effectue lors de la <strong>vacation de 10h (V10)</strong> du jour JP. Le client peut ressentir une coupure de service de quelques minutes pendant la transition.</p>
+
+<h3>Phase 5 : Confirmation — Ticket 1430 (JP)</h3>
+<p>Après vérification du bon fonctionnement de la ligne sur le nouveau réseau :</p>
+<ul>
+    <li>L'OPR émet un <strong>ticket 1430</strong> (confirmation de portage effectif)</li>
+    <li>L'OPD procède à la <strong>résiliation définitive</strong> de l'ancienne ligne</li>
+    <li>Le numéro est officiellement <strong>hébergé</strong> chez le nouvel opérateur</li>
+</ul>
+
+<h3>Chronologie récapitulative</h3>
+<ul>
+    <li><strong>JD</strong> : Demande client → ticket 1110 → envoi OPD</li>
+    <li><strong>JD / JD+1</strong> : Réponse OPD → ticket 1210 (acceptation ou refus)</li>
+    <li><strong>JP = JD+2 ouvrés</strong> : Bascule technique → ticket 1410 → ticket 1430</li>
+</ul>
+
+<p>Le délai réglementaire de <strong>2 jours ouvrés</strong> entre la demande et le portage effectif est un maximum. En cas de retard imputable à l'OPD, l'ARCEP peut être saisie. Les week-ends et jours fériés ne sont pas comptabilisés dans le calcul des jours ouvrés.</p>

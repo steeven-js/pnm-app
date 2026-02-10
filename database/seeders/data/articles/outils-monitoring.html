@@ -1,0 +1,58 @@
+<h2>Monitoring PNM — Contrôles essentiels</h2>
+
+<p>Le monitoring quotidien de la plateforme PNM est indispensable pour garantir la continuité du service de portabilité. Voici les <strong>contrôles essentiels</strong> à effectuer chaque jour, les indicateurs de santé à surveiller, et les problèmes courants avec leurs résolutions.</p>
+
+<h3>Contrôles quotidiens</h3>
+<p>L'équipe PNM doit effectuer les vérifications suivantes <strong>chaque matin avant la vacation V10</strong> :</p>
+<ul>
+    <li><strong>Statut des serveurs</strong> : vérifier que <code>vmqproportawebdb01</code> et <code>vmqproportasync01</code> sont accessibles et opérationnels (SSH, services actifs)</li>
+    <li><strong>Connectivité sFTP</strong> : tester les connexions sFTP vers les serveurs Orange (20) et SFR/Only (15). Un test de connexion simple suffit : <code>sftp -o ConnectTimeout=10 user@host</code></li>
+    <li><strong>Fichiers de la veille</strong> : vérifier que tous les fichiers PNMDATA de la veille ont été envoyés et que les ACR correspondants ont été reçus</li>
+    <li><strong>Files d'attente</strong> : contrôler dans PortaDB qu'aucun ticket n'est bloqué en statut intermédiaire depuis plus de 24h</li>
+    <li><strong>Logs d'erreur</strong> : consulter les logs de la veille dans <code>/var/log/portadb/</code> et <code>/var/log/portasync/</code> pour détecter les erreurs silencieuses</li>
+    <li><strong>Espace disque</strong> : vérifier l'espace disponible sur les deux serveurs (seuil d'alerte : 80%)</li>
+</ul>
+
+<h3>Indicateurs de santé (KPIs)</h3>
+<p>Les indicateurs suivants doivent être suivis <strong>quotidiennement</strong> :</p>
+<ul>
+    <li><strong>Taux de réussite des bascules</strong> : pourcentage de bascules exécutées sans erreur. Cible : >98%</li>
+    <li><strong>Taux d'ACR</strong> : pourcentage de fichiers PNMDATA envoyés ayant reçu un ACR. Cible : 100%</li>
+    <li><strong>Délai moyen de traitement</strong> : temps entre la réception d'un ticket et son traitement. Cible : <30 minutes</li>
+    <li><strong>Nombre de tickets en erreur</strong> : dossiers bloqués nécessitant une intervention manuelle. Cible : 0</li>
+    <li><strong>Taux de refus</strong> : pourcentage de demandes de portage refusées par nos soins (quand Digicel est OPD). Un taux anormalement élevé peut indiquer un problème de données</li>
+    <li><strong>Divergences PNMSYNC</strong> : nombre d'écarts détectés lors de la synchronisation hebdomadaire. Cible : <0.1% du volume total de numéros portés</li>
+</ul>
+
+<h3>Problèmes courants et résolutions</h3>
+
+<p><strong>Connexion sFTP refusée :</strong></p>
+<ul>
+    <li>Vérifier le certificat SSH (expiration, renouvellement)</li>
+    <li>Contrôler les règles firewall (changement d'IP côté partenaire)</li>
+    <li>Contacter le référent technique de l'opérateur partenaire si le problème persiste</li>
+</ul>
+
+<p><strong>Bascule en erreur (commande MOBI rejetée) :</strong></p>
+<ul>
+    <li>Vérifier le message d'erreur dans les logs DataPower</li>
+    <li>Causes fréquentes : MSISDN déjà présent dans les tables MOBI (doublon), format de commande invalide</li>
+    <li>Relancer manuellement la bascule après correction, ou escalader à l'équipe réseau</li>
+</ul>
+
+<p><strong>Fichier PNMDATA non reçu :</strong></p>
+<ul>
+    <li>Vérifier les logs sFTP (<code>/var/log/portasync/sftp-pull.log</code>)</li>
+    <li>Contrôler si le fichier est bien présent sur le serveur sFTP distant</li>
+    <li>Relancer le script <code>portasync-pull.sh</code> manuellement</li>
+</ul>
+
+<p><strong>Base PortaDB lente ou inaccessible :</strong></p>
+<ul>
+    <li>Vérifier la charge CPU et mémoire de <code>vmqproportawebdb01</code></li>
+    <li>Contrôler les requêtes longues (locks, deadlocks)</li>
+    <li>Si nécessaire, relancer le service de base de données (en coordination avec l'équipe Infrastructure)</li>
+</ul>
+
+<h3>Alerting</h3>
+<p>Des <strong>alertes automatiques</strong> sont configurées pour notifier l'équipe en cas d'anomalie : échec de bascule, absence d'ACR après 2 vacations, espace disque critique, ou service PortaSync arrêté. Ces alertes sont envoyées par email et par SMS aux astreintes PNM.</p>

@@ -1,0 +1,39 @@
+<h2>Les 3 acteurs d'un portage</h2>
+
+<p>Chaque opération de portabilité implique <strong>trois rôles distincts</strong>, qui peuvent être portés par deux ou trois opérateurs différents selon les cas. Comprendre ces rôles est essentiel pour suivre le cycle de vie d'un ticket de portage.</p>
+
+<h3>OPR — Opérateur Receveur</h3>
+<p>L'<strong>Opérateur Receveur</strong> est celui vers lequel le client souhaite migrer. C'est lui qui <strong>initie la demande de portage</strong>.</p>
+<ul>
+    <li>Recueille la demande du client et collecte le <strong>RIO</strong> (Relevé d'Identité Opérateur)</li>
+    <li>Vérifie l'éligibilité du numéro au portage</li>
+    <li>Crée le <strong>ticket 1110</strong> (demande de portage) et l'envoie à l'OPD via le système de fichiers PNMDATA</li>
+    <li>Prépare l'activation de la nouvelle ligne sur son réseau</li>
+    <li>Exécute la <strong>bascule</strong> au jour JP : mise à jour du HLR, activation SIM, routage réseau</li>
+    <li>Confirme le portage effectif par un ticket <strong>1430</strong></li>
+</ul>
+<p>Quand Digicel est OPR (portage entrant), c'est notre équipe BSS qui crée la souscription et notre équipe réseau qui configure le HLR/HSS.</p>
+
+<h3>OPD — Opérateur Donneur</h3>
+<p>L'<strong>Opérateur Donneur</strong> est celui que le client quitte. Il doit <strong>faciliter le départ</strong> du client conformément à la réglementation.</p>
+<ul>
+    <li>Reçoit le ticket 1110 de l'OPR et vérifie la validité du RIO</li>
+    <li>Contrôle les <strong>motifs d'éligibilité</strong> : numéro actif, pas de portage en cours, RIO valide</li>
+    <li>Émet un ticket <strong>1210</strong> (acceptation) ou un <strong>ticket 1210 avec motif de refus</strong></li>
+    <li>Prépare la <strong>résiliation de la ligne</strong> pour le jour JP</li>
+    <li>Désactive la ligne sur son réseau après réception du ticket 1410 (notification de bascule)</li>
+</ul>
+<p>L'OPD n'a <strong>pas le droit de retenir</strong> un client en refusant abusivement un portage. Les motifs de refus sont strictement encadrés par l'ARCEP.</p>
+
+<h3>OPA — Opérateur Attributaire</h3>
+<p>L'<strong>Opérateur Attributaire</strong> est celui à qui le numéro a été <strong>originellement attribué</strong> par l'ARCEP dans le plan de numérotation. Ce rôle est souvent méconnu mais crucial pour le routage.</p>
+<ul>
+    <li>Reste le <strong>propriétaire administratif</strong> du bloc de numéros dans le plan national</li>
+    <li>Maintient les <strong>tables de routage</strong> permettant d'acheminer les appels vers l'opérateur hébergeant actuellement le numéro</li>
+    <li>Intervient dans les procédures de <strong>restitution</strong> (tickets 3xxx) lorsqu'un numéro revient à son réseau d'origine</li>
+</ul>
+
+<h3>Interactions entre acteurs</h3>
+<p>Les échanges entre OPR, OPD et OPA suivent un <strong>protocole strict</strong> via des fichiers PNMDATA échangés par sFTP selon le calendrier des vacations. Chaque ticket est identifié par un numéro unique et fait l'objet d'un accusé de réception (ACR) ou d'un signalement d'erreur (ERR) par le destinataire.</p>
+
+<p>Dans le cas fréquent où l'OPD est aussi l'OPA (le client quitte l'opérateur qui lui avait attribué le numéro), seuls deux opérateurs sont impliqués dans l'échange.</p>

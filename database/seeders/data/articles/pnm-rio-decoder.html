@@ -1,0 +1,39 @@
+<h2>Comprendre le RIO — Relevé d'Identité Opérateur</h2>
+
+<p>Le <strong>RIO</strong> (Relevé d'Identité Opérateur) est un code unique de <strong>12 caractères</strong> associé à chaque ligne mobile. Il sert de clé d'authentification lors d'une demande de portage et garantit que le client est bien le titulaire de la ligne qu'il souhaite porter.</p>
+
+<h3>Format du RIO</h3>
+<p>Le RIO suit le format normalisé : <code>OO-Q-RRRRRR-CCC</code></p>
+<ul>
+    <li><strong>OO</strong> (2 caractères) — <strong>Code opérateur</strong> : identifie l'opérateur attributaire du numéro</li>
+    <li><strong>Q</strong> (1 caractère) — <strong>Qualificateur</strong> : type de client</li>
+    <li><strong>RRRRRR</strong> (6 caractères) — <strong>Référence</strong> : identifiant unique de la ligne chez l'opérateur</li>
+    <li><strong>CCC</strong> (3 caractères) — <strong>Clé de contrôle</strong> : permet de vérifier l'intégrité du RIO</li>
+</ul>
+<p>Exemple : <code>02P123456ABC</code> — Digicel, client particulier, référence 123456, clé ABC.</p>
+
+<h3>Codes opérateurs Antilles-Guyane</h3>
+<p>Dans la zone GPMAG, les codes opérateurs sont :</p>
+<ul>
+    <li><code>02</code> — <strong>Digicel</strong></li>
+    <li><code>20</code> — <strong>Orange Caraïbe</strong></li>
+    <li><code>15</code> — <strong>SFR / Only</strong></li>
+</ul>
+<p>Le code opérateur permet au système PNM d'identifier automatiquement l'OPD et de router le ticket 1110 vers le bon destinataire.</p>
+
+<h3>Qualificateur</h3>
+<p>Le qualificateur indique la nature du contrat :</p>
+<ul>
+    <li><code>P</code> — Client <strong>particulier</strong> (Postpaid ou Prepaid)</li>
+    <li><code>Q</code> — Client <strong>professionnel / entreprise</strong></li>
+</ul>
+<p>Ce champ est informatif et n'affecte pas le traitement technique du portage, mais il peut influencer les vérifications commerciales côté OPD.</p>
+
+<h3>Clé de contrôle</h3>
+<p>Les 3 derniers caractères constituent une <strong>clé de vérification</strong> calculée par un algorithme spécifique à partir des 9 premiers caractères. Cette clé permet de détecter les erreurs de saisie avant même d'interroger l'OPD.</p>
+<p>Si la clé ne correspond pas au reste du RIO, la demande de portage est <strong>rejetée immédiatement</strong> côté OPR sans générer de ticket 1110.</p>
+
+<h3>Obtenir son RIO</h3>
+<p>Le client obtient son RIO en appelant le <strong>3179</strong> depuis sa ligne mobile. Ce numéro court, gratuit et accessible quel que soit l'opérateur, fournit le RIO par SMS dans les secondes qui suivent l'appel. Le RIO est également disponible dans l'espace client en ligne de chaque opérateur.</p>
+
+<p>En cas de RIO perdu ou non reçu, le conseiller en boutique peut orienter le client vers le 3179 ou consulter le RIO directement dans l'outil CRM (pour les clients de son propre réseau).</p>

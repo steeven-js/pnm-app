@@ -1,0 +1,40 @@
+<h2>GPMAG — Structure et gouvernance inter-opérateurs</h2>
+
+<p>Le <strong>GPMAG</strong> (Groupement de Portabilité des Numéros Mobiles Antilles-Guyane) est l'instance de coordination inter-opérateurs qui régit la portabilité mobile dans les départements français d'Amérique. Il regroupe les trois opérateurs mobiles de la zone et définit les règles communes de fonctionnement.</p>
+
+<h3>Les opérateurs membres</h3>
+<p>Trois opérateurs composent le GPMAG, chacun identifié par un <strong>code opérateur unique</strong> :</p>
+<ul>
+    <li><strong>Digicel</strong> — Code <code>02</code> : opérateur historique des Antilles-Guyane, présent en Guadeloupe, Martinique et Guyane. Réseau 2G/3G/4G.</li>
+    <li><strong>Orange Caraïbe</strong> — Code <code>20</code> : filiale du groupe Orange dédiée à la zone Antilles-Guyane. Infrastructure complète avec couverture étendue.</li>
+    <li><strong>SFR / Only</strong> — Code <code>15</code> : opérateur opérant sous les marques SFR et Only selon les territoires. Réseau propre avec accord d'itinérance sur certaines zones.</li>
+</ul>
+<p>Ces codes opérateurs sont utilisés dans le <strong>RIO</strong>, les tickets PNM et les fichiers PNMDATA pour identifier sans ambiguïté chaque acteur.</p>
+
+<h3>Liaisons sFTP</h3>
+<p>Les échanges de fichiers PNM entre opérateurs s'effectuent via des <strong>liaisons sFTP sécurisées</strong> point à point :</p>
+<ul>
+    <li>Chaque opérateur dispose d'un <strong>serveur sFTP</strong> dédié aux échanges PNM</li>
+    <li>Les connexions sont authentifiées par <strong>certificats SSL</strong> et clés SSH</li>
+    <li>Chaque paire d'opérateurs maintient une liaison bidirectionnelle (ex : Digicel ↔ Orange, Digicel ↔ SFR, Orange ↔ SFR)</li>
+    <li>Les répertoires de dépôt et de collecte suivent une <strong>convention de nommage</strong> standardisée : <code>/pnm/[code_emetteur]/[code_destinataire]/</code></li>
+</ul>
+<p>Les fichiers déposés sont les <strong>PNMDATA</strong> (tickets), <strong>ACR</strong> (accusés de réception), <strong>ERR</strong> (erreurs), et <strong>PNMSYNC</strong> (synchronisation).</p>
+
+<h3>Gouvernance</h3>
+<p>Le GPMAG fonctionne selon une gouvernance collégiale :</p>
+<ul>
+    <li><strong>Comité technique</strong> : réunion mensuelle entre les référents techniques PNM de chaque opérateur. Traitement des incidents inter-opérateurs, analyse des statistiques de portage, planification des évolutions.</li>
+    <li><strong>Comité de pilotage</strong> : réunion trimestrielle au niveau direction. Validation des évolutions majeures du protocole, arbitrage des litiges non résolus au niveau technique.</li>
+    <li><strong>Spécifications communes</strong> : le GPMAG maintient un document de spécifications techniques PNM V3 partagé, qui fait foi en cas de divergence d'interprétation.</li>
+</ul>
+
+<h3>Obligations des membres</h3>
+<p>Chaque opérateur membre du GPMAG s'engage à :</p>
+<ul>
+    <li>Maintenir ses systèmes PNM <strong>opérationnels 7j/7</strong></li>
+    <li>Respecter les <strong>délais de traitement</strong> des tickets (réponse sous 24h ouvrées)</li>
+    <li>Participer aux <strong>synchronisations hebdomadaires</strong> (PNMSYNC du dimanche)</li>
+    <li>Signaler tout <strong>incident impactant la portabilité</strong> dans un délai de 2 heures</li>
+    <li>Fournir des <strong>statistiques mensuelles</strong> de portage à l'ARCEP</li>
+</ul>

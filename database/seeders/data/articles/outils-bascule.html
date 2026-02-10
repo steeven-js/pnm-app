@@ -1,0 +1,61 @@
+<h2>Processus de bascule — TraitementBascule.sh</h2>
+
+<p>La <strong>bascule</strong> est l'étape technique critique du portage : c'est le moment où le numéro du client bascule effectivement d'un réseau à l'autre. Ce processus est piloté par le script <code>TraitementBascule.sh</code> et implique une séquence précise d'opérations sur le réseau et les systèmes d'information.</p>
+
+<h3>Déclenchement</h3>
+<p>Le script <code>TraitementBascule.sh</code> est exécuté <strong>quotidiennement à 10h00</strong> (vacation V10) sur le serveur <code>vmqproportawebdb01</code>. Il identifie dans PortaDB tous les dossiers de portage dont :</p>
+<ul>
+    <li>La <strong>date de portage (JP)</strong> correspond au jour courant</li>
+    <li>Le statut est <strong>"accepté"</strong> (ticket 1210 reçu sans motif de refus)</li>
+    <li>Aucune demande d'annulation n'est en cours</li>
+</ul>
+
+<h3>Séquence d'opérations</h3>
+
+<p><strong>Étape 1 — Préparation :</strong></p>
+<ul>
+    <li>Extraction de la liste des MSISDN à basculer depuis PortaDB</li>
+    <li>Vérification des prérequis : profil SIM prêt, offre activée dans le CRM</li>
+    <li>Génération des commandes de routage à envoyer à MOBI</li>
+</ul>
+
+<p><strong>Étape 2 — Commandes EMA/EMM vers MOBI :</strong></p>
+<ul>
+    <li><strong>EMA</strong> (Enregistrement MSISDN Ajout) : pour un premier portage, ajoute le MSISDN dans les tables de routage PNM de MOBI avec l'indication que Digicel est désormais l'opérateur hébergeant</li>
+    <li><strong>EMM</strong> (Enregistrement MSISDN Modification) : pour un portage inverse (numéro déjà porté), modifie l'opérateur hébergeant dans les tables existantes</li>
+    <li>Les commandes sont transmises via l'<strong>ESB DataPower</strong> qui assure la transformation et le routage vers MOBI</li>
+</ul>
+
+<p><strong>Étape 3 — Mise à jour du HLR/HSS :</strong></p>
+<ul>
+    <li>Le profil abonné est <strong>créé sur le HLR Digicel</strong> avec le MSISDN porté et l'IMSI de la nouvelle SIM</li>
+    <li>Les services sont activés conformément à l'offre souscrite</li>
+    <li>Le client peut commencer à utiliser le réseau Digicel</li>
+</ul>
+
+<p><strong>Étape 4 — Émission des tickets de confirmation :</strong></p>
+<ul>
+    <li>PortaDB génère le <strong>ticket 1410</strong> (notification de bascule) destiné à l'OPD</li>
+    <li>Après vérification du bon fonctionnement, le <strong>ticket 1430</strong> (confirmation) est émis</li>
+    <li>Ces tickets seront envoyés lors de la vacation V14 (14h00)</li>
+</ul>
+
+<h3>Vérification post-bascule</h3>
+<p>Le script <code>BasculeVerification.sh</code> s'exécute <strong>30 minutes après la bascule</strong> et effectue les contrôles suivants :</p>
+<ul>
+    <li><strong>Acquittement MOBI</strong> : vérification que chaque commande EMA/EMM a reçu un acquittement positif</li>
+    <li><strong>Test HLR</strong> : interrogation du HLR pour confirmer que le profil abonné est bien présent et actif</li>
+    <li><strong>Test d'appel</strong> : dans certains cas, un appel test automatisé vérifie l'acheminement correct vers le numéro porté</li>
+</ul>
+
+<h3>Gestion des erreurs</h3>
+<p>En cas d'échec d'une bascule, plusieurs scénarios sont prévus :</p>
+<ul>
+    <li><strong>Erreur MOBI (commande EMA/EMM rejetée)</strong> : le script tente un <strong>retry automatique</strong> (3 tentatives espacées de 5 minutes). Si l'erreur persiste, le dossier est marqué "en erreur" dans PortaDB et une alerte est envoyée à l'équipe.</li>
+    <li><strong>Erreur HLR (profil non créé)</strong> : intervention manuelle nécessaire. L'équipe réseau doit vérifier le HLR et créer le profil manuellement si besoin.</li>
+    <li><strong>Timeout ESB DataPower</strong> : le flux est relancé. Si le timeout persiste, vérification de l'état de l'ESB et escalade à l'équipe Infrastructure.</li>
+    <li><strong>Erreur partielle</strong> : si certaines bascules réussissent et d'autres échouent dans un lot, seuls les dossiers en erreur sont retraités. Les bascules réussies ne sont pas impactées.</li>
+</ul>
+
+<h3>Reporting</h3>
+<p>À la fin de chaque exécution, <code>TraitementBascule.sh</code> produit un <strong>rapport de bascule</strong> contenant : le nombre de bascules tentées, réussies, en erreur, et les détails de chaque erreur. Ce rapport est envoyé par email à l'équipe PNM et archivé dans <code>/var/log/portadb/bascule/</code>.</p>

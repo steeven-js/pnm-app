@@ -1,0 +1,45 @@
+<h2>PortaDB — Base de données de portabilité</h2>
+
+<p><strong>PortaDB</strong> est le système central de gestion de la portabilité chez Digicel Antilles-Guyane. C'est une base de données relationnelle qui stocke l'intégralité des informations relatives aux portages : tickets, statuts, historiques et tables de référence.</p>
+
+<h3>Rôle de PortaDB</h3>
+<p>PortaDB assure plusieurs fonctions critiques :</p>
+<ul>
+    <li><strong>Référentiel des numéros portés</strong> : pour chaque MSISDN porté, PortaDB enregistre l'opérateur hébergeant actuel, l'opérateur attributaire, et la date du dernier portage</li>
+    <li><strong>Gestion des tickets</strong> : création, stockage et suivi de l'état de chaque ticket PNM (1110, 1210, 1410, etc.)</li>
+    <li><strong>Historique complet</strong> : traçabilité de toutes les opérations de portage (standard, inverse, restitution, annulation)</li>
+    <li><strong>Source de données</strong> pour la génération des fichiers PNMDATA sortants et le traitement des fichiers entrants</li>
+</ul>
+
+<h3>Tables principales</h3>
+<p>PortaDB est structurée autour de plusieurs tables clés :</p>
+<ul>
+    <li><code>portages</code> — Table centrale : un enregistrement par dossier de portage, contenant le MSISDN, les opérateurs impliqués (OPR, OPD, OPA), le statut courant, les dates clés (JD, JP)</li>
+    <li><code>tickets</code> — Détail de chaque ticket émis ou reçu, avec type (1110, 1210...), horodatage, contenu, et statut de traitement</li>
+    <li><code>numeros_portes</code> — Table de référence des numéros actuellement portés, mise à jour après chaque bascule effective</li>
+    <li><code>operateurs</code> — Table de référence des opérateurs avec leurs codes (02, 15, 20), noms et paramètres sFTP</li>
+    <li><code>motifs_refus</code> — Catalogue des codes de refus avec leurs libellés</li>
+    <li><code>historique_sync</code> — Journal des synchronisations PNMSYNC (date, résultat, écarts détectés)</li>
+</ul>
+
+<h3>Hébergement</h3>
+<p>PortaDB est hébergée sur le serveur <strong>vmqproportawebdb01</strong>, une machine virtuelle dédiée dans l'infrastructure Digicel. Ce serveur héberge également l'interface web d'administration permettant aux équipes de consulter et gérer les dossiers de portage.</p>
+
+<h3>Relations avec PortaSync</h3>
+<p>PortaDB fonctionne en tandem avec <strong>PortaSync</strong>, le service de synchronisation :</p>
+<ul>
+    <li>PortaSync <strong>lit</strong> les tickets à envoyer dans PortaDB et génère les fichiers PNMDATA</li>
+    <li>PortaSync <strong>écrit</strong> dans PortaDB les tickets reçus des autres opérateurs via sFTP</li>
+    <li>PortaSync déclenche les <strong>mises à jour de statut</strong> dans PortaDB après chaque échange réussi</li>
+</ul>
+
+<h3>Relations avec l'ESB DataPower</h3>
+<p>L'<strong>ESB DataPower</strong> sert d'intermédiaire entre PortaDB et les systèmes internes :</p>
+<ul>
+    <li>Transmission des ordres de <strong>bascule HLR</strong> vers les équipements réseau (MOBI)</li>
+    <li>Remontée des <strong>résultats de bascule</strong> vers PortaDB</li>
+    <li>Interface avec le <strong>CRM</strong> pour les notifications de statut de portage</li>
+</ul>
+
+<h3>Maintenance</h3>
+<p>La maintenance de PortaDB inclut des <strong>sauvegardes quotidiennes</strong>, une purge périodique des dossiers anciens (archivage après 12 mois), et un monitoring des performances (temps de requête, espace disque). Les accès sont restreints aux équipes Applications et BSS via des comptes nominatifs.</p>

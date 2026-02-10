@@ -1,0 +1,79 @@
+<h2>Catalogue des scripts PNM</h2>
+
+<p>L'exploitation quotidienne de la portabilité repose sur un ensemble de <strong>scripts automatisés</strong> exécutés sur les serveurs PortaDB et PortaSync. Ce catalogue recense les scripts principaux, leur fonction, leur ordonnancement et leur localisation.</p>
+
+<h3>Scripts de bascule</h3>
+
+<p><strong><code>TraitementBascule.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : script principal de bascule. Identifie les portages à basculer au jour JP, envoie les commandes EMA/EMM vers MOBI via l'ESB DataPower, vérifie les retours, et met à jour PortaDB.</li>
+    <li><strong>Ordonnancement</strong> : exécuté quotidiennement lors de la vacation V10 (10h00), après import des fichiers PNMDATA.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportawebdb01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portadb/scripts/TraitementBascule.sh</code></li>
+    <li><strong>Criticité</strong> : haute — un échec retarde les portages du jour.</li>
+</ul>
+
+<p><strong><code>BasculeVerification.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : vérifie le résultat des bascules exécutées par TraitementBascule.sh. Contrôle que les commandes EMA/EMM ont été acquittées positivement par MOBI et que le HLR a bien été mis à jour.</li>
+    <li><strong>Ordonnancement</strong> : exécuté 30 minutes après TraitementBascule.sh.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportawebdb01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portadb/scripts/BasculeVerification.sh</code></li>
+</ul>
+
+<h3>Scripts d'export/import</h3>
+
+<p><strong><code>PortaDB-export-csv.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : exporte les données de PortaDB au format CSV pour les besoins de reporting, d'audit ou d'analyse. Génère des extractions par période, par opérateur, ou par statut.</li>
+    <li><strong>Ordonnancement</strong> : à la demande, ou quotidiennement à 23h00 pour les rapports automatiques.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportawebdb01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portadb/scripts/PortaDB-export-csv.sh</code></li>
+</ul>
+
+<p><strong><code>pnm-import.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : importe les tickets PNM reçus des autres opérateurs dans PortaDB. Parse les fichiers PNMDATA, valide chaque ticket, et insère les données dans les tables correspondantes.</li>
+    <li><strong>Ordonnancement</strong> : 3 fois par jour, à chaque vacation (V10, V14, V19), après la collecte sFTP.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportasync01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portasync/scripts/pnm-import.sh</code></li>
+</ul>
+
+<h3>Scripts de restitution</h3>
+
+<p><strong><code>RestitutionProcess.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : gère le processus de restitution des numéros portés à leur opérateur attributaire. Identifie les numéros résiliés chez Digicel qui doivent être restitués, génère les tickets 3110, et suit le cycle de restitution.</li>
+    <li><strong>Ordonnancement</strong> : quotidien à 08h00, avant la vacation V10.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportawebdb01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portadb/scripts/RestitutionProcess.sh</code></li>
+</ul>
+
+<p><strong><code>RestitutionCleanup.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : nettoie les restitutions terminées, archive les dossiers clôturés, met à jour la table <code>numeros_portes</code> pour retirer les numéros restitués.</li>
+    <li><strong>Ordonnancement</strong> : hebdomadaire, dimanche à 22h00.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportawebdb01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portadb/scripts/RestitutionCleanup.sh</code></li>
+</ul>
+
+<h3>Scripts de synchronisation</h3>
+
+<p><strong><code>pnmsync-generate.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : génère le fichier PNMSYNC hebdomadaire contenant la liste complète des numéros portés dans notre base.</li>
+    <li><strong>Ordonnancement</strong> : dimanche à 07h00.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportasync01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portasync/scripts/pnmsync-generate.sh</code></li>
+</ul>
+
+<p><strong><code>pnmsync-compare.sh</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : compare les fichiers PNMSYNC reçus des autres opérateurs avec notre base PortaDB et génère le rapport de divergences.</li>
+    <li><strong>Ordonnancement</strong> : dimanche à 14h00, après collecte des fichiers PNMSYNC partenaires.</li>
+    <li><strong>Serveur</strong> : <code>vmqproportasync01</code></li>
+    <li><strong>Chemin</strong> : <code>/opt/portasync/scripts/pnmsync-compare.sh</code></li>
+</ul>
+
+<h3>Bonnes pratiques</h3>
+<p>Tous les scripts sont ordonnancés via <strong>crontab</strong> et produisent des logs dans <code>/var/log/</code> sur leur serveur respectif. En cas de modification d'un script, il est impératif de tester en environnement de pré-production et de notifier l'équipe via le canal PNM avant mise en production.</p>

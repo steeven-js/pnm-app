@@ -1,0 +1,51 @@
+<h2>Architecture réseau — Vue d'ensemble</h2>
+
+<p>L'architecture réseau de Digicel Antilles-Guyane repose sur une infrastructure <strong>multi-technologies</strong> (2G/3G/4G) couvrant la Guadeloupe, la Martinique et la Guyane. Comprendre cette architecture est essentiel pour appréhender les impacts de la portabilité sur le routage des communications.</p>
+
+<h3>Les trois couches du réseau</h3>
+<p>Le réseau mobile se décompose en trois couches principales :</p>
+<ul>
+    <li><strong>RAN</strong> (Radio Access Network) : antennes et stations de base assurant la couverture radio</li>
+    <li><strong>Core Network</strong> : cœur de réseau gérant l'intelligence des services</li>
+    <li><strong>Transport</strong> : liaisons fibre optique et faisceaux hertziens interconnectant les sites</li>
+</ul>
+
+<h3>Core Network — Cœur de réseau</h3>
+<p>Le cœur de réseau concentre les <strong>équipements critiques</strong> pour le traitement des appels et des données :</p>
+
+<p><strong>Domaine Circuit (2G/3G) :</strong></p>
+<ul>
+    <li><strong>MSC</strong> (Mobile Switching Center) : commutateur d'appels voix, gère l'établissement et le routage des appels</li>
+    <li><strong>HLR</strong> (Home Location Register) : base de données centrale des abonnés, stocke les profils, les droits et la localisation</li>
+    <li><strong>VLR</strong> (Visitor Location Register) : base temporaire des abonnés présents dans une zone MSC</li>
+</ul>
+
+<p><strong>Domaine Paquet (4G/LTE) :</strong></p>
+<ul>
+    <li><strong>EPC</strong> (Evolved Packet Core) : cœur de réseau 4G composé du MME, S-GW et P-GW</li>
+    <li><strong>HSS</strong> (Home Subscriber Server) : équivalent 4G du HLR, base de données des abonnés LTE</li>
+    <li><strong>IMS</strong> (IP Multimedia Subsystem) : plateforme de services voix sur IP (VoLTE), messagerie enrichie</li>
+</ul>
+
+<h3>Comment un appel est acheminé</h3>
+<p>Lorsqu'un abonné Digicel appelle un numéro, le flux suit ces étapes :</p>
+<ul>
+    <li>Le terminal s'accroche au réseau via le <strong>RAN</strong> (station de base la plus proche)</li>
+    <li>La demande d'appel remonte vers le <strong>MSC</strong> (voix 2G/3G) ou l'<strong>IMS</strong> (VoLTE)</li>
+    <li>Le MSC interroge le <strong>HLR</strong> pour déterminer l'opérateur hébergeant le numéro appelé</li>
+    <li>Si le numéro est porté, le HLR consulte les <strong>tables de routage PNM</strong> (mises à jour par MOBI) pour rediriger vers le bon opérateur</li>
+    <li>L'appel est acheminé via les <strong>interconnexions</strong> vers l'opérateur destinataire</li>
+    <li>L'opérateur destinataire route l'appel jusqu'au terminal appelé</li>
+</ul>
+
+<h3>Comment les données transitent</h3>
+<p>Pour le trafic data (navigation, applications, streaming) :</p>
+<ul>
+    <li>Le terminal établit un <strong>bearer</strong> (tunnel de données) avec l'EPC via le RAN 4G</li>
+    <li>Le <strong>P-GW</strong> (Packet Gateway) connecte l'abonné à Internet</li>
+    <li>Le <strong>HSS</strong> fournit le profil de l'abonné (débit autorisé, quota data, APN)</li>
+    <li>Les paquets sont acheminés de manière transparente — la portabilité n'affecte pas le trafic data sortant</li>
+</ul>
+
+<h3>Transport et interconnexions</h3>
+<p>Les trois territoires (Guadeloupe, Martinique, Guyane) sont reliés par des <strong>liaisons sous-marines</strong> et des réseaux de transport terrestres. Les interconnexions avec les autres opérateurs (Orange, SFR/Only) s'effectuent via des <strong>points d'interconnexion (POI)</strong> dédiés, essentiels pour le routage des appels vers les numéros portés.</p>

@@ -1,0 +1,42 @@
+<h2>Catalogue complet des tickets PNM V3</h2>
+
+<p>Le protocole PNM V3 utilise un système de <strong>tickets numérotés</strong> pour formaliser chaque étape du processus de portabilité. Les tickets sont regroupés en familles selon leur nature : standard (1xxx), inverse (2xxx), restitution (3xxx) et annulation (15xx).</p>
+
+<h3>Tickets Standard (1xxx) — Portage classique</h3>
+<p>Les tickets de la série 1000 couvrent le <strong>cycle de vie normal</strong> d'un portage initié par le client.</p>
+<ul>
+    <li><strong>1110</strong> — <strong>Demande de portage simple</strong> : émis par l'OPR vers l'OPD. Contient le MSISDN, le RIO, la date de portage souhaitée (JP). C'est le ticket d'initialisation du processus.</li>
+    <li><strong>1120</strong> — <strong>Demande de portage groupé</strong> : variante du 1110 pour les flottes entreprises, permettant de porter plusieurs numéros simultanément sous un même dossier.</li>
+    <li><strong>1210</strong> — <strong>Réponse à la demande de portage</strong> : émis par l'OPD vers l'OPR. Contient l'acceptation ou le refus avec code motif. En cas d'acceptation, confirme la date JP.</li>
+    <li><strong>1310</strong> — <strong>Avis de portage à l'OPA</strong> : émis par l'OPR vers l'OPA (quand l'OPA est distinct de l'OPD). Informe l'attributaire qu'un portage est programmé sur un numéro de son bloc.</li>
+    <li><strong>1410</strong> — <strong>Notification de bascule</strong> : émis par l'OPR vers l'OPD après exécution de la bascule technique. Indique que le numéro est désormais actif sur le réseau de l'OPR.</li>
+    <li><strong>1430</strong> — <strong>Confirmation de portage effectif</strong> : émis par l'OPR, confirme que le portage est complet et opérationnel. Déclenche la résiliation côté OPD.</li>
+</ul>
+
+<h3>Tickets Inverses (2xxx) — Portage retour</h3>
+<p>Les tickets de la série 2000 gèrent le <strong>portage inverse</strong>, lorsqu'un numéro déjà porté est de nouveau porté vers un autre opérateur (ou retourne chez un opérateur précédent).</p>
+<ul>
+    <li><strong>2110</strong> — <strong>Demande de portage inverse</strong> : similaire au 1110 mais pour un numéro déjà porté au moins une fois. Le flux implique des mises à jour supplémentaires dans les tables de routage.</li>
+    <li><strong>2210</strong> — <strong>Réponse au portage inverse</strong> : acceptation ou refus du portage inverse par l'OPD actuel.</li>
+    <li><strong>2410</strong> — <strong>Notification de bascule inverse</strong> : confirmation technique de la bascule pour un portage inverse.</li>
+    <li><strong>2430</strong> — <strong>Confirmation de portage inverse effectif</strong> : clôture du portage inverse.</li>
+</ul>
+
+<h3>Tickets de Restitution (3xxx)</h3>
+<p>Les tickets de la série 3000 gèrent la <strong>restitution d'un numéro</strong> à son opérateur attributaire d'origine, typiquement après une résiliation chez l'opérateur hébergeant.</p>
+<ul>
+    <li><strong>3110</strong> — <strong>Demande de restitution</strong> : émis par l'opérateur hébergeant vers l'OPA. Signale que le numéro doit être rendu à son bloc d'origine.</li>
+    <li><strong>3210</strong> — <strong>Réponse de restitution</strong> : l'OPA confirme la reprise du numéro dans son plan de numérotation.</li>
+    <li><strong>3410</strong> — <strong>Notification de restitution effective</strong> : la bascule retour est effectuée, le numéro réintègre le HLR de l'OPA.</li>
+</ul>
+
+<h3>Tickets d'Annulation (15xx)</h3>
+<p>Les tickets d'annulation permettent d'<strong>interrompre un portage en cours</strong> avant la bascule effective.</p>
+<ul>
+    <li><strong>1510</strong> — <strong>Demande d'annulation par l'OPR</strong> : l'opérateur receveur annule la demande (ex : le client a changé d'avis, erreur de saisie).</li>
+    <li><strong>1520</strong> — <strong>Demande d'annulation par l'OPD</strong> : l'opérateur donneur demande l'annulation (cas rare, nécessite un motif valide).</li>
+    <li><strong>1530</strong> — <strong>Confirmation d'annulation</strong> : les deux parties confirment l'annulation. Le portage est clôturé sans bascule.</li>
+</ul>
+
+<h3>Règles générales</h3>
+<p>Chaque ticket est identifié de manière unique par un <strong>numéro de dossier</strong> attribué par l'OPR lors du 1110 initial. Tous les tickets d'un même portage partagent ce numéro de dossier. Les tickets sont transportés dans des fichiers <strong>PNMDATA</strong> et font l'objet d'un accusé (ACR) ou d'une erreur (ERR) à réception.</p>

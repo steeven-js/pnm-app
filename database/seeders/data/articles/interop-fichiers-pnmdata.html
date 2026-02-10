@@ -1,0 +1,69 @@
+<h2>Fichiers PNMDATA — Anatomie et structure</h2>
+
+<p>Les fichiers <strong>PNMDATA</strong> sont le support de transport des tickets PNM entre opérateurs. Chaque vacation (V10, V14, V19) génère un ou plusieurs fichiers PNMDATA contenant les tickets à envoyer. Comprendre leur structure est essentiel pour le diagnostic des échanges inter-opérateurs.</p>
+
+<h3>Convention de nommage</h3>
+<p>Les fichiers PNMDATA suivent une convention de nommage stricte :</p>
+<p><code>PNMDATA_[OPE]_[OPR]_[DATE]_[VACATION]_[SEQ].dat</code></p>
+<ul>
+    <li><strong>PNMDATA</strong> : préfixe fixe identifiant le type de fichier</li>
+    <li><strong>[OPE]</strong> : code opérateur émetteur (02, 15, 20)</li>
+    <li><strong>[OPR]</strong> : code opérateur récepteur</li>
+    <li><strong>[DATE]</strong> : date de génération au format <code>YYYYMMDD</code></li>
+    <li><strong>[VACATION]</strong> : identifiant de la vacation (<code>V10</code>, <code>V14</code>, <code>V19</code>)</li>
+    <li><strong>[SEQ]</strong> : numéro de séquence (en cas de fichiers multiples pour une même vacation)</li>
+</ul>
+<p>Exemple : <code>PNMDATA_02_20_20250115_V10_001.dat</code> — Fichier émis par Digicel (02) vers Orange (20), le 15 janvier 2025, vacation de 10h, séquence 1.</p>
+
+<h3>Structure du fichier</h3>
+<p>Chaque fichier PNMDATA est structuré en trois sections :</p>
+
+<p><strong>1. En-tête (Header) :</strong></p>
+<ul>
+    <li><code>TYPE_FICHIER</code> : "PNMDATA"</li>
+    <li><code>VERSION</code> : version du protocole (ex : "V3.2")</li>
+    <li><code>EMETTEUR</code> : code opérateur émetteur</li>
+    <li><code>DESTINATAIRE</code> : code opérateur destinataire</li>
+    <li><code>DATE_GENERATION</code> : horodatage de création du fichier</li>
+    <li><code>VACATION</code> : vacation d'émission</li>
+    <li><code>NB_TICKETS</code> : nombre de tickets contenus dans le fichier</li>
+</ul>
+
+<p><strong>2. Corps (Tickets) :</strong></p>
+<p>Chaque ticket est un enregistrement contenant :</p>
+<ul>
+    <li><code>NUM_DOSSIER</code> : identifiant unique du dossier de portage</li>
+    <li><code>TYPE_TICKET</code> : code du ticket (1110, 1210, 1410, etc.)</li>
+    <li><code>MSISDN</code> : numéro mobile au format international (<code>590690XXXXXX</code>)</li>
+    <li><code>RIO</code> : Relevé d'Identité Opérateur (présent dans le 1110)</li>
+    <li><code>CODE_OPR</code> : code opérateur receveur</li>
+    <li><code>CODE_OPD</code> : code opérateur donneur</li>
+    <li><code>CODE_OPA</code> : code opérateur attributaire</li>
+    <li><code>DATE_PORTAGE</code> : date de portage prévue (JP) au format <code>YYYYMMDD</code></li>
+    <li><code>MOTIF_REFUS</code> : code motif (uniquement pour les tickets 1210 en refus)</li>
+    <li><code>HORODATAGE</code> : date et heure de création du ticket</li>
+</ul>
+
+<p><strong>3. Pied de page (Footer) :</strong></p>
+<ul>
+    <li><code>CHECKSUM</code> : somme de contrôle pour vérifier l'intégrité du fichier</li>
+    <li><code>FIN_FICHIER</code> : marqueur de fin</li>
+</ul>
+
+<h3>Système de vacations</h3>
+<p>Les fichiers PNMDATA sont échangés selon un <strong>calendrier tri-quotidien</strong> appelé système de vacations :</p>
+<ul>
+    <li><strong>V10</strong> (vacation 10h) : dépôt avant 10h00, collecte à 10h00. Vacation principale, utilisée pour les bascules du jour JP.</li>
+    <li><strong>V14</strong> (vacation 14h) : dépôt avant 14h00, collecte à 14h00. Vacation intermédiaire pour les réponses et confirmations.</li>
+    <li><strong>V19</strong> (vacation 19h) : dépôt avant 19h00, collecte à 19h00. Dernière vacation de la journée, principalement pour les nouvelles demandes.</li>
+</ul>
+<p>Chaque opérateur dépose ses fichiers PNMDATA sur le serveur sFTP du destinataire <strong>avant l'heure de vacation</strong>. Le destinataire collecte et traite les fichiers à l'heure de vacation.</p>
+
+<h3>Validation à réception</h3>
+<p>À réception d'un fichier PNMDATA, l'opérateur destinataire effectue des contrôles :</p>
+<ul>
+    <li>Vérification du <strong>checksum</strong> (intégrité du fichier)</li>
+    <li>Vérification de la <strong>cohérence de l'en-tête</strong> (destinataire correct, vacation valide)</li>
+    <li>Vérification du <strong>nombre de tickets</strong> déclaré vs. réel</li>
+</ul>
+<p>Si le fichier est valide, un <strong>ACR</strong> (accusé de réception) est généré. Sinon, un <strong>ERR</strong> (fichier d'erreur) est retourné.</p>

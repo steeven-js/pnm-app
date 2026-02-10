@@ -1,0 +1,60 @@
+<h2>Inventaire des serveurs PNM</h2>
+
+<p>L'infrastructure de portabilité de Digicel repose sur un ensemble de <strong>serveurs dédiés</strong>, chacun hébergeant des composants spécifiques de la chaîne PNM. Connaître ces serveurs et leur rôle est indispensable pour le diagnostic et la maintenance.</p>
+
+<h3>vmqproportawebdb01 — Serveur PortaDB</h3>
+<p>Serveur principal de la plateforme de portabilité.</p>
+<ul>
+    <li><strong>Rôle</strong> : héberge la base de données PortaDB et l'interface web d'administration</li>
+    <li><strong>Composants</strong> :
+        <ul>
+            <li>Base de données relationnelle PortaDB (stockage des tickets, numéros portés, historiques)</li>
+            <li>Application web de gestion (consultation et pilotage des dossiers de portage)</li>
+            <li>Scripts de bascule (<code>TraitementBascule.sh</code>, <code>BasculeVerification.sh</code>)</li>
+            <li>Scripts de restitution et d'export CSV</li>
+        </ul>
+    </li>
+    <li><strong>OS</strong> : Linux (Red Hat Enterprise Linux)</li>
+    <li><strong>Sauvegarde</strong> : backup quotidien de la base de données à 02h00, rétention 30 jours</li>
+    <li><strong>Accès</strong> : restreint aux équipes Applications et BSS via SSH (authentification par clé)</li>
+    <li><strong>Supervision</strong> : monitoring CPU, RAM, disque, et processus base de données</li>
+</ul>
+
+<h3>vmqproportasync01 — Serveur PortaSync</h3>
+<p>Serveur dédié aux échanges inter-opérateurs.</p>
+<ul>
+    <li><strong>Rôle</strong> : héberge le service PortaSync et gère les transferts sFTP</li>
+    <li><strong>Composants</strong> :
+        <ul>
+            <li>Service PortaSync (génération et traitement des fichiers PNMDATA)</li>
+            <li>Serveur sFTP local (réception des fichiers des opérateurs partenaires)</li>
+            <li>Scripts d'export/import (<code>pnm-import.sh</code>, <code>portasync-export.sh</code>)</li>
+            <li>Scripts de synchronisation PNMSYNC</li>
+            <li>Répertoire d'archivage des fichiers échangés</li>
+        </ul>
+    </li>
+    <li><strong>OS</strong> : Linux (Red Hat Enterprise Linux)</li>
+    <li><strong>Réseau</strong> : interface dédiée pour les flux sFTP inter-opérateurs, firewallé avec accès restreint aux IP des partenaires GPMAG</li>
+    <li><strong>Stockage</strong> : espace dédié pour l'archivage des fichiers PNMDATA (rétention 12 mois)</li>
+    <li><strong>Supervision</strong> : monitoring des connexions sFTP, espace disque, et processus PortaSync</li>
+</ul>
+
+<h3>BTCTF — Bureau Technique Central</h3>
+<p>Plateforme externe nationale de référence pour la portabilité.</p>
+<ul>
+    <li><strong>Rôle</strong> : référentiel national des numéros portés, géré au niveau métropolitain</li>
+    <li><strong>Interaction</strong> : PortaSync communique avec le BTCTF pour les synchronisations nationales et les cas de portage inter-zones</li>
+    <li><strong>Connexion</strong> : liaison sécurisée dédiée depuis vmqproportasync01</li>
+    <li><strong>Fréquence</strong> : échanges quotidiens pour les mises à jour incrémentales, synchronisation complète hebdomadaire</li>
+</ul>
+
+<h3>Réseau inter-serveurs</h3>
+<p>Les serveurs PNM communiquent via le <strong>réseau interne Digicel</strong> :</p>
+<ul>
+    <li><code>vmqproportawebdb01</code> ↔ <code>vmqproportasync01</code> : connexion base de données sécurisée (port dédié, authentification applicative)</li>
+    <li><code>vmqproportawebdb01</code> ↔ <strong>ESB DataPower</strong> : flux web services pour les commandes de bascule HLR</li>
+    <li><code>vmqproportasync01</code> ↔ <strong>sFTP partenaires</strong> : flux sFTP sortants vers Orange et SFR/Only</li>
+</ul>
+
+<h3>Plan de continuité</h3>
+<p>En cas de panne d'un serveur, les procédures de <strong>disaster recovery</strong> prévoient une restauration à partir des sauvegardes sous 4 heures. Les vacations impactées sont reportées et les opérateurs partenaires sont notifiés conformément aux engagements GPMAG.</p>

@@ -1,0 +1,48 @@
+<h2>ESB DataPower — Bus d'intégration</h2>
+
+<p>L'<strong>ESB DataPower</strong> (Enterprise Service Bus) est le bus d'intégration central de l'architecture PNM chez Digicel. Basé sur la technologie <strong>IBM DataPower Gateway</strong>, il assure l'interconnexion entre les différents systèmes impliqués dans le processus de portabilité.</p>
+
+<h3>Rôle dans l'architecture PNM</h3>
+<p>L'ESB DataPower remplit une fonction de <strong>médiateur</strong> entre les systèmes internes :</p>
+<ul>
+    <li><strong>Routage des messages</strong> : acheminer les requêtes du bon émetteur vers le bon destinataire (PortaDB → MOBI, CRM → PortaDB, etc.)</li>
+    <li><strong>Transformation de données</strong> : convertir les formats entre systèmes hétérogènes (XML, JSON, formats propriétaires)</li>
+    <li><strong>Orchestration</strong> : coordonner les séquences d'appels multi-systèmes nécessaires pour une bascule</li>
+    <li><strong>Sécurité</strong> : authentification, chiffrement et contrôle d'accès sur les flux inter-applicatifs</li>
+</ul>
+
+<h3>Flux principaux</h3>
+<p>Les flux PNM transitant par l'ESB DataPower incluent :</p>
+
+<p><strong>Flux PortaDB → MOBI (bascule) :</strong></p>
+<ul>
+    <li>PortaDB envoie un ordre de bascule contenant le MSISDN et les paramètres de routage</li>
+    <li>L'ESB transforme la requête au format attendu par MOBI</li>
+    <li>MOBI exécute les commandes <strong>EMA</strong> (ajout) et <strong>EMM</strong> (modification) sur les tables de routage réseau</li>
+    <li>Le résultat (succès ou erreur) remonte vers PortaDB via l'ESB</li>
+</ul>
+
+<p><strong>Flux CRM → PortaDB (demande de portage) :</strong></p>
+<ul>
+    <li>Le CRM soumet une nouvelle demande de portage avec les informations client</li>
+    <li>L'ESB valide le format et transmet à PortaDB pour création du ticket 1110</li>
+    <li>PortaDB retourne un accusé de réception avec le numéro de dossier</li>
+</ul>
+
+<p><strong>Flux PortaDB → CRM (notifications) :</strong></p>
+<ul>
+    <li>PortaDB notifie le CRM des changements de statut (acceptation, refus, bascule effectuée)</li>
+    <li>Le CRM met à jour la fiche client et peut déclencher des notifications SMS au client</li>
+</ul>
+
+<h3>Transformations</h3>
+<p>L'ESB DataPower effectue plusieurs types de <strong>transformations</strong> sur les messages :</p>
+<ul>
+    <li><strong>Mapping de champs</strong> : correspondance entre les noms de champs PortaDB et les noms MOBI</li>
+    <li><strong>Enrichissement</strong> : ajout d'informations contextuelles (horodatage, identifiant de corrélation)</li>
+    <li><strong>Validation de schéma</strong> : vérification de la conformité des messages avant transmission</li>
+    <li><strong>Gestion des erreurs</strong> : capture des exceptions, retry automatique, mise en file d'attente (dead letter queue)</li>
+</ul>
+
+<h3>Monitoring et logs</h3>
+<p>Tous les flux transitant par l'ESB sont <strong>journalisés</strong>. Les logs DataPower permettent de tracer chaque message de bout en bout grâce à un <strong>identifiant de corrélation unique</strong>. En cas d'incident sur un portage, ces logs sont le premier point d'investigation pour identifier à quelle étape le flux a échoué.</p>

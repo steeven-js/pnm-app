@@ -1,0 +1,42 @@
+<h2>PortaSync — Service de synchronisation PNM</h2>
+
+<p><strong>PortaSync</strong> est le service applicatif qui assure la synchronisation entre la base de données PortaDB et les systèmes inter-opérateurs. C'est le composant qui gère concrètement les échanges de fichiers PNMDATA avec les autres opérateurs du GPMAG.</p>
+
+<h3>Rôle principal</h3>
+<p>PortaSync est le <strong>pont opérationnel</strong> entre le monde interne (PortaDB, ESB) et le monde externe (sFTP inter-opérateurs) :</p>
+<ul>
+    <li><strong>Export</strong> : extraction des tickets depuis PortaDB, génération des fichiers PNMDATA au format normalisé, dépôt sur les serveurs sFTP des opérateurs partenaires</li>
+    <li><strong>Import</strong> : collecte des fichiers PNMDATA reçus des autres opérateurs, parsing, validation, et injection des tickets dans PortaDB</li>
+    <li><strong>Synchronisation</strong> : gestion du processus PNMSYNC hebdomadaire (extraction, comparaison, détection de divergences)</li>
+    <li><strong>ACR/ERR</strong> : génération des accusés de réception et fichiers d'erreur pour chaque fichier reçu</li>
+</ul>
+
+<h3>Hébergement</h3>
+<p>PortaSync est hébergé sur le serveur <strong>vmqproportasync01</strong>, distinct du serveur PortaDB pour des raisons de sécurité et de performance :</p>
+<ul>
+    <li>Serveur dédié aux échanges réseau (sFTP) et au traitement des fichiers</li>
+    <li>Accès réseau ouvert vers les serveurs sFTP des opérateurs partenaires</li>
+    <li>Connexion sécurisée vers PortaDB (vmqproportawebdb01) via le réseau interne</li>
+</ul>
+
+<h3>Connexion au BTCTF</h3>
+<p>PortaSync interagit avec le <strong>BTCTF</strong> (Bureau Technique Central des Télécommunications Françaises), la plateforme nationale de référence pour la portabilité :</p>
+<ul>
+    <li>Transmission périodique des données de portage de la zone Antilles-Guyane vers le référentiel national</li>
+    <li>Récupération des mises à jour nationales impactant les numéros portés inter-zones (cas d'un numéro métropolitain porté en outre-mer)</li>
+    <li>Synchronisation des tables de routage nationales</li>
+</ul>
+
+<h3>Scripts principaux</h3>
+<p>PortaSync orchestre plusieurs scripts exécutés selon le calendrier des vacations :</p>
+<ul>
+    <li><code>portasync-export.sh</code> : génère les fichiers PNMDATA à partir des tickets en attente dans PortaDB</li>
+    <li><code>portasync-push.sh</code> : dépose les fichiers sur les serveurs sFTP distants (authentification par clé SSH)</li>
+    <li><code>portasync-pull.sh</code> : collecte les fichiers déposés par les opérateurs sur notre serveur sFTP</li>
+    <li><code>portasync-import.sh</code> : parse et importe les tickets reçus dans PortaDB</li>
+    <li><code>portasync-acr.sh</code> : génère et envoie les accusés de réception</li>
+    <li><code>portasync-sunday.sh</code> : script spécifique pour la synchronisation PNMSYNC du dimanche</li>
+</ul>
+
+<h3>Logs et diagnostic</h3>
+<p>PortaSync produit des <strong>logs détaillés</strong> pour chaque opération, stockés dans <code>/var/log/portasync/</code>. Ces logs incluent : les fichiers envoyés/reçus, le nombre de tickets traités, les erreurs rencontrées, et les temps de traitement. Ils constituent la première source d'information en cas d'incident sur les échanges inter-opérateurs.</p>
