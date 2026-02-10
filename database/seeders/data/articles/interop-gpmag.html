@@ -3,13 +3,16 @@
 <p>Le <strong>GPMAG</strong> (Groupement de Portabilité des Numéros Mobiles Antilles-Guyane) est l'instance de coordination inter-opérateurs qui régit la portabilité mobile dans les départements français d'Amérique. Il regroupe les trois opérateurs mobiles de la zone et définit les règles communes de fonctionnement.</p>
 
 <h3>Les opérateurs membres</h3>
-<p>Trois opérateurs composent le GPMAG, chacun identifié par un <strong>code opérateur unique</strong> :</p>
+<p><strong>Six opérateurs</strong> composent le GPMAG, chacun identifié par un <strong>code opérateur unique</strong> utilisé dans les fichiers PNMDATA, les tickets PNM et le RIO :</p>
 <ul>
+    <li><strong>Orange Caraïbe</strong> — Code <code>01</code> : filiale du groupe Orange dédiée à la zone Antilles-Guyane. Infrastructure complète avec couverture étendue.</li>
     <li><strong>Digicel</strong> — Code <code>02</code> : opérateur historique des Antilles-Guyane, présent en Guadeloupe, Martinique et Guyane. Réseau 2G/3G/4G.</li>
-    <li><strong>Orange Caraïbe</strong> — Code <code>20</code> : filiale du groupe Orange dédiée à la zone Antilles-Guyane. Infrastructure complète avec couverture étendue.</li>
-    <li><strong>SFR / Only</strong> — Code <code>15</code> : opérateur opérant sous les marques SFR et Only selon les territoires. Réseau propre avec accord d'itinérance sur certaines zones.</li>
+    <li><strong>SFR / Only</strong> — Code <code>03</code> : opérateur opérant sous les marques SFR et Only selon les territoires.</li>
+    <li><strong>Dauphin Télécom</strong> — Code <code>04</code> : opérateur local présent principalement à Saint-Martin et Saint-Barthélemy.</li>
+    <li><strong>UTS (United Telecommunication Services)</strong> — Code <code>05</code> : opérateur actif sur la partie néerlandaise de Saint-Martin avec des services transfrontaliers.</li>
+    <li><strong>Free Caraïbe</strong> — Code <code>06</code> : filiale du groupe Iliad pour la zone Antilles-Guyane.</li>
 </ul>
-<p>Ces codes opérateurs sont utilisés dans le <strong>RIO</strong>, les tickets PNM et les fichiers PNMDATA pour identifier sans ambiguïté chaque acteur.</p>
+<p>Ces codes opérateurs (01 à 06) sont utilisés dans le <strong>RIO</strong>, les tickets PNM, les fichiers PNMDATA et les logs PortaSync pour identifier sans ambiguïté chaque acteur.</p>
 
 <h3>Liaisons sFTP</h3>
 <p>Les échanges de fichiers PNM entre opérateurs s'effectuent via des <strong>liaisons sFTP sécurisées</strong> point à point :</p>
@@ -28,6 +31,18 @@
     <li><strong>Comité de pilotage</strong> : réunion trimestrielle au niveau direction. Validation des évolutions majeures du protocole, arbitrage des litiges non résolus au niveau technique.</li>
     <li><strong>Spécifications communes</strong> : le GPMAG maintient un document de spécifications techniques PNM V3 partagé, qui fait foi en cas de divergence d'interprétation.</li>
 </ul>
+
+<h3>Contacts techniques GPMAG</h3>
+<p>Chaque opérateur du GPMAG désigne des <strong>référents techniques PNM</strong> joignables pour le traitement des incidents et la coordination inter-opérateurs :</p>
+<ul>
+    <li><strong>Digicel</strong> : équipe PNM interne — via canal Teams PNM et email générique PNM</li>
+    <li><strong>Orange Caraïbe</strong> : référent technique portabilité — contact via email générique portabilité Orange AG</li>
+    <li><strong>SFR / Only</strong> : équipe technique PNM — contact via email générique portabilité SFR AG</li>
+    <li><strong>Dauphin Télécom</strong> : référent technique — contact via email opérateur</li>
+    <li><strong>UTS</strong> : référent technique — contact via email opérateur</li>
+    <li><strong>Free Caraïbe</strong> : référent technique — contact via email opérateur</li>
+</ul>
+<p>Les coordonnées nominatives et emails génériques sont disponibles dans le <strong>répertoire GPMAG partagé</strong> (SharePoint PNM). En cas d'incident critique, privilégier le contact téléphonique direct suivi d'un email de confirmation.</p>
 
 <h3>Obligations des membres</h3>
 <p>Chaque opérateur membre du GPMAG s'engage à :</p>

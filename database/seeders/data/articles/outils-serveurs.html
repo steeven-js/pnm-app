@@ -24,13 +24,23 @@
 <p>Serveur dédié aux échanges inter-opérateurs.</p>
 <ul>
     <li><strong>Rôle</strong> : héberge le service PortaSync et gère les transferts sFTP</li>
+    <li><strong>Utilisateur dédié</strong> : <code>porta_pnmv3</code></li>
+    <li><strong>Dossier PortaSync</strong> : <code>/home/porta_pnmv3/PortaSync</code></li>
+    <li><strong>Logs</strong> : <code>/home/porta_pnmv3/PortaSync/log</code> (EmaExtracter.log, EmmExtracter.log, PnmDataManager.log, PnmAckManager.log)</li>
     <li><strong>Composants</strong> :
         <ul>
             <li>Service PortaSync (génération et traitement des fichiers PNMDATA)</li>
             <li>Serveur sFTP local (réception des fichiers des opérateurs partenaires)</li>
+            <li>Scripts PHP PortaSync (EmaExtracter, EmmExtracter, PnmDataManager, PnmSyncAckManager)</li>
             <li>Scripts d'export/import (<code>pnm-import.sh</code>, <code>portasync-export.sh</code>)</li>
             <li>Scripts de synchronisation PNMSYNC</li>
             <li>Répertoire d'archivage des fichiers échangés</li>
+        </ul>
+    </li>
+    <li><strong>Web services hébergés</strong> :
+        <ul>
+            <li><strong>PortaWs</strong> : <code>http://172.24.119.72:8080/PortaWs/</code> — Portail de consultation des portages en cours et services DAPI (DigicelFwiPortaWs4Esb, DigicelFwiPortaWs4PortaSync)</li>
+            <li><strong>PortaWebUi</strong> : <code>http://172.24.119.71:8080/PortaWebUi/</code> — Interface d'administration PNM et service DigicelFwiPortaUiWs4Esb</li>
         </ul>
     </li>
     <li><strong>OS</strong> : Linux (Red Hat Enterprise Linux)</li>

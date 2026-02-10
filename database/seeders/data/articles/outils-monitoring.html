@@ -54,5 +54,24 @@
     <li>Si nécessaire, relancer le service de base de données (en coordination avec l'équipe Infrastructure)</li>
 </ul>
 
+<h3>Emails de supervision PNM</h3>
+<p>L'équipe PNM reçoit des <strong>emails automatiques de supervision</strong> à surveiller quotidiennement. Leur présence (ou absence) est un indicateur de santé du système.</p>
+
+<p><strong>Emails internes (générés par les systèmes PNM) :</strong></p>
+<ul>
+    <li><code>[PNM]Controle fichier batchhandler FNR_V3</code> — Vérification de l'intégrité des fichiers batch traités par le système</li>
+    <li><code>[PNM] 1ère vacation</code> / <code>[PNM] 2ème vacation</code> / <code>[PNM] 3ème vacation</code> — Rapport automatique de chaque vacation (V10, V14, V19) avec le nombre de fichiers échangés</li>
+    <li><code>[PNM][INCIDENT]</code> — Notification d'incident critique nécessitant une action immédiate de l'équipe</li>
+    <li><code>[PNMV3]Verification Bascule Porta MOBI</code> — Résultat de la vérification automatique des bascules envoyées à MOBI</li>
+    <li><code>[PNM] Verification des resiliations pour PSO</code> — Contrôle des résiliations liées aux portages sortants (Portage Sortant Opérateur)</li>
+</ul>
+
+<p><strong>Emails externes (échanges inter-opérateurs) :</strong></p>
+<ul>
+    <li><code>PNM INCIDENT : Numeros en ecart dans le fichier de synchronisation</code> — Alerte sur des divergences détectées lors de la synchronisation PNMSYNC avec un opérateur partenaire. Nécessite une analyse des écarts et une correction coordonnée.</li>
+</ul>
+
+<p>L'absence d'un email de vacation attendu, ou la réception d'un email <code>[INCIDENT]</code>, doit déclencher une investigation immédiate selon les procédures d'exploitation quotidienne.</p>
+
 <h3>Alerting</h3>
 <p>Des <strong>alertes automatiques</strong> sont configurées pour notifier l'équipe en cas d'anomalie : échec de bascule, absence d'ACR après 2 vacations, espace disque critique, ou service PortaSync arrêté. Ces alertes sont envoyées par email et par SMS aux astreintes PNM.</p>

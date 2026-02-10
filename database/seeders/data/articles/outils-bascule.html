@@ -57,5 +57,20 @@
     <li><strong>Erreur partielle</strong> : si certaines bascules réussissent et d'autres échouent dans un lot, seuls les dossiers en erreur sont retraités. Les bascules réussies ne sont pas impactées.</li>
 </ul>
 
+<h3>Vérification des logs PortaSync</h3>
+<p>En complément de la vérification post-bascule, les logs PortaSync sur <code>vmqproportasync01</code> permettent de confirmer que les extractions EMA/EMM se sont déroulées correctement.</p>
+
+<p><strong>Chemin des logs :</strong> <code>/home/porta_pnmv3/PortaSync/log</code></p>
+
+<p><strong>Vérification EmaExtracter (bascules) :</strong></p>
+<pre><code>tail -n 12 EmaExtracter.log</code></pre>
+<p>Résultat attendu : <strong>"Check success"</strong> pour chacun des 6 opérateurs (01 à 06), suivi du nombre de bascules extraites. L'absence de "Check success" pour un opérateur indique un échec d'extraction à investiguer.</p>
+
+<p><strong>Vérification EmmExtracter (valorisations) :</strong></p>
+<pre><code>tail -n 12 EmmExtracter.log</code></pre>
+<p>Même format : <strong>"Check success"</strong> par opérateur avec compteur de valorisations. Les valorisations EMM correspondent aux modifications d'opérateur hébergeant dans les tables de routage.</p>
+
+<p>Ces vérifications sont à effectuer <strong>chaque matin à 9h00</strong>, immédiatement après l'exécution des scripts d'extraction. Consulter l'article <em>Exploitation quotidienne</em> pour le workflow complet.</p>
+
 <h3>Reporting</h3>
 <p>À la fin de chaque exécution, <code>TraitementBascule.sh</code> produit un <strong>rapport de bascule</strong> contenant : le nombre de bascules tentées, réussies, en erreur, et les détails de chaque erreur. Ce rapport est envoyé par email à l'équipe PNM et archivé dans <code>/var/log/portadb/bascule/</code>.</p>

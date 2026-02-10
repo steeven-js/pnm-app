@@ -75,5 +75,40 @@
     <li><strong>Chemin</strong> : <code>/opt/portasync/scripts/pnmsync-compare.sh</code></li>
 </ul>
 
+<h3>Scripts PortaSync (PHP)</h3>
+<p>En plus des scripts shell, PortaSync utilise des <strong>scripts PHP</strong> exécutés par cron sur <code>vmqproportasync01</code> (utilisateur <code>porta_pnmv3</code>). Ces scripts gèrent les étapes clés du workflow quotidien :</p>
+
+<p><strong><code>EmaExtracter.php</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : extraction des bascules EMA depuis PortaDB pour chacun des 6 opérateurs. Prépare les données de bascule (ajout MSISDN dans les tables de routage).</li>
+    <li><strong>Ordonnancement</strong> : cron à <strong>9h00</strong></li>
+    <li><strong>Chemin</strong> : <code>/home/porta_pnmv3/PortaSync/</code></li>
+    <li><strong>Log</strong> : <code>EmaExtracter.log</code> — doit afficher "Check success" pour les 6 opérateurs</li>
+</ul>
+
+<p><strong><code>EmmExtracter.php</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : extraction des valorisations EMM depuis PortaDB pour chacun des 6 opérateurs. Prépare les données de modification d'opérateur hébergeant.</li>
+    <li><strong>Ordonnancement</strong> : cron à <strong>9h01</strong></li>
+    <li><strong>Chemin</strong> : <code>/home/porta_pnmv3/PortaSync/</code></li>
+    <li><strong>Log</strong> : <code>EmmExtracter.log</code> — doit afficher "Check success" pour les 6 opérateurs</li>
+</ul>
+
+<p><strong><code>PnmDataManager.php</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : génération des fichiers PNMDATA à partir des données extraites. Produit un fichier par opérateur (01 à 06) contenant les tickets à transmettre.</li>
+    <li><strong>Ordonnancement</strong> : cron à <strong>10h00</strong></li>
+    <li><strong>Chemin</strong> : <code>/home/porta_pnmv3/PortaSync/</code></li>
+    <li><strong>Log</strong> : <code>PnmDataManager.log</code> — indique le nombre de tickets par fichier généré</li>
+</ul>
+
+<p><strong><code>PnmSyncAckManager.php</code></strong></p>
+<ul>
+    <li><strong>Fonction</strong> : vérification des acquittements AR SYNC reçus des opérateurs partenaires. Contrôle que chaque fichier PNMDATA envoyé a bien reçu son accusé de réception.</li>
+    <li><strong>Ordonnancement</strong> : cron à <strong>10h40</strong></li>
+    <li><strong>Chemin</strong> : <code>/home/porta_pnmv3/PortaSync/</code></li>
+    <li><strong>Log</strong> : <code>PnmAckManager.log</code> — liste les AR reçus et manquants</li>
+</ul>
+
 <h3>Bonnes pratiques</h3>
-<p>Tous les scripts sont ordonnancés via <strong>crontab</strong> et produisent des logs dans <code>/var/log/</code> sur leur serveur respectif. En cas de modification d'un script, il est impératif de tester en environnement de pré-production et de notifier l'équipe via le canal PNM avant mise en production.</p>
+<p>Tous les scripts sont ordonnancés via <strong>crontab</strong> et produisent des logs dans <code>/var/log/</code> (scripts shell) ou <code>/home/porta_pnmv3/PortaSync/log</code> (scripts PHP) sur leur serveur respectif. En cas de modification d'un script, il est impératif de tester en environnement de pré-production et de notifier l'équipe via le canal PNM avant mise en production.</p>

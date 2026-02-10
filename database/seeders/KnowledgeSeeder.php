@@ -84,6 +84,13 @@ class KnowledgeSeeder extends Seeder
             ['term' => 'Clé SSH', 'abbreviation' => 'SSH Key', 'definition' => 'Paire de clés cryptographiques (publique/privée) utilisée pour authentifier les connexions sFTP entre opérateurs.', 'category' => 'Sécurité'],
             ['term' => 'Management Information System', 'abbreviation' => 'MIS', 'definition' => 'Système d\'information décisionnel exploitant les données du Data Warehouse pour les rapports de pilotage.', 'category' => 'Systèmes'],
             ['term' => 'Mise en Production', 'abbreviation' => 'MEP', 'definition' => 'Déploiement d\'une application ou modification en environnement de production, après validation en recette.', 'category' => 'Opérations'],
+
+            // Termes PORTA exploitation
+            ['term' => 'Digicel Application Portability Interface', 'abbreviation' => 'DAPI', 'definition' => 'Couche d\'interfaces web services (WSDL/SOAP) exposée par les composants PNM de Digicel. Comprend les services DigicelFwiEsbWs4Porta, DigicelFwiPortaWs4Esb, DigicelFwiPortaWs4PortaSync et DigicelFwiPortaUiWs4Esb.', 'category' => 'Systèmes'],
+            ['term' => 'Valorisation', 'abbreviation' => null, 'definition' => 'Opération de modification de l\'opérateur hébergeant dans les tables de routage réseau via une commande EMM. Correspond à un portage inverse (numéro déjà porté qui change à nouveau d\'opérateur).', 'category' => 'Opérations'],
+            ['term' => 'Acquittement', 'abbreviation' => 'AR', 'definition' => 'Message de confirmation envoyé par un opérateur après réception et traitement d\'un fichier PNMDATA. L\'AR SYNC confirme la bonne synchronisation des données entre opérateurs.', 'category' => 'Inter-opérateurs'],
+            ['term' => 'PortaWs', 'abbreviation' => 'PortaWs', 'definition' => 'Portail web et services DAPI hébergés sur vmqproportasync01 (http://172.24.119.72:8080/PortaWs/). Permet la consultation des portages en cours et expose les web services DigicelFwiPortaWs4Esb et DigicelFwiPortaWs4PortaSync.', 'category' => 'Systèmes'],
+            ['term' => 'PortaWebUi', 'abbreviation' => 'PortaWebUi', 'definition' => 'Interface d\'administration web PNM hébergée sur vmqproportasync01 (http://172.24.119.71:8080/PortaWebUi/). Expose le service DigicelFwiPortaUiWs4Esb pour les opérations via l\'interface utilisateur.', 'category' => 'Systèmes'],
         ];
 
         foreach ($terms as $term) {
@@ -112,8 +119,8 @@ class KnowledgeSeeder extends Seeder
             // Systèmes d'Information
             ['domain' => 'systemes-information', 'title' => 'Organisation du SI Digicel', 'slug' => 'organisation', 'excerpt' => 'Les 6 équipes SI, leurs missions et outils principaux.', 'file' => 'si-organisation.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 5],
             ['domain' => 'systemes-information', 'title' => 'Architecture BSS', 'slug' => 'architecture-bss', 'excerpt' => 'Le flux CRM → Facturation → Activation → Selfcare expliqué.', 'file' => 'si-architecture-bss.html', 'level' => 'comprehension', 'sort_order' => 2, 'reading_time' => 5],
-            ['domain' => 'systemes-information', 'title' => 'PortaDB — Base de données PNM', 'slug' => 'portadb', 'excerpt' => 'Architecture, tables principales et rôle de PortaDB dans le processus de portabilité.', 'file' => 'si-portadb.html', 'level' => 'comprehension', 'sort_order' => 3, 'reading_time' => 5],
-            ['domain' => 'systemes-information', 'title' => 'ESB DataPower', 'slug' => 'esb-datapower', 'excerpt' => 'Le bus d\'intégration entre PortaDB et MOBI : flux, transformations et monitoring.', 'file' => 'si-esb-datapower.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 4],
+            ['domain' => 'systemes-information', 'title' => 'PortaDB — Base de données PNM', 'slug' => 'portadb', 'excerpt' => 'Architecture, tables principales et rôle de PortaDB dans le processus de portabilité.', 'file' => 'si-portadb.html', 'level' => 'comprehension', 'sort_order' => 3, 'reading_time' => 6],
+            ['domain' => 'systemes-information', 'title' => 'ESB DataPower', 'slug' => 'esb-datapower', 'excerpt' => 'Le bus d\'intégration entre PortaDB et MOBI : flux, transformations et monitoring.', 'file' => 'si-esb-datapower.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 6],
 
             // Réseau & Infrastructure
             ['domain' => 'reseau-infrastructure', 'title' => 'Architecture réseau télécom', 'slug' => 'architecture', 'excerpt' => 'Vue d\'ensemble du réseau Digicel : du terminal mobile au cœur de réseau.', 'file' => 'reseau-architecture.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 5],
@@ -121,7 +128,7 @@ class KnowledgeSeeder extends Seeder
             ['domain' => 'reseau-infrastructure', 'title' => 'Impact de la portabilité sur le routage', 'slug' => 'impact-portage', 'excerpt' => 'Comment un numéro porté est routé à travers le réseau et les mises à jour nécessaires.', 'file' => 'reseau-impact-portage.html', 'level' => 'maitrise', 'sort_order' => 3, 'reading_time' => 4],
 
             // Inter-opérateurs & GPMAG
-            ['domain' => 'inter-operateurs-gpmag', 'title' => 'Le GPMAG et ses opérateurs', 'slug' => 'gpmag', 'excerpt' => 'Structure de gouvernance, opérateurs membres et liaisons de la zone Antilles-Guyane.', 'file' => 'interop-gpmag.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 5],
+            ['domain' => 'inter-operateurs-gpmag', 'title' => 'Le GPMAG et ses opérateurs', 'slug' => 'gpmag', 'excerpt' => 'Structure de gouvernance, opérateurs membres et liaisons de la zone Antilles-Guyane.', 'file' => 'interop-gpmag.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 6],
             ['domain' => 'inter-operateurs-gpmag', 'title' => 'Anatomie d\'un fichier PNMDATA', 'slug' => 'fichiers-pnmdata', 'excerpt' => 'Structure, champs et convention de nommage des fichiers d\'échange de portabilité.', 'file' => 'interop-fichiers-pnmdata.html', 'level' => 'comprehension', 'sort_order' => 2, 'reading_time' => 6],
             ['domain' => 'inter-operateurs-gpmag', 'title' => 'Fichiers PNMSYNC et synchronisation', 'slug' => 'fichiers-pnmsync', 'excerpt' => 'Le processus de synchronisation hebdomadaire des bases de numéros portés.', 'file' => 'interop-fichiers-pnmsync.html', 'level' => 'comprehension', 'sort_order' => 3, 'reading_time' => 4],
             ['domain' => 'inter-operateurs-gpmag', 'title' => 'Le système de vacations', 'slug' => 'vacations', 'excerpt' => 'Les 3 créneaux quotidiens d\'échange de fichiers et la synchronisation du dimanche.', 'file' => 'interop-vacations.html', 'level' => 'decouverte', 'sort_order' => 4, 'reading_time' => 5],
@@ -129,10 +136,11 @@ class KnowledgeSeeder extends Seeder
 
             // Outils & Scripts
             ['domain' => 'outils-scripts', 'title' => 'PortaSync — Service de synchronisation', 'slug' => 'portasync', 'excerpt' => 'Rôle, fonctionnement et gestion du service PortaSync.', 'file' => 'outils-portasync.html', 'level' => 'comprehension', 'sort_order' => 1, 'reading_time' => 4],
-            ['domain' => 'outils-scripts', 'title' => 'Catalogue des scripts', 'slug' => 'scripts-catalogue', 'excerpt' => 'TraitementBascule.sh, exports CSV, restitutions — tous les scripts clés expliqués.', 'file' => 'outils-scripts-catalogue.html', 'level' => 'comprehension', 'sort_order' => 2, 'reading_time' => 6],
-            ['domain' => 'outils-scripts', 'title' => 'Inventaire des serveurs', 'slug' => 'serveurs', 'excerpt' => 'vmqproportawebdb01, vmqproportasync01, BTCTF — rôle de chaque serveur.', 'file' => 'outils-serveurs.html', 'level' => 'decouverte', 'sort_order' => 3, 'reading_time' => 4],
-            ['domain' => 'outils-scripts', 'title' => 'Processus de bascule', 'slug' => 'bascule', 'excerpt' => 'Le script TraitementBascule.sh et le flux EMA/EMM → MOBI en détail.', 'file' => 'outils-bascule.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 5],
-            ['domain' => 'outils-scripts', 'title' => 'Monitoring et santé des systèmes', 'slug' => 'monitoring', 'excerpt' => 'Quoi vérifier au quotidien, indicateurs de santé et résolution des problèmes courants.', 'file' => 'outils-monitoring.html', 'level' => 'maitrise', 'sort_order' => 5, 'reading_time' => 4],
+            ['domain' => 'outils-scripts', 'title' => 'Catalogue des scripts', 'slug' => 'scripts-catalogue', 'excerpt' => 'TraitementBascule.sh, exports CSV, restitutions — tous les scripts clés expliqués.', 'file' => 'outils-scripts-catalogue.html', 'level' => 'comprehension', 'sort_order' => 2, 'reading_time' => 8],
+            ['domain' => 'outils-scripts', 'title' => 'Inventaire des serveurs', 'slug' => 'serveurs', 'excerpt' => 'vmqproportawebdb01, vmqproportasync01, BTCTF — rôle de chaque serveur.', 'file' => 'outils-serveurs.html', 'level' => 'decouverte', 'sort_order' => 3, 'reading_time' => 5],
+            ['domain' => 'outils-scripts', 'title' => 'Processus de bascule', 'slug' => 'bascule', 'excerpt' => 'Le script TraitementBascule.sh et le flux EMA/EMM → MOBI en détail.', 'file' => 'outils-bascule.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 6],
+            ['domain' => 'outils-scripts', 'title' => 'Monitoring et santé des systèmes', 'slug' => 'monitoring', 'excerpt' => 'Quoi vérifier au quotidien, indicateurs de santé et résolution des problèmes courants.', 'file' => 'outils-monitoring.html', 'level' => 'maitrise', 'sort_order' => 5, 'reading_time' => 5],
+            ['domain' => 'outils-scripts', 'title' => 'Exploitation quotidienne', 'slug' => 'exploitation-quotidienne', 'excerpt' => 'Procédures opérationnelles PORTA : vérifications à 9h, 10h15 et 11h15, commandes SSH et emails de supervision.', 'file' => 'outils-exploitation-quotidienne.html', 'level' => 'maitrise', 'sort_order' => 6, 'reading_time' => 8],
         ];
 
         foreach ($articleDefinitions as $def) {
@@ -165,21 +173,22 @@ class KnowledgeSeeder extends Seeder
             'motifs-refus' => ['RIO', 'OPR', 'OPD', 'PNM'],
             'organisation' => ['BSS', 'OSS', 'CRM', 'DW', 'MIS'],
             'architecture-bss' => ['BSS', 'CRM', 'MOBI'],
-            'portadb' => ['PortaDB', 'PortaSync', 'ESB', 'DataPower', 'MOBI'],
-            'esb-datapower' => ['ESB', 'DataPower', 'PortaDB', 'MOBI'],
+            'portadb' => ['PortaDB', 'PortaSync', 'ESB', 'DataPower', 'MOBI', 'PortaWs'],
+            'esb-datapower' => ['ESB', 'DataPower', 'PortaDB', 'MOBI', 'DAPI', 'PortaWs', 'PortaWebUi'],
             'architecture' => ['HLR', 'HSS', 'EPC', 'IMS', 'MSC', 'RAN'],
             'composants' => ['HLR', 'HSS', 'EPC', 'IMS', 'MSC'],
             'impact-portage' => ['HLR', 'HSS', 'MOBI', 'MSISDN', 'PNM'],
-            'gpmag' => ['GPMAG', 'sFTP', 'PNMDATA', 'PNMSYNC'],
+            'gpmag' => ['GPMAG', 'sFTP', 'PNMDATA', 'PNMSYNC', 'AR'],
             'fichiers-pnmdata' => ['PNMDATA', 'ACR', 'ERR', 'MSISDN', 'sFTP'],
             'fichiers-pnmsync' => ['PNMSYNC', 'MSISDN', 'sFTP'],
             'vacations' => ['PNMDATA', 'PNMSYNC', 'sFTP'],
             'flux-acr-err' => ['ACR', 'ERR', 'PNMDATA', 'sFTP'],
             'portasync' => ['PortaSync', 'PortaDB', 'BTCTF', 'sFTP'],
-            'scripts-catalogue' => ['PortaDB', 'MOBI', 'EMA/EMM', 'DW'],
-            'serveurs' => ['PortaDB', 'PortaSync', 'BTCTF'],
-            'bascule' => ['EMA/EMM', 'MOBI', 'PortaDB'],
+            'scripts-catalogue' => ['PortaDB', 'MOBI', 'EMA/EMM', 'DW', 'PortaSync'],
+            'serveurs' => ['PortaDB', 'PortaSync', 'BTCTF', 'PortaWs', 'PortaWebUi', 'DAPI'],
+            'bascule' => ['EMA/EMM', 'MOBI', 'PortaDB', 'PortaSync'],
             'monitoring' => ['PortaDB', 'PortaSync', 'ESB', 'BTCTF'],
+            'exploitation-quotidienne' => ['PortaSync', 'PortaDB', 'EMA/EMM', 'PNMDATA', 'MOBI', 'PortaWs', 'PortaWebUi', 'DAPI', 'AR'],
         ];
 
         $articles = Article::all()->keyBy('slug');

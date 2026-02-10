@@ -44,5 +44,37 @@
     <li><strong>Gestion des erreurs</strong> : capture des exceptions, retry automatique, mise en file d'attente (dead letter queue)</li>
 </ul>
 
+<h3>Interfaces DAPI — Endpoints de production</h3>
+<p>La <strong>DAPI</strong> (Digicel Application Portability Interface) définit les web services exposés et consommés par les différents composants PNM. Voici les endpoints de production :</p>
+
+<p><strong>WS ESB (consommé par PortaDB) :</strong></p>
+<ul>
+    <li><strong>WSDL</strong> : <code>DigicelFwiEsbWs4Porta.wsdl</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.116.76:8000</code></li>
+    <li><strong>Configuration</strong> : l'URL est stockée dans la table <code>web_config</code> de PortaDB avec le code <code>esb.wsdlLocation</code></li>
+    <li><strong>Usage</strong> : appels de PortaDB vers l'ESB pour les ordres de bascule et les notifications</li>
+</ul>
+
+<p><strong>WS DAPI — ESB (exposé par PortaWs) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaWs4Esb</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.72:8080/PortaWs/</code></li>
+    <li><strong>Usage</strong> : interface consommée par l'ESB pour interroger ou notifier PortaDB</li>
+</ul>
+
+<p><strong>WS DAPI — PortaSync (exposé par PortaWs) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaWs4PortaSync</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.72:8080/PortaWs/</code></li>
+    <li><strong>Usage</strong> : interface consommée par PortaSync pour les opérations de synchronisation et d'échange de données</li>
+</ul>
+
+<p><strong>WS DAPI — WebStore (exposé par PortaWebUi) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaUiWs4Esb</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.71:8080/PortaWebUi/</code></li>
+    <li><strong>Usage</strong> : interface consommée par l'ESB pour les opérations via l'interface utilisateur web</li>
+</ul>
+
 <h3>Monitoring et logs</h3>
 <p>Tous les flux transitant par l'ESB sont <strong>journalisés</strong>. Les logs DataPower permettent de tracer chaque message de bout en bout grâce à un <strong>identifiant de corrélation unique</strong>. En cas d'incident sur un portage, ces logs sont le premier point d'investigation pour identifier à quelle étape le flux a échoué.</p>

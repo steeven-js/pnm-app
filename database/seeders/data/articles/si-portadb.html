@@ -41,5 +41,21 @@
     <li>Interface avec le <strong>CRM</strong> pour les notifications de statut de portage</li>
 </ul>
 
+<h3>Table web_config — Configuration des endpoints</h3>
+<p>PortaDB contient une table <code>web_config</code> qui centralise la <strong>configuration des endpoints web services</strong> utilisés par les composants PNM :</p>
+<ul>
+    <li><code>esb.wsdlLocation</code> — URL du WSDL de l'ESB DataPower (<code>http://172.24.116.76:8000</code>), utilisée par PortaDB pour les appels de bascule</li>
+    <li>Autres paramètres de configuration des interfaces DAPI (URLs des services PortaWs, PortaWebUi, etc.)</li>
+</ul>
+<p>En cas de changement d'adresse IP ou de port d'un service, cette table doit être mise à jour <strong>avant</strong> le déploiement pour éviter des erreurs de connexion.</p>
+
+<h3>Portail PortaWs</h3>
+<p>Le portail <strong>PortaWs</strong> (<code>http://172.24.119.72:8080/PortaWs/</code>) est une interface web permettant de consulter en temps réel les portages en cours dans PortaDB. Il est utilisé quotidiennement par l'équipe PNM pour :</p>
+<ul>
+    <li>Visualiser les portages au statut <strong>"En cours"</strong> et leur progression</li>
+    <li>Vérifier les acquittements AR reçus</li>
+    <li>Identifier les dossiers nécessitant une intervention manuelle</li>
+</ul>
+
 <h3>Maintenance</h3>
 <p>La maintenance de PortaDB inclut des <strong>sauvegardes quotidiennes</strong>, une purge périodique des dossiers anciens (archivage après 12 mois), et un monitoring des performances (temps de requête, espace disque). Les accès sont restreints aux équipes Applications et BSS via des comptes nominatifs.</p>
