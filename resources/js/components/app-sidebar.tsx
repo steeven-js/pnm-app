@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { BarChart3, BookOpenText, LayoutGrid } from 'lucide-react';
-import { NavFooter } from '@/components/nav-footer';
 import { NavKnowledge } from '@/components/nav-knowledge';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
