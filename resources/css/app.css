@@ -215,3 +215,18 @@
     height: auto;
     display: inline-block;
 }
+
+/* Mermaid diagrams in gallery (outside .prose) */
+pre.mermaid {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+pre.mermaid svg {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}

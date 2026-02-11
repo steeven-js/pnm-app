@@ -68,6 +68,14 @@ export type ProgressStats = {
     level: string;
 };
 
+export type Diagram = {
+    id: number;
+    title: string;
+    mermaid_source: string;
+    article: Pick<Article, 'id' | 'title' | 'slug'>;
+    domain: Pick<KnowledgeDomain, 'id' | 'name' | 'slug' | 'color'>;
+};
+
 export type SearchResults = {
     articles: (Pick<Article, 'id' | 'title' | 'slug' | 'excerpt' | 'level'> & {
         domain: Pick<KnowledgeDomain, 'id' | 'slug' | 'name' | 'color'>;

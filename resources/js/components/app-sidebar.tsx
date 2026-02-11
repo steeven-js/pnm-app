@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BarChart3, BookOpenText, LayoutGrid } from 'lucide-react';
+import { BarChart3, BookOpenText, LayoutGrid, Workflow } from 'lucide-react';
 import { NavKnowledge } from '@/components/nav-knowledge';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -31,6 +31,11 @@ const mainNavItems: NavItem[] = [
         title: 'Glossaire',
         href: '/glossary',
         icon: BookOpenText,
+    },
+    {
+        title: 'Diagrammes',
+        href: '/diagrams',
+        icon: Workflow,
     },
 ];
 

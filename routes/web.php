@@ -38,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Progress
     Route::get('progress', ProgressController::class)->name('progress');
+
+    // Diagrams
+    Route::get('diagrams', \App\Http\Controllers\DiagramController::class)->name('diagrams');
 });
 
 require __DIR__.'/settings.php';
