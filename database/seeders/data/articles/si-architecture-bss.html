@@ -54,6 +54,19 @@
     <li>Suivi des demandes en cours (y compris portage)</li>
 </ul>
 
+<h3>Chaîne BSS</h3>
+<pre class="mermaid">
+graph LR
+    CRM[CRM<br/>Relation client] --> ACT[Activation<br/>Provisioning]
+    ACT --> DBS[DBS<br/>Base abonnés]
+    DBS --> BILL[Billing<br/>Facturation]
+    BILL --> SELF[Selfcare<br/>Espace client]
+
+    CRM -->|Portage entrant| PORTA[PortaDB<br/>Ticket 1110]
+    PORTA -->|Après acceptation 1210| ACT
+    ACT -->|Bascule JP| HLR[HLR/HSS]
+</pre>
+
 <h3>Flux de données dans un portage entrant</h3>
 <p>Quand un client porte son numéro chez Digicel, le flux BSS suit cette séquence :</p>
 <ul>

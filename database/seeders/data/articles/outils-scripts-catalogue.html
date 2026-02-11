@@ -110,5 +110,31 @@
     <li><strong>Log</strong> : <code>PnmAckManager.log</code> — liste les AR reçus et manquants</li>
 </ul>
 
+<h3>Flux d'exécution des scripts</h3>
+<pre class="mermaid">
+graph LR
+    subgraph MATIN["Matin — vmqproportasync01"]
+        EMA[EmaExtracter.php<br/>9h00] --> EMM[EmmExtracter.php<br/>9h01]
+        EMM --> PDM[PnmDataManager.php<br/>10h00]
+        PDM --> ACK[PnmSyncAckManager.php<br/>10h40]
+    end
+
+    subgraph BASCULE["V10 — vmqproportawebdb01"]
+        TB[TraitementBascule.sh<br/>10h00] --> BV[BasculeVerification.sh<br/>10h30]
+    end
+
+    subgraph RESTITUTION["Quotidien — vmqproportawebdb01"]
+        RP[RestitutionProcess.sh<br/>8h00]
+    end
+
+    subgraph DIMANCHE["Dimanche — vmqproportasync01"]
+        GEN[pnmsync-generate.sh<br/>7h00] --> CMP[pnmsync-compare.sh<br/>14h00]
+    end
+
+    subgraph EXPORT_CSV["À la demande"]
+        CSV[PortaDB-export-csv.sh]
+    end
+</pre>
+
 <h3>Bonnes pratiques</h3>
 <p>Tous les scripts sont ordonnancés via <strong>crontab</strong> et produisent des logs dans <code>/var/log/</code> (scripts shell) ou <code>/home/porta_pnmv3/PortaSync/log</code> (scripts PHP) sur leur serveur respectif. En cas de modification d'un script, il est impératif de tester en environnement de pré-production et de notifier l'équipe via le canal PNM avant mise en production.</p>

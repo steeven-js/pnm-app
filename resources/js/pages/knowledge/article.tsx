@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { ArticleContent } from '@/components/article-content';
 import { GlossaryTooltip } from '@/components/glossary-tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -59,10 +60,7 @@ export default function ArticleShow({ domain, article, isRead, prevArticle, next
                         )}
                     </div>
 
-                    <div
-                        className="prose dark:prose-invert max-w-none"
-                        dangerouslySetInnerHTML={{ __html: article.content || '' }}
-                    />
+                    <ArticleContent content={article.content || ''} />
 
                     <div className="mt-6 flex items-center justify-between border-t pt-4">
                         <div>

@@ -52,5 +52,35 @@
     <li><code>NUM_DOSSIER</code> : référence du dernier dossier de portage</li>
 </ul>
 
+<h3>Processus de synchronisation du dimanche</h3>
+<pre class="mermaid">
+sequenceDiagram
+    participant DIG as Digicel<br/>PortaSync
+    participant SFTP as sFTP
+    participant ORA as Orange
+    participant SFR as SFR/Only
+
+    Note over DIG,SFR: Dimanche matin — Extraction
+    DIG->>DIG: Extraction PNMSYNC<br/>Liste complète MSISDN portés
+    ORA->>ORA: Extraction PNMSYNC
+    SFR->>SFR: Extraction PNMSYNC
+
+    Note over DIG,SFR: Dimanche matin — Échange
+    DIG->>SFTP: PNMSYNC_02_[DATE].dat
+    ORA->>SFTP: PNMSYNC_20_[DATE].dat
+    SFR->>SFTP: PNMSYNC_15_[DATE].dat
+    SFTP->>DIG: Fichiers Orange + SFR
+    SFTP->>ORA: Fichiers Digicel + SFR
+    SFTP->>SFR: Fichiers Digicel + Orange
+
+    Note over DIG,SFR: Dimanche après-midi — Comparaison
+    DIG->>DIG: Comparaison bases<br/>Détection divergences
+    alt Divergences mineures
+        DIG->>DIG: Correction automatique PortaDB
+    else Divergences majeures
+        DIG->>ORA: Escalade comité GPMAG
+    end
+</pre>
+
 <h3>Importance opérationnelle</h3>
 <p>Un taux de divergence supérieur à <strong>0.1%</strong> est considéré comme anormal et déclenche une investigation. Les divergences non résolues peuvent entraîner des <strong>appels mal routés</strong> (l'appelant entend un message d'erreur ou est dirigé vers le mauvais opérateur), d'où l'importance critique de ce processus hebdomadaire.</p>

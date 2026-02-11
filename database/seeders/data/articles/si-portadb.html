@@ -22,6 +22,58 @@
     <li><code>historique_sync</code> — Journal des synchronisations PNMSYNC (date, résultat, écarts détectés)</li>
 </ul>
 
+<h3>Modèle de données PortaDB</h3>
+<pre class="mermaid">
+erDiagram
+    portages {
+        int id PK
+        string msisdn
+        string code_opr
+        string code_opd
+        string code_opa
+        string statut
+        date date_demande_jd
+        date date_portage_jp
+    }
+    tickets {
+        int id PK
+        int portage_id FK
+        string type_ticket
+        datetime horodatage
+        string contenu
+        string statut_traitement
+    }
+    numeros_portes {
+        string msisdn PK
+        string operateur_hebergeant
+        string operateur_attributaire
+        date date_dernier_portage
+    }
+    operateurs {
+        string code PK
+        string nom
+        string sftp_host
+        string sftp_user
+    }
+    motifs_refus {
+        string code PK
+        string libelle
+    }
+    historique_sync {
+        int id PK
+        date date_sync
+        string resultat
+        int nb_divergences
+    }
+
+    portages ||--o{ tickets : contient
+    portages }o--|| operateurs : opr
+    portages }o--|| operateurs : opd
+    portages }o--|| operateurs : opa
+    tickets }o--o| motifs_refus : motif
+    numeros_portes }o--|| operateurs : hebergeant
+</pre>
+
 <h3>Hébergement</h3>
 <p>PortaDB est hébergée sur le serveur <strong>vmqproportawebdb01</strong>, une machine virtuelle dédiée dans l'infrastructure Digicel. Ce serveur héberge également l'interface web d'administration permettant aux équipes de consulter et gérer les dossiers de portage.</p>
 

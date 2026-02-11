@@ -26,6 +26,27 @@
     <li>Des <strong>numéros au format spécifique</strong> : préfixes 0590, 0690 (Guadeloupe), 0596, 0696 (Martinique), 0594, 0694 (Guyane)</li>
 </ul>
 
+<h3>Vue d'ensemble de l'écosystème PNM</h3>
+<pre class="mermaid">
+graph TD
+    CLIENT[Client mobile] -->|Demande portage + RIO| OPR[OPR — Opérateur Receveur]
+    OPR -->|Ticket 1110 via PNMDATA| SFTP[sFTP GPMAG]
+    SFTP -->|Fichier PNMDATA| OPD[OPD — Opérateur Donneur]
+    OPD -->|Ticket 1210 Accept/Refus| SFTP
+    SFTP -->|Réponse| OPR
+    OPR -->|Bascule JP| MOBI[MOBI — Tables routage]
+    MOBI -->|EMA/EMM| HLR[HLR / HSS]
+    OPR -->|Ticket 1430| OPD
+
+    subgraph GPMAG[Zone Antilles-Guyane — GPMAG]
+        OPR
+        OPD
+        SFTP
+    end
+
+    ARCEP[ARCEP] -.->|Régulation & Supervision| GPMAG
+</pre>
+
 <h3>Le GPMAG</h3>
 <p>Le <strong>GPMAG</strong> (Groupement de Portabilité des Numéros Mobiles Antilles-Guyane) est l'instance de gouvernance regroupant les trois opérateurs de la zone. Le GPMAG définit les <strong>règles de fonctionnement communes</strong>, valide les évolutions du protocole PNM V3, et arbitre les litiges entre opérateurs.</p>
 

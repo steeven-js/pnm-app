@@ -33,6 +33,20 @@
     <li>Intervient dans les procédures de <strong>restitution</strong> (tickets 3xxx) lorsqu'un numéro revient à son réseau d'origine</li>
 </ul>
 
+<h3>Relations entre acteurs</h3>
+<pre class="mermaid">
+graph LR
+    OPR[OPR<br/>Opérateur Receveur] -->|Ticket 1110<br/>Demande portage| OPD[OPD<br/>Opérateur Donneur]
+    OPD -->|Ticket 1210<br/>Accept / Refus| OPR
+    OPR -->|Ticket 1310<br/>Avis portage| OPA[OPA<br/>Opérateur Attributaire]
+    OPR -->|Ticket 1410<br/>Bascule notifiée| OPD
+    OPR -->|Ticket 1430<br/>Portage effectif| OPD
+
+    CLIENT[Client] -->|RIO + Demande| OPR
+    OPA -.->|Tables de routage<br/>Plan numérotation| OPR
+    OPA -.->|Tables de routage<br/>Plan numérotation| OPD
+</pre>
+
 <h3>Interactions entre acteurs</h3>
 <p>Les échanges entre OPR, OPD et OPA suivent un <strong>protocole strict</strong> via des fichiers PNMDATA échangés par sFTP selon le calendrier des vacations. Chaque ticket est identifié par un numéro unique et fait l'objet d'un accusé de réception (ACR) ou d'un signalement d'erreur (ERR) par le destinataire.</p>
 

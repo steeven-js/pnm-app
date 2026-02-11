@@ -143,3 +143,75 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* SVG diagrams in prose articles */
+.prose svg {
+    max-width: 100%;
+    height: auto;
+    margin: 1.5em auto;
+    display: block;
+    border-radius: 0.5rem;
+    overflow: visible;
+}
+
+.prose svg text {
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark .prose svg .svg-bg {
+    fill: #1e293b;
+}
+
+.dark .prose svg .svg-box {
+    fill-opacity: 0.15;
+}
+
+.dark .prose svg .svg-text-primary {
+    fill: #f1f5f9;
+}
+
+.dark .prose svg .svg-text-secondary {
+    fill: #94a3b8;
+}
+
+.dark .prose svg .svg-line {
+    stroke-opacity: 0.6;
+}
+
+/* SVG diagrams inside prose articles */
+.prose svg {
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    display: block;
+    border-radius: 0.5rem;
+    overflow: visible;
+}
+
+.prose svg text {
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark .prose svg .svg-bg {
+    opacity: 0.12;
+}
+
+.prose svg .svg-bg {
+    opacity: 0.08;
+}
+
+/* Mermaid diagrams in prose articles */
+.prose pre.mermaid {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 1.5rem auto;
+    text-align: center;
+    box-shadow: none;
+}
+
+.prose pre.mermaid svg {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}

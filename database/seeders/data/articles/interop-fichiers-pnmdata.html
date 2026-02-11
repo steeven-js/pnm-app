@@ -59,6 +59,29 @@
 </ul>
 <p>Chaque opérateur dépose ses fichiers PNMDATA sur le serveur sFTP du destinataire <strong>avant l'heure de vacation</strong>. Le destinataire collecte et traite les fichiers à l'heure de vacation.</p>
 
+<h3>Convention de nommage PNMDATA</h3>
+<pre class="mermaid">
+graph LR
+    NOM["PNMDATA_02_20_20250115_V10_001.dat"] --> P1["PNMDATA<br/>Préfixe fixe"]
+    NOM --> P2["02<br/>Émetteur<br/>(Digicel)"]
+    NOM --> P3["20<br/>Récepteur<br/>(Orange)"]
+    NOM --> P4["20250115<br/>Date<br/>YYYYMMDD"]
+    NOM --> P5["V10<br/>Vacation"]
+    NOM --> P6["001<br/>Séquence"]
+</pre>
+
+<h3>Structure d'un fichier PNMDATA</h3>
+<pre class="mermaid">
+graph TD
+    FILE[Fichier PNMDATA] --> HEADER[En-tête<br/>Type, Version, Émetteur,<br/>Destinataire, Date, Vacation, Nb tickets]
+    FILE --> BODY[Corps — Tickets]
+    FILE --> FOOTER[Pied de page<br/>Checksum + Fin fichier]
+
+    BODY --> T1[Ticket 1<br/>NUM_DOSSIER, TYPE, MSISDN,<br/>RIO, OPR, OPD, OPA, JP]
+    BODY --> T2[Ticket 2<br/>...]
+    BODY --> TN[Ticket N<br/>...]
+</pre>
+
 <h3>Validation à réception</h3>
 <p>À réception d'un fichier PNMDATA, l'opérateur destinataire effectue des contrôles :</p>
 <ul>

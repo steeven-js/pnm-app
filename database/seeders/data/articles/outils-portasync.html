@@ -38,5 +38,40 @@
     <li><code>portasync-sunday.sh</code> : script spécifique pour la synchronisation PNMSYNC du dimanche</li>
 </ul>
 
+<h3>Architecture PortaSync</h3>
+<pre class="mermaid">
+graph TD
+    subgraph INTERNE[Systèmes internes Digicel]
+        PORTADB[(PortaDB<br/>vmqproportawebdb01)]
+        ESB[ESB DataPower]
+    end
+
+    subgraph PORTASYNC[vmqproportasync01 — PortaSync]
+        EXPORT[portasync-export.sh<br/>Extraction tickets]
+        PUSH[portasync-push.sh<br/>Dépôt sFTP]
+        PULL[portasync-pull.sh<br/>Collecte sFTP]
+        IMPORT[portasync-import.sh<br/>Injection tickets]
+        ACR_GEN[portasync-acr.sh<br/>Génération ACR]
+        SUNDAY[portasync-sunday.sh<br/>PNMSYNC dimanche]
+    end
+
+    subgraph EXTERNE[Opérateurs partenaires]
+        ORA[sFTP Orange]
+        SFR_[sFTP SFR/Only]
+        BTCTF[BTCTF]
+    end
+
+    PORTADB -->|Tickets à envoyer| EXPORT
+    EXPORT --> PUSH
+    PUSH --> ORA
+    PUSH --> SFR_
+    ORA --> PULL
+    SFR_ --> PULL
+    PULL --> IMPORT
+    IMPORT -->|Tickets reçus| PORTADB
+    IMPORT --> ACR_GEN
+    PORTASYNC <-->|Synchro nationale| BTCTF
+</pre>
+
 <h3>Logs et diagnostic</h3>
 <p>PortaSync produit des <strong>logs détaillés</strong> pour chaque opération, stockés dans <code>/var/log/portasync/</code>. Ces logs incluent : les fichiers envoyés/reçus, le nombre de tickets traités, les erreurs rencontrées, et les temps de traitement. Ils constituent la première source d'information en cas d'incident sur les échanges inter-opérateurs.</p>

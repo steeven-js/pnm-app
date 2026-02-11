@@ -30,6 +30,36 @@
 <p>Les informations du ticket 1110 présentent des <strong>incohérences</strong> : le code opérateur du RIO ne correspond pas à l'OPD ciblé, le format du MSISDN est incorrect, ou des champs obligatoires sont manquants.</p>
 <p><strong>Action corrective :</strong> vérifier la cohérence entre le RIO (code opérateur), le MSISDN et l'OPD destinataire. Corriger les données et resoumettre.</p>
 
+<h3>Arbre de diagnostic des refus</h3>
+<pre class="mermaid">
+flowchart TD
+    START[Refus reçu<br/>Ticket 1210] --> CODE{Code motif ?}
+
+    CODE -->|01| M01[RIO invalide]
+    CODE -->|02| M02[Numéro inactif]
+    CODE -->|03| M03[Portage en cours]
+    CODE -->|04| M04[Numéro non attribué]
+    CODE -->|05| M05[Opposition judiciaire]
+    CODE -->|06| M06[Date JP invalide]
+    CODE -->|07| M07[Données incohérentes]
+
+    M01 --> A01[Client rappelle 3179<br/>Nouveau RIO]
+    M02 --> A02[Vérifier statut ligne<br/>avec le client]
+    M03 --> A03[Attendre clôture<br/>portage en cours]
+    M04 --> A04[Vérifier format MSISDN<br/>10 chiffres 06xx]
+    M05 --> A05[Résolution juridique<br/>nécessaire]
+    M06 --> A06[Recalculer JP<br/>JD+2 ouvrés]
+    M07 --> A07[Vérifier cohérence<br/>RIO / MSISDN / OPD]
+
+    A01 --> RESUB[Resoumettre demande]
+    A02 --> RESUB
+    A03 --> RESUB
+    A04 --> RESUB
+    A06 --> RESUB
+    A07 --> RESUB
+    A05 --> STOP[Portage impossible]
+</pre>
+
 <h3>Bonnes pratiques</h3>
 <p>Pour <strong>minimiser les refus</strong>, il est recommandé de :</p>
 <ul>

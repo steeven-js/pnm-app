@@ -50,5 +50,19 @@
 </ul>
 <p><strong>Impact si down :</strong> aucun appel voix ni SMS possible sur la zone couverte par ce MSC. Les abonnés conservent leur accès data si le réseau 4G est disponible. Impact direct sur la facturation (pas de CDR générés).</p>
 
+<h3>Interactions entre composants réseau</h3>
+<pre class="mermaid">
+graph LR
+    MSC[MSC<br/>Commutateur voix] <-->|Localisation| HLR[HLR<br/>Base abonnés 2G/3G]
+    HLR <-->|Profils unifiés| HSS[HSS<br/>Base abonnés 4G]
+    HSS <-->|Authentification| EPC[EPC<br/>Coeur 4G]
+    EPC <-->|VoLTE| IMS[IMS<br/>Services IP]
+    MSC -->|CDR| BILL[Billing]
+
+    HLR -->|Consultation PNM| MOBI[Tables MOBI<br/>Routage portés]
+    MOBI -.->|Commandes EMA/EMM| ESB[ESB DataPower]
+    ESB -.->|Ordres bascule| PORTADB[PortaDB]
+</pre>
+
 <h3>Interdépendances avec la PNM</h3>
 <p>La portabilité dépend directement du bon fonctionnement du <strong>HLR/HSS</strong> (pour les bascules) et du <strong>MSC</strong> (pour le routage des appels vers les numéros portés). Toute intervention de maintenance sur ces équipements doit être coordonnée avec le planning des vacations PNM pour éviter les conflits.</p>

@@ -2,6 +2,34 @@
 
 <p>Le protocole PNM V3 utilise un système de <strong>tickets numérotés</strong> pour formaliser chaque étape du processus de portabilité. Les tickets sont regroupés en familles selon leur nature : standard (1xxx), inverse (2xxx), restitution (3xxx) et annulation (15xx).</p>
 
+<pre class="mermaid">
+graph TD
+    ROOT[Tickets PNM V3] --> STD[Standard<br/>1xxx]
+    ROOT --> INV[Inverse<br/>2xxx]
+    ROOT --> REST[Restitution<br/>3xxx]
+    ROOT --> ANN[Annulation<br/>15xx]
+
+    STD --> T1110[1110<br/>Demande portage]
+    STD --> T1120[1120<br/>Portage groupé]
+    STD --> T1210[1210<br/>Réponse OPD]
+    STD --> T1310[1310<br/>Avis OPA]
+    STD --> T1410[1410<br/>Notification bascule]
+    STD --> T1430[1430<br/>Confirmation]
+
+    INV --> T2110[2110<br/>Demande inverse]
+    INV --> T2210[2210<br/>Réponse inverse]
+    INV --> T2410[2410<br/>Bascule inverse]
+    INV --> T2430[2430<br/>Confirmation inverse]
+
+    REST --> T3110[3110<br/>Demande restitution]
+    REST --> T3210[3210<br/>Réponse restitution]
+    REST --> T3410[3410<br/>Restitution effective]
+
+    ANN --> T1510[1510<br/>Annulation OPR]
+    ANN --> T1520[1520<br/>Annulation OPD]
+    ANN --> T1530[1530<br/>Confirmation annul.]
+</pre>
+
 <h3>Tickets Standard (1xxx) — Portage classique</h3>
 <p>Les tickets de la série 1000 couvrent le <strong>cycle de vie normal</strong> d'un portage initié par le client.</p>
 <ul>

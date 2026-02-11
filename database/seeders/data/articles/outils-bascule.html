@@ -2,6 +2,90 @@
 
 <p>La <strong>bascule</strong> est l'étape technique critique du portage : c'est le moment où le numéro du client bascule effectivement d'un réseau à l'autre. Ce processus est piloté par le script <code>TraitementBascule.sh</code> et implique une séquence précise d'opérations sur le réseau et les systèmes d'information.</p>
 
+<svg viewBox="0 0 800 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagramme de séquence du processus de bascule">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#334155" />
+    </marker>
+    <marker id="arrowhead-self" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect class="svg-bg" width="800" height="520" rx="8" fill="#f8fafc" />
+
+  <!-- Participant boxes -->
+  <!-- 1. TraitementBascule.sh (#ef4444) -->
+  <rect class="svg-box" x="30" y="20" width="130" height="40" rx="6" fill="#ef4444" fill-opacity="0.15" stroke="#ef4444" stroke-width="1.5" />
+  <text x="95" y="35" text-anchor="middle" font-size="12" font-weight="bold" fill="#ef4444" font-family="system-ui, sans-serif">Traitement</text>
+  <text x="95" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#ef4444" font-family="system-ui, sans-serif">Bascule.sh</text>
+
+  <!-- 2. PortaDB (#3b82f6) -->
+  <rect class="svg-box" x="220" y="20" width="110" height="40" rx="6" fill="#3b82f6" fill-opacity="0.15" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="275" y="45" text-anchor="middle" font-size="12" font-weight="bold" fill="#3b82f6" font-family="system-ui, sans-serif">PortaDB</text>
+
+  <!-- 3. ESB DataPower (#8b5cf6) -->
+  <rect class="svg-box" x="390" y="20" width="120" height="40" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1.5" />
+  <text x="450" y="35" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b5cf6" font-family="system-ui, sans-serif">ESB</text>
+  <text x="450" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#8b5cf6" font-family="system-ui, sans-serif">DataPower</text>
+
+  <!-- 4. MOBI (#f59e0b) -->
+  <rect class="svg-box" x="570" y="20" width="80" height="40" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="610" y="45" text-anchor="middle" font-size="12" font-weight="bold" fill="#f59e0b" font-family="system-ui, sans-serif">MOBI</text>
+
+  <!-- 5. HLR/HSS (#10b981) -->
+  <rect class="svg-box" x="700" y="20" width="80" height="40" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.5" />
+  <text x="740" y="45" text-anchor="middle" font-size="12" font-weight="bold" fill="#10b981" font-family="system-ui, sans-serif">HLR/HSS</text>
+
+  <!-- Lifelines (dashed vertical lines) -->
+  <line x1="95" y1="60" x2="95" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,4" />
+  <line x1="275" y1="60" x2="275" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,4" />
+  <line x1="450" y1="60" x2="450" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,4" />
+  <line x1="610" y1="60" x2="610" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,4" />
+  <line x1="740" y1="60" x2="740" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="6,4" />
+
+  <!-- Message 1: TraitementBascule.sh -> PortaDB: "Liste MSISDN JP=aujourd'hui" -->
+  <line x1="95" y1="95" x2="267" y2="95" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="185" y="88" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Liste MSISDN JP=aujourd'hui</text>
+
+  <!-- Message 2: PortaDB -> TraitementBascule.sh: "Dossiers acceptés" (return) -->
+  <line x1="275" y1="135" x2="103" y2="135" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="185" y="128" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Dossiers acceptés</text>
+
+  <!-- Message 3: TraitementBascule.sh -> PortaDB: "Ordre de bascule" -->
+  <line x1="95" y1="175" x2="267" y2="175" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="185" y="168" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Ordre de bascule</text>
+
+  <!-- Message 4: PortaDB -> ESB: "EMA/EMM request" -->
+  <line x1="275" y1="215" x2="442" y2="215" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="362" y="208" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">EMA/EMM request</text>
+
+  <!-- Message 5: ESB -> MOBI: "Commande EMA/EMM" -->
+  <line x1="450" y1="255" x2="602" y2="255" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="530" y="248" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Commande EMA/EMM</text>
+
+  <!-- Message 6: MOBI -> HLR/HSS: "Mise à jour routage" -->
+  <line x1="610" y1="295" x2="732" y2="295" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="675" y="288" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Mise à jour routage</text>
+
+  <!-- Message 7: HLR/HSS -> MOBI: "ACK" (return) -->
+  <line x1="740" y1="335" x2="618" y2="335" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="675" y="328" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">ACK</text>
+
+  <!-- Message 8: MOBI -> ESB: "Acquittement" (return) -->
+  <line x1="610" y1="375" x2="458" y2="375" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="530" y="368" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Acquittement</text>
+
+  <!-- Message 9: ESB -> PortaDB: "Résultat bascule" (return) -->
+  <line x1="450" y1="415" x2="283" y2="415" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowhead)" />
+  <text class="svg-text-primary" x="362" y="408" text-anchor="middle" font-size="11" fill="#334155" font-family="system-ui, sans-serif">Résultat bascule</text>
+
+  <!-- Message 10: PortaDB -> PortaDB (self): "Ticket 1410 + 1430" -->
+  <path d="M275,455 L325,455 L325,480 L283,480" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowhead-self)" />
+  <text class="svg-text-primary" x="335" y="471" text-anchor="start" font-size="11" fill="#3b82f6" font-family="system-ui, sans-serif">Ticket 1410 + 1430</text>
+</svg>
+
 <h3>Déclenchement</h3>
 <p>Le script <code>TraitementBascule.sh</code> est exécuté <strong>quotidiennement à 10h00</strong> (vacation V10) sur le serveur <code>vmqproportawebdb01</code>. Il identifie dans PortaDB tous les dossiers de portage dont :</p>
 <ul>
@@ -47,6 +131,27 @@
     <li><strong>Test HLR</strong> : interrogation du HLR pour confirmer que le profil abonné est bien présent et actif</li>
     <li><strong>Test d'appel</strong> : dans certains cas, un appel test automatisé vérifie l'acheminement correct vers le numéro porté</li>
 </ul>
+
+<h3>Processus de bascule — Flowchart</h3>
+<pre class="mermaid">
+flowchart TD
+    START[TraitementBascule.sh<br/>Déclenchement V10 — 10h00] --> QUERY[Extraction dossiers<br/>JP = aujourd'hui<br/>Statut = accepté]
+    QUERY --> CHECK{Dossiers à basculer ?}
+    CHECK -->|Non| END_OK[Aucune bascule — Fin]
+    CHECK -->|Oui| PREP[Préparation commandes<br/>EMA / EMM]
+    PREP --> ESB[Envoi via ESB DataPower]
+    ESB --> MOBI[MOBI exécute<br/>commandes routage]
+    MOBI --> HLR[Mise à jour HLR/HSS]
+    HLR --> RESULT{Acquittement OK ?}
+
+    RESULT -->|Oui| T1410[Génération Ticket 1410 + 1430]
+    T1410 --> VERIF[BasculeVerification.sh<br/>+30 min]
+    VERIF --> END_OK2[Bascule réussie]
+
+    RESULT -->|Non| RETRY{Retry < 3 ?}
+    RETRY -->|Oui| ESB
+    RETRY -->|Non| ERREUR[Dossier marqué en erreur<br/>Alerte équipe PNM]
+</pre>
 
 <h3>Gestion des erreurs</h3>
 <p>En cas d'échec d'une bascule, plusieurs scénarios sont prévus :</p>

@@ -36,5 +36,26 @@
     <li><strong>EMS</strong> (Enregistrement MSISDN Suppression) : retire un numéro des tables de portage (restitution à l'OPA)</li>
 </ul>
 
+<h3>Routage d'un appel vers un numéro porté</h3>
+<pre class="mermaid">
+sequenceDiagram
+    participant A as Appelant
+    participant MSC as MSC Appelant
+    participant HLR as HLR Appelant
+    participant MOBI as Tables MOBI
+    participant POI as Interconnexion POI
+    participant OPH as Opérateur Hébergeant
+    participant B as Appelé (porté)
+
+    A->>MSC: Appel vers 0690XXXXXX
+    MSC->>HLR: Qui héberge ce numéro ?
+    HLR->>MOBI: Consultation table routage PNM
+    MOBI-->>HLR: Opérateur hébergeant = OPH
+    HLR-->>MSC: Préfixe routage vers OPH
+    MSC->>POI: Redirection appel
+    POI->>OPH: Acheminement vers réseau OPH
+    OPH->>B: Appel aboutit
+</pre>
+
 <h3>Impacts sur la qualité de service</h3>
 <p>La portabilité peut engendrer un <strong>léger surcoût en temps de routage</strong> (quelques millisecondes pour la consultation HLR). En cas de désynchronisation des tables de routage entre opérateurs, un numéro porté peut temporairement être <strong>injoignable</strong>. C'est pourquoi la synchronisation hebdomadaire (PNMSYNC) est essentielle pour détecter et corriger ces divergences.</p>

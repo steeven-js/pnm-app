@@ -73,5 +73,26 @@
 
 <p>L'absence d'un email de vacation attendu, ou la réception d'un email <code>[INCIDENT]</code>, doit déclencher une investigation immédiate selon les procédures d'exploitation quotidienne.</p>
 
+<h3>Checks de monitoring quotidien</h3>
+<pre class="mermaid">
+graph TD
+    MATIN[Contrôles matinaux<br/>Avant V10] --> SRV[Statut serveurs<br/>vmqproportawebdb01<br/>vmqproportasync01]
+    MATIN --> SFTP_CHK[Connectivité sFTP<br/>Orange + SFR/Only]
+    MATIN --> FILES[Fichiers veille<br/>PNMDATA envoyés<br/>ACR reçus]
+    MATIN --> QUEUE[Files d'attente<br/>Tickets bloqués >24h]
+    MATIN --> LOGS[Logs d'erreur<br/>/var/log/portadb/<br/>/var/log/portasync/]
+    MATIN --> DISK[Espace disque<br/>Seuil 80%]
+
+    SRV --> OK{Tout OK ?}
+    SFTP_CHK --> OK
+    FILES --> OK
+    QUEUE --> OK
+    LOGS --> OK
+    DISK --> OK
+
+    OK -->|Oui| V10[Vacation V10 — Bascules]
+    OK -->|Non| ALERT[Alerte équipe PNM<br/>Investigation immédiate]
+</pre>
+
 <h3>Alerting</h3>
 <p>Des <strong>alertes automatiques</strong> sont configurées pour notifier l'équipe en cas d'anomalie : échec de bascule, absence d'ACR après 2 vacations, espace disque critique, ou service PortaSync arrêté. Ces alertes sont envoyées par email et par SMS aux astreintes PNM.</p>

@@ -12,6 +12,21 @@
 </ul>
 <p>Exemple : <code>02P123456ABC</code> — Digicel, client particulier, référence 123456, clé ABC.</p>
 
+<pre class="mermaid">
+graph LR
+    RIO["RIO : 02P123456ABC<br/>12 caractères"] --> OO["OO<br/><b>02</b><br/>Code opérateur"]
+    RIO --> Q["Q<br/><b>P</b><br/>Qualificateur"]
+    RIO --> REF["RRRRRR<br/><b>123456</b><br/>Référence ligne"]
+    RIO --> CLE["CCC<br/><b>ABC</b><br/>Clé contrôle"]
+
+    OO --> OP02["02 = Digicel"]
+    OO --> OP20["20 = Orange"]
+    OO --> OP15["15 = SFR/Only"]
+
+    Q --> QP["P = Particulier"]
+    Q --> QQ["Q = Professionnel"]
+</pre>
+
 <h3>Codes opérateurs Antilles-Guyane</h3>
 <p>Dans la zone GPMAG, les codes opérateurs sont :</p>
 <ul>

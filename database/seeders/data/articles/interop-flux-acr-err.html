@@ -42,6 +42,25 @@
     <li><strong>Escalade GPMAG</strong> : après 3 tentatives infructueuses, l'incident est escaladé au comité technique inter-opérateurs</li>
 </ul>
 
+<h3>Cycle de vie d'un échange PNMDATA</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Généré: PortaSync extrait tickets
+    Généré --> Envoyé: Dépôt sFTP (pnm-sftp-push.sh)
+    Envoyé --> Reçu: Collecte par destinataire
+    Reçu --> Validé: Contrôles intégrité OK
+    Reçu --> Erreur: Contrôles KO
+
+    Validé --> ACR_Émis: Génération ACR
+    ACR_Émis --> [*]: Cycle terminé
+
+    Erreur --> ERR_Émis: Génération ERR
+    ERR_Émis --> Retry_Auto: Renvoi automatique (2 vacations)
+    Retry_Auto --> Envoyé: Fichier régénéré
+    ERR_Émis --> Retry_Manuel: Après 3 échecs
+    Retry_Manuel --> Escalade_GPMAG: Investigation inter-opérateurs
+</pre>
+
 <h3>Monitoring des ACR/ERR</h3>
 <p>Le suivi des ACR/ERR fait partie des <strong>contrôles quotidiens</strong> de l'équipe PNM :</p>
 <ul>

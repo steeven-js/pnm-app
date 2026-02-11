@@ -49,5 +49,31 @@
     <li><strong>Dimanche 14h00</strong> : exécution de la comparaison et génération du rapport de divergences</li>
 </ul>
 
+<h3>Planning des vacations</h3>
+<pre class="mermaid">
+gantt
+    title Planning quotidien des vacations PNM
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section V10 — Principale
+    Dépôt fichiers PNMDATA        :v10dep, 09:00, 60min
+    Collecte + Import              :v10col, 10:00, 30min
+    Bascules TraitementBascule.sh  :crit, v10bas, 10:30, 30min
+    Génération ACR                 :v10acr, 11:00, 15min
+
+    section V14 — Intermédiaire
+    Dépôt fichiers PNMDATA        :v14dep, 13:00, 60min
+    Collecte + Import              :v14col, 14:00, 30min
+    Traitement réponses 1210       :v14rep, 14:30, 30min
+    Génération ACR                 :v14acr, 15:00, 15min
+
+    section V19 — Nouvelles demandes
+    Dépôt fichiers PNMDATA        :v19dep, 18:00, 60min
+    Collecte + Import              :v19col, 19:00, 30min
+    Traitement demandes 1110       :v19dem, 19:30, 30min
+    Génération ACR                 :v19acr, 20:00, 15min
+</pre>
+
 <h3>Gestion des jours fériés</h3>
 <p>Les jours fériés locaux (propres à chaque département : Guadeloupe, Martinique, Guyane) sont gérés via un <strong>calendrier partagé</strong> dans le GPMAG. Les vacations ne sont pas opérées les jours fériés, ce qui impacte le calcul des dates JP (jours ouvrés uniquement). Le calendrier est mis à jour chaque année en comité technique.</p>

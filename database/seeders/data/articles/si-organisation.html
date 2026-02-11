@@ -2,6 +2,163 @@
 
 <p>Le Système d'Information (SI) de Digicel Antilles-Guyane est structuré en <strong>six équipes</strong>, chacune responsable d'un périmètre fonctionnel et technique distinct. Cette organisation permet de couvrir l'ensemble de la chaîne, de l'abonnement client jusqu'à l'infrastructure réseau.</p>
 
+<div class="my-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="100%" role="img" aria-label="Diagramme de l'organisation SI Digicel">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="currentColor" opacity="0.4"/>
+    </marker>
+    <marker id="arr-r" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="currentColor" opacity="0.4"/>
+    </marker>
+  </defs>
+
+  <!-- ===== CONNECTION LINES (behind blocks) ===== -->
+
+  <!-- Central hub to all 6 teams -->
+  <line x1="450" y1="260" x2="155" y2="155" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+  <line x1="450" y1="260" x2="450" y2="155" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+  <line x1="450" y1="260" x2="745" y2="155" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+  <line x1="450" y1="340" x2="155" y2="445" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+  <line x1="450" y1="340" x2="450" y2="445" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+  <line x1="450" y1="340" x2="745" y2="445" stroke="currentColor" stroke-opacity="0.13" stroke-width="1.5"/>
+
+  <!-- Key inter-team connections (dashed, colored) -->
+  <!-- Applications <-> BSS -->
+  <path d="M 640 435 Q 400 370 260 185" fill="none" stroke="#ef4444" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arr)" marker-start="url(#arr-r)"/>
+  <!-- Applications <-> Infrastructure -->
+  <path d="M 745 420 Q 785 300 745 185" fill="none" stroke="#10b981" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arr)" marker-start="url(#arr-r)"/>
+  <!-- Applications <-> OSS -->
+  <path d="M 660 425 Q 550 340 475 185" fill="none" stroke="#8b5cf6" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arr)" marker-start="url(#arr-r)"/>
+
+  <!-- ===== CENTRAL BLOCK: SI Digicel ===== -->
+  <rect x="350" y="255" width="200" height="90" rx="12" fill="currentColor" fill-opacity="0.07" stroke="currentColor" stroke-opacity="0.22" stroke-width="2"/>
+  <text x="450" y="290" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold" font-family="system-ui, sans-serif">SI Digicel</text>
+  <text x="450" y="312" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.55" font-family="system-ui, sans-serif">Antilles-Guyane</text>
+  <text x="450" y="332" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.45" font-family="system-ui, sans-serif">6 equipes</text>
+
+  <!-- ===== TOP ROW ===== -->
+
+  <!-- BSS (bleu #3b82f6) -->
+  <rect x="30" y="50" width="250" height="135" rx="8" fill="#3b82f6" fill-opacity="0.1" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="30" y="50" width="250" height="30" rx="8" fill="#3b82f6" fill-opacity="0.22"/>
+  <rect x="30" y="68" width="250" height="12" fill="#3b82f6" fill-opacity="0.22"/>
+  <text x="155" y="71" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">BSS</text>
+  <circle cx="40" cy="99" r="2.5" fill="#3b82f6" opacity="0.7"/>
+  <text x="48" y="103" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">CRM</text>
+  <circle cx="40" cy="117" r="2.5" fill="#3b82f6" opacity="0.7"/>
+  <text x="48" y="121" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Billing &amp; Activation</text>
+  <circle cx="40" cy="135" r="2.5" fill="#3b82f6" opacity="0.7"/>
+  <text x="48" y="139" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Selfcare</text>
+  <circle cx="40" cy="153" r="2.5" fill="#3b82f6" opacity="0.7"/>
+  <text x="48" y="157" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">DBS (Base abonnes)</text>
+
+  <!-- OSS (violet #8b5cf6) -->
+  <rect x="325" y="50" width="250" height="135" rx="8" fill="#8b5cf6" fill-opacity="0.1" stroke="#8b5cf6" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="325" y="50" width="250" height="30" rx="8" fill="#8b5cf6" fill-opacity="0.22"/>
+  <rect x="325" y="68" width="250" height="12" fill="#8b5cf6" fill-opacity="0.22"/>
+  <text x="450" y="71" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">OSS</text>
+  <circle cx="335" cy="99" r="2.5" fill="#8b5cf6" opacity="0.7"/>
+  <text x="343" y="103" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Supervision reseau</text>
+  <circle cx="335" cy="117" r="2.5" fill="#8b5cf6" opacity="0.7"/>
+  <text x="343" y="121" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Gestion des alarmes</text>
+  <circle cx="335" cy="135" r="2.5" fill="#8b5cf6" opacity="0.7"/>
+  <text x="343" y="139" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">KPIs &amp; Statistiques</text>
+  <circle cx="335" cy="153" r="2.5" fill="#8b5cf6" opacity="0.7"/>
+  <text x="343" y="157" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Maintenance reseau</text>
+
+  <!-- Infrastructure (vert #10b981) -->
+  <rect x="620" y="50" width="250" height="135" rx="8" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="620" y="50" width="250" height="30" rx="8" fill="#10b981" fill-opacity="0.22"/>
+  <rect x="620" y="68" width="250" height="12" fill="#10b981" fill-opacity="0.22"/>
+  <text x="745" y="71" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">Infrastructure</text>
+  <circle cx="630" cy="99" r="2.5" fill="#10b981" opacity="0.7"/>
+  <text x="638" y="103" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Serveurs (physiques/VM)</text>
+  <circle cx="630" cy="117" r="2.5" fill="#10b981" opacity="0.7"/>
+  <text x="638" y="121" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">VMware &amp; Stockage</text>
+  <circle cx="630" cy="135" r="2.5" fill="#10b981" opacity="0.7"/>
+  <text x="638" y="139" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Reseau LAN/WAN</text>
+  <circle cx="630" cy="153" r="2.5" fill="#10b981" opacity="0.7"/>
+  <text x="638" y="157" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Firewalls &amp; Load Balancers</text>
+
+  <!-- ===== BOTTOM ROW ===== -->
+
+  <!-- MIS/DW (orange #f59e0b) -->
+  <rect x="30" y="415" width="250" height="135" rx="8" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="30" y="415" width="250" height="30" rx="8" fill="#f59e0b" fill-opacity="0.22"/>
+  <rect x="30" y="433" width="250" height="12" fill="#f59e0b" fill-opacity="0.22"/>
+  <text x="155" y="436" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">MIS / Data Warehouse</text>
+  <circle cx="40" cy="464" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <text x="48" y="468" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Data Warehouse</text>
+  <circle cx="40" cy="482" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <text x="48" y="486" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Rapports &amp; Tableaux de bord</text>
+  <circle cx="40" cy="500" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <text x="48" y="504" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Analyses trafic &amp; revenus</text>
+  <circle cx="40" cy="518" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <text x="48" y="522" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Rapports ARCEP</text>
+
+  <!-- Digital (cyan #06b6d4) -->
+  <rect x="325" y="415" width="250" height="135" rx="8" fill="#06b6d4" fill-opacity="0.1" stroke="#06b6d4" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="325" y="415" width="250" height="30" rx="8" fill="#06b6d4" fill-opacity="0.22"/>
+  <rect x="325" y="433" width="250" height="12" fill="#06b6d4" fill-opacity="0.22"/>
+  <text x="450" y="436" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">Digital</text>
+  <circle cx="335" cy="464" r="2.5" fill="#06b6d4" opacity="0.7"/>
+  <text x="343" y="468" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Site web &amp; e-commerce</text>
+  <circle cx="335" cy="482" r="2.5" fill="#06b6d4" opacity="0.7"/>
+  <text x="343" y="486" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Apps mobiles (Android/iOS)</text>
+  <circle cx="335" cy="500" r="2.5" fill="#06b6d4" opacity="0.7"/>
+  <text x="343" y="504" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">APIs &amp; Integrations</text>
+  <circle cx="335" cy="518" r="2.5" fill="#06b6d4" opacity="0.7"/>
+  <text x="343" y="522" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Parcours digitaux</text>
+
+  <!-- Applications (rouge #ef4444) -->
+  <rect x="620" y="415" width="250" height="135" rx="8" fill="#ef4444" fill-opacity="0.1" stroke="#ef4444" stroke-opacity="0.4" stroke-width="1.5"/>
+  <rect x="620" y="415" width="250" height="30" rx="8" fill="#ef4444" fill-opacity="0.22"/>
+  <rect x="620" y="433" width="250" height="12" fill="#ef4444" fill-opacity="0.22"/>
+  <text x="745" y="436" text-anchor="middle" fill="currentColor" font-size="14" font-weight="bold" font-family="system-ui, sans-serif">Applications</text>
+  <circle cx="630" cy="464" r="2.5" fill="#ef4444" opacity="0.7"/>
+  <text x="638" y="468" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">PortaDB</text>
+  <circle cx="630" cy="482" r="2.5" fill="#ef4444" opacity="0.7"/>
+  <text x="638" y="486" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">PortaSync</text>
+  <circle cx="630" cy="500" r="2.5" fill="#ef4444" opacity="0.7"/>
+  <text x="638" y="504" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">ESB DataPower</text>
+  <circle cx="630" cy="518" r="2.5" fill="#ef4444" opacity="0.7"/>
+  <text x="638" y="522" fill="currentColor" font-size="11.5" font-family="system-ui, sans-serif" opacity="0.8">Outils metier internes</text>
+
+  <!-- ===== PORTABILITY FLOW: CRM -> PortaDB <-> ESB DataPower <-> MOBI ===== -->
+  <rect x="80" y="573" width="740" height="38" rx="8" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.12" stroke-width="1"/>
+  <text x="450" y="568" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.5" font-family="system-ui, sans-serif" font-style="italic">Flux portabilite : CRM &#x2192; PortaDB &#x2194; ESB DataPower &#x2194; MOBI</text>
+
+  <!-- CRM -->
+  <rect x="100" y="579" width="80" height="26" rx="6" fill="#3b82f6" fill-opacity="0.18" stroke="#3b82f6" stroke-opacity="0.5" stroke-width="1"/>
+  <text x="140" y="596" text-anchor="middle" fill="currentColor" font-size="11" font-weight="bold" font-family="system-ui, sans-serif">CRM</text>
+
+  <!-- Arrow CRM -> PortaDB -->
+  <line x1="185" y1="592" x2="248" y2="592" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- PortaDB -->
+  <rect x="255" y="579" width="100" height="26" rx="6" fill="#ef4444" fill-opacity="0.18" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1"/>
+  <text x="305" y="596" text-anchor="middle" fill="currentColor" font-size="11" font-weight="bold" font-family="system-ui, sans-serif">PortaDB</text>
+
+  <!-- Double arrow PortaDB <-> ESB -->
+  <line x1="360" y1="589" x2="443" y2="589" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="443" y1="596" x2="360" y2="596" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ESB DataPower -->
+  <rect x="450" y="579" width="140" height="26" rx="6" fill="#ef4444" fill-opacity="0.18" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1"/>
+  <text x="520" y="596" text-anchor="middle" fill="currentColor" font-size="11" font-weight="bold" font-family="system-ui, sans-serif">ESB DataPower</text>
+
+  <!-- Double arrow ESB <-> MOBI -->
+  <line x1="595" y1="589" x2="658" y2="589" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="658" y1="596" x2="595" y2="596" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- MOBI -->
+  <rect x="665" y="579" width="120" height="26" rx="6" fill="#f59e0b" fill-opacity="0.18" stroke="#f59e0b" stroke-opacity="0.5" stroke-width="1"/>
+  <text x="725" y="596" text-anchor="middle" fill="currentColor" font-size="11" font-weight="bold" font-family="system-ui, sans-serif">MOBI (EGP)</text>
+
+</svg>
+</div>
+
 <h3>1. BSS — Business Support Systems</h3>
 <p>L'équipe BSS gère les systèmes de <strong>support aux activités commerciales</strong> :</p>
 <ul>
@@ -58,6 +215,19 @@
     <li>Scripts d'automatisation et de traitement batch</li>
     <li>Outils de portabilité : <strong>PortaDB</strong>, <strong>PortaSync</strong>, scripts de bascule</li>
 </ul>
+
+<h3>Flux de portabilité entre équipes</h3>
+<pre class="mermaid">
+graph TD
+    BSS[BSS<br/>CRM + Billing] -->|Souscription client| APPS[Applications<br/>PortaDB + PortaSync]
+    APPS -->|Ordres de bascule| ESB[ESB DataPower]
+    ESB -->|Commandes EMA/EMM| MOBI[MOBI<br/>Tables routage]
+    MOBI -->|Mise à jour| INFRA[Infrastructure<br/>HLR/HSS]
+    APPS -->|Fichiers PNMDATA| SFTP[sFTP<br/>Opérateurs partenaires]
+    OSS[OSS<br/>Supervision] -->|Monitoring post-bascule| INFRA
+    MIS[MIS / DW] -->|Rapports ARCEP| APPS
+    DIGITAL[Digital] -->|Parcours portage en ligne| BSS
+</pre>
 
 <h3>Interactions inter-équipes</h3>
 <p>Les processus de portabilité impliquent la collaboration de <strong>plusieurs équipes</strong> : BSS pour la partie commerciale, Applications pour les outils PNM, Infrastructure pour les serveurs, et OSS pour la supervision post-bascule. Une communication fluide entre ces équipes est essentielle pour garantir un taux de réussite élevé des portages.</p>

@@ -2,6 +2,121 @@
 
 <p>Le <strong>GPMAG</strong> (Groupement de Portabilité des Numéros Mobiles Antilles-Guyane) est l'instance de coordination inter-opérateurs qui régit la portabilité mobile dans les départements français d'Amérique. Il regroupe les trois opérateurs mobiles de la zone et définit les règles communes de fonctionnement.</p>
 
+<svg viewBox="0 0 800 550" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 1.5em 0;">
+  <defs>
+    <!-- Bidirectional arrowhead marker -->
+    <marker id="arrowStart" viewBox="0 0 10 6" refX="0" refY="3" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M10,0 L0,3 L10,6 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowEnd" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+    <!-- BTCTF radial gradient -->
+    <radialGradient id="btctfGrad" cx="50%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect class="svg-bg" x="0" y="0" width="800" height="550" rx="8" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e293b" font-family="system-ui, sans-serif">Topologie des échanges GPMAG</text>
+
+  <!--
+    Layout — hexagonal around center (400, 265), radius ~185
+    1. Orange      top           (400, 80)
+    2. Digicel     top-right     (560, 172)
+    3. SFR/Only    bottom-right  (560, 358)
+    4. Dauphin     bottom        (400, 450)
+    5. UTS         bottom-left   (240, 358)
+    6. Free        top-left      (240, 172)
+  -->
+
+  <!-- ===== DASHED LINES: each operator to BTCTF (synchro nationale) ===== -->
+  <line class="svg-line" x1="400" y1="124" x2="400" y2="230" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+  <line class="svg-line" x1="528" y1="184" x2="436" y2="244" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+  <line class="svg-line" x1="528" y1="346" x2="436" y2="286" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+  <line class="svg-line" x1="400" y1="406" x2="400" y2="300" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+  <line class="svg-line" x1="272" y1="346" x2="364" y2="286" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+  <line class="svg-line" x1="272" y1="184" x2="364" y2="244" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.45"/>
+
+  <!-- ===== SOLID BIDIRECTIONAL ARROWS: adjacent operators (sFTP point-a-point) ===== -->
+
+  <!-- Orange (400,104) <-> Digicel (532,172) -->
+  <line class="svg-line" x1="454" y1="104" x2="520" y2="155" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <text x="500" y="120" font-size="8" fill="#64748b" font-family="system-ui, sans-serif" transform="rotate(28,500,120)">PNMDATA</text>
+
+  <!-- Digicel (560,196) <-> SFR/Only (560,346) -->
+  <line class="svg-line" x1="560" y1="214" x2="560" y2="318" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <text x="568" y="269" font-size="8" fill="#64748b" font-family="system-ui, sans-serif">ACR</text>
+
+  <!-- SFR/Only (520,370) <-> Dauphin (454,418) -->
+  <line class="svg-line" x1="520" y1="376" x2="454" y2="424" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <text x="500" y="410" font-size="8" fill="#64748b" font-family="system-ui, sans-serif" transform="rotate(-28,500,410)">ERR</text>
+
+  <!-- Dauphin (346,424) <-> UTS (280,376) -->
+  <line class="svg-line" x1="346" y1="424" x2="280" y2="376" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+
+  <!-- UTS (240,318) <-> Free (240,214) -->
+  <line class="svg-line" x1="240" y1="318" x2="240" y2="214" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+
+  <!-- Free (280,155) <-> Orange (346,104) -->
+  <line class="svg-line" x1="280" y1="155" x2="346" y2="104" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+
+  <!-- ===== BTCTF CENTER CIRCLE ===== -->
+  <circle cx="400" cy="265" r="36" fill="url(#btctfGrad)" stroke="#7c3aed" stroke-width="2.5"/>
+  <circle cx="400" cy="265" r="36" fill="none" stroke="white" stroke-width="1" opacity="0.25"/>
+  <text class="svg-text-primary" x="400" y="261" text-anchor="middle" font-size="12" font-weight="bold" fill="white" font-family="system-ui, sans-serif">BTCTF</text>
+  <text class="svg-text-secondary" x="400" y="275" text-anchor="middle" font-size="8" fill="#ede9fe" font-family="system-ui, sans-serif">Bureau Central</text>
+
+  <!-- ===== OPERATOR BOXES ===== -->
+
+  <!-- 01 - Orange (top) -->
+  <rect class="svg-box" x="340" y="58" width="120" height="48" rx="8" fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="400" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309" font-family="system-ui, sans-serif">Orange</text>
+  <text class="svg-text-secondary" x="400" y="94" text-anchor="middle" font-size="10" fill="#d97706" font-family="system-ui, sans-serif">Code 01</text>
+
+  <!-- 02 - Digicel (top-right) -->
+  <rect class="svg-box" x="500" y="148" width="120" height="48" rx="8" fill="#ef4444" fill-opacity="0.12" stroke="#ef4444" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="560" y="168" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626" font-family="system-ui, sans-serif">Digicel</text>
+  <text class="svg-text-secondary" x="560" y="184" text-anchor="middle" font-size="10" fill="#ef4444" font-family="system-ui, sans-serif">Code 02</text>
+
+  <!-- 03 - SFR/Only (bottom-right) -->
+  <rect class="svg-box" x="500" y="334" width="120" height="48" rx="8" fill="#3b82f6" fill-opacity="0.12" stroke="#3b82f6" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="560" y="354" text-anchor="middle" font-size="12" font-weight="bold" fill="#2563eb" font-family="system-ui, sans-serif">SFR / Only</text>
+  <text class="svg-text-secondary" x="560" y="370" text-anchor="middle" font-size="10" fill="#3b82f6" font-family="system-ui, sans-serif">Code 03</text>
+
+  <!-- 04 - Dauphin (bottom) -->
+  <rect class="svg-box" x="340" y="418" width="120" height="48" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="400" y="438" text-anchor="middle" font-size="12" font-weight="bold" fill="#059669" font-family="system-ui, sans-serif">Dauphin</text>
+  <text class="svg-text-secondary" x="400" y="454" text-anchor="middle" font-size="10" fill="#10b981" font-family="system-ui, sans-serif">Code 04</text>
+
+  <!-- 05 - UTS (bottom-left) -->
+  <rect class="svg-box" x="180" y="334" width="120" height="48" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="240" y="354" text-anchor="middle" font-size="12" font-weight="bold" fill="#4f46e5" font-family="system-ui, sans-serif">UTS</text>
+  <text class="svg-text-secondary" x="240" y="370" text-anchor="middle" font-size="10" fill="#6366f1" font-family="system-ui, sans-serif">Code 05</text>
+
+  <!-- 06 - Free (top-left) -->
+  <rect class="svg-box" x="180" y="148" width="120" height="48" rx="8" fill="#ec4899" fill-opacity="0.12" stroke="#ec4899" stroke-width="1.8"/>
+  <text class="svg-text-primary" x="240" y="168" text-anchor="middle" font-size="12" font-weight="bold" fill="#db2777" font-family="system-ui, sans-serif">Free</text>
+  <text class="svg-text-secondary" x="240" y="184" text-anchor="middle" font-size="10" fill="#ec4899" font-family="system-ui, sans-serif">Code 06</text>
+
+  <!-- ===== LEGEND ===== -->
+  <rect x="210" y="492" width="380" height="48" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Dashed line legend -->
+  <line x1="230" y1="508" x2="270" y2="508" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="278" y="512" font-size="10" fill="#475569" font-family="system-ui, sans-serif">Synchro BTCTF</text>
+
+  <!-- Solid arrow legend -->
+  <line x1="420" y1="508" x2="460" y2="508" stroke="#64748b" stroke-width="1.2" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+  <text x="468" y="512" font-size="10" fill="#475569" font-family="system-ui, sans-serif">sFTP bilatéral</text>
+
+  <text x="400" y="530" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="system-ui, sans-serif">(PNMDATA / ACR / ERR)</text>
+</svg>
+
 <h3>Les opérateurs membres</h3>
 <p><strong>Six opérateurs</strong> composent le GPMAG, chacun identifié par un <strong>code opérateur unique</strong> utilisé dans les fichiers PNMDATA, les tickets PNM et le RIO :</p>
 <ul>
@@ -31,6 +146,24 @@
     <li><strong>Comité de pilotage</strong> : réunion trimestrielle au niveau direction. Validation des évolutions majeures du protocole, arbitrage des litiges non résolus au niveau technique.</li>
     <li><strong>Spécifications communes</strong> : le GPMAG maintient un document de spécifications techniques PNM V3 partagé, qui fait foi en cas de divergence d'interprétation.</li>
 </ul>
+
+<h3>Flux d'échanges inter-opérateurs GPMAG</h3>
+<pre class="mermaid">
+graph TD
+    BTCTF((BTCTF<br/>Bureau Central)) -.->|Synchro nationale| DIG
+    BTCTF -.->|Synchro nationale| ORA
+    BTCTF -.->|Synchro nationale| SFR
+    BTCTF -.->|Synchro nationale| DAU
+    BTCTF -.->|Synchro nationale| UTS
+    BTCTF -.->|Synchro nationale| FREE
+
+    DIG[Digicel<br/>Code 02] <-->|PNMDATA / ACR / ERR| ORA[Orange<br/>Code 01]
+    DIG <-->|PNMDATA / ACR / ERR| SFR[SFR/Only<br/>Code 03]
+    ORA <-->|PNMDATA / ACR / ERR| SFR
+    DAU[Dauphin<br/>Code 04] <-->|PNMDATA| DIG
+    UTS[UTS<br/>Code 05] <-->|PNMDATA| DIG
+    FREE[Free<br/>Code 06] <-->|PNMDATA| DIG
+</pre>
 
 <h3>Contacts techniques GPMAG</h3>
 <p>Chaque opérateur du GPMAG désigne des <strong>référents techniques PNM</strong> joignables pour le traitement des incidents et la coordination inter-opérateurs :</p>
