@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DecisionTreeController;
 use App\Http\Controllers\GlossaryController;
 use App\Http\Controllers\KnowledgeDomainController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PnmCodeController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ResolveController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -41,6 +45,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Diagrams
     Route::get('diagrams', \App\Http\Controllers\DiagramController::class)->name('diagrams');
+
+    // Resolve
+    Route::get('resolve', ResolveController::class)->name('resolve');
+    Route::get('resolve/codes', [PnmCodeController::class, 'index'])->name('resolve.codes.index');
+    Route::get('resolve/codes/{code}', [PnmCodeController::class, 'show'])->name('resolve.codes.show');
+    Route::get('resolve/decision-trees', [DecisionTreeController::class, 'index'])->name('resolve.trees.index');
+    Route::get('resolve/decision-trees/{tree:slug}', [DecisionTreeController::class, 'show'])->name('resolve.trees.show');
+
+    // Chat API
+    Route::get('api/chat/conversations', [ChatController::class, 'index'])->name('api.chat.index');
+    Route::get('api/chat/conversations/{conversation}', [ChatController::class, 'show'])->name('api.chat.show');
+    Route::post('api/chat/stream', [ChatController::class, 'stream'])->name('api.chat.stream');
+    Route::delete('api/chat/conversations/{conversation}', [ChatController::class, 'destroy'])->name('api.chat.destroy');
 });
 
 require __DIR__.'/settings.php';

@@ -1,0 +1,80 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "Avez-vous reçu le ticket 1110/1120 (demande de portage) de l'OPR ?",
+  "yes": {
+    "id": "q2",
+    "type": "question",
+    "text": "L'éligibilité a-t-elle été vérifiée automatiquement ?",
+    "yes": {
+      "id": "q3",
+      "type": "question",
+      "text": "Le résultat est-il une acceptation (RIO valide, ligne active) ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "Le ticket 1210 (acceptation) a-t-il été envoyé à l'OPR ?",
+        "yes": {
+          "id": "q5",
+          "type": "question",
+          "text": "Avez-vous reçu le ticket 1410 (EP) de l'OPR ?",
+          "yes": {
+            "id": "d_attente_bascule",
+            "type": "diagnosis",
+            "text": "En attente de bascule",
+            "diagnosis": "Le processus suit son cours normal. La bascule aura lieu à JP entre 08h30 et 10h00.",
+            "recommended_action": "Pas d'action de notre côté. Préparer la résiliation dans MOBI pour le jour de bascule.",
+            "severity": "info",
+            "related_codes": ["1410", "1430"]
+          },
+          "no": {
+            "id": "d_ep_opr",
+            "type": "diagnosis",
+            "text": "Ticket 1410 non reçu de l'OPR",
+            "diagnosis": "L'OPR n'a pas envoyé le ticket 1410 (EP) pour planifier la bascule. Le délai maximum est JD+1 à la V14.",
+            "recommended_action": "Contacter l'OPR pour savoir pourquoi le 1410 n'a pas été envoyé. Si pas de réponse, ouvrir un ticket d'incident.",
+            "severity": "warning",
+            "related_codes": ["1210", "1410"]
+          }
+        },
+        "no": {
+          "id": "d_envoi_1210",
+          "type": "diagnosis",
+          "text": "Ticket 1210 non envoyé",
+          "diagnosis": "L'éligibilité est acceptée mais le ticket 1210 n'a pas été envoyé à l'OPR.",
+          "recommended_action": "Vérifier PnmDataManager.log. Le ticket doit partir à la prochaine vacation. Vérifier qu'aucune erreur n'empêche la génération du fichier PNMDATA.",
+          "severity": "warning",
+          "sql_query": "SELECT d.* FROM DATA d WHERE d.id_portage = ? AND d.code_ticket IN ('1210', '1220') ORDER BY d.date_creation_ticket DESC",
+          "related_codes": ["1210", "E011"]
+        }
+      },
+      "no": {
+        "id": "d_refus_interne",
+        "type": "diagnosis",
+        "text": "Portage refusé en interne",
+        "diagnosis": "La vérification d'éligibilité a échoué. Le ticket 1220 (refus) sera envoyé.",
+        "recommended_action": "Vérifier le motif de refus : RIO incorrect (R123), ligne résiliée (R322/R323), autre portage en cours (R220). Consulter le dictionnaire des codes.",
+        "severity": "warning",
+        "related_codes": ["1220", "R123", "R220", "R322", "R323"]
+      }
+    },
+    "no": {
+      "id": "d_verif_elig",
+      "type": "diagnosis",
+      "text": "Vérification d'éligibilité bloquée",
+      "diagnosis": "Le processus automatique de vérification d'éligibilité n'a pas fonctionné.",
+      "recommended_action": "Vérifier le microservice MSLine (CheckEligibility/RIO). Vérifier la connexion ESB DataPower. Traiter manuellement si nécessaire via PortaWebUi.",
+      "severity": "error",
+      "related_codes": ["1110", "1120"]
+    }
+  },
+  "no": {
+    "id": "d_ticket_non_recu",
+    "type": "diagnosis",
+    "text": "Ticket de demande non reçu",
+    "diagnosis": "L'OPR n'a pas encore envoyé la demande de portage, ou le fichier PNMDATA n'a pas été correctement intégré.",
+    "recommended_action": "Vérifier PnmDataAckManager.log pour les fichiers reçus. Vérifier le dossier RECV sur BTCTF. Si aucun fichier, contacter l'OPR.",
+    "severity": "info",
+    "related_codes": ["1110", "1120", "E001", "E009"]
+  }
+}

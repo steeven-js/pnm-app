@@ -1,0 +1,79 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "La connexion SFTP vers le serveur BTCTF fonctionne-t-elle ?",
+  "yes": {
+    "id": "q2",
+    "type": "question",
+    "text": "Le problème concerne-t-il un opérateur spécifique ?",
+    "yes": {
+      "id": "q3",
+      "type": "question",
+      "text": "Avez-vous essayé une retransmission (BUPNM9400) ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "La retransmission a-t-elle réussi ?",
+        "yes": {
+          "id": "d_retrans_ok",
+          "type": "diagnosis",
+          "text": "Problème transitoire résolu",
+          "diagnosis": "La retransmission a fonctionné. Il s'agissait probablement d'un problème réseau temporaire.",
+          "recommended_action": "Surveiller les prochaines vacations. Si le problème se répète 3 fois dans la même semaine, ouvrir un ticket d'incident.",
+          "severity": "info",
+          "related_codes": ["E011"]
+        },
+        "no": {
+          "id": "d_mode_degrade",
+          "type": "diagnosis",
+          "text": "Activer le mode dégradé",
+          "diagnosis": "La retransmission a échoué. Activer le mode dégradé : utiliser email et/ou téléphone pour les échanges.",
+          "recommended_action": "1) Envoyer les fichiers par email chiffré à l'opérateur. 2) Ouvrir un ticket d'incident. 3) Chaque opérateur doit envoyer un fichier (même vide) à chaque vacation. 4) Vérifier les clés SSH.",
+          "severity": "critical",
+          "related_codes": ["E007", "E011"]
+        }
+      },
+      "no": {
+        "id": "d_tenter_retrans",
+        "type": "diagnosis",
+        "text": "Tenter la retransmission",
+        "diagnosis": "Avant d'activer le mode dégradé, tentez une retransmission du fichier.",
+        "recommended_action": "Utiliser la commande BUPNM9400 pour retransmettre. Test de connexion : sftp -oPort=22 pnm_02@193.251.160.208. En mode debug : sftp -oLoglevel=DEBUG3.",
+        "severity": "warning",
+        "related_codes": ["E011"]
+      }
+    },
+    "no": {
+      "id": "d_global",
+      "type": "diagnosis",
+      "text": "Panne globale SFTP",
+      "diagnosis": "Le problème affecte tous les opérateurs. Il s'agit probablement d'un problème sur le serveur BTCTF ou la liaison réseau.",
+      "recommended_action": "Vérifier le serveur vmqproportasync01 et BTCTF. Activer le mode dégradé complet. Notifier tous les opérateurs par mail et téléphone. Ouvrir un ticket d'incident en urgence.",
+      "severity": "critical",
+      "related_codes": ["E007", "E009", "E011"]
+    }
+  },
+  "no": {
+    "id": "q_btctf",
+    "type": "question",
+    "text": "Le serveur BTCTF (vmqproportasync01) est-il accessible ?",
+    "yes": {
+      "id": "d_cle_ssh",
+      "type": "diagnosis",
+      "text": "Problème de clé SSH",
+      "diagnosis": "Le serveur est accessible mais la connexion SFTP échoue. Les clés SSH ont peut-être expiré ou été compromises.",
+      "recommended_action": "Vérifier .ssh/authorized_keys2. Régénérer les clés si nécessaire (ssh-keygen -t dsa -b 1024). Envoyer la nouvelle clé publique chiffrée PGP par email, le passphrase par FAX.",
+      "severity": "error",
+      "related_codes": ["E011"]
+    },
+    "no": {
+      "id": "d_serveur_down",
+      "type": "diagnosis",
+      "text": "Serveur BTCTF indisponible",
+      "diagnosis": "Le serveur BTCTF n'est pas joignable. C'est un incident critique nécessitant une intervention immédiate.",
+      "recommended_action": "Contacter l'équipe infrastructure pour remonter le serveur. Activer le mode dégradé complet (email/téléphone). Notifier tous les opérateurs.",
+      "severity": "critical",
+      "related_codes": ["E007", "E009", "E011"]
+    }
+  }
+}

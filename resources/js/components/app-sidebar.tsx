@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { BarChart3, BookOpenText, LayoutGrid, Workflow } from 'lucide-react';
+import { BarChart3, BookOpenText, LayoutGrid, Search, Workflow } from 'lucide-react';
+import { ChatTrigger } from '@/components/chat-trigger';
 import { NavKnowledge } from '@/components/nav-knowledge';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -33,13 +34,18 @@ const mainNavItems: NavItem[] = [
         icon: BookOpenText,
     },
     {
+        title: 'Résoudre',
+        href: '/resolve',
+        icon: Search,
+    },
+    {
         title: 'Diagrammes',
         href: '/diagrams',
         icon: Workflow,
     },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ onChatOpen }: { onChatOpen?: () => void }) {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -60,6 +66,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                {onChatOpen && <ChatTrigger onClick={onChatOpen} />}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

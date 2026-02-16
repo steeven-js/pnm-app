@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\GlossaryTerm;
+use App\Models\PnmCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class SearchController extends Controller
         $query = $request->get('q', '');
 
         if (strlen($query) < 2) {
-            return response()->json(['articles' => [], 'glossary' => []]);
+            return response()->json(['articles' => [], 'glossary' => [], 'pnmCodes' => []]);
         }
 
         $articles = Article::where('is_published', true)
@@ -34,9 +35,14 @@ class SearchController extends Controller
             ->limit(5)
             ->get(['id', 'term', 'slug', 'abbreviation', 'definition', 'category']);
 
+        $pnmCodes = PnmCode::search($query)
+            ->limit(5)
+            ->get(['id', 'code', 'label', 'category', 'severity']);
+
         return response()->json([
             'articles' => $articles,
             'glossary' => $glossary,
+            'pnmCodes' => $pnmCodes,
         ]);
     }
 }

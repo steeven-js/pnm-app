@@ -1,17 +1,22 @@
 import { router } from '@inertiajs/react';
-import { BookOpen, FileText, Search } from 'lucide-react';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import Divider from '@mui/material/Divider';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { BookOpen, FileText, Hash, Search } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import type { SearchResults } from '@/types';
 
 export function SpotlightSearch() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<SearchResults>({ articles: [], glossary: [] });
+    const [results, setResults] = useState<SearchResults>({ articles: [], glossary: [], pnmCodes: [] });
     const [loading, setLoading] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
-
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -26,7 +31,7 @@ export function SpotlightSearch() {
 
     const search = useCallback((q: string) => {
         if (q.length < 2) {
-            setResults({ articles: [], glossary: [] });
+            setResults({ articles: [], glossary: [], pnmCodes: [] });
             return;
         }
         setLoading(true);
@@ -48,117 +53,215 @@ export function SpotlightSearch() {
     const navigate = (url: string) => {
         setOpen(false);
         setQuery('');
-        setResults({ articles: [], glossary: [] });
+        setResults({ articles: [], glossary: [], pnmCodes: [] });
         router.visit(url);
     };
 
-    const hasResults = results.articles.length > 0 || results.glossary.length > 0;
+    const hasResults = results.articles.length > 0 || results.glossary.length > 0 || results.pnmCodes.length > 0;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="top-[20%] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-xl">
-                <DialogTitle className="sr-only">Rechercher</DialogTitle>
-                <DialogDescription className="sr-only">
-                    Rechercher des articles et termes du glossaire
-                </DialogDescription>
-                <div className="flex items-center border-b px-3">
-                    <Search className="text-muted-foreground mr-2 size-4 shrink-0" />
-                    <Input
-                        value={query}
-                        onChange={(e) => handleChange(e.target.value)}
-                        placeholder="Rechercher articles, termes..."
-                        className="h-12 border-0 shadow-none focus-visible:ring-0"
-                    />
-                    <kbd className="bg-muted text-muted-foreground pointer-events-none ml-2 inline-flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium">
-                        <span className="text-xs">⌘</span>K
-                    </kbd>
-                </div>
+        <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    position: 'fixed',
+                    top: '20%',
+                    m: 0,
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                },
+            }}
+        >
+            <Box sx={{ display: 'flex', alignItems: 'center', px: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <TextField
+                    value={query}
+                    onChange={(e) => handleChange(e.target.value)}
+                    placeholder="Rechercher articles, termes..."
+                    fullWidth
+                    autoFocus
+                    variant="standard"
+                    slotProps={{
+                        input: {
+                            disableUnderline: true,
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search size={16} style={{ opacity: 0.5 }} />
+                                </InputAdornment>
+                            ),
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Chip label="\u2318K" size="small" variant="outlined" sx={{ fontSize: '0.625rem', height: 20, fontFamily: 'monospace' }} />
+                                </InputAdornment>
+                            ),
+                            sx: { py: 1.5 },
+                        },
+                    }}
+                />
+            </Box>
 
-                {query.length >= 2 && (
-                    <div className="max-h-80 overflow-y-auto p-2">
-                        {loading && (
-                            <p className="text-muted-foreground p-4 text-center text-sm">
-                                Recherche...
-                            </p>
-                        )}
+            {query.length >= 2 && (
+                <DialogContent sx={{ maxHeight: 320, p: 1 }}>
+                    {loading && (
+                        <Typography color="text.secondary" variant="body2" sx={{ p: 2, textAlign: 'center' }}>
+                            Recherche...
+                        </Typography>
+                    )}
 
-                        {!loading && !hasResults && (
-                            <p className="text-muted-foreground p-4 text-center text-sm">
-                                Aucun résultat pour &quot;{query}&quot;
-                            </p>
-                        )}
+                    {!loading && !hasResults && (
+                        <Typography color="text.secondary" variant="body2" sx={{ p: 2, textAlign: 'center' }}>
+                            Aucun résultat pour &quot;{query}&quot;
+                        </Typography>
+                    )}
 
-                        {results.articles.length > 0 && (
-                            <div>
-                                <p className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-                                    Articles
-                                </p>
-                                {results.articles.map((article) => (
-                                    <button
-                                        key={article.id}
-                                        onClick={() =>
-                                            navigate(
-                                                `/knowledge/${article.domain.slug}/${article.slug}`,
-                                            )
-                                        }
-                                        className="hover:bg-accent flex w-full items-start gap-3 rounded-md px-2 py-2 text-left"
-                                    >
-                                        <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium">
-                                                {article.title}
-                                            </p>
-                                            {article.excerpt && (
-                                                <p className="text-muted-foreground truncate text-xs">
-                                                    {article.excerpt}
-                                                </p>
+                    {results.articles.length > 0 && (
+                        <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ px: 1, py: 0.75, display: 'block', fontWeight: 500 }}>
+                                Articles
+                            </Typography>
+                            {results.articles.map((article) => (
+                                <Box
+                                    key={article.id}
+                                    component="button"
+                                    onClick={() => navigate(`/knowledge/${article.domain.slug}/${article.slug}`)}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: 1.5,
+                                        width: '100%',
+                                        px: 1,
+                                        py: 1,
+                                        textAlign: 'left',
+                                        borderRadius: 1,
+                                        border: 'none',
+                                        bgcolor: 'transparent',
+                                        cursor: 'pointer',
+                                        color: 'inherit',
+                                        '&:hover': { bgcolor: 'action.hover' },
+                                    }}
+                                >
+                                    <FileText size={16} style={{ opacity: 0.5, marginTop: 2, flexShrink: 0 }} />
+                                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                                        <Typography variant="body2" fontWeight={500} noWrap>
+                                            {article.title}
+                                        </Typography>
+                                        {article.excerpt && (
+                                            <Typography variant="caption" color="text.secondary" noWrap component="p">
+                                                {article.excerpt}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    <Chip
+                                        label={article.domain.name}
+                                        size="small"
+                                        sx={{
+                                            mt: 0.25,
+                                            ml: 'auto',
+                                            flexShrink: 0,
+                                            fontSize: '0.625rem',
+                                            height: 20,
+                                            bgcolor: article.domain.color || '#6b7280',
+                                            color: '#fff',
+                                        }}
+                                    />
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+
+                    {results.glossary.length > 0 && (
+                        <Box>
+                            {results.articles.length > 0 && <Divider sx={{ my: 1 }} />}
+                            <Typography variant="caption" color="text.secondary" sx={{ px: 1, py: 0.75, display: 'block', fontWeight: 500 }}>
+                                Glossaire
+                            </Typography>
+                            {results.glossary.map((term) => (
+                                <Box
+                                    key={term.id}
+                                    component="button"
+                                    onClick={() => navigate(`/glossary?q=${encodeURIComponent(term.term)}`)}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: 1.5,
+                                        width: '100%',
+                                        px: 1,
+                                        py: 1,
+                                        textAlign: 'left',
+                                        borderRadius: 1,
+                                        border: 'none',
+                                        bgcolor: 'transparent',
+                                        cursor: 'pointer',
+                                        color: 'inherit',
+                                        '&:hover': { bgcolor: 'action.hover' },
+                                    }}
+                                >
+                                    <BookOpen size={16} style={{ opacity: 0.5, marginTop: 2, flexShrink: 0 }} />
+                                    <Box sx={{ minWidth: 0 }}>
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {term.abbreviation && (
+                                                <Box component="span" sx={{ fontFamily: 'monospace', color: 'primary.main', mr: 0.5 }}>
+                                                    {term.abbreviation}
+                                                </Box>
                                             )}
-                                        </div>
-                                        <span
-                                            className="mt-0.5 ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
-                                            style={{
-                                                backgroundColor: article.domain.color || '#6b7280',
-                                            }}
-                                        >
-                                            {article.domain.name}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                                            {term.term}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" noWrap component="p">
+                                            {term.definition}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
 
-                        {results.glossary.length > 0 && (
-                            <div className={results.articles.length > 0 ? 'mt-2 border-t pt-2' : ''}>
-                                <p className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-                                    Glossaire
-                                </p>
-                                {results.glossary.map((term) => (
-                                    <button
-                                        key={term.id}
-                                        onClick={() => navigate(`/glossary?q=${encodeURIComponent(term.term)}`)}
-                                        className="hover:bg-accent flex w-full items-start gap-3 rounded-md px-2 py-2 text-left"
-                                    >
-                                        <BookOpen className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium">
-                                                {term.abbreviation && (
-                                                    <span className="text-primary mr-1 font-mono">
-                                                        {term.abbreviation}
-                                                    </span>
-                                                )}
-                                                {term.term}
-                                            </p>
-                                            <p className="text-muted-foreground line-clamp-1 text-xs">
-                                                {term.definition}
-                                            </p>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-            </DialogContent>
+                    {results.pnmCodes.length > 0 && (
+                        <Box>
+                            {(results.articles.length > 0 || results.glossary.length > 0) && <Divider sx={{ my: 1 }} />}
+                            <Typography variant="caption" color="text.secondary" sx={{ px: 1, py: 0.75, display: 'block', fontWeight: 500 }}>
+                                Codes PNM
+                            </Typography>
+                            {results.pnmCodes.map((code) => (
+                                <Box
+                                    key={code.id}
+                                    component="button"
+                                    onClick={() => navigate(`/resolve/codes/${code.code}`)}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: 1.5,
+                                        width: '100%',
+                                        px: 1,
+                                        py: 1,
+                                        textAlign: 'left',
+                                        borderRadius: 1,
+                                        border: 'none',
+                                        bgcolor: 'transparent',
+                                        cursor: 'pointer',
+                                        color: 'inherit',
+                                        '&:hover': { bgcolor: 'action.hover' },
+                                    }}
+                                >
+                                    <Hash size={16} style={{ opacity: 0.5, marginTop: 2, flexShrink: 0 }} />
+                                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                                        <Typography variant="body2" fontWeight={500}>
+                                            <Box component="span" sx={{ fontFamily: 'monospace', color: 'primary.main', mr: 0.5 }}>
+                                                {code.code}
+                                            </Box>
+                                            {code.label}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" noWrap component="p">
+                                            {code.category}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </DialogContent>
+            )}
         </Dialog>
     );
 }

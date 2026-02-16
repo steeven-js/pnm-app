@@ -81,4 +81,5 @@ export type SearchResults = {
         domain: Pick<KnowledgeDomain, 'id' | 'slug' | 'name' | 'color'>;
     })[];
     glossary: Pick<GlossaryTerm, 'id' | 'term' | 'slug' | 'abbreviation' | 'definition' | 'category'>[];
+    pnmCodes: { id: number; code: string; label: string; category: string; severity: string }[];
 };

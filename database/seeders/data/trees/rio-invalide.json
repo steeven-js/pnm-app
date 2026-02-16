@@ -1,0 +1,65 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "Le RIO fait-il exactement 12 caractères ?",
+  "yes": {
+    "id": "q2",
+    "type": "question",
+    "text": "Les 2 premiers caractères (OO) correspondent-ils au code opérateur actuel du client ?",
+    "yes": {
+      "id": "q3",
+      "type": "question",
+      "text": "Le caractère de qualité (3ème caractère) est-il valide ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "La clé de contrôle (3 derniers caractères CCC) est-elle valide ?",
+        "yes": {
+          "id": "d_rio_expire",
+          "type": "diagnosis",
+          "text": "RIO possiblement expiré ou changé",
+          "diagnosis": "Le format du RIO semble correct mais il est rejeté. Le RIO a peut-être été régénéré (changement de carte SIM, renouvellement).",
+          "recommended_action": "Demander au client d'obtenir un nouveau RIO en appelant le 3179 depuis sa ligne actuelle. Le RIO est régénéré à chaque demande.",
+          "severity": "warning",
+          "related_codes": ["R123"]
+        },
+        "no": {
+          "id": "d_cle_ctrl",
+          "type": "diagnosis",
+          "text": "Clé de contrôle invalide",
+          "diagnosis": "Les 3 derniers caractères du RIO (clé de contrôle CCC) ne correspondent pas. L'algorithme détecte 100% des erreurs sur 1-3 caractères.",
+          "recommended_action": "Le RIO a probablement été mal recopié. Demander au client de le redemander via 3179.",
+          "severity": "error",
+          "related_codes": ["R123"]
+        }
+      },
+      "no": {
+        "id": "d_qualite",
+        "type": "diagnosis",
+        "text": "Caractère de qualité invalide",
+        "diagnosis": "Le 3ème caractère du RIO (Q - qualité) n'est pas valide. Ce caractère indique le type de client.",
+        "recommended_action": "Vérifier le format RIO : OO-Q-RRRRRR-CCC. Le caractère Q doit correspondre au type de client (particulier/entreprise).",
+        "severity": "error",
+        "related_codes": ["R123"]
+      }
+    },
+    "no": {
+      "id": "d_mauvais_op",
+      "type": "diagnosis",
+      "text": "Code opérateur incorrect dans le RIO",
+      "diagnosis": "Les 2 premiers caractères du RIO ne correspondent pas à l'opérateur donneur (OPD). Le client est peut-être chez un autre opérateur.",
+      "recommended_action": "Vérifier chez quel opérateur le client est réellement abonné. Codes : 01=Orange, 02=Digicel, 03=SFR, 04=Dauphin, 05=UTS, 06=Free.",
+      "severity": "error",
+      "related_codes": ["R123", "R210"]
+    }
+  },
+  "no": {
+    "id": "d_format",
+    "type": "diagnosis",
+    "text": "Format du RIO incorrect",
+    "diagnosis": "Le RIO ne fait pas 12 caractères. Le format attendu est OO-Q-RRRRRR-CCC (12 caractères alphanumériques).",
+    "recommended_action": "Vérifier qu'il n'y a pas d'espaces ou de caractères parasites. Demander au client de redemander son RIO via 3179.",
+    "severity": "error",
+    "related_codes": ["R123"]
+  }
+}

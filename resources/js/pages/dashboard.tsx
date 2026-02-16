@@ -1,4 +1,6 @@
 import { Head, router } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { Calculator, GraduationCap, Network, Search } from 'lucide-react';
 import { DomainCard } from '@/components/domain-card';
 import { IntentionCard } from '@/components/intention-card';
@@ -25,18 +27,20 @@ export default function Dashboard({ domains, domainProgress, user }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex flex-col gap-6 p-4">
-                <div>
-                    <h1 className="text-2xl font-bold">Bonjour, {user.name}</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Que souhaitez-vous faire aujourd'hui ?
-                        <span className="ml-2">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
+                <Box>
+                    <Typography variant="h5" fontWeight={700}>
+                        Bonjour, {user.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Que souhaitez-vous faire aujourd'hui ?{' '}
+                        <Box component="span" sx={{ ml: 1 }}>
                             <LevelBadge level={user.level} />
-                        </span>
-                    </p>
-                </div>
+                        </Box>
+                    </Typography>
+                </Box>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' } }}>
                     <IntentionCard
                         title="Apprendre"
                         description="Parcourir les modules de formation"
@@ -55,9 +59,8 @@ export default function Dashboard({ domains, domainProgress, user }: Props) {
                         title="Résoudre"
                         description="Arbres de décision et diagnostics"
                         icon={Search}
-                        href="/knowledge"
+                        href="/resolve"
                         color="#f59e0b"
-                        disabled
                     />
                     <IntentionCard
                         title="Vérifier"
@@ -67,11 +70,13 @@ export default function Dashboard({ domains, domainProgress, user }: Props) {
                         color="#10b981"
                         disabled
                     />
-                </div>
+                </Box>
 
-                <div>
-                    <h2 className="mb-3 text-lg font-semibold">Progression par domaine</h2>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Box>
+                    <Typography variant="h6" fontWeight={600} sx={{ mb: 1.5 }}>
+                        Progression par domaine
+                    </Typography>
+                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' } }}>
                         {domains.map((domain) => (
                             <DomainCard
                                 key={domain.id}
@@ -79,9 +84,9 @@ export default function Dashboard({ domains, domainProgress, user }: Props) {
                                 progress={domainProgress[domain.id]}
                             />
                         ))}
-                    </div>
-                </div>
-            </div>
+                    </Box>
+                </Box>
+            </Box>
         </AppLayout>
     );
 }
