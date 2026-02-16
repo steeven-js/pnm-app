@@ -11,6 +11,8 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ResolveController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\VerifyController;
+use App\Http\Controllers\VerifyToolController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -52,6 +54,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('resolve/codes/{code}', [PnmCodeController::class, 'show'])->name('resolve.codes.show');
     Route::get('resolve/decision-trees', [DecisionTreeController::class, 'index'])->name('resolve.trees.index');
     Route::get('resolve/decision-trees/{tree:slug}', [DecisionTreeController::class, 'show'])->name('resolve.trees.show');
+
+    // Verify
+    Route::get('verify', VerifyController::class)->name('verify');
+    Route::get('verify/date-calculator', [VerifyToolController::class, 'dateCalculator'])->name('verify.date-calculator');
+    Route::get('verify/rio-validator', [VerifyToolController::class, 'rioValidator'])->name('verify.rio-validator');
+    Route::get('verify/filename-decoder', [VerifyToolController::class, 'filenameDecoder'])->name('verify.filename-decoder');
+    Route::get('verify/portage-id', [VerifyToolController::class, 'portageIdCalculator'])->name('verify.portage-id');
+    Route::get('verify/msisdn-checker', [VerifyToolController::class, 'msisdnChecker'])->name('verify.msisdn-checker');
 
     // Chat API
     Route::get('api/chat/conversations', [ChatController::class, 'index'])->name('api.chat.index');

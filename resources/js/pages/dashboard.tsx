@@ -66,9 +66,8 @@ export default function Dashboard({ domains, domainProgress, user }: Props) {
                         title="Vérifier"
                         description="Outils et calculateurs"
                         icon={Calculator}
-                        href="/knowledge"
+                        href="/verify"
                         color="#10b981"
-                        disabled
                     />
                 </Box>
 

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BarChart3, BookOpenText, LayoutGrid, Search, Workflow } from 'lucide-react';
+import { BarChart3, BookOpenText, Calculator, LayoutGrid, Search, Workflow } from 'lucide-react';
 import { ChatTrigger } from '@/components/chat-trigger';
 import { NavKnowledge } from '@/components/nav-knowledge';
 import { NavMain } from '@/components/nav-main';
@@ -37,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Résoudre',
         href: '/resolve',
         icon: Search,
+    },
+    {
+        title: 'Vérifier',
+        href: '/verify',
+        icon: Calculator,
     },
     {
         title: 'Diagrammes',
