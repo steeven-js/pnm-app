@@ -181,8 +181,8 @@ export type FilenameResult =
     | { valid: false; error: string };
 
 export function decodeFilename(filename: string): FilenameResult {
-    // Retirer uniquement les extensions fichier connues (.csv, .txt, .dat, .xml)
-    const name = filename.replace(/\.(csv|txt|dat|xml)$/i, '');
+    // Retirer uniquement les extensions fichier connues (.csv, .txt, .dat, .xml, .ACR, .ERR)
+    const name = filename.replace(/\.(csv|txt|dat|xml|acr|err)$/i, '');
 
     // Format attendu : PNMDATA.XX.YY.AAAAMMJJHHMMSS.ZZZ
     const parts = name.split('.');
@@ -196,10 +196,10 @@ export function decodeFilename(filename: string): FilenameResult {
 
     const [prefix, sourceOp, destOp, timestamp, sequence] = parts;
 
-    if (prefix !== 'PNMDATA') {
+    if (prefix !== 'PNMDATA' && prefix !== 'PNMSYNC') {
         return {
             valid: false,
-            error: `Le préfixe doit être "PNMDATA" (reçu : "${prefix}").`,
+            error: `Le préfixe doit être "PNMDATA" ou "PNMSYNC" (reçu : "${prefix}").`,
         };
     }
 

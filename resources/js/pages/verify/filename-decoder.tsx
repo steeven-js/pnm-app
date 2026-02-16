@@ -40,11 +40,11 @@ export default function FilenameDecoder() {
             >
                 <Box>
                     <Typography variant="h5" fontWeight={700}>
-                        Décodeur de nom de fichier PNMDATA
+                        Décodeur de nom de fichier PNM
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Décodez un nom de fichier PNMDATA pour en extraire les
-                        informations.
+                        Décodez un nom de fichier PNMDATA ou PNMSYNC pour en
+                        extraire les informations.
                     </Typography>
                 </Box>
 
@@ -69,7 +69,7 @@ export default function FilenameDecoder() {
                             <TextField
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Ex : PNMDATA.02.01.20260216093000.001"
+                                placeholder="Ex : PNMDATA.02.01.20260216093000.001 ou PNMSYNC.06.02.20260215180103.001"
                                 size="small"
                                 sx={{ flex: 1 }}
                                 onKeyDown={(e) => e.key === 'Enter' && decode()}
