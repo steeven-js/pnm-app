@@ -1,8 +1,11 @@
 import { Head, router } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 import { Code2, Headphones, MonitorCog, Network, Users } from 'lucide-react';
-import { useState } from 'react';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 
 type RoleOption = {
     value: string;
@@ -65,58 +68,82 @@ export default function Onboarding() {
     return (
         <>
             <Head title="Bienvenue" />
-            <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-transparent to-gray-50 p-4 dark:to-gray-950">
-                <div className="w-full max-w-2xl">
-                    <div className="mb-8 text-center">
-                        <h1 className="text-3xl font-bold">Bienvenue sur PNM Knowledge</h1>
-                        <p className="text-muted-foreground mt-2">
+            <Box
+                sx={{
+                    display: 'flex',
+                    minHeight: '100vh',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: (t) =>
+                        t.palette.mode === 'dark'
+                            ? 'linear-gradient(to bottom, transparent, #030712)'
+                            : 'linear-gradient(to bottom, transparent, #f9fafb)',
+                    p: 2,
+                }}
+            >
+                <Box sx={{ width: '100%', maxWidth: 672 }}>
+                    <Box sx={{ mb: 4, textAlign: 'center' }}>
+                        <Typography variant="h4" fontWeight={700}>
+                            Bienvenue sur PNM Knowledge
+                        </Typography>
+                        <Typography color="text.secondary" sx={{ mt: 1 }}>
                             Pour personnaliser votre expérience, sélectionnez votre rôle
-                        </p>
-                    </div>
+                        </Typography>
+                    </Box>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { sm: 'repeat(2, 1fr)' } }}>
                         {roles.map((role) => {
                             const Icon = role.icon;
                             const isSelected = selectedRole === role.value;
 
                             return (
-                                <button
+                                <Card
                                     key={role.value}
+                                    component="button"
                                     onClick={() => handleSelect(role.value)}
                                     disabled={submitting}
-                                    className="text-left disabled:opacity-50"
+                                    sx={{
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        border: '1px solid',
+                                        borderColor: isSelected ? 'primary.main' : 'divider',
+                                        transition: 'all 0.2s',
+                                        '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' },
+                                        '&:disabled': { opacity: 0.5 },
+                                        ...(isSelected && { boxShadow: (t) => `0 0 0 2px ${t.palette.primary.main}` }),
+                                    }}
                                 >
-                                    <Card
-                                        className={`group transition-all hover:shadow-md hover:-translate-y-0.5 ${
-                                            isSelected ? 'ring-primary ring-2' : ''
-                                        }`}
-                                    >
-                                        <CardHeader className="flex flex-row items-center gap-4">
-                                            <div
-                                                className="flex size-10 shrink-0 items-center justify-center rounded-lg"
-                                                style={{
-                                                    backgroundColor: `${role.color}15`,
-                                                    color: role.color,
-                                                }}
-                                            >
-                                                <Icon className="size-5" />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-sm">
-                                                    {role.title}
-                                                </CardTitle>
-                                                <CardDescription className="text-xs">
-                                                    {role.description}
-                                                </CardDescription>
-                                            </div>
-                                        </CardHeader>
-                                    </Card>
-                                </button>
+                                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                width: 40,
+                                                height: 40,
+                                                flexShrink: 0,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                borderRadius: 2,
+                                                bgcolor: `${role.color}15`,
+                                                color: role.color,
+                                            }}
+                                        >
+                                            <Icon size={20} />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={600}>
+                                                {role.title}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {role.description}
+                                            </Typography>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
                             );
                         })}
-                    </div>
-                </div>
-            </div>
+                    </Box>
+                </Box>
+            </Box>
         </>
     );
 }

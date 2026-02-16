@@ -1,3 +1,7 @@
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
+
 type ProgressBarProps = {
     value: number;
     color?: string;
@@ -5,22 +9,34 @@ type ProgressBarProps = {
     showLabel?: boolean;
 };
 
-export function ProgressBar({ value, color = '#3b82f6', size = 'md', showLabel = true }: ProgressBarProps) {
-    const heights = { sm: 'h-1', md: 'h-2', lg: 'h-3' };
+const heights = { sm: 4, md: 8, lg: 12 };
 
+export function ProgressBar({ value, color = '#3b82f6', size = 'md', showLabel = true }: ProgressBarProps) {
     return (
-        <div className="flex items-center gap-2">
-            <div className={`bg-muted flex-1 overflow-hidden rounded-full ${heights[size]}`}>
-                <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, value)}%`, backgroundColor: color }}
-                />
-            </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LinearProgress
+                variant="determinate"
+                value={Math.min(100, value)}
+                sx={{
+                    flex: 1,
+                    height: heights[size],
+                    borderRadius: 99,
+                    bgcolor: 'action.hover',
+                    '& .MuiLinearProgress-bar': {
+                        bgcolor: color,
+                        borderRadius: 99,
+                    },
+                }}
+            />
             {showLabel && (
-                <span className="text-muted-foreground text-xs font-medium tabular-nums">
+                <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontWeight: 500, fontVariantNumeric: 'tabular-nums', minWidth: '2.5em', textAlign: 'right' }}
+                >
                     {Math.round(value)}%
-                </span>
+                </Typography>
             )}
-        </div>
+        </Box>
     );
 }

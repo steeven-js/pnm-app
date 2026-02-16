@@ -1,11 +1,13 @@
 import { Form, Head } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
@@ -36,36 +38,34 @@ export default function Login({
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
-                                />
-                                <InputError message={errors.email} />
-                            </div>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <TextField
+                                id="email"
+                                label="Email address"
+                                type="email"
+                                name="email"
+                                required
+                                autoFocus
+                                tabIndex={1}
+                                autoComplete="email"
+                                placeholder="email@example.com"
+                                error={!!errors.email}
+                                helperText={errors.email}
+                                fullWidth
+                            />
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                            <Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                                    <Typography variant="body2" fontWeight={500}>
+                                        Password
+                                    </Typography>
                                     {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
+                                        <TextLink href={request()} tabIndex={5}>
                                             Forgot password?
                                         </TextLink>
                                     )}
-                                </div>
-                                <Input
+                                </Box>
+                                <TextField
                                     id="password"
                                     type="password"
                                     name="password"
@@ -73,47 +73,47 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    error={!!errors.password}
+                                    helperText={errors.password}
+                                    fullWidth
                                 />
-                                <InputError message={errors.password} />
-                            </div>
+                            </Box>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                />
-                                <Label htmlFor="remember">Remember me</Label>
-                            </div>
+                            <FormControlLabel
+                                control={<Checkbox name="remember" tabIndex={3} size="small" />}
+                                label={<Typography variant="body2">Remember me</Typography>}
+                            />
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                variant="contained"
+                                fullWidth
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
+                                sx={{ mt: 1 }}
                             >
-                                {processing && <Spinner />}
+                                {processing && <CircularProgress size={16} sx={{ mr: 1 }} color="inherit" />}
                                 Log in
                             </Button>
-                        </div>
+                        </Box>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
+                            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                                 Don't have an account?{' '}
                                 <TextLink href={register()} tabIndex={5}>
                                     Sign up
                                 </TextLink>
-                            </div>
+                            </Typography>
                         )}
                     </>
                 )}
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <Typography variant="body2" fontWeight={500} sx={{ color: 'success.main', textAlign: 'center', mb: 2 }}>
                     {status}
-                </div>
+                </Typography>
             )}
         </AuthLayout>
     );

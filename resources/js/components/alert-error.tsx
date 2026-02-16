@@ -1,5 +1,5 @@
-import { AlertCircleIcon } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import MuiAlert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 
 export default function AlertError({
     errors,
@@ -9,16 +9,13 @@ export default function AlertError({
     title?: string;
 }) {
     return (
-        <Alert variant="destructive">
-            <AlertCircleIcon />
+        <MuiAlert severity="error" variant="outlined">
             <AlertTitle>{title || 'Something went wrong.'}</AlertTitle>
-            <AlertDescription>
-                <ul className="list-inside list-disc text-sm">
-                    {Array.from(new Set(errors)).map((error, index) => (
-                        <li key={index}>{error}</li>
-                    ))}
-                </ul>
-            </AlertDescription>
-        </Alert>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                {Array.from(new Set(errors)).map((error, index) => (
+                    <li key={index}>{error}</li>
+                ))}
+            </ul>
+        </MuiAlert>
     );
 }

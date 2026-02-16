@@ -1,4 +1,6 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import type { GlossaryTerm } from '@/types';
 
 type GlossaryTooltipProps = {
@@ -8,21 +10,35 @@ type GlossaryTooltipProps = {
 
 export function GlossaryTooltip({ term, children }: GlossaryTooltipProps) {
     return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <span className="border-primary/30 cursor-help border-b border-dashed font-medium">
-                    {children || term.abbreviation || term.term}
-                </span>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs" side="top">
-                <div className="space-y-1">
-                    <p className="text-xs font-semibold">
-                        {term.abbreviation && <span className="mr-1 font-mono">{term.abbreviation}</span>}
+        <Tooltip
+            title={
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" fontWeight={600}>
+                        {term.abbreviation && (
+                            <Box component="span" sx={{ fontFamily: 'monospace', mr: 0.5 }}>
+                                {term.abbreviation}
+                            </Box>
+                        )}
                         {term.term}
-                    </p>
-                    <p className="text-primary-foreground/80 text-xs">{term.definition}</p>
-                </div>
-            </TooltipContent>
+                    </Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.85 }}>
+                        {term.definition}
+                    </Typography>
+                </Box>
+            }
+            placement="top"
+        >
+            <Box
+                component="span"
+                sx={{
+                    borderBottom: '1px dashed',
+                    borderColor: 'primary.light',
+                    cursor: 'help',
+                    fontWeight: 500,
+                }}
+            >
+                {children || term.abbreviation || term.term}
+            </Box>
         </Tooltip>
     );
 }

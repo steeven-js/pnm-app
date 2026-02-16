@@ -1,51 +1,51 @@
 import { Form } from '@inertiajs/react';
-import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Check, Copy, ScanLine } from 'lucide-react';
+import { MuiOtpInput } from 'mui-one-time-password-input';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSlot,
-} from '@/components/ui/input-otp';
 import { useAppearance } from '@/hooks/use-appearance';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import { confirm } from '@/routes/two-factor';
 import AlertError from './alert-error';
-import { Spinner } from './ui/spinner';
 
 function GridScanIcon() {
     return (
-        <div className="mb-3 rounded-full border border-border bg-card p-0.5 shadow-sm">
-            <div className="relative overflow-hidden rounded-full border border-border bg-muted p-2.5">
-                <div className="absolute inset-0 grid grid-cols-5 opacity-50">
-                    {Array.from({ length: 5 }, (_, i) => (
-                        <div
-                            key={`col-${i + 1}`}
-                            className="border-r border-border last:border-r-0"
-                        />
-                    ))}
-                </div>
-                <div className="absolute inset-0 grid grid-rows-5 opacity-50">
-                    {Array.from({ length: 5 }, (_, i) => (
-                        <div
-                            key={`row-${i + 1}`}
-                            className="border-b border-border last:border-b-0"
-                        />
-                    ))}
-                </div>
-                <ScanLine className="relative z-20 size-6 text-foreground" />
-            </div>
-        </div>
+        <Box
+            sx={{
+                mb: 1.5,
+                display: 'inline-flex',
+                borderRadius: '50%',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.paper',
+                p: 0.25,
+                boxShadow: 1,
+            }}
+        >
+            <Box
+                sx={{
+                    borderRadius: '50%',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'action.hover',
+                    p: 1.25,
+                    display: 'flex',
+                }}
+            >
+                <ScanLine size={24} />
+            </Box>
+        </Box>
     );
 }
 
@@ -72,66 +72,74 @@ function TwoFactorSetupStep({
                 <AlertError errors={errors} />
             ) : (
                 <>
-                    <div className="mx-auto flex max-w-md overflow-hidden">
-                        <div className="mx-auto aspect-square w-64 rounded-lg border border-border">
-                            <div className="z-10 flex h-full w-full items-center justify-center p-5">
-                                {qrCodeSvg ? (
-                                    <div
-                                        className="aspect-square w-full rounded-lg bg-white p-2 [&_svg]:size-full"
-                                        dangerouslySetInnerHTML={{
-                                            __html: qrCodeSvg,
-                                        }}
-                                        style={{
-                                            filter:
-                                                resolvedAppearance === 'dark'
-                                                    ? 'invert(1) brightness(1.5)'
-                                                    : undefined,
-                                        }}
-                                    />
-                                ) : (
-                                    <Spinner />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex w-full space-x-5">
-                        <Button className="w-full" onClick={onNextStep}>
-                            {buttonText}
-                        </Button>
-                    </div>
-
-                    <div className="relative flex w-full items-center justify-center">
-                        <div className="absolute inset-0 top-1/2 h-px w-full bg-border" />
-                        <span className="relative bg-card px-2 py-1">
-                            or, enter the code manually
-                        </span>
-                    </div>
-
-                    <div className="flex w-full space-x-2">
-                        <div className="flex w-full items-stretch overflow-hidden rounded-xl border border-border">
-                            {!manualSetupKey ? (
-                                <div className="flex h-full w-full items-center justify-center bg-muted p-3">
-                                    <Spinner />
-                                </div>
+                    <Box sx={{ mx: 'auto', maxWidth: 'md', overflow: 'hidden' }}>
+                        <Box
+                            sx={{
+                                mx: 'auto',
+                                aspectRatio: '1',
+                                width: 256,
+                                borderRadius: 2,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                p: 2.5,
+                            }}
+                        >
+                            {qrCodeSvg ? (
+                                <Box
+                                    sx={{
+                                        aspectRatio: '1',
+                                        width: '100%',
+                                        borderRadius: 2,
+                                        bgcolor: 'white',
+                                        p: 1,
+                                        '& svg': { width: '100%', height: '100%' },
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
+                                    style={{
+                                        filter: resolvedAppearance === 'dark' ? 'invert(1) brightness(1.5)' : undefined,
+                                    }}
+                                />
                             ) : (
-                                <>
-                                    <input
-                                        type="text"
-                                        readOnly
-                                        value={manualSetupKey}
-                                        className="h-full w-full bg-background p-3 text-foreground outline-none"
-                                    />
-                                    <button
-                                        onClick={() => copy(manualSetupKey)}
-                                        className="border-l border-border px-3 hover:bg-muted"
-                                    >
-                                        <IconComponent className="w-4" />
-                                    </button>
-                                </>
+                                <CircularProgress size={24} />
                             )}
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
+
+                    <Button variant="contained" fullWidth onClick={onNextStep}>
+                        {buttonText}
+                    </Button>
+
+                    <Divider>or, enter the code manually</Divider>
+
+                    <Box sx={{ display: 'flex', border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+                        {!manualSetupKey ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', bgcolor: 'action.hover', p: 1.5 }}>
+                                <CircularProgress size={20} />
+                            </Box>
+                        ) : (
+                            <>
+                                <TextField
+                                    value={manualSetupKey}
+                                    slotProps={{ input: { readOnly: true } }}
+                                    variant="standard"
+                                    fullWidth
+                                    sx={{
+                                        '& .MuiInput-root': { p: 1.5 },
+                                        '& .MuiInput-root::before, & .MuiInput-root::after': { display: 'none' },
+                                    }}
+                                />
+                                <IconButton
+                                    onClick={() => copy(manualSetupKey)}
+                                    sx={{ borderLeft: '1px solid', borderColor: 'divider', borderRadius: 0 }}
+                                >
+                                    <IconComponent size={16} />
+                                </IconButton>
+                            </>
+                        )}
+                    </Box>
                 </>
             )}
         </>
@@ -146,11 +154,11 @@ function TwoFactorVerificationStep({
     onBack: () => void;
 }) {
     const [code, setCode] = useState<string>('');
-    const pinInputContainerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setTimeout(() => {
-            pinInputContainerRef.current?.querySelector('input')?.focus();
+            containerRef.current?.querySelector('input')?.focus();
         }, 0);
     }, []);
 
@@ -168,61 +176,33 @@ function TwoFactorVerificationStep({
                 processing: boolean;
                 errors?: { confirmTwoFactorAuthentication?: { code?: string } };
             }) => (
-                <>
-                    <div
-                        ref={pinInputContainerRef}
-                        className="relative w-full space-y-3"
-                    >
-                        <div className="flex w-full flex-col items-center space-y-3 py-2">
-                            <InputOTP
-                                id="otp"
-                                name="code"
-                                maxLength={OTP_MAX_LENGTH}
-                                onChange={setCode}
-                                disabled={processing}
-                                pattern={REGEXP_ONLY_DIGITS}
-                            >
-                                <InputOTPGroup>
-                                    {Array.from(
-                                        { length: OTP_MAX_LENGTH },
-                                        (_, index) => (
-                                            <InputOTPSlot
-                                                key={index}
-                                                index={index}
-                                            />
-                                        ),
-                                    )}
-                                </InputOTPGroup>
-                            </InputOTP>
-                            <InputError
-                                message={
-                                    errors?.confirmTwoFactorAuthentication?.code
-                                }
-                            />
-                        </div>
+                <Box ref={containerRef} sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, py: 1 }}>
+                        <input type="hidden" name="code" value={code} />
+                        <MuiOtpInput
+                            value={code}
+                            onChange={setCode}
+                            length={OTP_MAX_LENGTH}
+                            autoFocus
+                            TextFieldsProps={{ size: 'small', disabled: processing }}
+                        />
+                        <InputError message={errors?.confirmTwoFactorAuthentication?.code} />
+                    </Box>
 
-                        <div className="flex w-full space-x-5">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="flex-1"
-                                onClick={onBack}
-                                disabled={processing}
-                            >
-                                Back
-                            </Button>
-                            <Button
-                                type="submit"
-                                className="flex-1"
-                                disabled={
-                                    processing || code.length < OTP_MAX_LENGTH
-                                }
-                            >
-                                Confirm
-                            </Button>
-                        </div>
-                    </div>
-                </>
+                    <Box sx={{ display: 'flex', gap: 2.5 }}>
+                        <Button variant="outlined" fullWidth onClick={onBack} disabled={processing}>
+                            Back
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            disabled={processing || code.length < OTP_MAX_LENGTH}
+                        >
+                            Confirm
+                        </Button>
+                    </Box>
+                </Box>
             )}
         </Form>
     );
@@ -251,8 +231,7 @@ export default function TwoFactorSetupModal({
     fetchSetupData,
     errors,
 }: Props) {
-    const [showVerificationStep, setShowVerificationStep] =
-        useState<boolean>(false);
+    const [showVerificationStep, setShowVerificationStep] = useState<boolean>(false);
 
     const modalConfig = useMemo<{
         title: string;
@@ -271,8 +250,7 @@ export default function TwoFactorSetupModal({
         if (showVerificationStep) {
             return {
                 title: 'Verify Authentication Code',
-                description:
-                    'Enter the 6-digit code from your authenticator app',
+                description: 'Enter the 6-digit code from your authenticator app',
                 buttonText: 'Continue',
             };
         }
@@ -290,14 +268,12 @@ export default function TwoFactorSetupModal({
             setShowVerificationStep(true);
             return;
         }
-
         clearSetupData();
         onClose();
     }, [requiresConfirmation, clearSetupData, onClose]);
 
     const resetModalState = useCallback(() => {
         setShowVerificationStep(false);
-
         if (twoFactorEnabled) {
             clearSetupData();
         }
@@ -315,17 +291,20 @@ export default function TwoFactorSetupModal({
     }, [onClose, resetModalState]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="flex items-center justify-center">
+        <Dialog open={isOpen} onClose={handleClose} maxWidth="xs" fullWidth>
+            <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <GridScanIcon />
-                    <DialogTitle>{modalConfig.title}</DialogTitle>
-                    <DialogDescription className="text-center">
+                    <Typography variant="h6" fontWeight={600}>
+                        {modalConfig.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                         {modalConfig.description}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div className="flex flex-col items-center space-y-5">
+                    </Typography>
+                </Box>
+            </DialogTitle>
+            <DialogContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5 }}>
                     {showVerificationStep ? (
                         <TwoFactorVerificationStep
                             onClose={onClose}
@@ -340,7 +319,7 @@ export default function TwoFactorSetupModal({
                             errors={errors}
                         />
                     )}
-                </div>
+                </Box>
             </DialogContent>
         </Dialog>
     );

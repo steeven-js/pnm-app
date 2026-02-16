@@ -55,6 +55,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function chatConversations(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class);
+    }
+
     public function articleProgress(): HasMany
     {
         return $this->hasMany(UserArticleProgress::class);

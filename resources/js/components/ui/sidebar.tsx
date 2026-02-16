@@ -14,7 +14,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +22,14 @@ import {
 } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+
+// Inline minimal Skeleton used only by SidebarMenuSkeleton
+const Skeleton = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("animate-pulse rounded-md bg-black/10 dark:bg-white/10", className)} {...props} />
+  ),
+)
+Skeleton.displayName = "Skeleton"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

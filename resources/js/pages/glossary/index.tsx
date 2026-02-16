@@ -1,7 +1,11 @@
 import { Head, router } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Search } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, GlossaryTerm } from '@/types';
 
@@ -43,81 +47,97 @@ export default function GlossaryIndex({ terms, categories, filters }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Glossaire" />
-            <div className="flex flex-col gap-6 p-4">
-                <div>
-                    <h1 className="text-2xl font-bold">Glossaire</h1>
-                    <p className="text-muted-foreground text-sm">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
+                <Box>
+                    <Typography variant="h5" fontWeight={700}>
+                        Glossaire
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
                         Tous les termes techniques de l'architecture Digicel
-                    </p>
-                </div>
+                    </Typography>
+                </Box>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <div className="relative flex-1">
-                        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                        <Input
-                            placeholder="Rechercher un terme..."
-                            defaultValue={filters.q || ''}
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="pl-9"
-                        />
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                        <Badge
-                            variant={!filters.category ? 'default' : 'outline'}
-                            className="cursor-pointer"
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, gap: 1.5 }}>
+                    <TextField
+                        placeholder="Rechercher un terme..."
+                        defaultValue={filters.q || ''}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        fullWidth
+                        size="small"
+                        slotProps={{
+                            input: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search size={16} style={{ opacity: 0.5 }} />
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                        <Chip
+                            label="Tous"
+                            size="small"
+                            color={!filters.category ? 'primary' : 'default'}
+                            variant={!filters.category ? 'filled' : 'outlined'}
                             onClick={() => handleCategoryFilter(null)}
-                        >
-                            Tous
-                        </Badge>
+                        />
                         {categories.map((cat) => (
-                            <Badge
+                            <Chip
                                 key={cat}
-                                variant={filters.category === cat ? 'default' : 'outline'}
-                                className="cursor-pointer"
+                                label={cat}
+                                size="small"
+                                color={filters.category === cat ? 'primary' : 'default'}
+                                variant={filters.category === cat ? 'filled' : 'outlined'}
                                 onClick={() => handleCategoryFilter(cat)}
-                            >
-                                {cat}
-                            </Badge>
+                            />
                         ))}
-                    </div>
-                </div>
+                    </Box>
+                </Box>
 
                 {terms.length === 0 ? (
-                    <p className="text-muted-foreground py-8 text-center text-sm">
+                    <Typography color="text.secondary" variant="body2" sx={{ py: 4, textAlign: 'center' }}>
                         Aucun terme trouvé
-                    </p>
+                    </Typography>
                 ) : (
-                    <div className="space-y-6">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {sortedLetters.map((letter) => (
-                            <div key={letter}>
-                                <h2 className="border-b pb-1 text-lg font-bold">{letter}</h2>
-                                <div className="mt-2 space-y-3">
+                            <Box key={letter}>
+                                <Typography variant="h6" fontWeight={700} sx={{ pb: 0.5 }}>
+                                    {letter}
+                                </Typography>
+                                <Divider />
+                                <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                                     {grouped[letter].map((term) => (
-                                        <div key={term.id} className="group">
-                                            <div className="flex items-baseline gap-2">
+                                        <Box key={term.id}>
+                                            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                                                 {term.abbreviation && (
-                                                    <span className="text-primary shrink-0 font-mono text-sm font-bold">
+                                                    <Typography
+                                                        variant="body2"
+                                                        component="span"
+                                                        sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main', flexShrink: 0 }}
+                                                    >
                                                         {term.abbreviation}
-                                                    </span>
+                                                    </Typography>
                                                 )}
-                                                <span className="text-sm font-semibold">{term.term}</span>
+                                                <Typography variant="body2" fontWeight={600}>
+                                                    {term.term}
+                                                </Typography>
                                                 {term.category && (
-                                                    <Badge variant="secondary" className="text-[10px]">
-                                                        {term.category}
-                                                    </Badge>
+                                                    <Chip label={term.category} size="small" variant="outlined" sx={{ fontSize: '0.625rem', height: 20 }} />
                                                 )}
-                                            </div>
-                                            <p className="text-muted-foreground mt-0.5 text-sm">
+                                            </Box>
+                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                                                 {term.definition}
-                                            </p>
-                                        </div>
+                                            </Typography>
+                                        </Box>
                                     ))}
-                                </div>
-                            </div>
+                                </Box>
+                            </Box>
                         ))}
-                    </div>
+                    </Box>
                 )}
-            </div>
+            </Box>
         </AppLayout>
     );
 }

@@ -1,4 +1,6 @@
 import { Head } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { DomainCard } from '@/components/domain-card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, KnowledgeDomain } from '@/types';
@@ -16,14 +18,16 @@ export default function KnowledgeIndex({ domains }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Base de connaissances" />
-            <div className="flex flex-col gap-6 p-4">
-                <div>
-                    <h1 className="text-2xl font-bold">Base de connaissances</h1>
-                    <p className="text-muted-foreground text-sm">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
+                <Box>
+                    <Typography variant="h5" fontWeight={700}>
+                        Base de connaissances
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
                         Explorez les domaines de l'architecture entreprise Digicel
-                    </p>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' } }}>
                     {domains.map((domain) => (
                         <DomainCard
                             key={domain.id}
@@ -31,8 +35,8 @@ export default function KnowledgeIndex({ domains }: Props) {
                             showProgress={false}
                         />
                     ))}
-                </div>
-            </div>
+                </Box>
+            </Box>
         </AppLayout>
     );
 }

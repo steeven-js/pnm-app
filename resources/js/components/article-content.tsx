@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import { useRef } from 'react';
 import { useMermaid } from '@/hooks/use-mermaid';
 
@@ -6,7 +7,7 @@ export function ArticleContent({ content }: { content: string }) {
     useMermaid(ref, content);
 
     return (
-        <div
+        <Box
             ref={ref}
             className="prose dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: content || '' }}

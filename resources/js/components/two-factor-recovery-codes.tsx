@@ -1,14 +1,12 @@
 import { Form } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 import AlertError from './alert-error';
 
@@ -53,29 +51,25 @@ export default function TwoFactorRecoveryCodes({
     const RecoveryCodeIconComponent = codesAreVisible ? EyeOff : Eye;
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex gap-3">
-                    <LockKeyhole className="size-4" aria-hidden="true" />
-                    2FA Recovery Codes
-                </CardTitle>
-                <CardDescription>
+        <Card variant="outlined" sx={{ width: '100%' }}>
+            <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                    <LockKeyhole size={16} />
+                    <Typography variant="subtitle2">2FA Recovery Codes</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Recovery codes let you regain access if you lose your 2FA
                     device. Store them in a secure password manager.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between">
+                </Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1.5, userSelect: 'none' }}>
                     <Button
+                        variant="contained"
                         onClick={toggleCodesVisibility}
-                        className="w-fit"
+                        startIcon={<RecoveryCodeIconComponent size={16} />}
                         aria-expanded={codesAreVisible}
                         aria-controls="recovery-codes-section"
                     >
-                        <RecoveryCodeIconComponent
-                            className="size-4"
-                            aria-hidden="true"
-                        />
                         {codesAreVisible ? 'Hide' : 'View'} Recovery Codes
                     </Button>
 
@@ -87,77 +81,74 @@ export default function TwoFactorRecoveryCodes({
                         >
                             {({ processing }) => (
                                 <Button
-                                    variant="secondary"
                                     type="submit"
                                     disabled={processing}
+                                    startIcon={<RefreshCw size={16} />}
                                     aria-describedby="regenerate-warning"
                                 >
-                                    <RefreshCw /> Regenerate Codes
+                                    Regenerate Codes
                                 </Button>
                             )}
                         </Form>
                     )}
-                </div>
-                <div
+                </Box>
+
+                <Box
                     id="recovery-codes-section"
-                    className={`relative overflow-hidden transition-all duration-300 ${codesAreVisible ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
+                    sx={{
+                        overflow: 'hidden',
+                        transition: 'all 0.3s',
+                        height: codesAreVisible ? 'auto' : 0,
+                        opacity: codesAreVisible ? 1 : 0,
+                    }}
                     aria-hidden={!codesAreVisible}
                 >
-                    <div className="mt-3 space-y-3">
+                    <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                         {errors?.length ? (
                             <AlertError errors={errors} />
                         ) : (
                             <>
-                                <div
+                                <Box
                                     ref={codesSectionRef}
-                                    className="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
+                                    sx={{
+                                        display: 'grid',
+                                        gap: 0.5,
+                                        borderRadius: 2,
+                                        bgcolor: 'action.hover',
+                                        p: 2,
+                                        fontFamily: 'monospace',
+                                        fontSize: '0.875rem',
+                                    }}
                                     role="list"
                                     aria-label="Recovery codes"
                                 >
                                     {recoveryCodesList.length ? (
                                         recoveryCodesList.map((code, index) => (
-                                            <div
-                                                key={index}
-                                                role="listitem"
-                                                className="select-text"
-                                            >
+                                            <Box key={index} role="listitem" sx={{ userSelect: 'text' }}>
                                                 {code}
-                                            </div>
+                                            </Box>
                                         ))
                                     ) : (
-                                        <div
-                                            className="space-y-2"
-                                            aria-label="Loading recovery codes"
-                                        >
-                                            {Array.from(
-                                                { length: 8 },
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="h-4 animate-pulse rounded bg-muted-foreground/20"
-                                                        aria-hidden="true"
-                                                    />
-                                                ),
-                                            )}
-                                        </div>
+                                        <Box aria-label="Loading recovery codes">
+                                            {Array.from({ length: 8 }, (_, index) => (
+                                                <Skeleton key={index} height={16} sx={{ my: 0.5 }} />
+                                            ))}
+                                        </Box>
                                     )}
-                                </div>
+                                </Box>
 
-                                <div className="text-xs text-muted-foreground select-none">
-                                    <p id="regenerate-warning">
+                                <Typography variant="caption" color="text.secondary" sx={{ userSelect: 'none' }}>
+                                    <span id="regenerate-warning">
                                         Each recovery code can be used once to
                                         access your account and will be removed
                                         after use. If you need more, click{' '}
-                                        <span className="font-bold">
-                                            Regenerate Codes
-                                        </span>{' '}
-                                        above.
-                                    </p>
-                                </div>
+                                        <strong>Regenerate Codes</strong> above.
+                                    </span>
+                                </Typography>
                             </>
                         )}
-                    </div>
-                </div>
+                    </Box>
+                </Box>
             </CardContent>
         </Card>
     );

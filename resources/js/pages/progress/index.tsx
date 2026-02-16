@@ -1,8 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import MuiLink from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 import { BookOpen, CheckCircle2, Clock, Trophy } from 'lucide-react';
 import { LevelBadge } from '@/components/level-badge';
 import { ProgressBar } from '@/components/progress-bar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type {
     BreadcrumbItem,
@@ -33,125 +38,170 @@ type Props = {
     stats: ProgressStats;
 };
 
+const statCards = (stats: ProgressStats) => [
+    {
+        icon: BookOpen,
+        iconColor: '#3b82f6',
+        bgLight: 'rgba(59,130,246,0.08)',
+        bgDark: 'rgba(59,130,246,0.12)',
+        value: stats.totalRead,
+        label: 'Articles lus',
+    },
+    {
+        icon: CheckCircle2,
+        iconColor: '#22c55e',
+        bgLight: 'rgba(34,197,94,0.08)',
+        bgDark: 'rgba(34,197,94,0.12)',
+        value: `${stats.completionPercentage}%`,
+        label: 'Complété',
+    },
+    {
+        icon: Trophy,
+        iconColor: '#a855f7',
+        bgLight: 'rgba(168,85,247,0.08)',
+        bgDark: 'rgba(168,85,247,0.12)',
+        value: null,
+        levelBadge: stats.level,
+        label: 'Niveau actuel',
+    },
+    {
+        icon: Clock,
+        iconColor: '#f59e0b',
+        bgLight: 'rgba(245,158,11,0.08)',
+        bgDark: 'rgba(245,158,11,0.12)',
+        value: stats.totalArticles,
+        label: 'Articles disponibles',
+    },
+];
+
 export default function Progress({ domains, domainProgress, recentlyRead, stats }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Progression" />
-            <div className="flex flex-col gap-6 p-4">
-                <div>
-                    <h1 className="text-2xl font-bold">Ma progression</h1>
-                    <p className="text-muted-foreground text-sm">Suivez votre avancement</p>
-                </div>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
+                <Box>
+                    <Typography variant="h5" fontWeight={700}>
+                        Ma progression
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Suivez votre avancement
+                    </Typography>
+                </Box>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardContent className="flex items-center gap-3 pt-6">
-                            <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950">
-                                <BookOpen className="size-5 text-blue-500" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.totalRead}</p>
-                                <p className="text-muted-foreground text-xs">Articles lus</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-3 pt-6">
-                            <div className="flex size-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950">
-                                <CheckCircle2 className="size-5 text-green-500" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.completionPercentage}%</p>
-                                <p className="text-muted-foreground text-xs">Complété</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-3 pt-6">
-                            <div className="flex size-10 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950">
-                                <Trophy className="size-5 text-purple-500" />
-                            </div>
-                            <div>
-                                <LevelBadge level={stats.level} />
-                                <p className="text-muted-foreground mt-0.5 text-xs">Niveau actuel</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-3 pt-6">
-                            <div className="flex size-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950">
-                                <Clock className="size-5 text-amber-500" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.totalArticles}</p>
-                                <p className="text-muted-foreground text-xs">Articles disponibles</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' } }}>
+                    {statCards(stats).map((card) => (
+                        <Card key={card.label} variant="outlined">
+                            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        width: 40,
+                                        height: 40,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: 2,
+                                        bgcolor: (t) => (t.palette.mode === 'dark' ? card.bgDark : card.bgLight),
+                                    }}
+                                >
+                                    <card.icon size={20} color={card.iconColor} />
+                                </Box>
+                                <Box>
+                                    {card.levelBadge ? (
+                                        <LevelBadge level={card.levelBadge} />
+                                    ) : (
+                                        <Typography variant="h5" fontWeight={700}>
+                                            {card.value}
+                                        </Typography>
+                                    )}
+                                    <Typography variant="caption" color="text.secondary">
+                                        {card.label}
+                                    </Typography>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </Box>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-base">Progression par domaine</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {domains.map((domain) => {
-                            const progress = domainProgress[domain.id];
-                            return (
-                                <div key={domain.id}>
-                                    <div className="mb-1 flex items-center justify-between text-sm">
-                                        <Link
-                                            href={`/knowledge/${domain.slug}`}
-                                            className="hover:underline"
-                                        >
-                                            {domain.name}
-                                        </Link>
-                                        <span className="text-muted-foreground text-xs">
-                                            {progress?.articles_read || 0}/{domain.articles_count || 0}
-                                        </span>
-                                    </div>
-                                    <ProgressBar
-                                        value={progress?.completion_percentage ?? 0}
-                                        color={domain.color || '#6b7280'}
-                                    />
-                                </div>
-                            );
-                        })}
+                <Card variant="outlined">
+                    <CardContent>
+                        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                            Progression par domaine
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {domains.map((domain) => {
+                                const progress = domainProgress[domain.id];
+                                return (
+                                    <Box key={domain.id}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                                            <MuiLink
+                                                component={Link}
+                                                href={`/knowledge/${domain.slug}`}
+                                                underline="hover"
+                                                variant="body2"
+                                                color="text.primary"
+                                            >
+                                                {domain.name}
+                                            </MuiLink>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {progress?.articles_read || 0}/{domain.articles_count || 0}
+                                            </Typography>
+                                        </Box>
+                                        <ProgressBar
+                                            value={progress?.completion_percentage ?? 0}
+                                            color={domain.color || '#6b7280'}
+                                        />
+                                    </Box>
+                                );
+                            })}
+                        </Box>
                     </CardContent>
                 </Card>
 
                 {recentlyRead.length > 0 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-base">Articles récemment lus</CardTitle>
-                        </CardHeader>
+                    <Card variant="outlined">
                         <CardContent>
-                            <div className="space-y-2">
+                            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                                Articles récemment lus
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 {recentlyRead.map((item) => (
-                                    <Link
+                                    <Box
                                         key={item.id}
+                                        component={Link}
                                         href={`/knowledge/${item.article.domain.slug}/${item.article.slug}`}
-                                        className="hover:bg-accent/50 flex items-center justify-between rounded-lg px-3 py-2 transition-colors"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            borderRadius: 2,
+                                            px: 1.5,
+                                            py: 1,
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                            '&:hover': { bgcolor: 'action.hover' },
+                                        }}
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle2 className="size-4 text-green-500" />
-                                            <span className="text-sm">{item.article.title}</span>
-                                        </div>
-                                        <span
-                                            className="rounded px-1.5 py-0.5 text-[10px] text-white"
-                                            style={{
-                                                backgroundColor: item.article.domain.color || '#6b7280',
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <CheckCircle2 size={16} color="#22c55e" />
+                                            <Typography variant="body2">{item.article.title}</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={item.article.domain.name}
+                                            size="small"
+                                            sx={{
+                                                fontSize: '0.625rem',
+                                                height: 20,
+                                                bgcolor: item.article.domain.color || '#6b7280',
+                                                color: '#fff',
                                             }}
-                                        >
-                                            {item.article.domain.name}
-                                        </span>
-                                    </Link>
+                                        />
+                                    </Box>
                                 ))}
-                            </div>
+                            </Box>
                         </CardContent>
                     </Card>
                 )}
-            </div>
+            </Box>
         </AppLayout>
     );
 }

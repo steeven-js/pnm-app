@@ -1,4 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import MuiAvatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { useInitials } from '@/hooks/use-initials';
 import type { User } from '@/types';
 
@@ -13,20 +15,23 @@ export function UserInfo({
 
     return (
         <>
-            <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                    {getInitials(user.name)}
-                </AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+            <MuiAvatar
+                src={user.avatar}
+                alt={user.name}
+                sx={{ width: 32, height: 32 }}
+            >
+                {getInitials(user.name)}
+            </MuiAvatar>
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <Typography variant="body2" fontWeight={500} noWrap>
+                    {user.name}
+                </Typography>
                 {showEmail && (
-                    <span className="truncate text-xs text-muted-foreground">
+                    <Typography variant="caption" color="text.secondary" noWrap component="p">
                         {user.email}
-                    </span>
+                    </Typography>
                 )}
-            </div>
+            </Box>
         </>
     );
 }

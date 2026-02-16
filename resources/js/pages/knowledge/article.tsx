@@ -1,10 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import MuiLink from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
 import { ArticleContent } from '@/components/article-content';
 import { GlossaryTooltip } from '@/components/glossary-tooltip';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { Article, BreadcrumbItem, GlossaryTerm, KnowledgeDomain } from '@/types';
 
@@ -38,87 +42,108 @@ export default function ArticleShow({ domain, article, isRead, prevArticle, next
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={article.title} />
-            <div className="flex flex-col gap-6 p-4 lg:flex-row">
-                <div className="min-w-0 flex-1">
-                    <div className="mb-4">
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <Badge variant="outline">{levelLabels[article.level] || article.level}</Badge>
-                            <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                                <Clock className="size-3" />
-                                {article.reading_time_minutes} min de lecture
-                            </span>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3, p: 2 }}>
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <Chip label={levelLabels[article.level] || article.level} size="small" variant="outlined" />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Clock size={12} style={{ opacity: 0.5 }} />
+                                <Typography variant="caption" color="text.secondary">
+                                    {article.reading_time_minutes} min de lecture
+                                </Typography>
+                            </Box>
                             {isRead && (
-                                <span className="flex items-center gap-1 text-xs text-green-600">
-                                    <CheckCircle2 className="size-3" />
-                                    Lu
-                                </span>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <CheckCircle2 size={12} color="#16a34a" />
+                                    <Typography variant="caption" sx={{ color: '#16a34a' }}>
+                                        Lu
+                                    </Typography>
+                                </Box>
                             )}
-                        </div>
-                        <h1 className="text-2xl font-bold">{article.title}</h1>
+                        </Box>
+                        <Typography variant="h5" fontWeight={700}>
+                            {article.title}
+                        </Typography>
                         {article.excerpt && (
-                            <p className="text-muted-foreground mt-1">{article.excerpt}</p>
+                            <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                                {article.excerpt}
+                            </Typography>
                         )}
-                    </div>
+                    </Box>
 
                     <ArticleContent content={article.content || ''} />
 
-                    <div className="mt-6 flex items-center justify-between border-t pt-4">
-                        <div>
+                    <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                        <Box>
                             {prevArticle && (
-                                <Link
+                                <MuiLink
+                                    component={Link}
                                     href={`/knowledge/${domain.slug}/${prevArticle.slug}`}
-                                    className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
+                                    underline="hover"
+                                    color="text.secondary"
+                                    variant="body2"
+                                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5, '&:hover': { color: 'text.primary' } }}
                                 >
-                                    <ArrowLeft className="size-4" />
+                                    <ArrowLeft size={16} />
                                     {prevArticle.title}
-                                </Link>
+                                </MuiLink>
                             )}
-                        </div>
-                        <div>
+                        </Box>
+                        <Box>
                             {nextArticle && (
-                                <Link
+                                <MuiLink
+                                    component={Link}
                                     href={`/knowledge/${domain.slug}/${nextArticle.slug}`}
-                                    className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
+                                    underline="hover"
+                                    color="text.secondary"
+                                    variant="body2"
+                                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5, '&:hover': { color: 'text.primary' } }}
                                 >
                                     {nextArticle.title}
-                                    <ArrowRight className="size-4" />
-                                </Link>
+                                    <ArrowRight size={16} />
+                                </MuiLink>
                             )}
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
 
                     {!isRead && (
-                        <div className="mt-4">
-                            <Button onClick={markAsRead} className="w-full sm:w-auto">
-                                <CheckCircle2 className="mr-2 size-4" />
+                        <Box sx={{ mt: 2 }}>
+                            <Button
+                                variant="contained"
+                                onClick={markAsRead}
+                                startIcon={<CheckCircle2 size={16} />}
+                            >
                                 Marquer comme lu
                             </Button>
-                        </div>
+                        </Box>
                     )}
-                </div>
+                </Box>
 
                 {article.glossary_terms && article.glossary_terms.length > 0 && (
-                    <aside className="w-full shrink-0 lg:w-72">
-                        <Card>
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-sm">Termes techniques</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {article.glossary_terms.map((term: GlossaryTerm) => (
-                                    <div key={term.id}>
-                                        <GlossaryTooltip term={term}>
-                                            {term.abbreviation || term.term}
-                                        </GlossaryTooltip>
-                                        <p className="text-muted-foreground mt-0.5 text-xs line-clamp-2">
-                                            {term.definition}
-                                        </p>
-                                    </div>
-                                ))}
+                    <Box component="aside" sx={{ width: { xs: '100%', lg: 288 }, flexShrink: 0 }}>
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
+                                    Termes techniques
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                    {article.glossary_terms.map((term: GlossaryTerm) => (
+                                        <Box key={term.id}>
+                                            <GlossaryTooltip term={term}>
+                                                {term.abbreviation || term.term}
+                                            </GlossaryTooltip>
+                                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                {term.definition}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
                             </CardContent>
                         </Card>
-                    </aside>
+                    </Box>
                 )}
-            </div>
+            </Box>
         </AppLayout>
     );
 }

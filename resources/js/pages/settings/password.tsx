@@ -1,12 +1,13 @@
-import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Fade from '@mui/material/Fade';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { useRef } from 'react';
 import PasswordController from '@/actions/App/Http/Controllers/Settings/PasswordController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/user-password';
@@ -30,7 +31,7 @@ export default function Password() {
             <h1 className="sr-only">Password Settings</h1>
 
             <SettingsLayout>
-                <div className="space-y-6">
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     <Heading
                         variant="small"
                         title="Update password"
@@ -60,88 +61,71 @@ export default function Password() {
                         className="space-y-6"
                     >
                         {({ errors, processing, recentlySuccessful }) => (
-                            <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="current_password">
-                                        Current password
-                                    </Label>
-
-                                    <Input
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <Box>
+                                    <TextField
                                         id="current_password"
-                                        ref={currentPasswordInput}
+                                        label="Current password"
+                                        inputRef={currentPasswordInput}
                                         name="current_password"
                                         type="password"
-                                        className="mt-1 block w-full"
                                         autoComplete="current-password"
                                         placeholder="Current password"
+                                        fullWidth
+                                        error={!!errors.current_password}
                                     />
+                                    <InputError message={errors.current_password} />
+                                </Box>
 
-                                    <InputError
-                                        message={errors.current_password}
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password">
-                                        New password
-                                    </Label>
-
-                                    <Input
+                                <Box>
+                                    <TextField
                                         id="password"
-                                        ref={passwordInput}
+                                        label="New password"
+                                        inputRef={passwordInput}
                                         name="password"
                                         type="password"
-                                        className="mt-1 block w-full"
                                         autoComplete="new-password"
                                         placeholder="New password"
+                                        fullWidth
+                                        error={!!errors.password}
                                     />
-
                                     <InputError message={errors.password} />
-                                </div>
+                                </Box>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation">
-                                        Confirm password
-                                    </Label>
-
-                                    <Input
+                                <Box>
+                                    <TextField
                                         id="password_confirmation"
+                                        label="Confirm password"
                                         name="password_confirmation"
                                         type="password"
-                                        className="mt-1 block w-full"
                                         autoComplete="new-password"
                                         placeholder="Confirm password"
+                                        fullWidth
+                                        error={!!errors.password_confirmation}
                                     />
+                                    <InputError message={errors.password_confirmation} />
+                                </Box>
 
-                                    <InputError
-                                        message={errors.password_confirmation}
-                                    />
-                                </div>
-
-                                <div className="flex items-center gap-4">
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                     <Button
+                                        type="submit"
+                                        variant="contained"
                                         disabled={processing}
                                         data-test="update-password-button"
                                     >
                                         Save password
                                     </Button>
 
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
+                                    <Fade in={recentlySuccessful}>
+                                        <Typography variant="body2" color="text.secondary">
                                             Saved
-                                        </p>
-                                    </Transition>
-                                </div>
-                            </>
+                                        </Typography>
+                                    </Fade>
+                                </Box>
+                            </Box>
                         )}
                     </Form>
-                </div>
+                </Box>
             </SettingsLayout>
         </AppLayout>
     );
