@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { Calendar, FileText, Hash, Phone, ShieldCheck } from 'lucide-react';
+import { Calendar, FileSearch, Hash, Phone, ShieldCheck } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -32,13 +32,13 @@ const tools = [
         count: 'Format OO-Q-RRRRRR-CCC',
     },
     {
-        title: 'Décodeur fichier PNMDATA',
+        title: 'Analyseur de fichier PNM',
         description:
-            'Décodez un nom de fichier PNMDATA pour identifier les opérateurs source/destination, la date et la séquence.',
-        icon: FileText,
+            "Analysez le contenu complet d'un fichier PNMDATA ou PNMSYNC : en-tête, tickets, pied de page et validation.",
+        icon: FileSearch,
         href: '/verify/filename-decoder',
         color: '#f59e0b',
-        count: 'PNMDATA.XX.YY.timestamp.seq',
+        count: 'En-tête, tickets, validation',
     },
     {
         title: "Calculateur d'ID portage",

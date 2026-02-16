@@ -252,6 +252,325 @@ export function decodeFilename(filename: string): FilenameResult {
     };
 }
 
+// ─── V3b — Analyseur complet de fichier PNM ─────────────────────────────────
+
+// ── Maps ──
+
+export const TICKET_TYPE_MAP: Record<string, { label: string; abbrev: string; direction: string }> = {
+    '0000': { label: 'Ticket générique', abbrev: 'GEN', direction: '—' },
+    '1110': { label: 'Demande de portage', abbrev: 'DP', direction: 'OPR → OPD' },
+    '1120': { label: 'Confirmation de demande', abbrev: 'CD', direction: 'OPR → OPD' },
+    '1210': { label: 'Réponse positive', abbrev: 'RP+', direction: 'OPD → OPR' },
+    '1220': { label: 'Réponse négative', abbrev: 'RP−', direction: 'OPD → OPR' },
+    '1410': { label: 'Notification tiers', abbrev: 'NT', direction: 'OPR → OPX' },
+    '1430': { label: 'Confirmation de portage', abbrev: 'CP', direction: 'OPX → OPR' },
+    '1510': { label: "Demande d'éligibilité", abbrev: 'DE', direction: 'OPR → OPD' },
+    '1530': { label: "Réponse d'éligibilité", abbrev: 'RE', direction: 'OPD → OPR' },
+    '3430': { label: 'Synchronisation portage', abbrev: 'SYNC', direction: 'EBP → OP' },
+    '7000': { label: 'Ticket technique', abbrev: 'TECH', direction: '—' },
+};
+
+export const RESPONSE_CODE_MAP: Record<string, string> = {
+    'A001': 'Accord de portage',
+    'R123': 'RIO invalide ou expiré',
+    'R201': 'Numéro non attribué à l\'opérateur',
+    'R202': 'Numéro non éligible (engagement en cours)',
+    'R203': 'Demande en cours sur ce numéro',
+    'R301': 'Données incohérentes',
+    'R322': 'Refus technique — erreur de format',
+    'R401': 'Délai de réponse dépassé',
+    'R501': 'Numéro en cours de suspension',
+    'R502': 'Numéro résilié',
+};
+
+// ── Types ──
+
+export type ParsedHeader = {
+    sentinel: string;
+    filename: string;
+    filenameDecoded: FilenameResult;
+    operatorCode: string;
+    operatorName: string;
+    timestamp: string;
+    formattedDate: string;
+};
+
+export type ParsedFooter = {
+    sentinel: string;
+    operatorCode: string;
+    operatorName: string;
+    timestamp: string;
+    formattedDate: string;
+    declaredCount: number;
+};
+
+export type TicketCommonFields = {
+    code: string;
+    typeInfo: { label: string; abbrev: string; direction: string };
+    opr: string;
+    oprName: string;
+    opd: string;
+    opdName: string;
+    opa: string;
+    opaName: string;
+    opx: string;
+    opxName: string;
+    timestamp: string;
+    formattedDate: string;
+    msisdn: string;
+    hash: string;
+};
+
+export type TicketSpecificFields = Record<string, string>;
+
+export type ParsedTicket = {
+    lineNumber: number;
+    raw: string;
+    common: TicketCommonFields;
+    specific: TicketSpecificFields;
+};
+
+export type ValidationIssue = {
+    severity: 'error' | 'warning' | 'info';
+    message: string;
+};
+
+export type TicketSummary = {
+    code: string;
+    label: string;
+    abbrev: string;
+    count: number;
+};
+
+export type FileAnalysisResult = {
+    header: ParsedHeader | null;
+    footer: ParsedFooter | null;
+    tickets: ParsedTicket[];
+    ticketSummary: TicketSummary[];
+    uniqueMsisdns: string[];
+    operatorsInvolved: string[];
+    issues: ValidationIssue[];
+};
+
+// ── Helpers ──
+
+export function formatPnmTimestamp(ts: string): string {
+    if (!/^\d{14}$/.test(ts)) return ts;
+    const y = ts.slice(0, 4);
+    const m = ts.slice(4, 6);
+    const d = ts.slice(6, 8);
+    const h = ts.slice(8, 10);
+    const mi = ts.slice(10, 12);
+    const s = ts.slice(12, 14);
+    return `${d}/${m}/${y} à ${h}:${mi}:${s}`;
+}
+
+// ── Parsing functions ──
+
+export function parseHeader(line: string): ParsedHeader | null {
+    if (!line.startsWith('0123456789|')) return null;
+    const parts = line.split('|');
+    if (parts.length < 4) return null;
+    const [sentinel, filename, opCode, ts] = parts;
+    return {
+        sentinel,
+        filename,
+        filenameDecoded: decodeFilename(filename),
+        operatorCode: opCode,
+        operatorName: getOperatorName(opCode),
+        timestamp: ts,
+        formattedDate: formatPnmTimestamp(ts),
+    };
+}
+
+export function parseFooter(line: string): ParsedFooter | null {
+    if (!line.startsWith('9876543210|')) return null;
+    const parts = line.split('|');
+    if (parts.length < 4) return null;
+    const [sentinel, opCode, ts, countStr] = parts;
+    return {
+        sentinel,
+        operatorCode: opCode,
+        operatorName: getOperatorName(opCode),
+        timestamp: ts,
+        formattedDate: formatPnmTimestamp(ts),
+        declaredCount: parseInt(countStr, 10) || 0,
+    };
+}
+
+function parseTicketCommon(fields: string[]): TicketCommonFields {
+    const code = fields[0] ?? '';
+    const opr = fields[1] ?? '';
+    const opd = fields[2] ?? '';
+    const opa = fields[3] ?? '';
+    const opx = fields[4] ?? '';
+    const ts = fields[5] ?? '';
+    const msisdn = fields[6] ?? '';
+    const hash = fields[7] ?? '';
+    return {
+        code,
+        typeInfo: TICKET_TYPE_MAP[code] ?? { label: `Ticket inconnu (${code})`, abbrev: '???', direction: '—' },
+        opr,
+        oprName: getOperatorName(opr),
+        opd,
+        opdName: getOperatorName(opd),
+        opa,
+        opaName: getOperatorName(opa),
+        opx,
+        opxName: getOperatorName(opx),
+        timestamp: ts,
+        formattedDate: formatPnmTimestamp(ts),
+        msisdn,
+        hash,
+    };
+}
+
+function parseTicketSpecific(code: string, fields: string[]): TicketSpecificFields {
+    // fields starts at index 8 (after common fields)
+    const extra = fields.slice(8);
+    const result: TicketSpecificFields = {};
+
+    switch (code) {
+        case '1110': // DP
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['RIO'] = extra[1];
+            if (extra[2]) result['Date envoi'] = formatPnmTimestamp(extra[2]);
+            if (extra[3]) result['Date portage'] = formatPnmTimestamp(extra[3]);
+            if (extra[6]) result['Code postal'] = extra[6];
+            if (extra[7]) result['Date souscription'] = formatPnmTimestamp(extra[7]);
+            break;
+        case '1120': // CD
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
+            break;
+        case '1210': // RP+
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Code réponse'] = extra[1];
+            if (extra[1] && RESPONSE_CODE_MAP[extra[1]]) result['Libellé réponse'] = RESPONSE_CODE_MAP[extra[1]];
+            if (extra[2]) result['Date réponse'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '1220': // RP-
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Code refus'] = extra[1];
+            if (extra[1] && RESPONSE_CODE_MAP[extra[1]]) result['Libellé refus'] = RESPONSE_CODE_MAP[extra[1]];
+            if (extra[2]) result['Date refus'] = formatPnmTimestamp(extra[2]);
+            if (extra[4]) result['Motif refus'] = extra[4];
+            break;
+        case '1430': // CP
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date effectif'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '3430': // SYNC
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date sync'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date cible'] = formatPnmTimestamp(extra[2]);
+            break;
+        default: {
+            // Format variable → rawExtra
+            const raw = extra.filter(Boolean).join(' | ');
+            if (raw) result['Données supplémentaires'] = raw;
+            break;
+        }
+    }
+
+    return result;
+}
+
+export function analyzeFileContent(content: string): FileAnalysisResult {
+    const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+    const issues: ValidationIssue[] = [];
+
+    if (lines.length === 0) {
+        issues.push({ severity: 'error', message: 'Le contenu est vide.' });
+        return { header: null, footer: null, tickets: [], ticketSummary: [], uniqueMsisdns: [], operatorsInvolved: [], issues };
+    }
+
+    // Parse header (first line)
+    const header = parseHeader(lines[0]);
+    if (!header) {
+        issues.push({ severity: 'warning', message: `En-tête non reconnu (sentinelle 0123456789 attendue). Ligne : "${lines[0].slice(0, 60)}…"` });
+    }
+
+    // Parse footer (last line)
+    const footer = lines.length > 1 ? parseFooter(lines[lines.length - 1]) : null;
+    if (!footer && lines.length > 1) {
+        issues.push({ severity: 'warning', message: `Pied de page non reconnu (sentinelle 9876543210 attendue). Ligne : "${lines[lines.length - 1].slice(0, 60)}…"` });
+    }
+
+    // Parse tickets (lines between header and footer)
+    const ticketLines = lines.slice(
+        header ? 1 : 0,
+        footer ? lines.length - 1 : lines.length,
+    );
+
+    const tickets: ParsedTicket[] = [];
+    for (let i = 0; i < ticketLines.length; i++) {
+        const raw = ticketLines[i];
+        const fields = raw.split('|').map((f) => f.trim());
+
+        if (fields.length < 2) {
+            issues.push({ severity: 'warning', message: `Ligne ${(header ? 2 : 1) + i} : format non reconnu (moins de 2 champs).` });
+            continue;
+        }
+
+        const common = parseTicketCommon(fields);
+        const specific = parseTicketSpecific(common.code, fields);
+
+        if (!TICKET_TYPE_MAP[common.code]) {
+            issues.push({ severity: 'info', message: `Ligne ${(header ? 2 : 1) + i} : code ticket inconnu "${common.code}".` });
+        }
+
+        tickets.push({
+            lineNumber: (header ? 2 : 1) + i,
+            raw,
+            common,
+            specific,
+        });
+    }
+
+    // Validate footer count
+    if (footer) {
+        const actualCount = tickets.length;
+        if (footer.declaredCount !== actualCount) {
+            issues.push({
+                severity: 'error',
+                message: `Compteur pied de page (${footer.declaredCount}) ≠ nombre réel de tickets (${actualCount}).`,
+            });
+        }
+    }
+
+    // Build summary
+    const countByCode: Record<string, number> = {};
+    const msisdnSet = new Set<string>();
+    const operatorSet = new Set<string>();
+
+    for (const t of tickets) {
+        const c = t.common.code;
+        countByCode[c] = (countByCode[c] ?? 0) + 1;
+        if (t.common.msisdn) msisdnSet.add(t.common.msisdn);
+        if (t.common.oprName) operatorSet.add(t.common.oprName);
+        if (t.common.opdName) operatorSet.add(t.common.opdName);
+    }
+
+    const ticketSummary: TicketSummary[] = Object.entries(countByCode)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([code, count]) => {
+            const info = TICKET_TYPE_MAP[code] ?? { label: `Inconnu (${code})`, abbrev: '???' };
+            return { code, label: info.label, abbrev: info.abbrev, count };
+        });
+
+    return {
+        header,
+        footer,
+        tickets,
+        ticketSummary,
+        uniqueMsisdns: [...msisdnSet].sort(),
+        operatorsInvolved: [...operatorSet].sort(),
+        issues,
+    };
+}
+
 // ─── V4 — Calcul ID de portage (MD5) ────────────────────────────────────────
 
 /** Calcul MD5 via Web Crypto (SHA n'est pas MD5, on implémente un MD5 léger). */
