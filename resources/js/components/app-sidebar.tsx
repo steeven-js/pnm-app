@@ -1,5 +1,18 @@
 import { Link } from '@inertiajs/react';
-import { BarChart3, BookOpenText, Calculator, LayoutGrid, Search, Workflow } from 'lucide-react';
+import {
+    BarChart3,
+    BookOpenText,
+    Calculator,
+    Calendar,
+    FileSearch,
+    GitBranch,
+    Hash,
+    LayoutGrid,
+    Phone,
+    Search,
+    ShieldCheck,
+    Workflow,
+} from 'lucide-react';
 import { ChatTrigger } from '@/components/chat-trigger';
 import { NavKnowledge } from '@/components/nav-knowledge';
 import { NavMain } from '@/components/nav-main';
@@ -17,7 +30,7 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const navItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -28,25 +41,42 @@ const mainNavItems: NavItem[] = [
         href: '/progress',
         icon: BarChart3,
     },
+];
+
+const toolsItems: NavItem[] = [
     {
-        title: 'Glossaire',
-        href: '/glossary',
-        icon: BookOpenText,
+        title: 'Vérifier',
+        href: '/verify',
+        icon: Calculator,
+        children: [
+            { title: 'Calculateur de dates', href: '/verify/date-calculator', icon: Calendar },
+            { title: 'Validateur de RIO', href: '/verify/rio-validator', icon: ShieldCheck },
+            { title: 'Analyseur fichier PNM', href: '/verify/filename-decoder', icon: FileSearch },
+            { title: 'Calculateur ID portage', href: '/verify/portage-id', icon: Hash },
+            { title: 'Vérificateur MSISDN', href: '/verify/msisdn-checker', icon: Phone },
+        ],
     },
     {
         title: 'Résoudre',
         href: '/resolve',
         icon: Search,
-    },
-    {
-        title: 'Vérifier',
-        href: '/verify',
-        icon: Calculator,
+        children: [
+            { title: 'Dictionnaire des codes', href: '/resolve/codes', icon: BookOpenText },
+            { title: 'Arbres de décision', href: '/resolve/decision-trees', icon: GitBranch },
+        ],
     },
     {
         title: 'Diagrammes',
         href: '/diagrams',
         icon: Workflow,
+    },
+];
+
+const referenceItems: NavItem[] = [
+    {
+        title: 'Glossaire',
+        href: '/glossary',
+        icon: BookOpenText,
     },
 ];
 
@@ -66,7 +96,9 @@ export function AppSidebar({ onChatOpen }: { onChatOpen?: () => void }) {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItems} label="Navigation" />
+                <NavMain items={toolsItems} label="Outils PNM" />
+                <NavMain items={referenceItems} label="Référence" />
                 <NavKnowledge />
             </SidebarContent>
 
