@@ -1,0 +1,325 @@
+<h2>Processus standard de portage — Étape par étape</h2>
+
+<p>Le portage d'un numéro mobile suit un processus normalisé par le GPMAG, avec des étapes précises et des délais réglementaires. Voici le déroulé complet d'un portage standard.</p>
+
+<div class="my-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 650" width="100%" role="img" aria-label="Diagramme du processus de portage de numéro mobile">
+  <defs>
+    <!-- Default arrow marker using currentColor -->
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="currentColor">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <!-- Green arrow for accept path -->
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#22c55e">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <!-- Red arrow for refuse path -->
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#ef4444">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <!-- Violet arrow for GPMAG transit -->
+    <marker id="arrowViolet" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#8b5cf6">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+
+  <!-- ======================================== -->
+  <!-- SWIMLANE COLUMN BACKGROUNDS              -->
+  <!-- ======================================== -->
+
+  <!-- Timeline column -->
+  <rect x="0" y="0" width="80" height="650" fill="currentColor" opacity="0.03" />
+
+  <!-- OPR column -->
+  <rect x="80" y="0" width="220" height="650" fill="#3b82f6" opacity="0.05" />
+
+  <!-- GPMAG/sFTP column -->
+  <rect x="300" y="0" width="160" height="650" fill="#8b5cf6" opacity="0.05" />
+
+  <!-- OPD column -->
+  <rect x="460" y="0" width="240" height="650" fill="#f59e0b" opacity="0.05" />
+
+  <!-- ======================================== -->
+  <!-- COLUMN HEADERS                           -->
+  <!-- ======================================== -->
+
+  <rect x="0" y="0" width="80" height="44" fill="currentColor" opacity="0.1" />
+  <text x="40" y="27" text-anchor="middle" fill="currentColor" font-size="11" font-weight="700" font-family="system-ui, sans-serif">Timeline</text>
+
+  <rect x="80" y="0" width="220" height="44" fill="#3b82f6" />
+  <text x="190" y="27" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700" font-family="system-ui, sans-serif">OPR (Receveur)</text>
+
+  <rect x="300" y="0" width="160" height="44" fill="#8b5cf6" />
+  <text x="380" y="27" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700" font-family="system-ui, sans-serif">GPMAG / sFTP</text>
+
+  <rect x="460" y="0" width="240" height="44" fill="#f59e0b" />
+  <text x="580" y="27" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700" font-family="system-ui, sans-serif">OPD (Donneur)</text>
+
+  <!-- Column separator lines -->
+  <line x1="80" y1="44" x2="80" y2="650" stroke="currentColor" stroke-opacity="0.1" stroke-width="1" />
+  <line x1="300" y1="44" x2="300" y2="650" stroke="currentColor" stroke-opacity="0.1" stroke-width="1" />
+  <line x1="460" y1="44" x2="460" y2="650" stroke="currentColor" stroke-opacity="0.1" stroke-width="1" />
+
+  <!-- ======================================== -->
+  <!-- TIMELINE LABELS                          -->
+  <!-- ======================================== -->
+
+  <text x="40" y="100" text-anchor="middle" fill="currentColor" font-size="13" font-weight="700" font-family="system-ui, sans-serif">JD</text>
+
+  <text x="40" y="335" text-anchor="middle" fill="currentColor" font-size="13" font-weight="700" font-family="system-ui, sans-serif">JD</text>
+  <text x="40" y="351" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.7">/ JD+1</text>
+
+  <text x="40" y="505" text-anchor="middle" fill="currentColor" font-size="13" font-weight="700" font-family="system-ui, sans-serif">JP</text>
+  <text x="40" y="521" text-anchor="middle" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.7">(JD+2 ouvrés)</text>
+
+  <!-- Horizontal zone separators -->
+  <line x1="0" y1="255" x2="700" y2="255" stroke="currentColor" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="6,4" />
+  <line x1="0" y1="435" x2="700" y2="435" stroke="currentColor" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="6,4" />
+
+  <!-- ======================================== -->
+  <!-- STEP 1: Client demande (OPR)             -->
+  <!-- ======================================== -->
+
+  <rect x="115" y="68" width="150" height="44" rx="6" fill="#3b82f6" opacity="0.12" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="190" y="86" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Demande client</text>
+  <text x="190" y="101" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">RIO + MSISDN</text>
+
+  <!-- Arrow Step 1 to Step 2 -->
+  <line x1="190" y1="112" x2="190" y2="140" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <!-- ======================================== -->
+  <!-- STEP 2: Ticket 1110 (OPR)                -->
+  <!-- ======================================== -->
+
+  <rect x="115" y="145" width="150" height="44" rx="6" fill="#3b82f6" opacity="0.12" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="190" y="163" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Ticket 1110</text>
+  <text x="190" y="178" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Demande de portage</text>
+
+  <!-- Arrow OPR to GPMAG -->
+  <line x1="265" y1="167" x2="342" y2="167" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrowViolet)" />
+
+  <!-- ======================================== -->
+  <!-- STEP 3: GPMAG sFTP transit               -->
+  <!-- ======================================== -->
+
+  <rect x="347" y="150" width="66" height="34" rx="6" fill="#8b5cf6" opacity="0.12" stroke="#8b5cf6" stroke-width="1.5" />
+  <text x="380" y="172" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="system-ui, sans-serif">sFTP</text>
+
+  <!-- Arrow GPMAG to OPD -->
+  <line x1="413" y1="167" x2="498" y2="167" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrowViolet)" />
+  <text x="456" y="160" text-anchor="middle" fill="#8b5cf6" font-size="9" font-family="system-ui, sans-serif" opacity="0.8">PNMDATA</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 3b: OPD receives ticket 1110        -->
+  <!-- ======================================== -->
+
+  <rect x="503" y="145" width="155" height="44" rx="6" fill="#f59e0b" opacity="0.12" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="580" y="163" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Réception 1110</text>
+  <text x="580" y="178" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Analyse demande</text>
+
+  <!-- Arrow down to decision -->
+  <line x1="580" y1="189" x2="580" y2="268" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <!-- ======================================== -->
+  <!-- STEP 4: Eligibility decision (OPD)       -->
+  <!-- ======================================== -->
+
+  <polygon points="580,273 632,310 580,347 528,310" fill="#f59e0b" opacity="0.12" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="580" y="306" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="system-ui, sans-serif">Éligibilité</text>
+  <text x="580" y="319" text-anchor="middle" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.7">RIO OK ?</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 5a: Accept path (green)             -->
+  <!-- ======================================== -->
+
+  <!-- Arrow from diamond left to GPMAG accept box -->
+  <polyline points="528,310 458,310 422,310" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowGreen)" />
+  <text x="475" y="300" text-anchor="middle" fill="#22c55e" font-size="9" font-weight="700" font-family="system-ui, sans-serif">Oui</text>
+
+  <!-- Accept transit box in GPMAG -->
+  <rect x="342" y="290" width="76" height="40" rx="6" fill="#22c55e" opacity="0.1" stroke="#22c55e" stroke-width="1.5" />
+  <text x="380" y="307" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="system-ui, sans-serif">1210</text>
+  <text x="380" y="320" text-anchor="middle" fill="#22c55e" font-size="9" font-weight="700" font-family="system-ui, sans-serif">Accept</text>
+
+  <!-- Arrow from accept to OPR -->
+  <line x1="342" y1="310" x2="268" y2="310" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowGreen)" />
+
+  <!-- OPR receives acceptance -->
+  <rect x="115" y="288" width="150" height="44" rx="6" fill="#22c55e" opacity="0.1" stroke="#22c55e" stroke-width="1.5" />
+  <text x="190" y="306" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Portage confirmé</text>
+  <text x="190" y="321" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Date JP fixée</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 5b: Refuse path (red)               -->
+  <!-- ======================================== -->
+
+  <!-- Arrow from diamond down to refuse box -->
+  <line x1="580" y1="347" x2="580" y2="370" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowRed)" />
+  <text x="594" y="363" fill="#ef4444" font-size="9" font-weight="700" font-family="system-ui, sans-serif">Non</text>
+
+  <rect x="503" y="375" width="155" height="38" rx="6" fill="#ef4444" opacity="0.08" stroke="#ef4444" stroke-width="1.5" />
+  <text x="580" y="391" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="system-ui, sans-serif">1210 — Refus</text>
+  <text x="580" y="404" text-anchor="middle" fill="#ef4444" font-size="9" font-family="system-ui, sans-serif">Code motif envoyé</text>
+
+  <!-- Dashed arrow refuse back to OPR -->
+  <polyline points="503,394 380,394 268,394" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)" />
+
+  <!-- Cancelled box at OPR -->
+  <rect x="115" y="378" width="150" height="32" rx="6" fill="#ef4444" opacity="0.06" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" />
+  <text x="190" y="399" text-anchor="middle" fill="#ef4444" font-size="10" font-family="system-ui, sans-serif">Portage annulé</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 6: Bascule technique (OPR) — JP     -->
+  <!-- ======================================== -->
+
+  <!-- Arrow from confirmed to bascule -->
+  <line x1="190" y1="332" x2="190" y2="462" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <rect x="115" y="467" width="150" height="50" rx="6" fill="#3b82f6" opacity="0.12" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="190" y="487" text-anchor="middle" fill="currentColor" font-size="11" font-weight="700" font-family="system-ui, sans-serif">Bascule technique</text>
+  <text x="190" y="503" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">HLR/HSS + EMA/EMM</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 7: Ticket 1410 notification to OPD  -->
+  <!-- ======================================== -->
+
+  <!-- Arrow from Bascule to GPMAG -->
+  <line x1="265" y1="492" x2="342" y2="492" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrowViolet)" />
+
+  <rect x="347" y="475" width="66" height="34" rx="6" fill="#8b5cf6" opacity="0.12" stroke="#8b5cf6" stroke-width="1.5" />
+  <text x="380" y="497" text-anchor="middle" fill="currentColor" font-size="10" font-weight="600" font-family="system-ui, sans-serif">sFTP</text>
+
+  <!-- Arrow from GPMAG to OPD -->
+  <line x1="413" y1="492" x2="498" y2="492" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrowViolet)" />
+
+  <rect x="503" y="470" width="155" height="44" rx="6" fill="#f59e0b" opacity="0.12" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="580" y="488" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Ticket 1410</text>
+  <text x="580" y="503" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Bascule notifiée</text>
+
+  <!-- ======================================== -->
+  <!-- STEP 8: Ticket 1430 confirmation (OPR)   -->
+  <!-- ======================================== -->
+
+  <!-- Arrow from Bascule down to 1430 -->
+  <line x1="190" y1="517" x2="190" y2="558" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <rect x="115" y="563" width="150" height="50" rx="6" fill="#22c55e" opacity="0.1" stroke="#22c55e" stroke-width="2" />
+  <text x="190" y="583" text-anchor="middle" fill="currentColor" font-size="11" font-weight="700" font-family="system-ui, sans-serif">Ticket 1430</text>
+  <text x="190" y="599" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Portage effectif</text>
+
+  <!-- Arrow 1430 across to OPD -->
+  <polyline points="265,588 380,588 498,588" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <rect x="503" y="566" width="155" height="44" rx="6" fill="#f59e0b" opacity="0.12" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="580" y="584" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui, sans-serif">Résiliation ligne</text>
+  <text x="580" y="599" text-anchor="middle" fill="currentColor" font-size="10" font-family="system-ui, sans-serif" opacity="0.6">Désactivation OPD</text>
+
+  <!-- ======================================== -->
+  <!-- LEGEND                                   -->
+  <!-- ======================================== -->
+
+  <rect x="110" y="628" width="10" height="10" rx="2" fill="#22c55e" opacity="0.5" />
+  <text x="125" y="637" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.5">Accepté</text>
+
+  <rect x="175" y="628" width="10" height="10" rx="2" fill="#ef4444" opacity="0.5" />
+  <text x="190" y="637" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.5">Refusé</text>
+
+  <line x1="240" y1="633" x2="260" y2="633" stroke="#8b5cf6" stroke-width="1.5" />
+  <text x="265" y="637" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.5">Transit GPMAG</text>
+
+  <polygon points="370,633 378,628 386,633 378,638" fill="#f59e0b" opacity="0.5" />
+  <text x="392" y="637" fill="currentColor" font-size="9" font-family="system-ui, sans-serif" opacity="0.5">Décision</text>
+
+</svg>
+</div>
+
+<h3>Phase 1 : Demande du client (JD — Jour de la Demande)</h3>
+<p>Le processus démarre lorsqu'un client se présente en boutique ou effectue une demande en ligne chez le <strong>nouvel opérateur (OPR)</strong>.</p>
+<ul>
+    <li>Le client fournit son <strong>RIO</strong>, obtenu en appelant le <strong>3179</strong> (serveur vocal interactif gratuit)</li>
+    <li>Le conseiller saisit la demande dans le système CRM</li>
+    <li>Le système vérifie le format du RIO et identifie l'opérateur donneur via le <strong>code opérateur</strong> (2 premiers caractères)</li>
+    <li>Une <strong>pré-vérification d'éligibilité</strong> est effectuée localement</li>
+</ul>
+
+<h3>Phase 2 : Émission du ticket 1110 (JD)</h3>
+<p>Le système de portabilité de l'OPR génère automatiquement un <strong>ticket 1110</strong> (demande de portage simple). Ce ticket contient :</p>
+<ul>
+    <li>Le <strong>MSISDN</strong> (numéro du client au format international : <code>590690XXXXXX</code>)</li>
+    <li>Le <strong>RIO</strong> fourni par le client</li>
+    <li>La <strong>date de portage souhaitée (JP)</strong>, calculée comme <strong>JD + 2 jours ouvrés</strong></li>
+    <li>Les identifiants OPR, OPD et OPA</li>
+</ul>
+<p>Ce ticket est intégré dans un <strong>fichier PNMDATA</strong> et transmis à l'OPD lors de la prochaine vacation sFTP.</p>
+
+<h3>Phase 3 : Réponse de l'OPD — Ticket 1210 (JD ou JD+1)</h3>
+<p>L'OPD reçoit le ticket 1110 et effectue ses <strong>contrôles d'éligibilité</strong> :</p>
+<ul>
+    <li>Vérification du RIO (correspondance numéro/opérateur/clé)</li>
+    <li>Vérification que le numéro est <strong>actif</strong> sur son réseau</li>
+    <li>Vérification qu'aucun <strong>portage n'est déjà en cours</strong> pour ce numéro</li>
+    <li>Vérification de l'absence de <strong>restriction légale</strong> (opposition judiciaire, etc.)</li>
+</ul>
+<p>L'OPD émet alors un <strong>ticket 1210</strong> :</p>
+<ul>
+    <li><strong>Acceptation</strong> : le portage est confirmé pour la date JP proposée</li>
+    <li><strong>Refus</strong> : le ticket 1210 contient un <strong>code motif de refus</strong> détaillé (voir article dédié)</li>
+</ul>
+
+<h3>Phase 4 : Bascule technique — Ticket 1410 (JP)</h3>
+<p>Le jour JP, l'OPR exécute la <strong>bascule technique</strong>. C'est le moment critique du portage :</p>
+<ul>
+    <li>Le script <strong>TraitementBascule.sh</strong> est déclenché automatiquement</li>
+    <li>L'OPR envoie des commandes <strong>EMA/EMM</strong> vers le MOBI pour mettre à jour le routage</li>
+    <li>Le <strong>HLR/HSS</strong> de l'OPR est mis à jour avec le profil du nouveau client</li>
+    <li>La SIM du client est activée sur le réseau de l'OPR</li>
+    <li>L'OPR émet un <strong>ticket 1410</strong> (notification de bascule effective) à l'OPD</li>
+</ul>
+<p>La bascule s'effectue lors de la <strong>vacation de 10h (V10)</strong> du jour JP. Le client peut ressentir une coupure de service de quelques minutes pendant la transition.</p>
+
+<h3>Phase 5 : Confirmation — Ticket 1430 (JP)</h3>
+<p>Après vérification du bon fonctionnement de la ligne sur le nouveau réseau :</p>
+<ul>
+    <li>L'OPR émet un <strong>ticket 1430</strong> (confirmation de portage effectif)</li>
+    <li>L'OPD procède à la <strong>résiliation définitive</strong> de l'ancienne ligne</li>
+    <li>Le numéro est officiellement <strong>hébergé</strong> chez le nouvel opérateur</li>
+</ul>
+
+<h3>Séquence complète du portage</h3>
+<pre class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant OPR as OPR (Receveur)
+    participant SFTP as sFTP GPMAG
+    participant OPD as OPD (Donneur)
+
+    C->>OPR: Demande portage + RIO (JD)
+    OPR->>OPR: Vérification RIO + création ticket
+    OPR->>SFTP: Ticket 1110 (PNMDATA)
+    SFTP->>OPD: Fichier PNMDATA
+
+    OPD->>OPD: Contrôle éligibilité
+    alt Accepté
+        OPD->>SFTP: Ticket 1210 (Accept)
+        SFTP->>OPR: Réponse acceptation
+        Note over OPR,OPD: JP = JD + 2 jours ouvrés
+        OPR->>OPR: Bascule HLR/HSS (V10)
+        OPR->>SFTP: Ticket 1410 (Bascule)
+        SFTP->>OPD: Notification bascule
+        OPR->>SFTP: Ticket 1430 (Confirmation)
+        SFTP->>OPD: Portage effectif
+        OPD->>OPD: Résiliation ligne
+    else Refusé
+        OPD->>SFTP: Ticket 1210 (Refus + motif)
+        SFTP->>OPR: Refus avec code motif
+    end
+</pre>
+
+<h3>Chronologie récapitulative</h3>
+<ul>
+    <li><strong>JD</strong> : Demande client → ticket 1110 → envoi OPD</li>
+    <li><strong>JD / JD+1</strong> : Réponse OPD → ticket 1210 (acceptation ou refus)</li>
+    <li><strong>JP = JD+2 ouvrés</strong> : Bascule technique → ticket 1410 → ticket 1430</li>
+</ul>
+
+<p>Le délai réglementaire de <strong>2 jours ouvrés</strong> entre la demande et le portage effectif est un maximum. En cas de retard imputable à l'OPD, l'ARCEP peut être saisie. Les week-ends et jours fériés ne sont pas comptabilisés dans le calcul des jours ouvrés.</p>

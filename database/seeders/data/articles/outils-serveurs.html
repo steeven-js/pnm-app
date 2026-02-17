@@ -1,0 +1,215 @@
+<h2>Inventaire des serveurs PNM</h2>
+
+<p>L'infrastructure de portabilité de Digicel repose sur un ensemble de <strong>serveurs dédiés</strong>, chacun hébergeant des composants spécifiques de la chaîne PNM. Connaître ces serveurs et leur rôle est indispensable pour le diagnostic et la maintenance.</p>
+
+<svg viewBox="0 0 800 450" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;margin:1.5em auto;display:block;">
+  <style>
+    .svg-bg { fill: #f8fafc; }
+    .svg-box { stroke-width: 2; fill-opacity: 1; }
+    .svg-line { stroke-dasharray: 6 4; stroke-width: 1.5; fill: none; }
+    .svg-text-secondary { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; font-size: 9px; fill: #64748b; }
+    .svg-label { font-family: system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 600; fill: #334155; }
+    .svg-server-name { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: bold; fill: #1e293b; }
+    .svg-component { font-family: system-ui, -apple-system, sans-serif; font-size: 10px; fill: #475569; }
+  </style>
+
+  <!-- Background -->
+  <rect class="svg-bg" x="0" y="0" width="800" height="450" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="26" text-anchor="middle" style="font-family:system-ui,sans-serif;font-size:14px;font-weight:700;fill:#0f172a;">Architecture Infrastructure PNM</text>
+
+  <!-- ====== CONNECTION LINES (behind boxes) ====== -->
+
+  <!-- vmqproportawebdb01 <-> vmqproportasync01 : DB securisee -->
+  <line class="svg-line" x1="245" y1="200" x2="310" y2="200" stroke="#94a3b8"/>
+  <rect x="250" y="186" width="80" height="16" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.5"/>
+  <text class="svg-label" x="290" y="198" text-anchor="middle">DB sécurisée</text>
+
+  <!-- vmqproportawebdb01 <-> ESB DataPower : Web Services -->
+  <line class="svg-line" x1="130" y1="130" x2="350" y2="70" stroke="#f59e0b"/>
+  <rect x="196" y="86" width="82" height="16" rx="3" fill="#fffbeb" stroke="#fcd34d" stroke-width="0.5"/>
+  <text class="svg-label" x="237" y="98" text-anchor="middle">Web Services</text>
+
+  <!-- vmqproportasync01 <-> BTCTF : Synchro nationale -->
+  <line class="svg-line" x1="555" y1="190" x2="620" y2="190" stroke="#8b5cf6"/>
+  <rect x="548" y="172" width="100" height="16" rx="3" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="0.5"/>
+  <text class="svg-label" x="598" y="184" text-anchor="middle">Synchro nationale</text>
+
+  <!-- vmqproportasync01 <-> sFTP Partenaires : sFTP PNM -->
+  <line class="svg-line" x1="470" y1="310" x2="565" y2="365" stroke="#ef4444"/>
+  <rect x="490" y="332" width="58" height="16" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.5"/>
+  <text class="svg-label" x="519" y="344" text-anchor="middle">sFTP PNM</text>
+
+  <!-- ====== ESB DataPower (top) ====== -->
+  <rect class="svg-box" x="310" y="42" width="195" height="56" rx="6" fill="#fffbeb" stroke="#f59e0b"/>
+  <!-- Server icon -->
+  <rect x="320" y="52" width="14" height="10" rx="2" fill="#f59e0b" opacity="0.3" stroke="#f59e0b" stroke-width="1"/>
+  <rect x="322" y="55" width="4" height="1.5" rx="0.5" fill="#f59e0b"/>
+  <rect x="322" y="58" width="4" height="1.5" rx="0.5" fill="#f59e0b"/>
+  <text class="svg-server-name" x="340" y="60">ESB DataPower</text>
+  <text class="svg-component" x="320" y="74">Passerelle Web Services</text>
+  <text class="svg-text-secondary" x="320" y="88">172.24.116.76:8000</text>
+
+  <!-- ====== vmqproportawebdb01 (left) ====== -->
+  <rect class="svg-box" x="20" y="130" width="225" height="175" rx="6" fill="#eff6ff" stroke="#3b82f6"/>
+  <!-- Server icon -->
+  <rect x="30" y="140" width="14" height="10" rx="2" fill="#3b82f6" opacity="0.3" stroke="#3b82f6" stroke-width="1"/>
+  <rect x="32" y="143" width="4" height="1.5" rx="0.5" fill="#3b82f6"/>
+  <rect x="32" y="146" width="4" height="1.5" rx="0.5" fill="#3b82f6"/>
+  <text class="svg-server-name" x="50" y="148">vmqproportawebdb01</text>
+  <line x1="30" y1="156" x2="235" y2="156" stroke="#3b82f6" stroke-width="0.5" opacity="0.4"/>
+  <text class="svg-component" x="36" y="174">PortaDB (base de données)</text>
+  <text class="svg-component" x="36" y="192">Scripts bascule</text>
+  <text style="font-family:'SF Mono',monospace;font-size:9px;fill:#64748b;" x="48" y="206">TraitementBascule.sh</text>
+  <text style="font-family:'SF Mono',monospace;font-size:9px;fill:#64748b;" x="48" y="218">BasculeVerification.sh</text>
+  <text class="svg-component" x="36" y="236">Interface Web administration</text>
+  <text class="svg-component" x="36" y="254">Scripts export CSV / restitution</text>
+  <!-- Role badge -->
+  <rect x="30" y="268" width="82" height="18" rx="9" fill="#3b82f6" opacity="0.12"/>
+  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#3b82f6;" x="42" y="281">Serveur PortaDB</text>
+
+  <!-- ====== vmqproportasync01 (center) ====== -->
+  <rect class="svg-box" x="310" y="120" width="245" height="195" rx="6" fill="#ecfdf5" stroke="#10b981"/>
+  <!-- Server icon -->
+  <rect x="320" y="130" width="14" height="10" rx="2" fill="#10b981" opacity="0.3" stroke="#10b981" stroke-width="1"/>
+  <rect x="322" y="133" width="4" height="1.5" rx="0.5" fill="#10b981"/>
+  <rect x="322" y="136" width="4" height="1.5" rx="0.5" fill="#10b981"/>
+  <text class="svg-server-name" x="340" y="138">vmqproportasync01</text>
+  <line x1="320" y1="146" x2="545" y2="146" stroke="#10b981" stroke-width="0.5" opacity="0.4"/>
+  <text class="svg-component" x="326" y="164">PortaSync (traitement PNMDATA)</text>
+  <text class="svg-component" x="326" y="182">sFTP local (réception fichiers)</text>
+  <text class="svg-component" x="326" y="200">PortaWs</text>
+  <text class="svg-text-secondary" x="372" y="200">172.24.119.72:8080</text>
+  <text class="svg-component" x="326" y="218">PortaWebUi</text>
+  <text class="svg-text-secondary" x="384" y="218">172.24.119.71:8080</text>
+  <text class="svg-component" x="326" y="238">Scripts PHP PortaSync</text>
+  <text class="svg-component" x="326" y="256">Scripts synchronisation PNMSYNC</text>
+  <text class="svg-component" x="326" y="274">Archivage fichiers échangés</text>
+  <!-- Role badge -->
+  <rect x="320" y="284" width="88" height="18" rx="9" fill="#10b981" opacity="0.12"/>
+  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#10b981;" x="330" y="297">Serveur PortaSync</text>
+
+  <!-- ====== BTCTF (right) ====== -->
+  <rect class="svg-box" x="620" y="130" width="165" height="125" rx="6" fill="#f5f3ff" stroke="#8b5cf6"/>
+  <!-- Server icon -->
+  <rect x="630" y="140" width="14" height="10" rx="2" fill="#8b5cf6" opacity="0.3" stroke="#8b5cf6" stroke-width="1"/>
+  <rect x="632" y="143" width="4" height="1.5" rx="0.5" fill="#8b5cf6"/>
+  <rect x="632" y="146" width="4" height="1.5" rx="0.5" fill="#8b5cf6"/>
+  <text class="svg-server-name" x="650" y="148">BTCTF</text>
+  <line x1="630" y1="156" x2="775" y2="156" stroke="#8b5cf6" stroke-width="0.5" opacity="0.4"/>
+  <text class="svg-component" x="636" y="174">Bureau Technique Central</text>
+  <text class="svg-component" x="636" y="192">Référentiel national</text>
+  <text class="svg-component" x="636" y="210">numéros portés</text>
+  <!-- Role badge -->
+  <rect x="630" y="225" width="112" height="18" rx="9" fill="#8b5cf6" opacity="0.12"/>
+  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#8b5cf6;" x="641" y="238">Plateforme nationale</text>
+
+  <!-- ====== sFTP Partenaires (bottom-right) ====== -->
+  <rect class="svg-box" x="545" y="355" width="200" height="80" rx="6" fill="#fef2f2" stroke="#ef4444"/>
+  <!-- Server icon -->
+  <rect x="555" y="365" width="14" height="10" rx="2" fill="#ef4444" opacity="0.3" stroke="#ef4444" stroke-width="1"/>
+  <rect x="557" y="368" width="4" height="1.5" rx="0.5" fill="#ef4444"/>
+  <rect x="557" y="371" width="4" height="1.5" rx="0.5" fill="#ef4444"/>
+  <text class="svg-server-name" x="575" y="373">sFTP Partenaires</text>
+  <line x1="555" y1="381" x2="735" y2="381" stroke="#ef4444" stroke-width="0.5" opacity="0.4"/>
+  <text class="svg-component" x="561" y="399">Orange</text>
+  <text class="svg-component" x="561" y="417">SFR / Only</text>
+  <!-- Role badge -->
+  <rect x="645" y="395" width="82" height="18" rx="9" fill="#ef4444" opacity="0.12"/>
+  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#ef4444;" x="654" y="408">Opérateurs tiers</text>
+
+  <!-- ====== Legend ====== -->
+  <rect x="20" y="400" width="185" height="38" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="30" y1="418" x2="62" y2="418" class="svg-line" stroke="#94a3b8"/>
+  <text class="svg-component" x="68" y="422">Liaison réseau</text>
+</svg>
+
+<h3>vmqproportawebdb01 — Serveur PortaDB</h3>
+<p>Serveur principal de la plateforme de portabilité.</p>
+<ul>
+    <li><strong>Rôle</strong> : héberge la base de données PortaDB et l'interface web d'administration</li>
+    <li><strong>Composants</strong> :
+        <ul>
+            <li>Base de données relationnelle PortaDB (stockage des tickets, numéros portés, historiques)</li>
+            <li>Application web de gestion (consultation et pilotage des dossiers de portage)</li>
+            <li>Scripts de bascule (<code>TraitementBascule.sh</code>, <code>BasculeVerification.sh</code>)</li>
+            <li>Scripts de restitution et d'export CSV</li>
+        </ul>
+    </li>
+    <li><strong>OS</strong> : Linux (Red Hat Enterprise Linux)</li>
+    <li><strong>Sauvegarde</strong> : backup quotidien de la base de données à 02h00, rétention 30 jours</li>
+    <li><strong>Accès</strong> : restreint aux équipes Applications et BSS via SSH (authentification par clé)</li>
+    <li><strong>Supervision</strong> : monitoring CPU, RAM, disque, et processus base de données</li>
+</ul>
+
+<h3>vmqproportasync01 — Serveur PortaSync</h3>
+<p>Serveur dédié aux échanges inter-opérateurs.</p>
+<ul>
+    <li><strong>Rôle</strong> : héberge le service PortaSync et gère les transferts sFTP</li>
+    <li><strong>Utilisateur dédié</strong> : <code>porta_pnmv3</code></li>
+    <li><strong>Dossier PortaSync</strong> : <code>/home/porta_pnmv3/PortaSync</code></li>
+    <li><strong>Logs</strong> : <code>/home/porta_pnmv3/PortaSync/log</code> (EmaExtracter.log, EmmExtracter.log, PnmDataManager.log, PnmAckManager.log)</li>
+    <li><strong>Composants</strong> :
+        <ul>
+            <li>Service PortaSync (génération et traitement des fichiers PNMDATA)</li>
+            <li>Serveur sFTP local (réception des fichiers des opérateurs partenaires)</li>
+            <li>Scripts PHP PortaSync (EmaExtracter, EmmExtracter, PnmDataManager, PnmSyncAckManager)</li>
+            <li>Scripts d'export/import (<code>pnm-import.sh</code>, <code>portasync-export.sh</code>)</li>
+            <li>Scripts de synchronisation PNMSYNC</li>
+            <li>Répertoire d'archivage des fichiers échangés</li>
+        </ul>
+    </li>
+    <li><strong>Web services hébergés</strong> :
+        <ul>
+            <li><strong>PortaWs</strong> : <code>http://172.24.119.72:8080/PortaWs/</code> — Portail de consultation des portages en cours et services DAPI (DigicelFwiPortaWs4Esb, DigicelFwiPortaWs4PortaSync)</li>
+            <li><strong>PortaWebUi</strong> : <code>http://172.24.119.71:8080/PortaWebUi/</code> — Interface d'administration PNM et service DigicelFwiPortaUiWs4Esb</li>
+        </ul>
+    </li>
+    <li><strong>OS</strong> : Linux (Red Hat Enterprise Linux)</li>
+    <li><strong>Réseau</strong> : interface dédiée pour les flux sFTP inter-opérateurs, firewallé avec accès restreint aux IP des partenaires GPMAG</li>
+    <li><strong>Stockage</strong> : espace dédié pour l'archivage des fichiers PNMDATA (rétention 12 mois)</li>
+    <li><strong>Supervision</strong> : monitoring des connexions sFTP, espace disque, et processus PortaSync</li>
+</ul>
+
+<h3>BTCTF — Bureau Technique Central</h3>
+<p>Plateforme externe nationale de référence pour la portabilité.</p>
+<ul>
+    <li><strong>Rôle</strong> : référentiel national des numéros portés, géré au niveau métropolitain</li>
+    <li><strong>Interaction</strong> : PortaSync communique avec le BTCTF pour les synchronisations nationales et les cas de portage inter-zones</li>
+    <li><strong>Connexion</strong> : liaison sécurisée dédiée depuis vmqproportasync01</li>
+    <li><strong>Fréquence</strong> : échanges quotidiens pour les mises à jour incrémentales, synchronisation complète hebdomadaire</li>
+</ul>
+
+<h3>Réseau inter-serveurs</h3>
+<p>Les serveurs PNM communiquent via le <strong>réseau interne Digicel</strong> :</p>
+<ul>
+    <li><code>vmqproportawebdb01</code> ↔ <code>vmqproportasync01</code> : connexion base de données sécurisée (port dédié, authentification applicative)</li>
+    <li><code>vmqproportawebdb01</code> ↔ <strong>ESB DataPower</strong> : flux web services pour les commandes de bascule HLR</li>
+    <li><code>vmqproportasync01</code> ↔ <strong>sFTP partenaires</strong> : flux sFTP sortants vers Orange et SFR/Only</li>
+</ul>
+
+<h3>Topologie des serveurs PNM</h3>
+<pre class="mermaid">
+graph TD
+    subgraph INTERNE[Réseau interne Digicel]
+        DB[vmqproportawebdb01<br/>PortaDB + Scripts bascule<br/>Interface Web admin]
+        SYNC[vmqproportasync01<br/>PortaSync + sFTP local<br/>PortaWs + PortaWebUi<br/>Scripts PHP]
+        ESB[ESB DataPower<br/>172.24.116.76:8000]
+    end
+
+    subgraph EXTERNE[Réseau externe]
+        ORA_SFTP[sFTP Orange]
+        SFR_SFTP[sFTP SFR/Only]
+        BTCTF_[BTCTF<br/>Référentiel national]
+    end
+
+    DB <-->|DB sécurisée| SYNC
+    DB <-->|Web Services| ESB
+    SYNC -->|sFTP PNM| ORA_SFTP
+    SYNC -->|sFTP PNM| SFR_SFTP
+    SYNC <-->|Synchro nationale| BTCTF_
+</pre>
+
+<h3>Plan de continuité</h3>
+<p>En cas de panne d'un serveur, les procédures de <strong>disaster recovery</strong> prévoient une restauration à partir des sauvegardes sous 4 heures. Les vacations impactées sont reportées et les opérateurs partenaires sont notifiés conformément aux engagements GPMAG.</p>

@@ -1,0 +1,70 @@
+<h2>Motifs de refus d'éligibilité au portage</h2>
+
+<p>Lorsque l'OPD reçoit une demande de portage (ticket 1110), il effectue des contrôles d'éligibilité. Si l'un de ces contrôles échoue, le ticket 1210 est émis avec un <strong>code motif de refus</strong>. Voici les motifs les plus fréquents et les actions correctives associées.</p>
+
+<h3>Motif 01 — RIO invalide</h3>
+<p>Le RIO transmis dans le ticket 1110 <strong>ne correspond pas</strong> à celui enregistré pour le MSISDN chez l'OPD. Causes possibles : erreur de saisie, RIO expiré après changement de SIM, RIO d'une ancienne ligne.</p>
+<p><strong>Action corrective :</strong> demander au client de rappeler le <strong>3179</strong> pour obtenir un RIO à jour, puis resoumettre la demande.</p>
+
+<h3>Motif 02 — Numéro inactif ou résilié</h3>
+<p>Le numéro n'est <strong>plus actif</strong> sur le réseau de l'OPD. Le client a peut-être déjà résilié sa ligne, ou la ligne a été suspendue pour impayé puis résiliée automatiquement.</p>
+<p><strong>Action corrective :</strong> vérifier avec le client le statut de son ancienne ligne. Si la résiliation est récente, le numéro peut encore être récupérable sous certaines conditions auprès de l'ancien opérateur.</p>
+
+<h3>Motif 03 — Portage déjà en cours</h3>
+<p>Une demande de portage est <strong>déjà active</strong> pour ce numéro. Il ne peut y avoir qu'un seul portage en cours pour un même MSISDN à un instant donné.</p>
+<p><strong>Action corrective :</strong> attendre la clôture du portage en cours (bascule ou annulation), puis resoumettre. Vérifier dans PortaDB si un ticket ouvert existe pour ce numéro.</p>
+
+<h3>Motif 04 — Numéro non attribué</h3>
+<p>Le MSISDN n'existe <strong>dans aucune base</strong> de l'OPD. Le numéro n'a jamais été attribué ou il y a une erreur dans le numéro transmis.</p>
+<p><strong>Action corrective :</strong> vérifier le numéro exact avec le client. Contrôler le format (10 chiffres commençant par 06 ou le format international 590/594/596).</p>
+
+<h3>Motif 05 — Opposition ou restriction judiciaire</h3>
+<p>Le numéro fait l'objet d'une <strong>mesure judiciaire</strong> interdisant tout changement d'opérateur (réquisition, mise sous scellé, etc.).</p>
+<p><strong>Action corrective :</strong> ce motif ne peut pas être contourné. Le client doit résoudre la situation juridique avant de pouvoir porter son numéro.</p>
+
+<h3>Motif 06 — Date de portage invalide</h3>
+<p>La date JP proposée ne respecte pas le <strong>délai minimum de 2 jours ouvrés</strong> après JD, ou tombe un jour non ouvré (week-end, jour férié local).</p>
+<p><strong>Action corrective :</strong> resoumettre avec une date JP valide. Vérifier le calendrier des jours ouvrés de la zone Antilles-Guyane (attention aux jours fériés locaux spécifiques).</p>
+
+<h3>Motif 07 — Données incohérentes</h3>
+<p>Les informations du ticket 1110 présentent des <strong>incohérences</strong> : le code opérateur du RIO ne correspond pas à l'OPD ciblé, le format du MSISDN est incorrect, ou des champs obligatoires sont manquants.</p>
+<p><strong>Action corrective :</strong> vérifier la cohérence entre le RIO (code opérateur), le MSISDN et l'OPD destinataire. Corriger les données et resoumettre.</p>
+
+<h3>Arbre de diagnostic des refus</h3>
+<pre class="mermaid">
+flowchart TD
+    START[Refus reçu<br/>Ticket 1210] --> CODE{Code motif ?}
+
+    CODE -->|01| M01[RIO invalide]
+    CODE -->|02| M02[Numéro inactif]
+    CODE -->|03| M03[Portage en cours]
+    CODE -->|04| M04[Numéro non attribué]
+    CODE -->|05| M05[Opposition judiciaire]
+    CODE -->|06| M06[Date JP invalide]
+    CODE -->|07| M07[Données incohérentes]
+
+    M01 --> A01[Client rappelle 3179<br/>Nouveau RIO]
+    M02 --> A02[Vérifier statut ligne<br/>avec le client]
+    M03 --> A03[Attendre clôture<br/>portage en cours]
+    M04 --> A04[Vérifier format MSISDN<br/>10 chiffres 06xx]
+    M05 --> A05[Résolution juridique<br/>nécessaire]
+    M06 --> A06[Recalculer JP<br/>JD+2 ouvrés]
+    M07 --> A07[Vérifier cohérence<br/>RIO / MSISDN / OPD]
+
+    A01 --> RESUB[Resoumettre demande]
+    A02 --> RESUB
+    A03 --> RESUB
+    A04 --> RESUB
+    A06 --> RESUB
+    A07 --> RESUB
+    A05 --> STOP[Portage impossible]
+</pre>
+
+<h3>Bonnes pratiques</h3>
+<p>Pour <strong>minimiser les refus</strong>, il est recommandé de :</p>
+<ul>
+    <li>Toujours demander un <strong>RIO fraîchement obtenu</strong> (moins de 7 jours)</li>
+    <li>Vérifier le format du RIO avant soumission (<code>12 caractères alphanumériques</code>)</li>
+    <li>Contrôler la clé de vérification avant envoi du ticket 1110</li>
+    <li>S'assurer que le numéro est bien actif en demandant au client s'il peut encore passer des appels</li>
+</ul>

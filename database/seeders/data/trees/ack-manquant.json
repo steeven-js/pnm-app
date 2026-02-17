@@ -1,0 +1,79 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "L'ACK manquant concerne-t-il un fichier PNMDATA (vacation) ?",
+  "yes": {
+    "id": "q2",
+    "type": "question",
+    "text": "Cela fait-il plus d'1 heure depuis l'envoi du fichier ?",
+    "yes": {
+      "id": "q3",
+      "type": "question",
+      "text": "Avez-vous contacté l'opérateur par mail ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "L'opérateur a-t-il répondu avant la prochaine vacation ?",
+        "yes": {
+          "id": "d_resolu",
+          "type": "diagnosis",
+          "text": "Problème résolu",
+          "diagnosis": "L'opérateur a traité le fichier et envoyé l'ACK. Le problème est résolu.",
+          "recommended_action": "Vérifier que l'ACK est bien présent dans les logs PnmAckManager. Si le problème se répète 3 fois dans la même semaine, ouvrir un ticket d'incident.",
+          "severity": "info",
+          "related_codes": ["E011"]
+        },
+        "no": {
+          "id": "d_incident",
+          "type": "diagnosis",
+          "text": "Ouvrir un ticket d'incident",
+          "diagnosis": "L'opérateur n'a pas répondu avant la prochaine vacation. Un ticket d'incident doit être ouvert.",
+          "recommended_action": "Ouvrir un ticket d'incident. Activer le mode dégradé si nécessaire. Retransmettre le fichier si demandé.",
+          "severity": "error",
+          "related_codes": ["E011"]
+        }
+      },
+      "no": {
+        "id": "d_contacter",
+        "type": "diagnosis",
+        "text": "Contacter l'opérateur",
+        "diagnosis": "Chaque fichier PNMDATA doit générer un ACK dans l'heure. L'absence d'ACK nécessite un contact par mail.",
+        "recommended_action": "Envoyer un mail à l'opérateur concerné (voir contacts dans le dictionnaire des codes opérateurs OP01-OP06). Attendre la réponse avant la prochaine vacation.",
+        "severity": "warning",
+        "related_codes": ["E011"]
+      }
+    },
+    "no": {
+      "id": "d_attendre",
+      "type": "diagnosis",
+      "text": "Délai d'ACK non écoulé",
+      "diagnosis": "Le délai d'1 heure pour l'envoi de l'ACK n'est pas encore écoulé.",
+      "recommended_action": "Attendre. L'ACK doit être reçu dans l'heure suivant la réception du fichier par l'opérateur destinataire.",
+      "severity": "info",
+      "related_codes": ["E011"]
+    }
+  },
+  "no": {
+    "id": "q_sync",
+    "type": "question",
+    "text": "L'ACK manquant concerne-t-il un fichier PNMSYNC (synchronisation du dimanche) ?",
+    "yes": {
+      "id": "d_sync",
+      "type": "diagnosis",
+      "text": "ACK PNMSYNC manquant",
+      "diagnosis": "L'ACK pour le fichier de synchronisation hebdomadaire (dimanche 22h-24h) n'a pas été reçu.",
+      "recommended_action": "Vérifier PnmSyncAckManager.log. Contacter l'opérateur le lundi matin. L'analyse des écarts doit être retournée avant mercredi.",
+      "severity": "warning",
+      "related_codes": ["E011"]
+    },
+    "no": {
+      "id": "d_type_inconnu",
+      "type": "diagnosis",
+      "text": "Type de fichier non identifié",
+      "diagnosis": "Le type de fichier pour lequel l'ACK est manquant n'est ni un PNMDATA ni un PNMSYNC.",
+      "recommended_action": "Vérifier le type de fichier et sa convention de nommage. Consulter les logs sur vmqproportasync01.",
+      "severity": "warning",
+      "related_codes": ["E006"]
+    }
+  }
+}

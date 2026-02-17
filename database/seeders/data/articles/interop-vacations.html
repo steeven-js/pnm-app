@@ -1,0 +1,79 @@
+<h2>Système de vacations — Rythme des échanges inter-opérateurs</h2>
+
+<p>Le système de <strong>vacations</strong> organise les échanges de fichiers PNM selon un calendrier strict de <strong>trois créneaux quotidiens</strong>. Ce rythme tri-quotidien garantit un traitement régulier des demandes de portage tout en laissant des fenêtres de traitement suffisantes entre chaque échange.</p>
+
+<h3>Les trois vacations quotidiennes</h3>
+
+<h3>V10 — Vacation de 10h00</h3>
+<p>C'est la <strong>vacation principale</strong>, la plus critique de la journée :</p>
+<ul>
+    <li><strong>Dépôt</strong> : les fichiers PNMDATA doivent être déposés sur le sFTP du destinataire avant 10h00</li>
+    <li><strong>Collecte et traitement</strong> : à 10h00, chaque opérateur collecte les fichiers reçus et lance le traitement</li>
+    <li><strong>Contenu typique</strong> : tickets de bascule (1410, 1430) pour les portages du jour JP, confirmations de la veille</li>
+    <li><strong>Bascules</strong> : les bascules techniques sont exécutées sur cette vacation. Le script <code>TraitementBascule.sh</code> est déclenché après traitement des tickets reçus</li>
+</ul>
+<p>Un retard sur la V10 impacte directement les clients dont le portage est programmé ce jour-là.</p>
+
+<h3>V14 — Vacation de 14h00</h3>
+<p>La vacation intermédiaire, utilisée pour les <strong>réponses et traitements courants</strong> :</p>
+<ul>
+    <li><strong>Dépôt</strong> : avant 14h00</li>
+    <li><strong>Contenu typique</strong> : réponses de l'OPD (tickets 1210 — acceptation ou refus), accusés de réception (ACR), erreurs (ERR)</li>
+    <li><strong>Rôle</strong> : permet de traiter les demandes reçues le matin et de préparer les bascules du lendemain</li>
+</ul>
+
+<h3>V19 — Vacation de 19h00</h3>
+<p>La dernière vacation de la journée, dédiée aux <strong>nouvelles demandes</strong> :</p>
+<ul>
+    <li><strong>Dépôt</strong> : avant 19h00</li>
+    <li><strong>Contenu typique</strong> : nouvelles demandes de portage (tickets 1110) issues des souscriptions de la journée, demandes d'annulation (1510)</li>
+    <li><strong>Rôle</strong> : les demandes déposées en V19 seront traitées par l'OPD dès la V10 du lendemain</li>
+</ul>
+
+<h3>Scripts impliqués</h3>
+<p>Chaque vacation déclenche une séquence de scripts automatisés :</p>
+<ul>
+    <li><code>pnm-export.sh</code> : extrait les tickets à envoyer depuis PortaDB et génère les fichiers PNMDATA</li>
+    <li><code>pnm-sftp-push.sh</code> : dépose les fichiers sur les serveurs sFTP des opérateurs destinataires</li>
+    <li><code>pnm-sftp-pull.sh</code> : collecte les fichiers déposés par les autres opérateurs sur notre serveur sFTP</li>
+    <li><code>pnm-import.sh</code> : parse les fichiers reçus et intègre les tickets dans PortaDB</li>
+    <li><code>pnm-acr-generate.sh</code> : génère les accusés de réception (ACR) pour les fichiers correctement reçus</li>
+    <li><code>TraitementBascule.sh</code> : exécuté uniquement en V10, déclenche les bascules HLR pour les portages du jour</li>
+</ul>
+
+<h3>Synchronisation du dimanche</h3>
+<p>Le dimanche, les vacations V10/V14/V19 ne sont <strong>pas opérées</strong> pour les tickets courants. En revanche, une vacation spéciale est dédiée à la <strong>synchronisation PNMSYNC</strong> :</p>
+<ul>
+    <li><strong>Dimanche 08h00</strong> : extraction et dépôt des fichiers PNMSYNC</li>
+    <li><strong>Dimanche 10h00</strong> : collecte des fichiers PNMSYNC des autres opérateurs</li>
+    <li><strong>Dimanche 14h00</strong> : exécution de la comparaison et génération du rapport de divergences</li>
+</ul>
+
+<h3>Planning des vacations</h3>
+<pre class="mermaid">
+gantt
+    title Planning quotidien des vacations PNM
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section V10 — Principale
+    Dépôt fichiers PNMDATA        :v10dep, 09:00, 60min
+    Collecte + Import              :v10col, 10:00, 30min
+    Bascules TraitementBascule.sh  :crit, v10bas, 10:30, 30min
+    Génération ACR                 :v10acr, 11:00, 15min
+
+    section V14 — Intermédiaire
+    Dépôt fichiers PNMDATA        :v14dep, 13:00, 60min
+    Collecte + Import              :v14col, 14:00, 30min
+    Traitement réponses 1210       :v14rep, 14:30, 30min
+    Génération ACR                 :v14acr, 15:00, 15min
+
+    section V19 — Nouvelles demandes
+    Dépôt fichiers PNMDATA        :v19dep, 18:00, 60min
+    Collecte + Import              :v19col, 19:00, 30min
+    Traitement demandes 1110       :v19dem, 19:30, 30min
+    Génération ACR                 :v19acr, 20:00, 15min
+</pre>
+
+<h3>Gestion des jours fériés</h3>
+<p>Les jours fériés locaux (propres à chaque département : Guadeloupe, Martinique, Guyane) sont gérés via un <strong>calendrier partagé</strong> dans le GPMAG. Les vacations ne sont pas opérées les jours fériés, ce qui impacte le calcul des dates JP (jours ouvrés uniquement). Le calendrier est mis à jour chaque année en comité technique.</p>

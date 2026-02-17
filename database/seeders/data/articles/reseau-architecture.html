@@ -1,0 +1,181 @@
+<h2>Architecture réseau — Vue d'ensemble</h2>
+
+<p>L'architecture réseau de Digicel Antilles-Guyane repose sur une infrastructure <strong>multi-technologies</strong> (2G/3G/4G) couvrant la Guadeloupe, la Martinique et la Guyane. Comprendre cette architecture est essentiel pour appréhender les impacts de la portabilité sur le routage des communications.</p>
+
+<svg viewBox="0 0 800 480" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrowUp" viewBox="0 0 10 10" refX="5" refY="0" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,10 L5,0 L10,10" fill="none" stroke="#64748b" stroke-width="1.5"/>
+    </marker>
+    <marker id="arrowUpRose" viewBox="0 0 10 10" refX="5" refY="0" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,10 L5,0 L10,10" fill="none" stroke="#e11d48" stroke-width="1.5"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect class="svg-bg" width="800" height="480" fill="#f8fafc" rx="8"/>
+
+  <!-- ===== LAYER 1 - Terminal (bottom) ===== -->
+  <rect class="svg-box" x="20" y="380" width="540" height="76" rx="6" fill="#10b981" fill-opacity="0.1"/>
+  <rect x="20" y="380" width="4" height="76" rx="2" fill="#10b981"/>
+  <text class="svg-text-primary" x="42" y="404" font-size="14" font-weight="bold" fill="#10b981">Terminal</text>
+  <text class="svg-text-primary" x="42" y="422" font-size="11" fill="#334155">Smartphone / SIM</text>
+  <rect x="230" y="392" width="140" height="38" rx="5" fill="#ffffff" stroke="#10b981" stroke-width="1"/>
+  <text class="svg-text-primary" x="300" y="410" font-size="11" fill="#334155" text-anchor="middle">Smartphone</text>
+  <text class="svg-text-primary" x="300" y="424" font-size="10" fill="#64748b" text-anchor="middle">+ carte SIM</text>
+  <rect x="390" y="392" width="140" height="38" rx="5" fill="#ffffff" stroke="#10b981" stroke-width="1"/>
+  <text class="svg-text-primary" x="460" y="415" font-size="11" fill="#334155" text-anchor="middle">USIM / IMSI</text>
+
+  <!-- Arrows Terminal -> RAN -->
+  <line x1="280" y1="380" x2="280" y2="362" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+  <line x1="360" y1="380" x2="360" y2="362" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+
+  <!-- ===== LAYER 2 - RAN ===== -->
+  <rect class="svg-box" x="20" y="278" width="540" height="76" rx="6" fill="#3b82f6" fill-opacity="0.1"/>
+  <rect x="20" y="278" width="4" height="76" rx="2" fill="#3b82f6"/>
+  <text class="svg-text-primary" x="42" y="302" font-size="14" font-weight="bold" fill="#3b82f6">RAN</text>
+  <text class="svg-text-primary" x="42" y="320" font-size="11" fill="#334155">Stations de base / Antennes</text>
+  <rect x="230" y="290" width="130" height="38" rx="5" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text class="svg-text-primary" x="295" y="308" font-size="11" fill="#334155" text-anchor="middle">eNodeB</text>
+  <text class="svg-text-primary" x="295" y="322" font-size="10" fill="#64748b" text-anchor="middle">(4G)</text>
+  <rect x="380" y="290" width="130" height="38" rx="5" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
+  <text class="svg-text-primary" x="445" y="308" font-size="11" fill="#334155" text-anchor="middle">NodeB / BTS</text>
+  <text class="svg-text-primary" x="445" y="322" font-size="10" fill="#64748b" text-anchor="middle">(3G / 2G)</text>
+
+  <!-- Arrows RAN -> Core -->
+  <line x1="280" y1="278" x2="280" y2="260" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+  <line x1="360" y1="278" x2="360" y2="260" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+
+  <!-- ===== LAYER 3 - Core Network (split) ===== -->
+  <rect class="svg-box" x="20" y="140" width="540" height="112" rx="6" fill="#8b5cf6" fill-opacity="0.1"/>
+  <rect x="20" y="140" width="4" height="112" rx="2" fill="#8b5cf6"/>
+  <text class="svg-text-primary" x="42" y="162" font-size="14" font-weight="bold" fill="#8b5cf6">Core Network</text>
+
+  <!-- Left sub-section: Circuit 2G/3G -->
+  <rect x="36" y="172" width="254" height="68" rx="5" fill="#ffffff" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4 2"/>
+  <text class="svg-text-primary" x="50" y="188" font-size="11" font-weight="bold" fill="#8b5cf6">Circuit 2G/3G</text>
+  <rect x="50" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="81" y="216" font-size="11" fill="#334155" text-anchor="middle">MSC</text>
+  <rect x="124" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="155" y="216" font-size="11" fill="#334155" text-anchor="middle">HLR</text>
+  <rect x="198" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="229" y="216" font-size="11" fill="#334155" text-anchor="middle">VLR</text>
+
+  <!-- Right sub-section: Paquet 4G/LTE -->
+  <rect x="302" y="172" width="248" height="68" rx="5" fill="#ffffff" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4 2"/>
+  <text class="svg-text-primary" x="316" y="188" font-size="11" font-weight="bold" fill="#8b5cf6">Paquet 4G/LTE</text>
+  <rect x="316" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="347" y="216" font-size="11" fill="#334155" text-anchor="middle">EPC</text>
+  <rect x="390" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="421" y="216" font-size="11" fill="#334155" text-anchor="middle">HSS</text>
+  <rect x="464" y="196" width="62" height="32" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1"/>
+  <text class="svg-text-primary" x="495" y="216" font-size="11" fill="#334155" text-anchor="middle">IMS</text>
+
+  <!-- Arrows Core -> Services -->
+  <line x1="280" y1="140" x2="280" y2="122" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+  <line x1="360" y1="140" x2="360" y2="122" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+
+  <!-- ===== LAYER 4 - Services & Routage PNM (top) ===== -->
+  <rect class="svg-box" x="20" y="38" width="540" height="76" rx="6" fill="#f59e0b" fill-opacity="0.1"/>
+  <rect x="20" y="38" width="4" height="76" rx="2" fill="#f59e0b"/>
+  <text class="svg-text-primary" x="42" y="62" font-size="14" font-weight="bold" fill="#f59e0b">Services &amp; Routage PNM</text>
+  <text class="svg-text-primary" x="42" y="80" font-size="11" fill="#334155">Tables MOBI / Interconnexions</text>
+  <rect x="260" y="50" width="130" height="38" rx="5" fill="#ffffff" stroke="#f59e0b" stroke-width="1"/>
+  <text class="svg-text-primary" x="325" y="73" font-size="11" fill="#334155" text-anchor="middle">Tables MOBI</text>
+  <rect x="410" y="50" width="130" height="38" rx="5" fill="#ffffff" stroke="#f59e0b" stroke-width="1"/>
+  <text class="svg-text-primary" x="475" y="73" font-size="11" fill="#334155" text-anchor="middle">Interconnexions</text>
+
+  <!-- ===== RIGHT SIDE - Trajet d'un appel porte ===== -->
+  <text class="svg-text-secondary" x="600" y="448" font-size="10" font-style="italic" fill="#64748b" font-weight="bold">Trajet d'un appel port&#233;</text>
+
+  <!-- Curved dashed path from Terminal upward through all layers -->
+  <path d="M 620,430
+           L 620,410
+           C 620,390 625,370 625,350
+           L 625,310
+           C 625,290 628,270 630,250
+           L 630,200
+           C 630,180 632,160 634,140
+           L 636,100
+           C 637,85 638,78 640,70"
+        fill="none" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arrowUpRose)"/>
+
+  <!-- Annotation labels along the path -->
+  <text class="svg-text-secondary" x="640" y="412" font-size="10" font-style="italic" fill="#64748b">Terminal</text>
+  <text class="svg-text-secondary" x="642" y="320" font-size="10" font-style="italic" fill="#64748b">RAN</text>
+  <text class="svg-text-secondary" x="645" y="210" font-size="10" font-style="italic" fill="#64748b">Core Network</text>
+  <text class="svg-text-secondary" x="650" y="130" font-size="10" font-style="italic" fill="#64748b">Interrogation</text>
+  <text class="svg-text-secondary" x="650" y="142" font-size="10" font-style="italic" fill="#64748b">tables PNM</text>
+
+  <!-- Branch out arrow - Redirection vers OPD -->
+  <path d="M 640,70 C 665,52 700,42 755,38"
+        fill="none" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="6 3" marker-end="url(#arrowUpRose)"/>
+  <rect x="700" y="18" width="88" height="28" rx="5" fill="#e11d48" fill-opacity="0.08" stroke="#e11d48" stroke-width="1"/>
+  <text class="svg-text-secondary" x="744" y="31" font-size="9" font-style="italic" fill="#e11d48" text-anchor="middle">Redirection</text>
+  <text class="svg-text-secondary" x="744" y="42" font-size="9" font-style="italic" fill="#e11d48" text-anchor="middle">vers OPD</text>
+
+  <!-- Legend -->
+  <line x1="600" y1="468" x2="626" y2="468" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="6 3"/>
+  <text class="svg-text-secondary" x="632" y="472" font-size="9" font-style="italic" fill="#64748b">Flux appel port&#233;</text>
+</svg>
+
+<h3>Les trois couches du réseau</h3>
+<p>Le réseau mobile se décompose en trois couches principales :</p>
+<ul>
+    <li><strong>RAN</strong> (Radio Access Network) : antennes et stations de base assurant la couverture radio</li>
+    <li><strong>Core Network</strong> : cœur de réseau gérant l'intelligence des services</li>
+    <li><strong>Transport</strong> : liaisons fibre optique et faisceaux hertziens interconnectant les sites</li>
+</ul>
+
+<h3>Core Network — Cœur de réseau</h3>
+<p>Le cœur de réseau concentre les <strong>équipements critiques</strong> pour le traitement des appels et des données :</p>
+
+<p><strong>Domaine Circuit (2G/3G) :</strong></p>
+<ul>
+    <li><strong>MSC</strong> (Mobile Switching Center) : commutateur d'appels voix, gère l'établissement et le routage des appels</li>
+    <li><strong>HLR</strong> (Home Location Register) : base de données centrale des abonnés, stocke les profils, les droits et la localisation</li>
+    <li><strong>VLR</strong> (Visitor Location Register) : base temporaire des abonnés présents dans une zone MSC</li>
+</ul>
+
+<p><strong>Domaine Paquet (4G/LTE) :</strong></p>
+<ul>
+    <li><strong>EPC</strong> (Evolved Packet Core) : cœur de réseau 4G composé du MME, S-GW et P-GW</li>
+    <li><strong>HSS</strong> (Home Subscriber Server) : équivalent 4G du HLR, base de données des abonnés LTE</li>
+    <li><strong>IMS</strong> (IP Multimedia Subsystem) : plateforme de services voix sur IP (VoLTE), messagerie enrichie</li>
+</ul>
+
+<h3>Comment un appel est acheminé</h3>
+<p>Lorsqu'un abonné Digicel appelle un numéro, le flux suit ces étapes :</p>
+<ul>
+    <li>Le terminal s'accroche au réseau via le <strong>RAN</strong> (station de base la plus proche)</li>
+    <li>La demande d'appel remonte vers le <strong>MSC</strong> (voix 2G/3G) ou l'<strong>IMS</strong> (VoLTE)</li>
+    <li>Le MSC interroge le <strong>HLR</strong> pour déterminer l'opérateur hébergeant le numéro appelé</li>
+    <li>Si le numéro est porté, le HLR consulte les <strong>tables de routage PNM</strong> (mises à jour par MOBI) pour rediriger vers le bon opérateur</li>
+    <li>L'appel est acheminé via les <strong>interconnexions</strong> vers l'opérateur destinataire</li>
+    <li>L'opérateur destinataire route l'appel jusqu'au terminal appelé</li>
+</ul>
+
+<h3>Comment les données transitent</h3>
+<p>Pour le trafic data (navigation, applications, streaming) :</p>
+<ul>
+    <li>Le terminal établit un <strong>bearer</strong> (tunnel de données) avec l'EPC via le RAN 4G</li>
+    <li>Le <strong>P-GW</strong> (Packet Gateway) connecte l'abonné à Internet</li>
+    <li>Le <strong>HSS</strong> fournit le profil de l'abonné (débit autorisé, quota data, APN)</li>
+    <li>Les paquets sont acheminés de manière transparente — la portabilité n'affecte pas le trafic data sortant</li>
+</ul>
+
+<h3>Couches réseau et routage PNM</h3>
+<pre class="mermaid">
+graph TD
+    SERV[Services &amp; Routage PNM<br/>Tables MOBI + Interconnexions] --> CORE[Core Network]
+    CORE --> RAN[RAN<br/>Stations de base]
+    RAN --> TERM[Terminal<br/>Smartphone + SIM]
+
+    subgraph CORE[Core Network]
+        direction LR
+        CIRC[Circuit 2G/3G<br/>MSC + HLR + VLR] --- PAQ[Paquet 4G/LTE<br/>EPC + HSS + IMS]
+    end
+</pre>
+
+<h3>Transport et interconnexions</h3>
+<p>Les trois territoires (Guadeloupe, Martinique, Guyane) sont reliés par des <strong>liaisons sous-marines</strong> et des réseaux de transport terrestres. Les interconnexions avec les autres opérateurs (Orange, SFR/Only) s'effectuent via des <strong>points d'interconnexion (POI)</strong> dédiés, essentiels pour le routage des appels vers les numéros portés.</p>

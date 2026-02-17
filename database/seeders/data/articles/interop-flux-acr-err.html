@@ -1,0 +1,71 @@
+<h2>Cycle de vie ACR/ERR — Accusés et erreurs</h2>
+
+<p>Le mécanisme d'<strong>ACR</strong> (Accusé de Réception) et d'<strong>ERR</strong> (fichier d'Erreur) garantit la fiabilité des échanges de fichiers PNMDATA entre opérateurs. Chaque fichier envoyé doit recevoir une réponse confirmant sa bonne réception ou signalant un problème.</p>
+
+<h3>Flux standard</h3>
+<p>Le cycle de vie d'un échange PNMDATA suit ces étapes :</p>
+<ul>
+    <li><strong>Étape 1 — Génération</strong> : PortaSync extrait les tickets de PortaDB et génère le fichier PNMDATA</li>
+    <li><strong>Étape 2 — Envoi</strong> : le fichier est déposé sur le serveur sFTP de l'opérateur destinataire via <code>pnm-sftp-push.sh</code></li>
+    <li><strong>Étape 3 — Réception</strong> : l'opérateur destinataire collecte le fichier lors de la vacation et lance l'import</li>
+    <li><strong>Étape 4 — Validation</strong> : contrôles d'intégrité (checksum, structure, cohérence de l'en-tête)</li>
+    <li><strong>Étape 5 — Réponse</strong> : émission d'un ACR (succès) ou d'un ERR (échec)</li>
+</ul>
+
+<h3>ACR — Accusé de Réception</h3>
+<p>L'ACR confirme que le fichier PNMDATA a été <strong>correctement reçu et intégré</strong> :</p>
+<ul>
+    <li>Nommé selon la convention : <code>ACR_[OPE]_[OPR]_[DATE]_[VACATION]_[SEQ].dat</code></li>
+    <li>Contient la référence du fichier PNMDATA d'origine</li>
+    <li>Indique le <strong>nombre de tickets intégrés</strong> avec succès</li>
+    <li>Peut signaler des <strong>rejets individuels</strong> de tickets (ticket mal formé) tout en acceptant le fichier globalement</li>
+    <li>Doit être émis lors de la <strong>vacation suivante</strong> au plus tard</li>
+</ul>
+
+<h3>ERR — Fichier d'erreur</h3>
+<p>L'ERR signale un <strong>problème bloquant</strong> sur le fichier PNMDATA reçu :</p>
+<ul>
+    <li>Nommé selon la convention : <code>ERR_[OPE]_[OPR]_[DATE]_[VACATION]_[SEQ].dat</code></li>
+    <li>Contient un <strong>code d'erreur</strong> indiquant la nature du problème :</li>
+    <li><code>ERR_CHECKSUM</code> : le checksum ne correspond pas, fichier potentiellement corrompu</li>
+    <li><code>ERR_STRUCTURE</code> : le fichier ne respecte pas le format PNMDATA attendu</li>
+    <li><code>ERR_HEADER</code> : l'en-tête est incohérent (mauvais destinataire, vacation invalide)</li>
+    <li><code>ERR_COUNT</code> : le nombre de tickets déclaré ne correspond pas au contenu réel</li>
+    <li><code>ERR_DUPLICATE</code> : un fichier avec le même identifiant a déjà été traité</li>
+</ul>
+
+<h3>Procédure de retry</h3>
+<p>En cas d'ERR ou d'absence d'ACR, une procédure de <strong>renvoi</strong> est déclenchée :</p>
+<ul>
+    <li><strong>Retry automatique</strong> : si aucun ACR n'est reçu dans les 2 vacations suivantes, le fichier est renvoyé automatiquement par PortaSync</li>
+    <li><strong>Retry manuel</strong> : en cas d'ERR persistant, l'équipe PNM investigue et peut régénérer le fichier après correction</li>
+    <li><strong>Escalade GPMAG</strong> : après 3 tentatives infructueuses, l'incident est escaladé au comité technique inter-opérateurs</li>
+</ul>
+
+<h3>Cycle de vie d'un échange PNMDATA</h3>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --> Généré: PortaSync extrait tickets
+    Généré --> Envoyé: Dépôt sFTP (pnm-sftp-push.sh)
+    Envoyé --> Reçu: Collecte par destinataire
+    Reçu --> Validé: Contrôles intégrité OK
+    Reçu --> Erreur: Contrôles KO
+
+    Validé --> ACR_Émis: Génération ACR
+    ACR_Émis --> [*]: Cycle terminé
+
+    Erreur --> ERR_Émis: Génération ERR
+    ERR_Émis --> Retry_Auto: Renvoi automatique (2 vacations)
+    Retry_Auto --> Envoyé: Fichier régénéré
+    ERR_Émis --> Retry_Manuel: Après 3 échecs
+    Retry_Manuel --> Escalade_GPMAG: Investigation inter-opérateurs
+</pre>
+
+<h3>Monitoring des ACR/ERR</h3>
+<p>Le suivi des ACR/ERR fait partie des <strong>contrôles quotidiens</strong> de l'équipe PNM :</p>
+<ul>
+    <li>Vérifier que chaque fichier PNMDATA envoyé a reçu un ACR</li>
+    <li>Analyser les ERR reçus et identifier les causes racines</li>
+    <li>Vérifier que nos propres ACR/ERR sont bien émis dans les délais</li>
+    <li>Surveiller le <strong>taux d'ACR</strong> : un taux inférieur à 100% nécessite une investigation immédiate</li>
+</ul>

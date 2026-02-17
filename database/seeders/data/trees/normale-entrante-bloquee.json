@@ -1,0 +1,98 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "Le portage est-il visible dans PortaDB ?",
+  "yes": {
+    "id": "q2",
+    "type": "question",
+    "text": "Le ticket de réponse d'éligibilité (1210/1220) a-t-il été reçu de l'OPD ?",
+    "yes": {
+      "id": "q3",
+      "type": "question",
+      "text": "La réponse est-elle une acceptation (1210) ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "Le ticket 1410 (EP - envoi données portage) a-t-il été envoyé à tous les opérateurs ?",
+        "yes": {
+          "id": "q5",
+          "type": "question",
+          "text": "La date de portage (JP) est-elle passée ?",
+          "yes": {
+            "id": "q6",
+            "type": "question",
+            "text": "La bascule dans MOBI a-t-elle eu lieu ? (Vérifier EmaExtracter.log)",
+            "yes": {
+              "id": "d_confirm",
+              "type": "diagnosis",
+              "text": "Confirmation de portage manquante",
+              "diagnosis": "La bascule a été effectuée mais le ticket 1430 (CP) de confirmation n'a pas été reçu de tous les opérateurs.",
+              "recommended_action": "Vérifier les logs PnmDataAckManager. Contacter les opérateurs qui n'ont pas confirmé. Si le problème persiste, ouvrir un ticket d'incident.",
+              "severity": "warning",
+              "sql_query": "SELECT d.* FROM DATA d WHERE d.id_portage = ? AND d.code_ticket = '1430' ORDER BY d.date_creation_ticket DESC",
+              "related_codes": ["1430", "E011"]
+            },
+            "no": {
+              "id": "d_bascule",
+              "type": "diagnosis",
+              "text": "Échec de bascule",
+              "diagnosis": "Le jour de portage est passé mais la bascule n'a pas eu lieu. Vérifier EmaExtracter.log pour identifier l'erreur.",
+              "recommended_action": "Vérifier tail -n 12 EmaExtracter.log sur vmqproportasync01. Chercher un échec de \"Check success\" pour l'opérateur concerné. Vérifier la connexion EMA/EMM et MOBI.",
+              "severity": "critical",
+              "sql_query": "SELECT p.*, e.etat FROM PORTAGE p JOIN ETAT e ON p.id_etat = e.id WHERE p.id_portage_multiple = ? ORDER BY p.date_portage DESC",
+              "related_codes": ["1410", "1430"]
+            }
+          },
+          "no": {
+            "id": "d_attente_jp",
+            "type": "diagnosis",
+            "text": "En attente du jour de portage",
+            "diagnosis": "Le portage est correctement planifié. La bascule aura lieu automatiquement à JP entre 08h30 et 10h00.",
+            "recommended_action": "Pas d'action nécessaire. La bascule est automatique le jour JP. Vérifier que JP est bien un jour ouvré (pas weekend ni férié).",
+            "severity": "info",
+            "related_codes": ["1410", "E607"]
+          }
+        },
+        "no": {
+          "id": "d_ep_manquant",
+          "type": "diagnosis",
+          "text": "Ticket 1410 (EP) non envoyé",
+          "diagnosis": "L'OPR (nous) doit envoyer le ticket 1410 avec les données de portage à tous les opérateurs pour planifier la bascule.",
+          "recommended_action": "Vérifier dans PortaDB pourquoi le 1410 n'a pas été généré. Vérifier PnmDataManager.log. Le 1410 doit être envoyé avant JD+1 à la V14.",
+          "severity": "warning",
+          "sql_query": "SELECT d.* FROM DATA d WHERE d.id_portage = ? AND d.code_ticket IN ('1210', '1410') ORDER BY d.date_creation_ticket",
+          "related_codes": ["1210", "1410"]
+        }
+      },
+      "no": {
+        "id": "d_refus",
+        "type": "diagnosis",
+        "text": "Portage refusé par l'OPD",
+        "diagnosis": "L'OPD a refusé le portage (ticket 1220). Vérifier le motif de refus (code R*).",
+        "recommended_action": "Consulter le code de refus dans le dictionnaire. Corriger le problème (RIO, date, éligibilité) et relancer la demande.",
+        "severity": "warning",
+        "sql_query": "SELECT d.*, d.code_reponse FROM DATA d WHERE d.id_portage = ? AND d.code_ticket = '1220'",
+        "related_codes": ["1220", "R123", "R220", "R322"]
+      }
+    },
+    "no": {
+      "id": "d_reponse_manquante",
+      "type": "diagnosis",
+      "text": "Réponse d'éligibilité manquante",
+      "diagnosis": "L'OPD n'a pas envoyé sa réponse d'éligibilité dans le délai imparti (1 jour ouvré max).",
+      "recommended_action": "Contacter l'OPD par mail. Si pas de réponse avant la prochaine vacation, ouvrir un ticket d'incident. Vérifier le portail http://172.24.119.72:8080/PortaWs/ pour les portages \"En cours\".",
+      "severity": "warning",
+      "sql_query": "SELECT d.* FROM DATA d WHERE d.id_portage = ? AND d.code_ticket IN ('1110', '1120', '1210', '1220') ORDER BY d.date_creation_ticket DESC",
+      "related_codes": ["1110", "1120", "1210", "1220", "E011"]
+    }
+  },
+  "no": {
+    "id": "d_non_cree",
+    "type": "diagnosis",
+    "text": "Portage non créé dans PortaDB",
+    "diagnosis": "La demande de portage n'existe pas encore dans le système. Elle n'a peut-être pas été saisie ou la transmission a échoué.",
+    "recommended_action": "Vérifier si la demande a été créée via l'interface PortaWebUi ou les web services CreatePortaParticulier/Entreprise. Vérifier les logs ESB DataPower.",
+    "severity": "error",
+    "related_codes": ["1110", "1120"]
+  }
+}

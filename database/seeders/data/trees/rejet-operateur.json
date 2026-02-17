@@ -1,0 +1,66 @@
+{
+  "id": "root",
+  "type": "question",
+  "text": "Le rejet concerne-t-il le RIO (code R123) ?",
+  "yes": {
+    "id": "d_rio",
+    "type": "diagnosis",
+    "text": "RIO incorrect",
+    "diagnosis": "Le RIO fourni ne correspond pas au numéro. Le format attendu est OO-Q-RRRRRR-CCC (12 caractères). Le RIO peut avoir expiré ou être erroné.",
+    "recommended_action": "Demander au client de redemander son RIO en appelant le 3179 depuis sa ligne. Vérifier le format et l'algorithme de contrôle.",
+    "severity": "error",
+    "related_codes": ["R123", "1220"]
+  },
+  "no": {
+    "id": "q2",
+    "type": "question",
+    "text": "Le rejet concerne-t-il un autre portage en cours (R220) ?",
+    "yes": {
+      "id": "d_r220",
+      "type": "diagnosis",
+      "text": "Autre portage en cours",
+      "diagnosis": "Un portage est déjà en cours pour ce numéro. Il peut s'agir d'une demande concurrente d'un autre OPR ou d'un portage précédent non clôturé.",
+      "recommended_action": "Attendre la clôture du portage en cours (max 90 jours de péremption). Vérifier dans PortaDB l'état du dossier existant.",
+      "severity": "error",
+      "sql_query": "SELECT p.*, e.classe FROM PORTAGE p JOIN ETAT e ON p.id_etat = e.id WHERE p.msisdn = ? AND e.classe NOT IN ('cloture', 'refuse', 'annule')",
+      "related_codes": ["R220", "E613"]
+    },
+    "no": {
+      "id": "q3",
+      "type": "question",
+      "text": "Le rejet concerne-t-il une ligne résiliée (R322 ou R323) ?",
+      "yes": {
+        "id": "q4",
+        "type": "question",
+        "text": "La résiliation date-t-elle de moins de 10 jours (R323) ?",
+        "yes": {
+          "id": "d_r323",
+          "type": "diagnosis",
+          "text": "Ligne résiliée récemment (< 10 jours)",
+          "diagnosis": "La ligne a été résiliée à la demande du client depuis moins de 10 jours calendaires. Le portage peut être relancé si le client fait réactiver sa ligne.",
+          "recommended_action": "Proposer au client de contacter son ancien opérateur (OPD) pour demander la réactivation de sa ligne, puis relancer le portage.",
+          "severity": "warning",
+          "related_codes": ["R323", "C003"]
+        },
+        "no": {
+          "id": "d_r322",
+          "type": "diagnosis",
+          "text": "Ligne résiliée définitivement",
+          "diagnosis": "La ligne a été résiliée en dehors de la demande de portabilité en cours. La résiliation est effective et le portage ne peut pas aboutir.",
+          "recommended_action": "Informer le client que le numéro n'est plus éligible au portage. Si contestation, vérifier les conditions de résiliation avec l'OPD.",
+          "severity": "error",
+          "related_codes": ["R322"]
+        }
+      },
+      "no": {
+        "id": "d_autre",
+        "type": "diagnosis",
+        "text": "Autre motif de refus",
+        "diagnosis": "Consultez le dictionnaire des codes pour le motif exact. Les codes R210 (mauvais destinataire), R212 (date non valide), R213 (trop de numéros) et R340 (numéro non contractuel) sont les plus courants.",
+        "recommended_action": "Allez dans Résoudre > Codes PNM et cherchez le code de refus exact pour obtenir la procédure détaillée.",
+        "severity": "warning",
+        "related_codes": ["R210", "R212", "R213", "R340"]
+      }
+    }
+  }
+}

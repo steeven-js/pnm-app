@@ -1,0 +1,79 @@
+<h2>Architecture BSS — Du souscription à la facture</h2>
+
+<p>Le <strong>BSS</strong> (Business Support System) constitue le cœur du système d'information commercial de Digicel. Il couvre l'intégralité du cycle de vie d'un abonné, depuis sa souscription jusqu'à la génération de ses factures.</p>
+
+<h3>Vue d'ensemble de la chaîne BSS</h3>
+<p>L'architecture BSS s'articule autour de cinq composants majeurs interconnectés :</p>
+<p><code>CRM → Activation → DBS → Billing → Selfcare</code></p>
+
+<h3>CRM — Customer Relationship Management</h3>
+<p>Le CRM est le <strong>point d'entrée</strong> de toute interaction client :</p>
+<ul>
+    <li>Création de la fiche client (identité, adresse, pièce d'identité)</li>
+    <li>Gestion des contrats et des offres commerciales</li>
+    <li>Historique des interactions (appels, visites boutique, réclamations)</li>
+    <li>Déclenchement des demandes de portabilité (saisie du RIO, choix de l'offre)</li>
+</ul>
+<p>Lors d'un portage entrant, c'est dans le CRM que le conseiller crée la nouvelle souscription avec le numéro porté.</p>
+
+<h3>Activation / Provisioning</h3>
+<p>Le module d'activation transforme les <strong>commandes commerciales en ordres techniques</strong> :</p>
+<ul>
+    <li>Provisioning de la SIM sur le HLR/HSS (inscription du profil abonné)</li>
+    <li>Attribution du profil de services (data, voix, SMS, roaming)</li>
+    <li>Activation des options et services additionnels</li>
+    <li>Envoi des commandes vers les équipements réseau via l'ESB</li>
+</ul>
+<p>Pour un portage, l'activation inclut l'étape critique de <strong>bascule HLR</strong> : le profil de l'abonné est créé sur le HLR Digicel avec son MSISDN existant.</p>
+
+<h3>DBS — Database Subscribers</h3>
+<p>Le DBS est la <strong>base de référence des abonnés</strong> :</p>
+<ul>
+    <li>Stocke le profil complet de chaque abonné (MSISDN, IMSI, SIM, offre, statut)</li>
+    <li>Sert de source de vérité pour les autres systèmes (billing, selfcare, etc.)</li>
+    <li>Gère les statuts de ligne : actif, suspendu, résilié</li>
+    <li>Interface avec PortaDB pour les numéros portés (flag de portabilité)</li>
+</ul>
+
+<h3>Billing — Facturation</h3>
+<p>Le système de facturation gère l'ensemble du <strong>cycle de revenus</strong> :</p>
+<ul>
+    <li><strong>Rating</strong> : valorisation en temps réel des événements (appels, SMS, data)</li>
+    <li><strong>Médiation</strong> : collecte et normalisation des CDR (Call Detail Records) provenant du réseau</li>
+    <li><strong>Facturation</strong> : génération cyclique des factures (mensuelle)</li>
+    <li><strong>Encaissement</strong> : suivi des paiements, relances, gestion des impayés</li>
+</ul>
+<p>Lors d'un portage entrant, le billing doit gérer le <strong>prorata</strong> du premier mois et s'assurer que les CDR du numéro porté sont correctement rattachés au nouveau compte.</p>
+
+<h3>Selfcare</h3>
+<p>Le Selfcare offre au client un <strong>accès autonome</strong> à son compte :</p>
+<ul>
+    <li>Consultation du solde et de la consommation</li>
+    <li>Changement d'offre, achat de packs</li>
+    <li>Téléchargement des factures</li>
+    <li>Suivi des demandes en cours (y compris portage)</li>
+</ul>
+
+<h3>Chaîne BSS</h3>
+<pre class="mermaid">
+graph LR
+    CRM[CRM<br/>Relation client] --> ACT[Activation<br/>Provisioning]
+    ACT --> DBS[DBS<br/>Base abonnés]
+    DBS --> BILL[Billing<br/>Facturation]
+    BILL --> SELF[Selfcare<br/>Espace client]
+
+    CRM -->|Portage entrant| PORTA[PortaDB<br/>Ticket 1110]
+    PORTA -->|Après acceptation 1210| ACT
+    ACT -->|Bascule JP| HLR[HLR/HSS]
+</pre>
+
+<h3>Flux de données dans un portage entrant</h3>
+<p>Quand un client porte son numéro chez Digicel, le flux BSS suit cette séquence :</p>
+<ul>
+    <li><strong>CRM</strong> : le conseiller crée la souscription avec le MSISDN porté et le RIO</li>
+    <li><strong>PortaDB</strong> : le ticket 1110 est généré et envoyé à l'OPD</li>
+    <li>Après acceptation (1210), <strong>Activation</strong> prépare le profil HLR</li>
+    <li>Au jour JP, la <strong>bascule</strong> active le profil sur le réseau</li>
+    <li><strong>DBS</strong> est mis à jour avec le nouveau statut</li>
+    <li><strong>Billing</strong> commence à facturer les consommations</li>
+</ul>

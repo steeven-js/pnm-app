@@ -1,0 +1,185 @@
+<h2>ESB DataPower — Bus d'intégration</h2>
+
+<p>L'<strong>ESB DataPower</strong> (Enterprise Service Bus) est le bus d'intégration central de l'architecture PNM chez Digicel. Basé sur la technologie <strong>IBM DataPower Gateway</strong>, il assure l'interconnexion entre les différents systèmes impliqués dans le processus de portabilité.</p>
+
+<svg viewBox="0 0 800 480" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="margin: 1.5rem 0;">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .svg-bg { fill: #f8fafc; }
+      .svg-box { stroke-width: 2; }
+      .svg-text-primary { fill: #1e293b; font-family: system-ui, -apple-system, sans-serif; }
+      .svg-text-secondary { fill: #475569; font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', monospace; font-size: 9px; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect class="svg-bg" x="0" y="0" width="800" height="480" rx="8"/>
+
+  <!-- ======== LEFT SIDE ======== -->
+
+  <!-- PortaDB -->
+  <rect class="svg-box" x="30" y="80" width="160" height="65" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"/>
+  <text class="svg-text-primary" x="110" y="108" text-anchor="middle" font-size="13" font-weight="bold">PortaDB</text>
+  <text class="svg-text-secondary" x="110" y="128" text-anchor="middle">Base de donnees portabilite</text>
+
+  <!-- Arrow PortaDB -> ESB -->
+  <line x1="190" y1="112" x2="298" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="228" y="124" font-size="10" transform="rotate(-13, 228, 124)">Ordres de bascule</text>
+
+  <!-- CRM -->
+  <rect class="svg-box" x="30" y="210" width="160" height="65" rx="6" fill="rgba(16,185,129,0.12)" stroke="#10b981"/>
+  <text class="svg-text-primary" x="110" y="238" text-anchor="middle" font-size="13" font-weight="bold">CRM</text>
+  <text class="svg-text-secondary" x="110" y="258" text-anchor="middle">Gestion client</text>
+
+  <!-- Arrow CRM -> ESB -->
+  <line x1="190" y1="242" x2="298" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="228" y="236" font-size="10" transform="rotate(12, 228, 236)">Demandes portage</text>
+
+  <!-- ======== CENTER - ESB DataPower ======== -->
+
+  <rect class="svg-box" x="300" y="130" width="220" height="110" rx="8" fill="rgba(139,92,246,0.12)" stroke="#8b5cf6" stroke-width="2.5"/>
+  <text class="svg-text-primary" x="410" y="160" text-anchor="middle" font-size="15" font-weight="bold">ESB DataPower</text>
+  <text class="svg-text-secondary" x="410" y="180" text-anchor="middle">172.24.116.76:8000</text>
+  <text class="svg-text-secondary" x="410" y="196" text-anchor="middle" font-style="italic">DigicelFwiEsbWs4Porta.wsdl</text>
+  <text class="svg-text-secondary" x="410" y="212" text-anchor="middle">IBM DataPower Gateway</text>
+
+  <!-- ======== RIGHT SIDE ======== -->
+
+  <!-- MOBI -->
+  <rect class="svg-box" x="620" y="155" width="150" height="60" rx="6" fill="rgba(245,158,11,0.12)" stroke="#f59e0b"/>
+  <text class="svg-text-primary" x="695" y="182" text-anchor="middle" font-size="13" font-weight="bold">MOBI</text>
+  <text class="svg-text-secondary" x="695" y="202" text-anchor="middle">Routage reseau</text>
+
+  <!-- Arrow ESB -> MOBI -->
+  <line x1="520" y1="185" x2="615" y2="185" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="567" y="178" text-anchor="middle" font-size="10">EMA / EMM</text>
+
+  <!-- ======== BOTTOM ======== -->
+
+  <!-- PortaWs -->
+  <rect class="svg-box" x="200" y="330" width="210" height="110" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"/>
+  <text class="svg-text-primary" x="305" y="357" text-anchor="middle" font-size="13" font-weight="bold">PortaWs</text>
+  <text class="svg-text-secondary" x="305" y="375" text-anchor="middle">172.24.119.72:8080</text>
+  <text class="svg-text-secondary" x="305" y="393" text-anchor="middle" font-style="italic">DigicelFwiPortaWs4Esb</text>
+  <text class="svg-text-secondary" x="305" y="409" text-anchor="middle" font-style="italic">DigicelFwiPortaWs4PortaSync</text>
+  <text class="svg-text-secondary" x="305" y="425" text-anchor="middle">/PortaWs/</text>
+
+  <!-- Arrow ESB <-> PortaWs (bidirectional) -->
+  <line x1="365" y1="240" x2="325" y2="325" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="332" y="280" text-anchor="middle" font-size="10">DAPI</text>
+
+  <!-- PortaSync -->
+  <rect class="svg-box" x="30" y="360" width="120" height="55" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"/>
+  <text class="svg-text-primary" x="90" y="390" text-anchor="middle" font-size="13" font-weight="bold">PortaSync</text>
+  <text class="svg-text-secondary" x="90" y="405" text-anchor="middle">Synchronisation</text>
+
+  <!-- Arrow PortaWs <-> PortaSync (bidirectional) -->
+  <line x1="155" y1="387" x2="195" y2="387" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="175" y="380" text-anchor="middle" font-size="10">Sync</text>
+
+  <!-- PortaWebUi -->
+  <rect class="svg-box" x="470" y="330" width="210" height="100" rx="6" fill="rgba(239,68,68,0.12)" stroke="#ef4444"/>
+  <text class="svg-text-primary" x="575" y="357" text-anchor="middle" font-size="13" font-weight="bold">PortaWebUi</text>
+  <text class="svg-text-secondary" x="575" y="375" text-anchor="middle">172.24.119.71:8080</text>
+  <text class="svg-text-secondary" x="575" y="393" text-anchor="middle" font-style="italic">DigicelFwiPortaUiWs4Esb</text>
+  <text class="svg-text-secondary" x="575" y="409" text-anchor="middle">/PortaWebUi/</text>
+
+  <!-- Arrow ESB <-> PortaWebUi (bidirectional) -->
+  <line x1="455" y1="240" x2="540" y2="325" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+  <text class="svg-text-primary" x="510" y="278" text-anchor="middle" font-size="10">WebStore</text>
+
+  <!-- Legend -->
+  <text class="svg-text-secondary" x="15" y="470" font-size="8">DAPI — Digicel Application Portability Interface — Endpoints de production</text>
+</svg>
+
+<h3>Rôle dans l'architecture PNM</h3>
+<p>L'ESB DataPower remplit une fonction de <strong>médiateur</strong> entre les systèmes internes :</p>
+<ul>
+    <li><strong>Routage des messages</strong> : acheminer les requêtes du bon émetteur vers le bon destinataire (PortaDB → MOBI, CRM → PortaDB, etc.)</li>
+    <li><strong>Transformation de données</strong> : convertir les formats entre systèmes hétérogènes (XML, JSON, formats propriétaires)</li>
+    <li><strong>Orchestration</strong> : coordonner les séquences d'appels multi-systèmes nécessaires pour une bascule</li>
+    <li><strong>Sécurité</strong> : authentification, chiffrement et contrôle d'accès sur les flux inter-applicatifs</li>
+</ul>
+
+<h3>Flux principaux</h3>
+<p>Les flux PNM transitant par l'ESB DataPower incluent :</p>
+
+<p><strong>Flux PortaDB → MOBI (bascule) :</strong></p>
+<ul>
+    <li>PortaDB envoie un ordre de bascule contenant le MSISDN et les paramètres de routage</li>
+    <li>L'ESB transforme la requête au format attendu par MOBI</li>
+    <li>MOBI exécute les commandes <strong>EMA</strong> (ajout) et <strong>EMM</strong> (modification) sur les tables de routage réseau</li>
+    <li>Le résultat (succès ou erreur) remonte vers PortaDB via l'ESB</li>
+</ul>
+
+<p><strong>Flux CRM → PortaDB (demande de portage) :</strong></p>
+<ul>
+    <li>Le CRM soumet une nouvelle demande de portage avec les informations client</li>
+    <li>L'ESB valide le format et transmet à PortaDB pour création du ticket 1110</li>
+    <li>PortaDB retourne un accusé de réception avec le numéro de dossier</li>
+</ul>
+
+<p><strong>Flux PortaDB → CRM (notifications) :</strong></p>
+<ul>
+    <li>PortaDB notifie le CRM des changements de statut (acceptation, refus, bascule effectuée)</li>
+    <li>Le CRM met à jour la fiche client et peut déclencher des notifications SMS au client</li>
+</ul>
+
+<h3>Transformations</h3>
+<p>L'ESB DataPower effectue plusieurs types de <strong>transformations</strong> sur les messages :</p>
+<ul>
+    <li><strong>Mapping de champs</strong> : correspondance entre les noms de champs PortaDB et les noms MOBI</li>
+    <li><strong>Enrichissement</strong> : ajout d'informations contextuelles (horodatage, identifiant de corrélation)</li>
+    <li><strong>Validation de schéma</strong> : vérification de la conformité des messages avant transmission</li>
+    <li><strong>Gestion des erreurs</strong> : capture des exceptions, retry automatique, mise en file d'attente (dead letter queue)</li>
+</ul>
+
+<h3>Interfaces DAPI — Endpoints de production</h3>
+<p>La <strong>DAPI</strong> (Digicel Application Portability Interface) définit les web services exposés et consommés par les différents composants PNM. Voici les endpoints de production :</p>
+
+<p><strong>WS ESB (consommé par PortaDB) :</strong></p>
+<ul>
+    <li><strong>WSDL</strong> : <code>DigicelFwiEsbWs4Porta.wsdl</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.116.76:8000</code></li>
+    <li><strong>Configuration</strong> : l'URL est stockée dans la table <code>web_config</code> de PortaDB avec le code <code>esb.wsdlLocation</code></li>
+    <li><strong>Usage</strong> : appels de PortaDB vers l'ESB pour les ordres de bascule et les notifications</li>
+</ul>
+
+<p><strong>WS DAPI — ESB (exposé par PortaWs) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaWs4Esb</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.72:8080/PortaWs/</code></li>
+    <li><strong>Usage</strong> : interface consommée par l'ESB pour interroger ou notifier PortaDB</li>
+</ul>
+
+<p><strong>WS DAPI — PortaSync (exposé par PortaWs) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaWs4PortaSync</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.72:8080/PortaWs/</code></li>
+    <li><strong>Usage</strong> : interface consommée par PortaSync pour les opérations de synchronisation et d'échange de données</li>
+</ul>
+
+<p><strong>WS DAPI — WebStore (exposé par PortaWebUi) :</strong></p>
+<ul>
+    <li><strong>Service</strong> : <code>DigicelFwiPortaUiWs4Esb</code></li>
+    <li><strong>Endpoint</strong> : <code>http://172.24.119.71:8080/PortaWebUi/</code></li>
+    <li><strong>Usage</strong> : interface consommée par l'ESB pour les opérations via l'interface utilisateur web</li>
+</ul>
+
+<h3>Endpoints DAPI de production</h3>
+<pre class="mermaid">
+graph LR
+    PORTADB[PortaDB] -->|Ordres bascule| ESB[ESB DataPower<br/>172.24.116.76:8000]
+    CRM[CRM] -->|Demandes portage| ESB
+    ESB -->|EMA/EMM| MOBI[MOBI<br/>Routage réseau]
+
+    ESB <-->|DAPI| PORTAWS[PortaWs<br/>172.24.119.72:8080<br/>/PortaWs/]
+    ESB <-->|WebStore| PORTAUI[PortaWebUi<br/>172.24.119.71:8080<br/>/PortaWebUi/]
+    PORTAWS <-->|Sync| PORTASYNC[PortaSync]
+</pre>
+
+<h3>Monitoring et logs</h3>
+<p>Tous les flux transitant par l'ESB sont <strong>journalisés</strong>. Les logs DataPower permettent de tracer chaque message de bout en bout grâce à un <strong>identifiant de corrélation unique</strong>. En cas d'incident sur un portage, ces logs sont le premier point d'investigation pour identifier à quelle étape le flux a échoué.</p>

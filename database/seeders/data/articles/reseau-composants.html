@@ -1,0 +1,68 @@
+<h2>Composants réseau clés</h2>
+
+<p>Les équipements du cœur de réseau sont au cœur du fonctionnement de la portabilité. Chaque composant joue un rôle spécifique dans l'acheminement des communications et la gestion des abonnés. Voici le détail de chaque élément critique et son impact en cas de panne.</p>
+
+<h3>HLR — Home Location Register</h3>
+<p>Le HLR est la <strong>base de données maîtresse</strong> des abonnés pour les réseaux 2G et 3G :</p>
+<ul>
+    <li>Stocke le profil de chaque abonné : IMSI, MSISDN, services autorisés, restrictions</li>
+    <li>Maintient la <strong>localisation courante</strong> de l'abonné (dans quel VLR il est enregistré)</li>
+    <li>Consulté à chaque <strong>appel entrant</strong> pour localiser l'abonné destinataire</li>
+    <li>Dans le contexte PNM : contient les <strong>informations de routage</strong> pour les numéros portés entrants</li>
+</ul>
+<p><strong>Impact si down :</strong> aucun nouvel appel entrant ne peut être routé vers les abonnés Digicel. Les appels en cours ne sont pas affectés. Les enregistrements de localisation ne sont plus mis à jour. Impact critique sur la portabilité : impossibilité d'effectuer les bascules HLR.</p>
+
+<h3>HSS — Home Subscriber Server</h3>
+<p>Le HSS est l'<strong>équivalent 4G/LTE du HLR</strong>, avec des fonctionnalités étendues :</p>
+<ul>
+    <li>Authentification des abonnés sur le réseau 4G</li>
+    <li>Gestion des profils QoS (Quality of Service) par abonné</li>
+    <li>Interface avec l'IMS pour les services VoLTE</li>
+    <li>Généralement couplé avec le HLR dans une plateforme unifiée (<strong>HLR/HSS combo</strong>)</li>
+</ul>
+<p><strong>Impact si down :</strong> les abonnés 4G ne peuvent plus s'authentifier. Pas de nouveau rattachement au réseau LTE. Les sessions data existantes peuvent persister temporairement mais ne peuvent être rétablies en cas de coupure.</p>
+
+<h3>EPC — Evolved Packet Core</h3>
+<p>L'EPC est le <strong>cœur de réseau 4G</strong>, composé de plusieurs éléments :</p>
+<ul>
+    <li><strong>MME</strong> (Mobility Management Entity) : gestion de la mobilité, authentification, paging</li>
+    <li><strong>S-GW</strong> (Serving Gateway) : point d'ancrage du trafic data, handover entre eNodeB</li>
+    <li><strong>P-GW</strong> (PDN Gateway) : passerelle vers les réseaux externes (Internet), attribution d'adresses IP</li>
+</ul>
+<p><strong>Impact si down :</strong> perte totale du service data 4G. Les abonnés basculent en 3G si le fallback est configuré. Les appels VoLTE sont interrompus (bascule en CSFB — Circuit Switched Fallback).</p>
+
+<h3>IMS — IP Multimedia Subsystem</h3>
+<p>L'IMS fournit les <strong>services voix et multimédia sur IP</strong> :</p>
+<ul>
+    <li>Support de la <strong>VoLTE</strong> (Voice over LTE) : appels haute définition sur le réseau 4G</li>
+    <li>Services de messagerie enrichie (RCS)</li>
+    <li>Visioconférence, appels Wi-Fi (VoWiFi)</li>
+</ul>
+<p><strong>Impact si down :</strong> les appels VoLTE sont impossibles. Les abonnés basculent automatiquement en voix circuit (2G/3G) via le mécanisme CSFB. Impact limité sur la portabilité sauf si le routage VoLTE des numéros portés est spécifiquement configuré dans l'IMS.</p>
+
+<h3>MSC — Mobile Switching Center</h3>
+<p>Le MSC est le <strong>commutateur d'appels voix</strong> des réseaux 2G/3G :</p>
+<ul>
+    <li>Établissement, maintien et libération des appels voix</li>
+    <li>Gestion des SMS (en lien avec le SMSC)</li>
+    <li>Génération des <strong>CDR</strong> (Call Detail Records) pour la facturation</li>
+    <li>Interrogation du HLR pour le routage des appels sortants vers des numéros portés</li>
+</ul>
+<p><strong>Impact si down :</strong> aucun appel voix ni SMS possible sur la zone couverte par ce MSC. Les abonnés conservent leur accès data si le réseau 4G est disponible. Impact direct sur la facturation (pas de CDR générés).</p>
+
+<h3>Interactions entre composants réseau</h3>
+<pre class="mermaid">
+graph LR
+    MSC[MSC<br/>Commutateur voix] <-->|Localisation| HLR[HLR<br/>Base abonnés 2G/3G]
+    HLR <-->|Profils unifiés| HSS[HSS<br/>Base abonnés 4G]
+    HSS <-->|Authentification| EPC[EPC<br/>Coeur 4G]
+    EPC <-->|VoLTE| IMS[IMS<br/>Services IP]
+    MSC -->|CDR| BILL[Billing]
+
+    HLR -->|Consultation PNM| MOBI[Tables MOBI<br/>Routage portés]
+    MOBI -.->|Commandes EMA/EMM| ESB[ESB DataPower]
+    ESB -.->|Ordres bascule| PORTADB[PortaDB]
+</pre>
+
+<h3>Interdépendances avec la PNM</h3>
+<p>La portabilité dépend directement du bon fonctionnement du <strong>HLR/HSS</strong> (pour les bascules) et du <strong>MSC</strong> (pour le routage des appels vers les numéros portés). Toute intervention de maintenance sur ces équipements doit être coordonnée avec le planning des vacations PNM pour éviter les conflits.</p>
