@@ -15,7 +15,7 @@ import { Iconify } from 'src/components/iconify';
 import { ChatPanel } from 'src/components/chat-panel';
 
 import { Logo } from 'src/components/logo';
-import { useSettingsContext } from 'src/components/settings';
+import { useSettingsContext, SettingsDrawer, defaultSettings } from 'src/components/settings';
 
 import { useMockedUser } from 'src/auth/hooks';
 
@@ -201,6 +201,7 @@ export function DashboardLayout({
   return (
     <>
     <ChatPanel open={chatOpen} onClose={onChatClose} />
+    <SettingsDrawer defaultSettings={defaultSettings} />
     <LayoutSection
       /** **************************************
        * @Header
