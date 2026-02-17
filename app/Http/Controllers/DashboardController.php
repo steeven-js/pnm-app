@@ -13,6 +13,10 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        if (! $user->onboarding_completed) {
+            return Inertia::render('Onboarding/Index');
+        }
+
         $domains = KnowledgeDomain::orderBy('sort_order')
             ->withCount(['publishedArticles as articles_count'])
             ->get();
