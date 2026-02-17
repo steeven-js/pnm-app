@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\DecisionTreeController;
 use App\Http\Controllers\DiagramController;
 use App\Http\Controllers\GlossaryController;
@@ -71,6 +72,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Monitoring API (JSON)
+    Route::get('/api/monitoring', [MonitoringController::class, 'index'])->name('api.monitoring.index');
+    Route::post('/api/monitoring', [MonitoringController::class, 'store'])->name('api.monitoring.store');
 
     // Chat IA (JSON API, not Inertia)
     Route::get('api/chat/conversations', [ChatController::class, 'index'])->name('api.chat.index');

@@ -15,6 +15,16 @@ export type {
     DecisionTree,
 } from './resolve';
 
+export type {
+    EventStatus,
+    MonitoringEvent,
+    MonitoringData,
+    HolidayDetail,
+    PnmEventConfig,
+    EnrichedPnmEvent,
+    EventCategory,
+} from './monitoring';
+
 export interface User {
     id: number;
     name: string;

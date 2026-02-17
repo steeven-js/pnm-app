@@ -8,17 +8,19 @@ import { paths } from 'src/routes/paths';
 
 import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
-import type { KnowledgeDomain, DomainProgress } from 'src/types';
+import type { KnowledgeDomain, DomainProgress, MonitoringData } from 'src/types';
 
 import { LevelBadge } from './Dashboard/components/level-badge';
 import { IntentionCard } from './Dashboard/components/intention-card';
 import { DomainCard } from './Dashboard/components/domain-card';
+import { MonitoringTimeline } from './Dashboard/components/monitoring/monitoring-timeline';
 
 // ----------------------------------------------------------------------
 
 type DashboardPageProps = {
   domains: KnowledgeDomain[];
   domainProgress: Record<string, DomainProgress>;
+  monitoring: MonitoringData;
   user: {
     id: number;
     name: string;
@@ -60,7 +62,7 @@ const INTENTIONS = [
 ];
 
 export default function Dashboard() {
-  const { domains, domainProgress, user } = usePage().props as unknown as DashboardPageProps;
+  const { domains, domainProgress, monitoring, user } = usePage().props as unknown as DashboardPageProps;
 
   return (
     <DashboardLayout>
@@ -79,6 +81,13 @@ export default function Dashboard() {
           </Box>
           {user?.level && <LevelBadge level={user.level} />}
         </Box>
+
+        {/* Monitoring Timeline */}
+        {monitoring && (
+          <Box sx={{ mb: 5 }}>
+            <MonitoringTimeline monitoring={monitoring} />
+          </Box>
+        )}
 
         {/* Intention Cards */}
         <Grid container spacing={3} sx={{ mb: 5 }}>
