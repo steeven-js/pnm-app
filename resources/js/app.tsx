@@ -1,35 +1,42 @@
+import 'src/global.css';
+import './bootstrap';
+
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '../css/app.css';
-import { initializeTheme } from './hooks/use-appearance';
-import { MuiProvider } from './theme';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+import { themeConfig, ThemeProvider } from 'src/theme';
+import { MotionLazy } from 'src/components/animate/motion-lazy';
+import { SettingsProvider, defaultSettings } from 'src/components/settings';
+
+// ----------------------------------------------------------------------
+
+const appName = import.meta.env.VITE_APP_NAME || 'PNM App';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
         resolvePageComponent(
-            `./pages/${name}.tsx`,
-            import.meta.glob('./pages/**/*.tsx'),
+            `./Pages/${name}.tsx`,
+            import.meta.glob('./Pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
 
         root.render(
-            <StrictMode>
-                <MuiProvider>
-                    <App {...props} />
-                </MuiProvider>
-            </StrictMode>,
+            <SettingsProvider defaultSettings={defaultSettings}>
+                <ThemeProvider
+                    modeStorageKey={themeConfig.modeStorageKey}
+                    defaultMode={themeConfig.defaultMode}
+                >
+                    <MotionLazy>
+                        <App {...props} />
+                    </MotionLazy>
+                </ThemeProvider>
+            </SettingsProvider>
         );
     },
     progress: {
-        color: '#4B5563',
+        color: '#00A76F', // Minimals primary color
     },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();

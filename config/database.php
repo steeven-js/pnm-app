@@ -98,19 +98,6 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 
-        'supabase' => [
-            'driver' => 'pgsql',
-            'host' => env('SUPABASE_HOST'),
-            'port' => env('SUPABASE_PORT', '5432'),
-            'database' => env('SUPABASE_DATABASE', 'postgres'),
-            'username' => env('SUPABASE_USERNAME'),
-            'password' => env('SUPABASE_PASSWORD'),
-            'charset' => 'utf8',
-            'prefix' => '',
-            'search_path' => 'public',
-            'sslmode' => 'require',
-        ],
-
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
