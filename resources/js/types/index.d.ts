@@ -1,22 +1,31 @@
+export type {
+    KnowledgeDomain,
+    Article,
+    GlossaryTerm,
+    UserArticleProgress,
+    UserDomainProgress,
+    ProgressStats,
+    Diagram,
+    SearchResults,
+} from './knowledge';
+
+export type {
+    PnmCode,
+    DecisionTreeNode,
+    DecisionTree,
+} from './resolve';
+
 export interface User {
     id: number;
     name: string;
     email: string;
+    avatar?: string;
     email_verified_at?: string;
     role?: string;
     level?: string;
     onboarding_completed?: boolean;
-}
-
-export interface KnowledgeDomain {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-    icon: string | null;
-    color: string | null;
-    sort_order: number;
-    articles_count?: number;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface DomainProgress {
