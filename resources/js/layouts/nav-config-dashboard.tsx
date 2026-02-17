@@ -19,6 +19,11 @@ export const navData: NavSectionProps['data'] = [
         icon: <Iconify icon="solar:home-angle-bold-duotone" width={24} />,
       },
       {
+        title: 'Connaissances',
+        path: paths.knowledge.root,
+        icon: <Iconify icon="solar:notebook-bold-duotone" width={24} />,
+      },
+      {
         title: 'Progression',
         path: paths.dashboard.progress,
         icon: <Iconify icon="solar:chart-bold-duotone" width={24} />,
