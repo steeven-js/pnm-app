@@ -55,6 +55,7 @@ export const navData: NavSectionProps['data'] = [
         children: [
           { title: 'Codes PNM', path: paths.resolve.codes },
           { title: 'Arbres de décision', path: paths.resolve.decisionTrees },
+          { title: 'Incidents', path: paths.resolve.incidents },
           { title: 'Diagrammes', path: paths.resolve.diagrams },
         ],
       },

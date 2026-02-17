@@ -61,7 +61,10 @@ export const paths = {
   resolve: {
     root: '/resolve',
     codes: '/resolve/codes',
+    codeShow: (code: string) => `/resolve/codes/${code}`,
     decisionTrees: '/resolve/decision-trees',
+    decisionTreeShow: (slug: string) => `/resolve/decision-trees/${slug}`,
+    incidents: '/resolve/incidents',
     diagrams: '/diagrams',
   },
   // KNOWLEDGE
