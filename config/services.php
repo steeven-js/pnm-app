@@ -35,4 +35,31 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Services (Chat IA)
+    |--------------------------------------------------------------------------
+    */
+
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'openai'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o'),
+        'max_tokens' => 4096,
+    ],
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514'),
+        'max_tokens' => 4096,
+    ],
+
+    'embedding' => [
+        'model' => env('EMBEDDING_MODEL', 'text-embedding-3-small'),
+        'dimensions' => 1536,
+    ],
+
 ];

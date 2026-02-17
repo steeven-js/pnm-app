@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DecisionTreeController;
 use App\Http\Controllers\DiagramController;
@@ -76,6 +77,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Chat IA (JSON API, not Inertia)
+    Route::get('api/chat/conversations', [ChatController::class, 'index'])->name('api.chat.index');
+    Route::get('api/chat/conversations/{conversation}', [ChatController::class, 'show'])->name('api.chat.show');
+    Route::post('api/chat/stream', [ChatController::class, 'stream'])->name('api.chat.stream');
+    Route::delete('api/chat/conversations/{conversation}', [ChatController::class, 'destroy'])->name('api.chat.destroy');
 });
 
 // Dev login route (local only)

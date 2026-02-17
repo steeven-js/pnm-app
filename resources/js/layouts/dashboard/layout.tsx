@@ -7,8 +7,12 @@ import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
+
+import { Iconify } from 'src/components/iconify';
+import { ChatPanel } from 'src/components/chat-panel';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
@@ -61,6 +65,7 @@ export function DashboardLayout({
   const navVars = dashboardNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
+  const { value: chatOpen, onFalse: onChatClose, onTrue: onChatOpen } = useBoolean();
 
   const navData = slotProps?.nav?.data ?? dynamicNavData;
 
@@ -170,7 +175,22 @@ export function DashboardLayout({
           settings.state.navLayout === 'vertical' ? 'mini' : 'vertical'
         )
       }
-      slots={{ bottomArea: <></> }}
+      slots={{
+        bottomArea: (
+          <Box sx={{ px: 2.5, pb: 2 }}>
+            <Button
+              fullWidth
+              variant="soft"
+              color="primary"
+              startIcon={<Iconify icon="solar:chat-round-dots-bold-duotone" width={20} />}
+              onClick={onChatOpen}
+              sx={{ justifyContent: 'flex-start' }}
+            >
+              {!isNavMini && 'Assistant IA'}
+            </Button>
+          </Box>
+        ),
+      }}
     />
   );
 
@@ -179,6 +199,8 @@ export function DashboardLayout({
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
+    <>
+    <ChatPanel open={chatOpen} onClose={onChatClose} />
     <LayoutSection
       /** **************************************
        * @Header
@@ -213,5 +235,6 @@ export function DashboardLayout({
     >
       {renderMain()}
     </LayoutSection>
+    </>
   );
 }
