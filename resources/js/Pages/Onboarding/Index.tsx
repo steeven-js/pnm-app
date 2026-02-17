@@ -1,5 +1,4 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -52,12 +51,11 @@ const ROLES = [
 // ----------------------------------------------------------------------
 
 export default function OnboardingIndex() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const { post, processing } = useForm({});
+  const { data, setData, post, processing } = useForm({ role: '' });
 
   const handleSubmit = () => {
-    if (!selected) return;
-    post('/onboarding', { data: { role: selected } as any });
+    if (!data.role) return;
+    post('/onboarding');
   };
 
   return (
@@ -88,13 +86,13 @@ export default function OnboardingIndex() {
                 key={role.value}
                 variant="outlined"
                 sx={{
-                  borderColor: selected === role.value ? role.color : 'divider',
-                  borderWidth: selected === role.value ? 2 : 1,
+                  borderColor: data.role === role.value ? role.color : 'divider',
+                  borderWidth: data.role === role.value ? 2 : 1,
                   transition: 'all 0.2s',
                 }}
               >
                 <CardActionArea
-                  onClick={() => setSelected(role.value)}
+                  onClick={() => setData('role', role.value)}
                   sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2 }}
                 >
                   <Box
@@ -119,7 +117,7 @@ export default function OnboardingIndex() {
                     </Typography>
                   </Box>
 
-                  {selected === role.value && (
+                  {data.role === role.value && (
                     <Iconify
                       icon="solar:check-circle-bold"
                       width={24}
@@ -136,7 +134,7 @@ export default function OnboardingIndex() {
             size="large"
             variant="contained"
             color="inherit"
-            disabled={!selected || processing}
+            disabled={!data.role || processing}
             onClick={handleSubmit}
           >
             {processing ? 'Enregistrement...' : 'Continuer'}
