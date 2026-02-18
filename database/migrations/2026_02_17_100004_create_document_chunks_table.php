@@ -23,9 +23,9 @@ return new class extends Migration
         DB::statement("ALTER TABLE document_chunks ADD COLUMN searchable tsvector");
         DB::statement("CREATE INDEX document_chunks_searchable_idx ON document_chunks USING GIN(searchable)");
 
-        // Auto-update trigger
+        // Auto-update trigger (CREATE OR REPLACE to avoid error on re-run)
         DB::statement("
-            CREATE FUNCTION document_chunks_searchable_update() RETURNS trigger AS $$
+            CREATE OR REPLACE FUNCTION document_chunks_searchable_update() RETURNS trigger AS $$
             BEGIN
                 NEW.searchable := to_tsvector('french', coalesce(NEW.heading, '') || ' ' || coalesce(NEW.content, ''));
                 RETURN NEW;
@@ -33,6 +33,9 @@ return new class extends Migration
             $$ LANGUAGE plpgsql;
         ");
 
+        DB::statement("
+            DROP TRIGGER IF EXISTS document_chunks_searchable_trigger ON document_chunks;
+        ");
         DB::statement("
             CREATE TRIGGER document_chunks_searchable_trigger
             BEFORE INSERT OR UPDATE ON document_chunks
