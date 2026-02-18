@@ -28,12 +28,26 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('domain_id');
 
+        // Calculate level dynamically from overall progress
+        $totalArticles = $domains->sum('articles_count');
+        $totalRead = $domainProgress->sum('articles_read');
+        $overallPercent = $totalArticles > 0 ? ($totalRead / $totalArticles) * 100 : 0;
+
+        $level = match (true) {
+            $overallPercent >= 75 => 'maitrise',
+            $overallPercent >= 30 => 'comprehension',
+            default => 'decouverte',
+        };
+
         $today = Carbon::now('America/Martinique')->startOfDay();
 
         return Inertia::render('Dashboard', [
             'domains' => $domains,
             'domainProgress' => $domainProgress,
-            'user' => $user->only('id', 'name', 'role', 'level', 'onboarding_completed'),
+            'user' => [
+                ...$user->only('id', 'name', 'role', 'onboarding_completed'),
+                'level' => $level,
+            ],
             'monitoring' => [
                 'events' => MonitoringEvent::where('user_id', $user->id)
                     ->forDate($today)

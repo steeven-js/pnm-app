@@ -9,8 +9,14 @@ type TimelineTrackProps = {
 };
 
 export function TimelineTrack({ events, selectedKey, onSelect }: TimelineTrackProps) {
-    const treatedCount = events.filter((e) => e.isPast || e.status === 'verified' || e.status === 'skipped').length;
-    const progressPercent = events.length > 0 ? (treatedCount / events.length) * 100 : 0;
+    // Find the index of the current event (or last past event) to position the green line
+    let activeIndex = -1;
+    for (let i = events.length - 1; i >= 0; i--) {
+        if (events[i].isCurrent || events[i].isPast) { activeIndex = i; break; }
+    }
+    const progressPercent = events.length > 1 && activeIndex >= 0
+        ? (activeIndex / (events.length - 1)) * 100
+        : 0;
 
     return (
         <Box sx={{ position: 'relative', px: 1 }}>
@@ -19,7 +25,7 @@ export function TimelineTrack({ events, selectedKey, onSelect }: TimelineTrackPr
             {/* Progress rail */}
             <Box sx={{
                 position: 'absolute', top: 20, left: 28,
-                width: `calc(${Math.min(progressPercent, 100)}% - 56px)`,
+                width: `calc((100% - 56px) * ${Math.min(progressPercent, 100)} / 100)`,
                 height: 3, bgcolor: 'success.main', borderRadius: 1.5, zIndex: 1,
                 transition: 'width 0.5s ease',
             }} />

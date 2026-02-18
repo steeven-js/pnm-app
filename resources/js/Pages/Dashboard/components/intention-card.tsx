@@ -20,15 +20,17 @@ type IntentionCardProps = CardProps & {
 
 export function IntentionCard({ title, description, icon, href, color, sx, ...other }: IntentionCardProps) {
   return (
-    <Card sx={sx} {...other}>
+    <Card sx={{ height: 180, ...sx }} {...other}>
       <CardActionArea
         component={RouterLink}
         href={href}
         sx={{
           p: 3,
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
+          justifyContent: 'flex-start',
           gap: 1.5,
         }}
       >
