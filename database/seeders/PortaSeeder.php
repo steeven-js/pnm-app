@@ -212,6 +212,9 @@ class PortaSeeder extends Seeder
 
     private array $dossierIds = [];
 
+    /** id_portage values for portages stuck in bascule (must NOT have ticket 1430) */
+    private array $basculeAnomalyPortageIds = [];
+
     private function seedMsisdns(): void
     {
         $trancheMap = DB::table('porta_tranche')->get()->keyBy('id');
@@ -372,14 +375,13 @@ class PortaSeeder extends Seeder
             $portages[$idx]['date_portage'] = Carbon::now()->subDays(mt_rand(6, 12));
         }
 
-        // Anomalie: 2 portages en "bascule" sans ticket 1430 (bascule non confirmée)
-        $basculeIndices = [];
-        for ($i = 0; $i < 2; $i++) {
+        // Anomalie: 3 portages en "bascule" sans ticket 1430 (bascule non confirmée)
+        for ($i = 0; $i < 3; $i++) {
             $idx = mt_rand(25, min(40, count($portages) - 1));
             if (isset($portages[$idx])) {
                 $portages[$idx]['etat_id_actuel'] = 3; // bascule
                 $portages[$idx]['date_portage'] = Carbon::now()->subDays(mt_rand(2, 4));
-                $basculeIndices[] = $idx;
+                $this->basculeAnomalyPortageIds[] = $portages[$idx]['id_portage'];
             }
         }
 
@@ -638,6 +640,14 @@ class PortaSeeder extends Seeder
         // Insert data rows
         foreach (array_chunk($dataRows, 50) as $chunk) {
             DB::table('porta_data')->insert($chunk);
+        }
+
+        // Clean up: remove any accidental 1430 tickets for bascule anomaly portages
+        if (! empty($this->basculeAnomalyPortageIds)) {
+            DB::table('porta_data')
+                ->where('code_ticket', '1430')
+                ->whereIn('id_portage', $this->basculeAnomalyPortageIds)
+                ->delete();
         }
 
         // ── Generate ACK rows ──
