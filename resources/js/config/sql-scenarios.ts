@@ -328,7 +328,7 @@ export const SCENARIO_LEVELS: Record<string, ScenarioLevel> = {
         description:
           "Detecte les portages dont le MSISDN n'a pas d'entree dans l'historique. Chaque portage devrait generer une ligne dans porta_msisdn_historique. L'absence signale une desynchronisation entre les tables.",
         concepts: ['LEFT JOIN absence', 'coherence inter-tables'],
-        sql: "SELECT p.id, p.msisdn, p.date_portage,\n       e.label AS etat\nFROM porta_portage p\nJOIN porta_etat e ON e.id = p.etat_id_actuel\nLEFT JOIN porta_msisdn_historique mh ON mh.portage_id = p.id_portage\nWHERE mh.id IS NULL\n  AND e.classe IN ('cloture', 'bascule')\nORDER BY p.date_portage DESC;",
+        sql: "SELECT p.id, p.msisdn, p.date_portage,\n       e.label AS etat\nFROM porta_portage p\nJOIN porta_etat e ON e.id = p.etat_id_actuel\nLEFT JOIN porta_msisdn_historique mh ON mh.portage_id::text = p.id_portage\nWHERE mh.id IS NULL\n  AND e.classe IN ('cloture', 'bascule')\nORDER BY p.date_portage DESC;",
       },
       {
         id: 'inv-12',
