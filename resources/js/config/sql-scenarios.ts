@@ -98,9 +98,9 @@ export const SCENARIO_LEVELS: Record<string, ScenarioLevel> = {
         id: 'deb-09',
         label: 'Recherche de texte',
         description:
-          "LIKE avec % permet la recherche partielle. '%DIGICEL%' trouve tout texte contenant 'DIGICEL'. Le % remplace n'importe quel nombre de caracteres.",
+          "LIKE avec % permet la recherche partielle. '%SYNC%' trouve tous les fichiers de synchronisation. Le % remplace n'importe quel nombre de caracteres.",
         concepts: ['LIKE', '%'],
-        sql: "SELECT id, filename\nFROM porta_fichier\nWHERE filename LIKE '%DIG%'\nORDER BY date DESC\nLIMIT 10;",
+        sql: "SELECT id, filename, date\nFROM porta_fichier\nWHERE filename LIKE '%SYNC%'\nORDER BY date DESC\nLIMIT 10;",
       },
       {
         id: 'deb-10',
@@ -122,9 +122,9 @@ export const SCENARIO_LEVELS: Record<string, ScenarioLevel> = {
         id: 'deb-12',
         label: 'Alias de colonnes',
         description:
-          "AS renomme une colonne dans les resultats. Utile pour rendre le resultat plus lisible : 'code' devient 'Code Operateur', etc.",
+          "AS renomme une colonne dans les resultats. Utile pour rendre le resultat plus lisible : 'code' devient 'Code', 'nom' devient 'Nom Operateur', etc.",
         concepts: ['AS alias'],
-        sql: "SELECT code AS \"Code\", nom AS \"Nom Operateur\", type AS \"Type\"\nFROM porta_operateur\nORDER BY nom;",
+        sql: "SELECT code AS \"Code\", nom AS \"Nom Operateur\",\n       is_active AS \"Actif\", email AS \"Contact Email\"\nFROM porta_operateur\nORDER BY nom;",
       },
     ],
   },
@@ -182,7 +182,7 @@ export const SCENARIO_LEVELS: Record<string, ScenarioLevel> = {
         description:
           "LEFT JOIN garde TOUTES les lignes de la table de gauche, meme sans correspondance a droite (NULL). Ici, chaque fichier avec son ACR s'il existe, NULL sinon.",
         concepts: ['LEFT JOIN', 'NULL a droite'],
-        sql: "SELECT f.id, f.filename, f.date,\n       a.date_reception AS date_acr\nFROM porta_fichier f\nLEFT JOIN porta_ack a ON a.fichier_id = f.id\nWHERE f.type = 'data'\nORDER BY f.date DESC\nLIMIT 20;",
+        sql: "SELECT f.id, f.filename, f.date,\n       a.created_at AS date_acr\nFROM porta_fichier f\nLEFT JOIN porta_ack a ON a.fichier_id = f.id\nWHERE f.type = 'data'\nORDER BY f.date DESC\nLIMIT 20;",
       },
       {
         id: 'int-07',
@@ -222,15 +222,15 @@ export const SCENARIO_LEVELS: Record<string, ScenarioLevel> = {
         description:
           "La table porta_transition definit les changements d'etat autorises. Cette requete montre toutes les transitions avec les noms lisibles des etats source et destination.",
         concepts: ['Self-JOIN (2 fois la meme table)'],
-        sql: "SELECT e_from.label AS de_etat,\n       e_to.label AS vers_etat,\n       t.code_ticket_declencheur\nFROM porta_transition t\nJOIN porta_etat e_from ON e_from.id = t.etat_id_from\nJOIN porta_etat e_to ON e_to.id = t.etat_id_to\nORDER BY e_from.label, e_to.label;",
+        sql: "SELECT e_from.label AS de_etat,\n       e_to.label AS vers_etat,\n       t.ticket_id_evenement AS ticket_declencheur\nFROM porta_transition t\nJOIN porta_etat e_from ON e_from.id = t.etat_id_from\nJOIN porta_etat e_to ON e_to.id = t.etat_id_to\nORDER BY e_from.label, e_to.label;",
       },
       {
         id: 'int-12',
         label: 'Tranches numeriques par operateur',
         description:
-          "Les tranches MSISDN (06XX, 09XX) sont attribuees aux operateurs. Cette requete montre quelle tranche appartient a quel operateur. Utile pour le routage reseau.",
+          "Les tranches MSISDN (0690, 0694, 0696) sont attribuees aux operateurs. Cette requete montre quelle plage de numeros appartient a quel operateur. Utile pour le routage reseau.",
         concepts: ['JOIN', 'ORDER BY multiple'],
-        sql: 'SELECT t.prefix, t.debut, t.fin,\n       o.nom AS operateur\nFROM porta_tranche t\nJOIN porta_operateur o ON o.code = t.operateur_id\nORDER BY t.prefix, t.debut;',
+        sql: 'SELECT t.debut, t.fin,\n       o.nom AS operateur\nFROM porta_tranche t\nJOIN porta_operateur o ON o.code = t.operateur_id\nORDER BY t.debut;',
       },
     ],
   },
