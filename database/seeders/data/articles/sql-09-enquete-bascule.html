@@ -1,0 +1,108 @@
+<h2>Enqu&ecirc;te : suivi d'une bascule</h2>
+
+<h3>Le sc&eacute;nario</h3>
+<p>Plusieurs alertes peuvent d&eacute;clencher cette enqu&ecirc;te :</p>
+<ul>
+<li>Email CTO : <em>&laquo; Bascule non termin&eacute;e avant 02h00 &raquo;</em></li>
+<li>Rapport quotidien : <em>&laquo; 2 portages en &eacute;tat bascule sans confirmation 1430 &raquo;</em></li>
+<li>Demande orale : <em>&laquo; Le portage du client est bloqu&eacute; depuis la bascule &raquo;</em></li>
+</ul>
+
+<h3>Rappel du workflow de bascule</h3>
+<p>Le processus normal :</p>
+<ol>
+<li><strong>saisi</strong> (ticket 1110) &rarr; demande envoy&eacute;e</li>
+<li><strong>encours</strong> (ticket 1210) &rarr; OPD accepte</li>
+<li><strong>bascule</strong> (ticket 1410) &rarr; bascule technique effectu&eacute;e</li>
+<li><strong>cl&ocirc;tur&eacute;</strong> (ticket 1430) &rarr; OPD confirme &rarr; FIN</li>
+</ol>
+<p>Un portage <strong>bloqu&eacute; en bascule</strong> (sans ticket 1430) signifie que la bascule technique est faite, mais l'OPD n'a pas confirm&eacute;. Le client est &laquo; entre deux op&eacute;rateurs &raquo;.</p>
+
+<h3>&Eacute;tape 1 : Portages en &eacute;tat bascule</h3>
+<pre><code>SELECT p.id, p.msisdn, p.date_portage, e.label AS etat,
+       d.operateur_id_origine AS de, d.operateur_id_destination AS vers,
+       p.updated_at
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_dossier d ON d.id = p.dossier_id
+WHERE e.classe = 'bascule'
+ORDER BY p.date_portage;</code></pre>
+
+<h3>&Eacute;tape 2 : D&eacute;lai depuis la bascule</h3>
+<p>Combien de temps le portage est-il bloqu&eacute; en bascule ?</p>
+<pre><code>SELECT
+    p.msisdn,
+    p.date_portage,
+    ph.date_debut AS debut_bascule,
+    EXTRACT(DAY FROM (NOW() - ph.date_debut)) AS jours_en_bascule
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_portage_historique ph ON ph.portage_id = p.id
+WHERE e.classe = 'bascule'
+  AND ph.etat_id_from = 3  -- etat bascule entrante
+  AND ph.date_fin IS NULL
+ORDER BY jours_en_bascule DESC;</code></pre>
+
+<h3>&Eacute;tape 3 : V&eacute;rifier la pr&eacute;sence du ticket 1430</h3>
+<p>Normalement, un ticket 1430 dans un fichier confirme la bascule :</p>
+<pre><code>SELECT p.msisdn, p.date_portage,
+       d2.code_ticket, d2.id AS data_id
+FROM porta_portage p
+LEFT JOIN porta_data d2 ON d2.id_portage = p.id_portage
+                       AND d2.code_ticket = '1430'
+WHERE p.etat_id_actuel = 3  -- bascule
+ORDER BY p.date_portage;</code></pre>
+<p>Si <code>d2.id</code> est NULL, il n'y a pas de ticket 1430 &rarr; bascule non confirm&eacute;e.</p>
+
+<h3>&Eacute;tape 4 : Portage un jour f&eacute;ri&eacute;</h3>
+<p>Un portage dont la date tombe un jour f&eacute;ri&eacute; ne peut pas &ecirc;tre trait&eacute; :</p>
+<pre><code>SELECT p.msisdn, p.date_portage, fd.ferryday
+FROM porta_portage p
+JOIN porta_ferryday fd ON fd.ferryday = p.date_portage
+WHERE fd.is_active = true;</code></pre>
+<p>Ces portages doivent &ecirc;tre replanifi&eacute;s au prochain jour ouvr&eacute;.</p>
+
+<h3>&Eacute;tape 5 : Historique complet d'un portage</h3>
+<p>Pour un portage sp&eacute;cifique, reconstruire toute la timeline :</p>
+<pre><code>SELECT
+    ph.date_debut,
+    ph.date_fin,
+    e.label AS etat,
+    e.classe,
+    CASE
+        WHEN ph.date_fin IS NOT NULL
+        THEN EXTRACT(HOUR FROM (ph.date_fin - ph.date_debut)) || 'h '
+             || EXTRACT(MINUTE FROM (ph.date_fin - ph.date_debut)) || 'min'
+        ELSE 'EN COURS'
+    END AS duree
+FROM porta_portage_historique ph
+JOIN porta_etat e ON e.id = ph.etat_id_from
+WHERE ph.portage_id = 42  -- remplacer par l'ID du portage
+ORDER BY ph.date_debut;</code></pre>
+
+<h3>Vue synth&eacute;tique des portages probl&eacute;matiques</h3>
+<pre><code>SELECT
+    p.msisdn,
+    p.date_portage,
+    e.label AS etat,
+    op_orig.nom AS de,
+    op_dest.nom AS vers,
+    EXTRACT(DAY FROM (NOW() - p.updated_at)) AS jours_sans_maj
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_dossier d ON d.id = p.dossier_id
+JOIN porta_operateur op_orig ON op_orig.code = d.operateur_id_origine
+JOIN porta_operateur op_dest ON op_dest.code = d.operateur_id_destination
+WHERE e.is_end = false
+  AND p.date_portage < CURRENT_DATE
+ORDER BY p.date_portage;</code></pre>
+<p>Tous les portages non termin&eacute;s dont la date de portage est pass&eacute;e &mdash; ce sont les cas urgents.</p>
+
+<div style="background: #fff3e0; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Anomalies &agrave; trouver :</strong>
+<ul>
+<li>2 portages en &eacute;tat &laquo; bascule &raquo; sans ticket 1430</li>
+<li>1 portage avec date_portage = jour f&eacute;ri&eacute; (Mardi Gras 2026-02-17)</li>
+<li>2 portages incomplets (bascule sans cl&ocirc;ture depuis plusieurs jours)</li>
+</ul>
+</div>

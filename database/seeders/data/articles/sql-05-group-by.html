@@ -1,0 +1,90 @@
+<h2>GROUP BY &mdash; Compter et r&eacute;sumer</h2>
+
+<h3>Pourquoi regrouper ?</h3>
+<p>En investigation PNM, on a souvent besoin de <strong>r&eacute;sum&eacute;s</strong> : &laquo; combien de portages par op&eacute;rateur ? &raquo;, &laquo; combien de fichiers par jour ? &raquo;. <code>GROUP BY</code> permet de regrouper les lignes par valeur et d'appliquer des fonctions d'agr&eacute;gation.</p>
+
+<h3>Fonctions d'agr&eacute;gation</h3>
+<table>
+<thead>
+<tr><th>Fonction</th><th>R&ocirc;le</th><th>Exemple</th></tr>
+</thead>
+<tbody>
+<tr><td><code>COUNT(*)</code></td><td>Compter les lignes</td><td>Nombre de portages</td></tr>
+<tr><td><code>COUNT(DISTINCT col)</code></td><td>Compter les valeurs uniques</td><td>Nombre d'op&eacute;rateurs diff&eacute;rents</td></tr>
+<tr><td><code>SUM(col)</code></td><td>Somme</td><td>Rarement utilis&eacute; en PNM</td></tr>
+<tr><td><code>AVG(col)</code></td><td>Moyenne</td><td>Dur&eacute;e moyenne d'un portage</td></tr>
+<tr><td><code>MIN(col)</code></td><td>Valeur minimum</td><td>Date du premier portage</td></tr>
+<tr><td><code>MAX(col)</code></td><td>Valeur maximum</td><td>Date du dernier portage</td></tr>
+</tbody>
+</table>
+
+<h3>Syntaxe GROUP BY</h3>
+<pre><code>SELECT colonne_de_regroupement, FONCTION_AGREGATION(*)
+FROM table
+GROUP BY colonne_de_regroupement;</code></pre>
+
+<h3>Exemples PNM concrets</h3>
+
+<h4>Nombre de portages par &eacute;tat</h4>
+<pre><code>SELECT e.label AS etat, COUNT(*) AS total
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+GROUP BY e.label
+ORDER BY total DESC;</code></pre>
+<p>Donne une vue d'ensemble : combien de portages sont saisis, en cours, bascul&eacute;s, cl&ocirc;tur&eacute;s, refus&eacute;s, annul&eacute;s.</p>
+
+<h4>Nombre de fichiers par jour</h4>
+<pre><code>SELECT date, COUNT(*) AS nb_fichiers
+FROM porta_fichier
+GROUP BY date
+ORDER BY date DESC;</code></pre>
+
+<h4>Portages par op&eacute;rateur d'origine</h4>
+<pre><code>SELECT o.nom AS operateur, COUNT(*) AS portages_sortants
+FROM porta_dossier d
+JOIN porta_operateur o ON o.code = d.operateur_id_origine
+GROUP BY o.nom
+ORDER BY portages_sortants DESC;</code></pre>
+<p>Quel op&eacute;rateur perd le plus de clients ?</p>
+
+<h4>Refus par motif</h4>
+<pre><code>SELECT cr.label AS motif, COUNT(*) AS total
+FROM porta_data d
+JOIN porta_code_reponse cr ON cr.code = d.code_motif
+WHERE d.code_ticket = '1220'
+GROUP BY cr.label
+ORDER BY total DESC;</code></pre>
+<p>Quels sont les motifs de refus les plus fr&eacute;quents ?</p>
+
+<h3>HAVING &mdash; Filtrer apr&egrave;s le regroupement</h3>
+<p><code>WHERE</code> filtre <strong>avant</strong> le regroupement, <code>HAVING</code> filtre <strong>apr&egrave;s</strong> :</p>
+
+<pre><code>SELECT date, COUNT(*) AS nb_fichiers
+FROM porta_fichier
+GROUP BY date
+HAVING COUNT(*) > 20
+ORDER BY nb_fichiers DESC;</code></pre>
+<p>Jours o&ugrave; plus de 20 fichiers ont &eacute;t&eacute; &eacute;chang&eacute;s (jours &agrave; fort trafic).</p>
+
+<h3>Combiner GROUP BY et JOIN</h3>
+<pre><code>SELECT
+    o.nom AS operateur,
+    e.classe AS etat,
+    COUNT(*) AS total
+FROM porta_portage p
+JOIN porta_dossier d ON d.id = p.dossier_id
+JOIN porta_operateur o ON o.code = d.operateur_id_destination
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+GROUP BY o.nom, e.classe
+ORDER BY o.nom, total DESC;</code></pre>
+<p>Tableau crois&eacute; : pour chaque op&eacute;rateur de destination, combien de portages dans chaque &eacute;tat.</p>
+
+<div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Exercices :</strong>
+<ol>
+<li>Comptez les portages par &eacute;tat</li>
+<li>Comptez les fichiers par exp&eacute;diteur (avec le nom de l'op&eacute;rateur)</li>
+<li>Trouvez les jours o&ugrave; plus de 10 fichiers ont &eacute;t&eacute; &eacute;chang&eacute;s</li>
+<li>Comptez les refus par type de code motif</li>
+</ol>
+</div>

@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(KnowledgeSeeder::class);
         $this->call(ResolveSeeder::class);
+        $this->call(PortaSeeder::class);
     }
 }

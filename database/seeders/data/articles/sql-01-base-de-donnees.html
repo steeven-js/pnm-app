@@ -1,0 +1,75 @@
+<h2>C'est quoi une base de donn&eacute;es ?</h2>
+
+<h3>Introduction</h3>
+<p>Une <strong>base de donn&eacute;es</strong> est un syst&egrave;me organis&eacute; pour stocker, g&eacute;rer et retrouver des informations. Dans le contexte de la portabilit&eacute; des num&eacute;ros mobiles (PNM), la base de donn&eacute;es <strong>PORTA</strong> est le c&oelig;ur du syst&egrave;me : elle enregistre chaque demande de portage, chaque &eacute;change de fichier, et chaque transition d'&eacute;tat d'un num&eacute;ro.</p>
+
+<p>Pensez &agrave; la base de donn&eacute;es comme un <strong>classeur g&eacute;ant</strong> avec des onglets (les <em>tables</em>), et dans chaque onglet, des lignes et des colonnes organisant les informations.</p>
+
+<h3>Les tables : les onglets du classeur</h3>
+<p>PORTA contient <strong>18 tables</strong>, r&eacute;parties en deux cat&eacute;gories :</p>
+
+<h4>Tables de r&eacute;f&eacute;rence (les &laquo; dictionnaires &raquo;)</h4>
+<p>Ces tables contiennent des donn&eacute;es qui changent rarement. Elles servent de r&eacute;f&eacute;rence pour les donn&eacute;es op&eacute;rationnelles.</p>
+
+<table>
+<thead>
+<tr><th>Table</th><th>R&ocirc;le</th><th>Exemple</th></tr>
+</thead>
+<tbody>
+<tr><td><code>porta_operateur</code></td><td>Liste des op&eacute;rateurs (Orange, Digicel, SFR...)</td><td>Code &laquo; 02 &raquo; = Digicel</td></tr>
+<tr><td><code>porta_code_ticket</code></td><td>Types de tickets PNM</td><td>1110 = Demande de portage</td></tr>
+<tr><td><code>porta_code_reponse</code></td><td>Codes erreur et motifs de refus</td><td>R100 = RIO invalide</td></tr>
+<tr><td><code>porta_etat</code></td><td>&Eacute;tats possibles d'un portage</td><td>saisi, encours, bascule, cl&ocirc;tur&eacute;</td></tr>
+<tr><td><code>porta_transition</code></td><td>R&egrave;gles de passage d'un &eacute;tat &agrave; un autre</td><td>saisi &rarr; encours (via ticket 1210)</td></tr>
+<tr><td><code>porta_tranche</code></td><td>Plages de num&eacute;ros attribu&eacute;es par op&eacute;rateur</td><td>0690500000-0690999999 = Digicel</td></tr>
+<tr><td><code>porta_ferryday</code></td><td>Jours f&eacute;ri&eacute;s GPMAG (pas d'&eacute;change ces jours-l&agrave;)</td><td>2026-02-17 = Mardi Gras</td></tr>
+</tbody>
+</table>
+
+<h4>Tables op&eacute;rationnelles (les donn&eacute;es vivantes)</h4>
+<p>Ces tables enregistrent l'activit&eacute; quotidienne : les portages, les fichiers &eacute;chang&eacute;s, les num&eacute;ros de t&eacute;l&eacute;phone.</p>
+
+<table>
+<thead>
+<tr><th>Table</th><th>R&ocirc;le</th><th>Contenu type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>porta_msisdn</code></td><td>Chaque num&eacute;ro de t&eacute;l&eacute;phone connu</td><td>0690123456 chez Digicel</td></tr>
+<tr><td><code>porta_msisdn_historique</code></td><td>Historique des changements d'op&eacute;rateur</td><td>0690123456 : Orange &rarr; Digicel le 15/01/2026</td></tr>
+<tr><td><code>porta_dossier</code></td><td>Regroupement de portages (dossier client)</td><td>Un dossier pour 2 lignes d'un m&ecirc;me client</td></tr>
+<tr><td><code>porta_portage</code></td><td>Chaque demande de portage individuelle</td><td>Portage du 0690123456, &eacute;tat &laquo; bascule &raquo;</td></tr>
+<tr><td><code>porta_portage_historique</code></td><td>Chaque changement d'&eacute;tat d'un portage</td><td>saisi &rarr; encours le 18/01 &agrave; 10h15</td></tr>
+<tr><td><code>porta_portage_data</code></td><td>Donn&eacute;es temporaires de bascule</td><td>Num&eacute;ro provisoire pendant la bascule</td></tr>
+<tr><td><code>porta_fichier</code></td><td>Fichiers PNMDATA/PNMSYNC &eacute;chang&eacute;s</td><td>PNMDATA_02_01_20260118_V10_0001.txt</td></tr>
+<tr><td><code>porta_data</code></td><td>Tickets contenus dans les fichiers</td><td>Ticket 1110 pour le 0690123456</td></tr>
+<tr><td><code>porta_ack</code></td><td>Accus&eacute;s de r&eacute;ception (ACR/ERR)</td><td>ACR re&ccedil;u pour le fichier 42</td></tr>
+<tr><td><code>porta_sync</code></td><td>Donn&eacute;es de synchronisation hebdomadaire</td><td>MSISDN chez Digicel confirm&eacute; par Orange</td></tr>
+<tr><td><code>porta_sync_status</code></td><td>R&eacute;sultat de la synchro (conflit ou OK)</td><td>Conflit : num&eacute;ro pr&eacute;sent chez 2 op&eacute;rateurs</td></tr>
+</tbody>
+</table>
+
+<h3>Comment les tables sont li&eacute;es entre elles</h3>
+<p>Les tables ne sont pas isol&eacute;es. Elles sont reli&eacute;es par des <strong>cl&eacute;s &eacute;trang&egrave;res</strong> (foreign keys). Par exemple :</p>
+<ul>
+<li>Un <code>portage</code> r&eacute;f&eacute;rence un <code>dossier</code> (par <code>dossier_id</code>)</li>
+<li>Un <code>portage</code> r&eacute;f&eacute;rence un <code>etat</code> (par <code>etat_id_actuel</code>)</li>
+<li>Un <code>fichier</code> r&eacute;f&eacute;rence deux <code>operateur</code> (exp&eacute;diteur et destinataire)</li>
+<li>Un ticket <code>data</code> r&eacute;f&eacute;rence un <code>fichier</code> et un <code>code_ticket</code></li>
+</ul>
+
+<p>Ces liens permettent de <strong>naviguer</strong> d'une information &agrave; l'autre. Par exemple, &agrave; partir d'un num&eacute;ro de t&eacute;l&eacute;phone, on peut retrouver son portage, puis son dossier, puis les fichiers &eacute;chang&eacute;s, puis les accus&eacute;s de r&eacute;ception.</p>
+
+<h3>Le langage SQL</h3>
+<p><strong>SQL</strong> (Structured Query Language) est le langage utilis&eacute; pour interroger une base de donn&eacute;es. C'est comme poser des questions au classeur :</p>
+<ul>
+<li>&laquo; Montre-moi tous les op&eacute;rateurs &raquo; &rarr; <code>SELECT * FROM porta_operateur</code></li>
+<li>&laquo; Combien de portages sont en cours ? &raquo; &rarr; <code>SELECT COUNT(*) FROM porta_portage WHERE etat_id_actuel = 2</code></li>
+</ul>
+
+<p>Dans les articles suivants, vous apprendrez pas &agrave; pas les commandes SQL pour interroger ces tables et mener des enqu&ecirc;tes sur les anomalies PNM.</p>
+
+<div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Exercice :</strong> Rendez-vous dans le <strong>SQL Playground</strong> et ex&eacute;cutez votre premi&egrave;re requ&ecirc;te :
+<pre><code>SELECT * FROM porta_operateur</code></pre>
+<p>Vous verrez la liste des 6 op&eacute;rateurs du GPMAG avec leurs codes, noms et contacts.</p>
+</div>

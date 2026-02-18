@@ -1,0 +1,100 @@
+<h2>Enqu&ecirc;te : refus de portage</h2>
+
+<h3>Le sc&eacute;nario</h3>
+<p>Plusieurs sc&eacute;narios peuvent d&eacute;clencher cette enqu&ecirc;te :</p>
+<ul>
+<li>Email automatique : <em>&laquo; 8 refus de portage (1220) d&eacute;tect&eacute;s pour RIO incorrect &raquo;</em></li>
+<li>Email automatique : <em>&laquo; 3 tickets erreur 7000 d&eacute;tect&eacute;s &raquo;</em></li>
+<li>Demande orale : <em>&laquo; Le client dit que son portage a &eacute;t&eacute; refus&eacute;, v&eacute;rifie pourquoi &raquo;</em></li>
+</ul>
+
+<h3>Comprendre les codes de refus</h3>
+<p>D'abord, consultez les codes existants :</p>
+<pre><code>SELECT * FROM porta_code_reponse
+WHERE type = 'eligibilite'
+ORDER BY code;</code></pre>
+
+<table>
+<thead>
+<tr><th>Code</th><th>Signification</th></tr>
+</thead>
+<tbody>
+<tr><td>R100</td><td>RIO invalide ou ne correspondant pas au MSISDN</td></tr>
+<tr><td>R110</td><td>RIO expir&eacute;</td></tr>
+<tr><td>R200</td><td>Num&eacute;ro d&eacute;j&agrave; en cours de portage</td></tr>
+<tr><td>R210</td><td>Num&eacute;ro r&eacute;sili&eacute;</td></tr>
+<tr><td>R220</td><td>Num&eacute;ro suspendu ou bloqu&eacute;</td></tr>
+<tr><td>R300</td><td>Engagement contractuel en cours</td></tr>
+<tr><td>R310</td><td>Opposition du titulaire</td></tr>
+<tr><td>R400</td><td>Portage impossible &mdash; num&eacute;ro entreprise multi-lignes</td></tr>
+</tbody>
+</table>
+
+<h3>&Eacute;tape 1 : Trouver tous les refus</h3>
+<pre><code>SELECT d.msisdn, d.rio, d.code_motif, cr.label AS motif,
+       f.date, f.expediteur, f.destinataire
+FROM porta_data d
+JOIN porta_code_reponse cr ON cr.code = d.code_motif
+JOIN porta_fichier f ON f.id = d.fichier_id
+WHERE d.code_ticket = '1220'
+ORDER BY f.date DESC;</code></pre>
+
+<h3>&Eacute;tape 2 : Refus pour RIO invalide sp&eacute;cifiquement</h3>
+<pre><code>SELECT d.msisdn, d.rio, cr.label AS motif, f.date
+FROM porta_data d
+JOIN porta_code_reponse cr ON cr.code = d.code_motif
+JOIN porta_fichier f ON f.id = d.fichier_id
+WHERE d.code_ticket = '1220'
+  AND d.code_motif IN ('R100', 'R110')
+ORDER BY f.date DESC;</code></pre>
+<p>V&eacute;rifiez la colonne <code>rio</code> : si elle contient des valeurs comme &laquo; XX0000000000 &raquo;, le RIO est clairement invalide.</p>
+
+<h3>&Eacute;tape 3 : Trouver les erreurs 7000</h3>
+<p>Le code 7000 indique un champ obligatoire manquant dans un ticket :</p>
+<pre><code>SELECT d.id, d.msisdn, d.rio, d.id_portage, d.code_ticket,
+       f.filename, f.date
+FROM porta_data d
+JOIN porta_fichier f ON f.id = d.fichier_id
+WHERE d.code_ticket = '7000'
+ORDER BY f.date DESC;</code></pre>
+<p>Examinez les colonnes : un <code>rio</code> &agrave; NULL ou un <code>id_portage</code> manquant est souvent la cause.</p>
+
+<h3>&Eacute;tape 4 : Statistiques des refus par p&eacute;riode</h3>
+<pre><code>SELECT
+    f.date,
+    d.code_motif,
+    cr.label AS motif,
+    COUNT(*) AS total
+FROM porta_data d
+JOIN porta_code_reponse cr ON cr.code = d.code_motif
+JOIN porta_fichier f ON f.id = d.fichier_id
+WHERE d.code_ticket = '1220'
+GROUP BY f.date, d.code_motif, cr.label
+ORDER BY f.date DESC, total DESC;</code></pre>
+<p>Permet de d&eacute;tecter un pic de refus sur un jour particulier.</p>
+
+<h3>&Eacute;tape 5 : Taux de refus par op&eacute;rateur</h3>
+<pre><code>SELECT
+    o.nom AS operateur_donneur,
+    COUNT(*) FILTER (WHERE d.code_ticket = '1220') AS refus,
+    COUNT(*) FILTER (WHERE d.code_ticket = '1210') AS acceptes,
+    ROUND(
+        COUNT(*) FILTER (WHERE d.code_ticket = '1220') * 100.0 /
+        NULLIF(COUNT(*) FILTER (WHERE d.code_ticket IN ('1210', '1220')), 0),
+        1
+    ) AS taux_refus_pct
+FROM porta_data d
+JOIN porta_fichier f ON f.id = d.fichier_id
+JOIN porta_operateur o ON o.code = f.expediteur
+WHERE d.code_ticket IN ('1210', '1220')
+GROUP BY o.nom
+ORDER BY taux_refus_pct DESC;</code></pre>
+<p><strong>Note avanc&eacute;e :</strong> <code>FILTER (WHERE ...)</code> est une syntaxe PostgreSQL qui permet de compter conditionnellement. <code>NULLIF</code> &eacute;vite la division par z&eacute;ro.</p>
+
+<div style="background: #fff3e0; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Anomalies &agrave; trouver :</strong>
+<ul>
+<li>8 tickets avec RIO invalide (code_motif R100/R110) dont certains ont un RIO &laquo; XX0000000000 &raquo;</li>
+<li>3 tickets avec code 7000 (erreur technique)</li>
+</ul>
+</div>

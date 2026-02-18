@@ -46,6 +46,7 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Décodeur fichier', path: paths.verify.filenameDecoder },
           { title: 'ID Portage', path: paths.verify.portageId },
           { title: 'Vérif. MSISDN', path: paths.verify.msisdnChecker },
+          { title: 'SQL Playground', path: paths.sqlPlayground.root },
         ],
       },
       {

@@ -73,6 +73,13 @@ export const paths = {
     domain: (slug: string) => `/knowledge/${slug}`,
     article: (domainSlug: string, articleSlug: string) => `/knowledge/${domainSlug}/${articleSlug}`,
   },
+  // SQL PLAYGROUND
+  sqlPlayground: {
+    root: '/sql-playground',
+    debutant: '/sql-playground/debutant',
+    intermediaire: '/sql-playground/intermediaire',
+    investigation: '/sql-playground/investigation',
+  },
   // GLOSSARY
   glossary: '/glossary',
 };

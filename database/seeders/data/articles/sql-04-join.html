@@ -1,0 +1,95 @@
+<h2>JOIN &mdash; Croiser deux tables</h2>
+
+<h3>Pourquoi joindre des tables ?</h3>
+<p>Les donn&eacute;es PNM sont r&eacute;parties dans 18 tables. Pour obtenir une vue compl&egrave;te, il faut <strong>croiser</strong> les informations. Par exemple, la table <code>porta_portage</code> contient un <code>etat_id_actuel</code> (un num&eacute;ro), mais c'est dans <code>porta_etat</code> qu'on trouve le libell&eacute; lisible (&laquo; En cours entrante &raquo;).</p>
+
+<p><code>JOIN</code> permet de relier deux tables par une colonne commune.</p>
+
+<h3>INNER JOIN &mdash; La jointure classique</h3>
+<p>Retourne uniquement les lignes qui ont une correspondance dans les <strong>deux</strong> tables.</p>
+
+<pre><code>SELECT p.id, p.msisdn, p.date_portage, e.label AS etat
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel;</code></pre>
+
+<p>D&eacute;cortiquons :</p>
+<ul>
+<li><code>porta_portage p</code> &mdash; on donne l'alias <code>p</code> &agrave; la table portage</li>
+<li><code>JOIN porta_etat e</code> &mdash; on joint la table etat avec l'alias <code>e</code></li>
+<li><code>ON e.id = p.etat_id_actuel</code> &mdash; la condition de jointure</li>
+<li><code>e.label AS etat</code> &mdash; on affiche le libell&eacute; de l'&eacute;tat</li>
+</ul>
+
+<h3>LEFT JOIN &mdash; Garder les lignes sans correspondance</h3>
+<p><code>LEFT JOIN</code> garde <strong>toutes</strong> les lignes de la table de gauche, m&ecirc;me si elles n'ont pas de correspondance &agrave; droite (les colonnes manquantes seront <code>NULL</code>).</p>
+
+<p><strong>Cas d'usage PNM :</strong> trouver les fichiers sans accus&eacute; de r&eacute;ception (ACR manquant) :</p>
+<pre><code>SELECT f.id, f.filename, f.date, a.id AS ack_id
+FROM porta_fichier f
+LEFT JOIN porta_ack a ON a.fichier_id = f.id
+WHERE a.id IS NULL;</code></pre>
+
+<p>Explication :</p>
+<ul>
+<li>On joint <code>fichier</code> avec <code>ack</code></li>
+<li><code>LEFT JOIN</code> conserve les fichiers m&ecirc;me sans ACK</li>
+<li><code>WHERE a.id IS NULL</code> filtre uniquement ceux qui n'ont PAS d'ACK</li>
+</ul>
+
+<h3>Joindre plusieurs tables</h3>
+<p>On peut cha&icirc;ner les jointures pour obtenir une vue compl&egrave;te :</p>
+
+<pre><code>SELECT
+    p.msisdn,
+    p.date_portage,
+    e.label AS etat,
+    d.operateur_id_origine AS de,
+    d.operateur_id_destination AS vers,
+    op_orig.nom AS operateur_origine,
+    op_dest.nom AS operateur_destination
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_dossier d ON d.id = p.dossier_id
+JOIN porta_operateur op_orig ON op_orig.code = d.operateur_id_origine
+JOIN porta_operateur op_dest ON op_dest.code = d.operateur_id_destination
+ORDER BY p.date_portage DESC
+LIMIT 20;</code></pre>
+
+<p>Cette requ&ecirc;te affiche les 20 derniers portages avec : num&eacute;ro, date, &eacute;tat lisible, et noms complets des op&eacute;rateurs d'origine et de destination.</p>
+
+<h3>Les types de JOIN en r&eacute;sum&eacute;</h3>
+<table>
+<thead>
+<tr><th>Type</th><th>Comportement</th><th>Usage PNM</th></tr>
+</thead>
+<tbody>
+<tr><td><code>JOIN</code> (INNER)</td><td>Seulement les correspondances</td><td>Portage + &Eacute;tat</td></tr>
+<tr><td><code>LEFT JOIN</code></td><td>Tout &agrave; gauche + correspondances &agrave; droite</td><td>Fichier sans ACR</td></tr>
+<tr><td><code>RIGHT JOIN</code></td><td>Tout &agrave; droite + correspondances &agrave; gauche</td><td>Rarement utilis&eacute;</td></tr>
+</tbody>
+</table>
+
+<div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Exercices :</strong>
+<ol>
+<li>Affichez les portages avec le nom de l'&eacute;tat :
+<pre><code>SELECT p.msisdn, e.label
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+LIMIT 10;</code></pre>
+</li>
+<li>Trouvez les fichiers envoy&eacute;s par Digicel avec le nom du destinataire :
+<pre><code>SELECT f.filename, f.date, o.nom AS destinataire
+FROM porta_fichier f
+JOIN porta_operateur o ON o.code = f.destinataire
+WHERE f.expediteur = '02'
+LIMIT 10;</code></pre>
+</li>
+<li>Trouvez les fichiers sans ACR (anomalie) :
+<pre><code>SELECT f.id, f.filename, f.date
+FROM porta_fichier f
+LEFT JOIN porta_ack a ON a.fichier_id = f.id
+WHERE a.id IS NULL;</code></pre>
+</li>
+</ol>
+</div>

@@ -1,0 +1,106 @@
+<h2>Enqu&ecirc;te : conflits de synchronisation</h2>
+
+<h3>Le sc&eacute;nario</h3>
+<p>Chaque dimanche, les op&eacute;rateurs &eacute;changent des fichiers <strong>PNMSYNC</strong> contenant la liste compl&egrave;te des MSISDN port&eacute;s. La comparaison entre ces listes peut r&eacute;v&eacute;ler des <strong>conflits</strong> : un num&eacute;ro qui appara&icirc;t chez deux op&eacute;rateurs diff&eacute;rents, ou un num&eacute;ro port&eacute; qui n'est pas dans la liste de l'op&eacute;rateur receveur.</p>
+
+<p>Alertes typiques :</p>
+<ul>
+<li>Rapport hebdomadaire : <em>&laquo; 3 conflits SYNC non r&eacute;solus &raquo;</em></li>
+<li>Anomalie r&eacute;seau : <em>&laquo; Le client X est rout&eacute; vers Orange alors qu'il est chez Digicel &raquo;</em></li>
+</ul>
+
+<h3>&Eacute;tape 1 : Trouver les conflits ouverts</h3>
+<pre><code>SELECT ss.id, s.msisdn, s.date_portage,
+       o.nom AS operateur_receveur,
+       ss.commentaire, ss.created_at
+FROM porta_sync_status ss
+JOIN porta_sync s ON s.id = ss.sync_id
+JOIN porta_operateur o ON o.code = s.operateur_receveur
+WHERE ss.is_conflict = true
+ORDER BY ss.created_at DESC;</code></pre>
+
+<h3>&Eacute;tape 2 : V&eacute;rifier l'historique du MSISDN en conflit</h3>
+<p>Pour chaque num&eacute;ro en conflit, on v&eacute;rifie son historique complet :</p>
+<pre><code>SELECT mh.msisdn, o.nom AS operateur, mh.date_debut, mh.date_fin
+FROM porta_msisdn_historique mh
+JOIN porta_operateur o ON o.code = mh.operateur_id
+WHERE mh.msisdn = '0690XXXXXX'  -- remplacer par le MSISDN en conflit
+ORDER BY mh.date_debut;</code></pre>
+
+<h3>&Eacute;tape 3 : D&eacute;tecter les MSISDN avec plusieurs entr&eacute;es actives</h3>
+<p>Un num&eacute;ro ne devrait avoir qu'<strong>une seule</strong> entr&eacute;e active (sans <code>date_fin</code>) dans l'historique :</p>
+<pre><code>SELECT mh.msisdn, COUNT(*) AS nb_entrees_actives
+FROM porta_msisdn_historique mh
+WHERE mh.date_fin IS NULL
+GROUP BY mh.msisdn
+HAVING COUNT(*) > 1;</code></pre>
+<p>Si cette requ&ecirc;te retourne des r&eacute;sultats, c'est une <strong>anomalie grave</strong> : un num&eacute;ro est enregistr&eacute; comme actif chez plusieurs op&eacute;rateurs en m&ecirc;me temps.</p>
+
+<h3>&Eacute;tape 4 : D&eacute;tail des doublons</h3>
+<pre><code>SELECT mh.msisdn, o.nom AS operateur, mh.date_debut, mh.portage_id
+FROM porta_msisdn_historique mh
+JOIN porta_operateur o ON o.code = mh.operateur_id
+WHERE mh.date_fin IS NULL
+  AND mh.msisdn IN (
+      SELECT msisdn FROM porta_msisdn_historique
+      WHERE date_fin IS NULL
+      GROUP BY msisdn
+      HAVING COUNT(*) > 1
+  )
+ORDER BY mh.msisdn, mh.date_debut;</code></pre>
+<p><strong>Note :</strong> C'est une <strong>sous-requ&ecirc;te</strong> (un SELECT dans un autre SELECT). Le SELECT interne trouve les MSISDN en double, puis le SELECT externe affiche les d&eacute;tails.</p>
+
+<h3>&Eacute;tape 5 : Fichiers SYNC r&eacute;cents</h3>
+<pre><code>SELECT f.filename, f.date,
+       o_exp.nom AS expediteur,
+       o_dest.nom AS destinataire,
+       COUNT(s.id) AS nb_msisdn
+FROM porta_fichier f
+JOIN porta_operateur o_exp ON o_exp.code = f.expediteur
+JOIN porta_operateur o_dest ON o_dest.code = f.destinataire
+LEFT JOIN porta_sync s ON s.fichier_id = f.id
+WHERE f.type = 'sync'
+GROUP BY f.id, f.filename, f.date, o_exp.nom, o_dest.nom
+ORDER BY f.date DESC
+LIMIT 20;</code></pre>
+
+<h3>&Eacute;tape 6 : Croiser SYNC et portages</h3>
+<p>V&eacute;rifier qu'un MSISDN signal&eacute; en conflit a bien un portage correspondant :</p>
+<pre><code>SELECT
+    s.msisdn,
+    s.date_portage AS date_sync,
+    p.date_portage AS date_portage_reel,
+    e.label AS etat_portage,
+    CASE
+        WHEN p.id IS NULL THEN 'PAS DE PORTAGE TROUVE'
+        WHEN e.classe = 'cloture' THEN 'OK - Cloture'
+        ELSE 'ATTENTION - ' || e.label
+    END AS diagnostic
+FROM porta_sync s
+JOIN porta_sync_status ss ON ss.sync_id = s.id
+LEFT JOIN porta_portage p ON p.msisdn = s.msisdn
+LEFT JOIN porta_etat e ON e.id = p.etat_id_actuel
+WHERE ss.is_conflict = true
+ORDER BY s.msisdn;</code></pre>
+
+<h3>R&eacute;capitulatif des requ&ecirc;tes SYNC</h3>
+<table>
+<thead>
+<tr><th>Objectif</th><th>Requ&ecirc;te cl&eacute;</th></tr>
+</thead>
+<tbody>
+<tr><td>Conflits ouverts</td><td><code>WHERE ss.is_conflict = true</code></td></tr>
+<tr><td>MSISDN en double</td><td><code>HAVING COUNT(*) &gt; 1</code> sur historique actif</td></tr>
+<tr><td>Sous-requ&ecirc;te</td><td><code>WHERE msisdn IN (SELECT ...)</code></td></tr>
+<tr><td>Diagnostic crois&eacute;</td><td><code>CASE WHEN ... THEN ... END</code></td></tr>
+</tbody>
+</table>
+
+<div style="background: #fff3e0; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Anomalies &agrave; trouver :</strong>
+<ul>
+<li>3 conflits SYNC ouverts (<code>is_conflict = true</code>)</li>
+<li>1 num&eacute;ro avec 2 entr&eacute;es actives dans <code>porta_msisdn_historique</code> (chez 2 op&eacute;rateurs diff&eacute;rents)</li>
+</ul>
+<p>F&eacute;licitations ! Vous ma&icirc;trisez maintenant les requ&ecirc;tes SQL essentielles pour investiguer les anomalies PNM. Continuez &agrave; pratiquer dans le SQL Playground !</p>
+</div>

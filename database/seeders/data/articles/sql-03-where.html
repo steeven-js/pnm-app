@@ -1,0 +1,79 @@
+<h2>WHERE &mdash; Filtrer les r&eacute;sultats</h2>
+
+<h3>Pourquoi filtrer ?</h3>
+<p>Sans filtre, <code>SELECT * FROM porta_portage</code> retourne <strong>tous</strong> les portages. En investigation PNM, on cherche des cas pr&eacute;cis : un num&eacute;ro particulier, un op&eacute;rateur, une p&eacute;riode. C'est le r&ocirc;le de <code>WHERE</code>.</p>
+
+<h3>Syntaxe</h3>
+<pre><code>SELECT colonnes FROM table WHERE condition;</code></pre>
+
+<h3>Comparaisons simples</h3>
+
+<h4>&Eacute;galit&eacute;</h4>
+<pre><code>SELECT * FROM porta_operateur WHERE code = '02';</code></pre>
+<p>R&eacute;sultat : uniquement Digicel.</p>
+
+<h4>Diff&eacute;rent de</h4>
+<pre><code>SELECT * FROM porta_msisdn WHERE operateur_id_actuel != '02';</code></pre>
+<p>Tous les num&eacute;ros qui ne sont PAS chez Digicel.</p>
+
+<h4>Sup&eacute;rieur / Inf&eacute;rieur</h4>
+<pre><code>SELECT * FROM porta_portage WHERE date_portage > '2026-02-01';</code></pre>
+<p>Portages pr&eacute;vus apr&egrave;s le 1er f&eacute;vrier 2026.</p>
+
+<h3>Combiner des conditions</h3>
+
+<h4>AND &mdash; Les deux conditions doivent &ecirc;tre vraies</h4>
+<pre><code>SELECT * FROM porta_portage
+WHERE etat_id_actuel = 2
+  AND date_portage < '2026-02-10';</code></pre>
+<p>Portages &laquo; en cours &raquo; dont la date de portage est pass&eacute;e &mdash; potentiellement bloqu&eacute;s.</p>
+
+<h4>OR &mdash; Au moins une condition doit &ecirc;tre vraie</h4>
+<pre><code>SELECT * FROM porta_data
+WHERE code_ticket = '1220'
+   OR code_ticket = '7000';</code></pre>
+<p>Tous les tickets qui sont soit des refus (1220) soit des erreurs techniques (7000).</p>
+
+<h4>Combiner AND et OR avec des parenth&egrave;ses</h4>
+<pre><code>SELECT * FROM porta_data
+WHERE code_ticket = '1220'
+  AND (code_motif = 'R100' OR code_motif = 'R110');</code></pre>
+<p>Refus sp&eacute;cifiquement pour RIO invalide ou RIO expir&eacute;.</p>
+
+<h3>Op&eacute;rateurs sp&eacute;ciaux</h3>
+
+<h4>IN &mdash; Parmi une liste de valeurs</h4>
+<pre><code>SELECT * FROM porta_data
+WHERE code_motif IN ('R100', 'R110', 'R200', 'R210');</code></pre>
+<p>&Eacute;quivalent &agrave; 4 conditions <code>OR</code>, mais plus lisible.</p>
+
+<h4>BETWEEN &mdash; Dans une plage</h4>
+<pre><code>SELECT * FROM porta_fichier
+WHERE date BETWEEN '2026-02-01' AND '2026-02-15';</code></pre>
+
+<h4>LIKE &mdash; Recherche partielle (pattern matching)</h4>
+<pre><code>SELECT * FROM porta_fichier
+WHERE filename LIKE 'PNMDATA_02_%';</code></pre>
+<p>Tous les fichiers envoy&eacute;s par Digicel (code 02). Le <code>%</code> remplace n'importe quel texte.</p>
+
+<h4>IS NULL / IS NOT NULL</h4>
+<pre><code>SELECT * FROM porta_data WHERE code_motif IS NOT NULL;</code></pre>
+<p>Tickets qui ont un motif de refus (la colonne n'est pas vide).</p>
+
+<h3>Cas pratique PNM</h3>
+<p><strong>Trouver tous les portages bloqu&eacute;s</strong> (en cours depuis plus de 5 jours) :</p>
+<pre><code>SELECT id, msisdn, date_portage, etat_id_actuel
+FROM porta_portage
+WHERE etat_id_actuel = 2
+  AND date_portage < CURRENT_DATE - INTERVAL '5 days'
+ORDER BY date_portage;</code></pre>
+
+<div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Exercices :</strong>
+<ol>
+<li>Trouvez les num&eacute;ros chez Orange : <code>SELECT * FROM porta_msisdn WHERE operateur_id_actuel = '01'</code></li>
+<li>Trouvez les fichiers de type &laquo; sync &raquo; : <code>SELECT * FROM porta_fichier WHERE type = 'sync'</code></li>
+<li>Trouvez les refus RIO invalide : <code>SELECT * FROM porta_data WHERE code_ticket = '1220' AND code_motif = 'R100'</code></li>
+<li>Trouvez les jours f&eacute;ri&eacute;s de mai 2026 : <code>SELECT * FROM porta_ferryday WHERE ferryday BETWEEN '2026-05-01' AND '2026-05-31'</code></li>
+</ol>
+</div>

@@ -1,0 +1,72 @@
+<h2>Enqu&ecirc;te : trouver un num&eacute;ro</h2>
+
+<h3>Le sc&eacute;nario</h3>
+<p>Un client appelle et dit : <em>&laquo; Mon num&eacute;ro ne marche plus depuis que j'ai chang&eacute; d'op&eacute;rateur. &raquo;</em></p>
+<p>C'est l'anomalie la plus fr&eacute;quente. Il faut retracer le parcours du num&eacute;ro pour comprendre o&ugrave; &ccedil;a bloque.</p>
+
+<h3>&Eacute;tape 1 : Identifier le num&eacute;ro</h3>
+<pre><code>SELECT * FROM porta_msisdn WHERE msisdn = '0690123456';</code></pre>
+<p>On v&eacute;rifie : le num&eacute;ro existe-t-il ? Chez quel op&eacute;rateur est-il actuellement ?</p>
+
+<h3>&Eacute;tape 2 : V&eacute;rifier le portage en cours</h3>
+<pre><code>SELECT p.id, p.msisdn, p.date_portage, e.label AS etat, e.classe,
+       d.operateur_id_origine AS de, d.operateur_id_destination AS vers
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_dossier d ON d.id = p.dossier_id
+WHERE p.msisdn = '0690123456'
+ORDER BY p.created_at DESC;</code></pre>
+<p>On cherche le dernier portage pour ce num&eacute;ro. L'&eacute;tat nous dit o&ugrave; en est le processus.</p>
+
+<h3>&Eacute;tape 3 : Consulter l'historique du portage</h3>
+<pre><code>SELECT ph.etat_id_from, e.label AS etat, ph.date_debut, ph.date_fin
+FROM porta_portage_historique ph
+JOIN porta_etat e ON e.id = ph.etat_id_from
+WHERE ph.portage_id = 42  -- remplacer par l'ID trouv&eacute; &agrave; l'&eacute;tape 2
+ORDER BY ph.date_debut;</code></pre>
+<p>On voit chaque transition d'&eacute;tat avec les dates. Si un &eacute;tat est rest&eacute; longtemps sans <code>date_fin</code>, c'est l&agrave; que &ccedil;a bloque.</p>
+
+<h3>&Eacute;tape 4 : V&eacute;rifier l'historique du num&eacute;ro</h3>
+<pre><code>SELECT mh.operateur_id, o.nom, mh.date_debut, mh.date_fin
+FROM porta_msisdn_historique mh
+JOIN porta_operateur o ON o.code = mh.operateur_id
+WHERE mh.msisdn = '0690123456'
+ORDER BY mh.date_debut;</code></pre>
+<p>L'historique complet des changements d'op&eacute;rateur. On v&eacute;rifie que la transition est coh&eacute;rente.</p>
+
+<h3>Diagnostic rapide</h3>
+<table>
+<thead>
+<tr><th>&Eacute;tat trouv&eacute;</th><th>Signification</th><th>Action</th></tr>
+</thead>
+<tbody>
+<tr><td>saisi</td><td>Demande envoy&eacute;e, pas encore trait&eacute;e</td><td>V&eacute;rifier si l'OPD a r&eacute;pondu (ticket 1210/1220)</td></tr>
+<tr><td>encours</td><td>Accept&eacute; mais pas encore bascul&eacute;</td><td>V&eacute;rifier si la date JP est pass&eacute;e</td></tr>
+<tr><td>bascule</td><td>Bascule technique faite, attente confirmation</td><td>V&eacute;rifier le ticket 1430 &mdash; PROBL&Egrave;ME FR&Eacute;QUENT</td></tr>
+<tr><td>cl&ocirc;tur&eacute;</td><td>Portage termin&eacute; avec succ&egrave;s</td><td>Le probl&egrave;me est ailleurs (r&eacute;seau, activation)</td></tr>
+<tr><td>refus&eacute;</td><td>Demande refus&eacute;e</td><td>V&eacute;rifier le motif de refus</td></tr>
+</tbody>
+</table>
+
+<h3>Requ&ecirc;te compl&egrave;te d'investigation</h3>
+<p>En une seule requ&ecirc;te, retrouver toutes les infos d'un num&eacute;ro :</p>
+<pre><code>SELECT
+    p.msisdn,
+    p.date_portage,
+    e.label AS etat_actuel,
+    op_orig.nom AS operateur_origine,
+    op_dest.nom AS operateur_destination,
+    p.created_at AS date_demande
+FROM porta_portage p
+JOIN porta_etat e ON e.id = p.etat_id_actuel
+JOIN porta_dossier d ON d.id = p.dossier_id
+JOIN porta_operateur op_orig ON op_orig.code = d.operateur_id_origine
+JOIN porta_operateur op_dest ON op_dest.code = d.operateur_id_destination
+WHERE p.msisdn LIKE '069%'
+  AND e.classe NOT IN ('cloture', 'refuse', 'annule')
+ORDER BY p.created_at DESC;</code></pre>
+<p>Liste tous les portages <strong>non termin&eacute;s</strong> &mdash; les cas qui n&eacute;cessitent potentiellement une investigation.</p>
+
+<div style="background: #fff3e0; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Anomalie &agrave; trouver :</strong> Dans les donn&eacute;es de test, il y a des portages bloqu&eacute;s en &eacute;tat &laquo; encours &raquo; depuis plus de 5 jours, et des portages en &eacute;tat &laquo; bascule &raquo; sans confirmation. Essayez de les trouver !
+</div>

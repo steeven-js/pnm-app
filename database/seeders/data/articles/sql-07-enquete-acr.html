@@ -1,0 +1,75 @@
+<h2>Enqu&ecirc;te : fichiers et ACR manquants</h2>
+
+<h3>Le sc&eacute;nario</h3>
+<p>Vous recevez un email automatique : <em>&laquo; Fichier PNMDATA_02_01_20260210_V10_0042.txt envoy&eacute; il y a plus de 60 minutes sans accus&eacute; de r&eacute;ception. &raquo;</em></p>
+<p>Un <strong>ACR manquant</strong> signifie que le fichier envoy&eacute; n'a pas &eacute;t&eacute; acquitt&eacute; par le destinataire. C'est potentiellement un probl&egrave;me de transmission sFTP, de traitement chez l'op&eacute;rateur distant, ou de fichier corrompu.</p>
+
+<h3>&Eacute;tape 1 : V&eacute;rifier le fichier en question</h3>
+<pre><code>SELECT f.id, f.filename, f.expediteur, f.destinataire,
+       f.date, f.type, f.created_at
+FROM porta_fichier f
+WHERE f.filename LIKE '%20260210_V10%'
+  AND f.expediteur = '02';</code></pre>
+
+<h3>&Eacute;tape 2 : Trouver TOUS les fichiers sans ACR</h3>
+<p>C'est LE cas d'usage du <code>LEFT JOIN</code> :</p>
+<pre><code>SELECT f.id, f.filename, f.date, f.expediteur, f.destinataire
+FROM porta_fichier f
+LEFT JOIN porta_ack a ON a.fichier_id = f.id
+WHERE a.id IS NULL
+  AND f.type = 'data'
+ORDER BY f.date DESC;</code></pre>
+
+<p><strong>Explication :</strong></p>
+<ul>
+<li><code>LEFT JOIN porta_ack</code> : on garde tous les fichiers, m&ecirc;me sans ACK</li>
+<li><code>WHERE a.id IS NULL</code> : on filtre ceux qui n'ont vraiment aucun ACK</li>
+<li><code>AND f.type = 'data'</code> : on ne regarde que les PNMDATA (pas les PNMSYNC)</li>
+</ul>
+
+<h3>&Eacute;tape 3 : V&eacute;rifier les ACR en erreur</h3>
+<p>Certains fichiers ont re&ccedil;u un ACR mais c'est un <strong>ERR</strong> (fichier d'erreur) :</p>
+<pre><code>SELECT f.filename, f.date, a.code_erreur, cr.label AS erreur
+FROM porta_fichier f
+JOIN porta_ack a ON a.fichier_id = f.id
+JOIN porta_code_reponse cr ON cr.code = a.code_erreur
+WHERE a.code_erreur IS NOT NULL
+ORDER BY f.date DESC;</code></pre>
+
+<h3>&Eacute;tape 4 : Compter les ACR manquants par op&eacute;rateur</h3>
+<pre><code>SELECT o.nom AS destinataire, COUNT(*) AS acr_manquants
+FROM porta_fichier f
+LEFT JOIN porta_ack a ON a.fichier_id = f.id
+JOIN porta_operateur o ON o.code = f.destinataire
+WHERE a.id IS NULL
+  AND f.type = 'data'
+GROUP BY o.nom
+ORDER BY acr_manquants DESC;</code></pre>
+<p>Identifie quel op&eacute;rateur a le plus de probl&egrave;mes de r&eacute;ception.</p>
+
+<h3>&Eacute;tape 5 : Impact sur les portages</h3>
+<p>Un fichier sans ACR contient des tickets. Quels portages sont impact&eacute;s ?</p>
+<pre><code>SELECT d.msisdn, d.code_ticket, ct.label AS type_ticket, f.filename
+FROM porta_data d
+JOIN porta_code_ticket ct ON ct.code = d.code_ticket
+JOIN porta_fichier f ON f.id = d.fichier_id
+LEFT JOIN porta_ack a ON a.fichier_id = f.id
+WHERE a.id IS NULL
+ORDER BY f.date DESC;</code></pre>
+<p>On retrouve les num&eacute;ros concern&eacute;s par des fichiers non acquitt&eacute;s.</p>
+
+<h3>Temps de r&eacute;ponse des ACR</h3>
+<p>V&eacute;rifier le d&eacute;lai moyen entre l'envoi du fichier et la r&eacute;ception de l'ACR :</p>
+<pre><code>SELECT
+    o.nom AS destinataire,
+    AVG(EXTRACT(EPOCH FROM (a.created_at - f.created_at)) / 60) AS delai_moyen_minutes
+FROM porta_fichier f
+JOIN porta_ack a ON a.fichier_id = f.id
+JOIN porta_operateur o ON o.code = f.destinataire
+WHERE f.type = 'data'
+GROUP BY o.nom
+ORDER BY delai_moyen_minutes DESC;</code></pre>
+
+<div style="background: #fff3e0; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Anomalie &agrave; trouver :</strong> Dans les donn&eacute;es de test, 5 fichiers r&eacute;cents n'ont pas re&ccedil;u d'ACR. Utilisez la requ&ecirc;te LEFT JOIN pour les identifier, puis v&eacute;rifiez quels tickets ils contenaient.
+</div>

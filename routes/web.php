@@ -15,6 +15,7 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ResolveController;
 use App\Http\Controllers\ResolveToolController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SqlPlaygroundController;
 use App\Http\Controllers\VerifyController;
 use App\Http\Controllers\VerifyToolController;
 use App\Models\User;
@@ -72,6 +73,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // SQL Playground
+    Route::get('/sql-playground', [SqlPlaygroundController::class, 'index'])->name('sql-playground');
+    Route::get('/sql-playground/{level}', [SqlPlaygroundController::class, 'scenarios'])->name('sql-playground.scenarios');
+    Route::post('/api/sql-playground', [SqlPlaygroundController::class, 'execute'])->name('api.sql-playground');
 
     // Monitoring API (JSON)
     Route::get('/api/monitoring', [MonitoringController::class, 'index'])->name('api.monitoring.index');

@@ -1,0 +1,68 @@
+<h2>SELECT &mdash; Lire des donn&eacute;es</h2>
+
+<h3>La commande SELECT</h3>
+<p><code>SELECT</code> est la commande la plus utilis&eacute;e en SQL. Elle permet de <strong>lire</strong> (extraire) des donn&eacute;es d'une table. C'est la seule commande que vous utiliserez pour investiguer les anomalies PNM.</p>
+
+<h3>Syntaxe de base</h3>
+<pre><code>SELECT colonnes FROM table;</code></pre>
+
+<h4>Lire toutes les colonnes</h4>
+<p>L'&eacute;toile <code>*</code> signifie &laquo; toutes les colonnes &raquo; :</p>
+<pre><code>SELECT * FROM porta_operateur;</code></pre>
+<p>R&eacute;sultat : toutes les colonnes (code, nom, is_active, contact, email) pour chaque op&eacute;rateur.</p>
+
+<h4>Lire des colonnes sp&eacute;cifiques</h4>
+<p>Vous pouvez choisir quelles colonnes afficher :</p>
+<pre><code>SELECT code, nom FROM porta_operateur;</code></pre>
+<p>R&eacute;sultat : seulement le code et le nom de chaque op&eacute;rateur.</p>
+
+<h3>Limiter le nombre de r&eacute;sultats : LIMIT</h3>
+<p>Quand une table contient des milliers de lignes, on utilise <code>LIMIT</code> pour n'en afficher qu'une partie :</p>
+<pre><code>SELECT * FROM porta_portage LIMIT 10;</code></pre>
+<p>Affiche les 10 premiers portages.</p>
+
+<h3>Trier les r&eacute;sultats : ORDER BY</h3>
+<p><code>ORDER BY</code> trie les r&eacute;sultats par une colonne :</p>
+<pre><code>SELECT * FROM porta_fichier ORDER BY date DESC LIMIT 20;</code></pre>
+<p>Affiche les 20 fichiers les plus r&eacute;cents (<code>DESC</code> = du plus r&eacute;cent au plus ancien).</p>
+
+<h3>Renommer une colonne : AS</h3>
+<p><code>AS</code> donne un alias (surnom) &agrave; une colonne dans les r&eacute;sultats :</p>
+<pre><code>SELECT code AS code_operateur, nom AS nom_operateur
+FROM porta_operateur;</code></pre>
+
+<h3>Compter les lignes : COUNT</h3>
+<p><code>COUNT(*)</code> compte le nombre total de lignes :</p>
+<pre><code>SELECT COUNT(*) AS total_portages FROM porta_portage;</code></pre>
+<p>R&eacute;sultat : un seul nombre indiquant le total de portages en base.</p>
+
+<h3>Valeurs uniques : DISTINCT</h3>
+<p><code>DISTINCT</code> &eacute;limine les doublons :</p>
+<pre><code>SELECT DISTINCT operateur_id_actuel FROM porta_msisdn;</code></pre>
+<p>Liste les codes op&eacute;rateurs qui ont au moins un num&eacute;ro attribu&eacute;.</p>
+
+<h3>R&eacute;capitulatif</h3>
+<table>
+<thead>
+<tr><th>Commande</th><th>R&ocirc;le</th><th>Exemple</th></tr>
+</thead>
+<tbody>
+<tr><td><code>SELECT *</code></td><td>Lire toutes les colonnes</td><td><code>SELECT * FROM porta_etat</code></td></tr>
+<tr><td><code>SELECT col1, col2</code></td><td>Lire des colonnes pr&eacute;cises</td><td><code>SELECT msisdn, date_portage FROM porta_portage</code></td></tr>
+<tr><td><code>LIMIT n</code></td><td>Limiter &agrave; n lignes</td><td><code>SELECT * FROM porta_data LIMIT 5</code></td></tr>
+<tr><td><code>ORDER BY col</code></td><td>Trier par colonne</td><td><code>ORDER BY date DESC</code></td></tr>
+<tr><td><code>AS alias</code></td><td>Renommer dans l'affichage</td><td><code>SELECT nom AS operateur</code></td></tr>
+<tr><td><code>COUNT(*)</code></td><td>Compter les lignes</td><td><code>SELECT COUNT(*) FROM porta_fichier</code></td></tr>
+<tr><td><code>DISTINCT</code></td><td>&Eacute;liminer les doublons</td><td><code>SELECT DISTINCT type FROM porta_fichier</code></td></tr>
+</tbody>
+</table>
+
+<div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
+<strong>Exercices :</strong>
+<ol>
+<li>Affichez tous les codes ticket : <code>SELECT * FROM porta_code_ticket</code></li>
+<li>Comptez le nombre de fichiers : <code>SELECT COUNT(*) FROM porta_fichier</code></li>
+<li>Affichez les 5 portages les plus r&eacute;cents : <code>SELECT * FROM porta_portage ORDER BY created_at DESC LIMIT 5</code></li>
+<li>Listez les types de fichiers distincts : <code>SELECT DISTINCT type FROM porta_fichier</code></li>
+</ol>
+</div>

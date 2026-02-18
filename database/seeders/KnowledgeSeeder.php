@@ -26,6 +26,7 @@ class KnowledgeSeeder extends Seeder
             ['name' => 'Réseau & Infrastructure', 'slug' => 'reseau-infrastructure', 'description' => 'Architecture réseau télécom — Core Network, composants, routage et impact de la portabilité.', 'icon' => 'solar:global-bold-duotone', 'color' => '#10b981', 'sort_order' => 3],
             ['name' => 'Inter-opérateurs & GPMAG', 'slug' => 'inter-operateurs-gpmag', 'description' => 'Échanges inter-opérateurs — GPMAG, fichiers PNMDATA/PNMSYNC, vacations et flux ACR/ERR.', 'icon' => 'solar:hand-shake-bold-duotone', 'color' => '#f59e0b', 'sort_order' => 4],
             ['name' => 'Outils & Scripts', 'slug' => 'outils-scripts', 'description' => 'Outils internes — PortaSync, scripts de bascule, serveurs, monitoring et procédures opérationnelles.', 'icon' => 'solar:settings-bold-duotone', 'color' => '#ef4444', 'sort_order' => 5],
+            ['name' => 'SQL & Investigation', 'slug' => 'sql-investigation', 'description' => 'Apprentissage SQL progressif et scénarios d\'investigation sur les tables PORTA simulées.', 'icon' => 'solar:code-bold-duotone', 'color' => '#06b6d4', 'sort_order' => 6],
         ];
 
         foreach ($domains as $domain) {
@@ -115,6 +116,17 @@ class KnowledgeSeeder extends Seeder
             ['domain' => 'outils-scripts', 'title' => 'Processus de bascule', 'slug' => 'bascule', 'excerpt' => 'Le script TraitementBascule.sh en détail.', 'file' => 'outils-bascule.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 6],
             ['domain' => 'outils-scripts', 'title' => 'Monitoring et santé des systèmes', 'slug' => 'monitoring', 'excerpt' => 'Indicateurs de santé et résolution.', 'file' => 'outils-monitoring.html', 'level' => 'maitrise', 'sort_order' => 5, 'reading_time' => 5],
             ['domain' => 'outils-scripts', 'title' => 'Exploitation quotidienne', 'slug' => 'exploitation-quotidienne', 'excerpt' => 'Procédures opérationnelles PORTA.', 'file' => 'outils-exploitation-quotidienne.html', 'level' => 'maitrise', 'sort_order' => 6, 'reading_time' => 8],
+            // SQL & Investigation
+            ['domain' => 'sql-investigation', 'title' => 'C\'est quoi une base de données ?', 'slug' => 'base-de-donnees', 'excerpt' => 'Les 18 tables PORTA, à quoi sert chacune, le schéma relationnel.', 'file' => 'sql-01-base-de-donnees.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 6],
+            ['domain' => 'sql-investigation', 'title' => 'SELECT — Lire des données', 'slug' => 'select', 'excerpt' => 'SELECT, LIMIT, ORDER BY, COUNT, DISTINCT — les bases de la lecture SQL.', 'file' => 'sql-02-select.html', 'level' => 'decouverte', 'sort_order' => 2, 'reading_time' => 5],
+            ['domain' => 'sql-investigation', 'title' => 'WHERE — Filtrer les résultats', 'slug' => 'where', 'excerpt' => 'AND, OR, IN, BETWEEN, LIKE, IS NULL — filtrer avec précision.', 'file' => 'sql-03-where.html', 'level' => 'decouverte', 'sort_order' => 3, 'reading_time' => 6],
+            ['domain' => 'sql-investigation', 'title' => 'JOIN — Croiser deux tables', 'slug' => 'join', 'excerpt' => 'INNER JOIN, LEFT JOIN — relier les tables pour obtenir une vue complète.', 'file' => 'sql-04-join.html', 'level' => 'comprehension', 'sort_order' => 4, 'reading_time' => 7],
+            ['domain' => 'sql-investigation', 'title' => 'GROUP BY — Compter et résumer', 'slug' => 'group-by', 'excerpt' => 'COUNT, SUM, AVG, HAVING — résumer les données pour le reporting.', 'file' => 'sql-05-group-by.html', 'level' => 'comprehension', 'sort_order' => 5, 'reading_time' => 6],
+            ['domain' => 'sql-investigation', 'title' => 'Enquête : trouver un numéro', 'slug' => 'enquete-numero', 'excerpt' => 'Scénario "le client dit que son numéro ne marche pas" — MSISDN → PORTAGE → ÉTAT → HISTORIQUE.', 'file' => 'sql-06-enquete-numero.html', 'level' => 'comprehension', 'sort_order' => 6, 'reading_time' => 7],
+            ['domain' => 'sql-investigation', 'title' => 'Enquête : fichiers et ACR manquants', 'slug' => 'enquete-acr', 'excerpt' => 'Scénario "un fichier n\'a pas reçu d\'ACR" — FICHIER LEFT JOIN ACK.', 'file' => 'sql-07-enquete-acr.html', 'level' => 'comprehension', 'sort_order' => 7, 'reading_time' => 7],
+            ['domain' => 'sql-investigation', 'title' => 'Enquête : refus de portage', 'slug' => 'enquete-refus', 'excerpt' => 'Scénario refus 1210/1220/7000 — DATA + CODE_REPONSE + CODE_TICKET.', 'file' => 'sql-08-enquete-refus.html', 'level' => 'maitrise', 'sort_order' => 8, 'reading_time' => 8],
+            ['domain' => 'sql-investigation', 'title' => 'Enquête : suivi d\'une bascule', 'slug' => 'enquete-bascule', 'excerpt' => 'Scénario "bascule incomplète" — PORTAGE + HISTORIQUE + TRANSITION.', 'file' => 'sql-09-enquete-bascule.html', 'level' => 'maitrise', 'sort_order' => 9, 'reading_time' => 8],
+            ['domain' => 'sql-investigation', 'title' => 'Enquête : conflits de synchronisation', 'slug' => 'enquete-sync', 'excerpt' => 'Scénario "conflit SYNC ouvert" — SYNC + SYNC_STATUS + MSISDN_HISTORIQUE.', 'file' => 'sql-10-enquete-sync.html', 'level' => 'maitrise', 'sort_order' => 10, 'reading_time' => 8],
         ];
 
         foreach ($articleDefinitions as $def) {
@@ -163,6 +175,17 @@ class KnowledgeSeeder extends Seeder
             'bascule' => ['EMA/EMM', 'MOBI', 'PortaDB', 'PortaSync'],
             'monitoring' => ['PortaDB', 'PortaSync', 'ESB', 'BTCTF'],
             'exploitation-quotidienne' => ['PortaSync', 'PortaDB', 'EMA/EMM', 'PNMDATA', 'MOBI', 'PortaWs', 'PortaWebUi', 'DAPI', 'AR'],
+            // SQL & Investigation
+            'base-de-donnees' => ['PortaDB', 'PNM', 'MSISDN', 'PNMDATA', 'PNMSYNC', 'ACR'],
+            'select' => ['PortaDB', 'MSISDN'],
+            'where' => ['PortaDB', 'MSISDN', 'RIO'],
+            'join' => ['PortaDB', 'MSISDN', 'ACR', 'PNMDATA'],
+            'group-by' => ['PortaDB', 'MSISDN', 'PNMDATA'],
+            'enquete-numero' => ['MSISDN', 'OPR', 'OPD', 'RIO', 'PNM'],
+            'enquete-acr' => ['ACR', 'ERR', 'PNMDATA', 'sFTP'],
+            'enquete-refus' => ['RIO', 'OPR', 'OPD', 'PNM'],
+            'enquete-bascule' => ['OPR', 'OPD', 'GPMAG', 'PNM'],
+            'enquete-sync' => ['PNMSYNC', 'MSISDN', 'GPMAG'],
         ];
 
         $articles = Article::all()->keyBy('slug');
