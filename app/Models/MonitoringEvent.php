@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 class MonitoringEvent extends Model
 {
     protected $fillable = [
+        'user_id',
         'event_type',
         'event_date',
         'status',
