@@ -26,42 +26,41 @@ GROUP BY colonne_de_regroupement;</code></pre>
 <h3>Exemples PNM concrets</h3>
 
 <h4>Nombre de portages par &eacute;tat</h4>
-<pre><code>SELECT e.label AS etat, COUNT(*) AS total
+<pre><code>SELECT p.portage_etat AS etat, COUNT(*) AS total
 FROM porta_portage p
-JOIN porta_etat e ON e.id = p.etat_id_actuel
-GROUP BY e.label
+GROUP BY p.portage_etat
 ORDER BY total DESC;</code></pre>
-<p>Donne une vue d'ensemble : combien de portages sont saisis, en cours, bascul&eacute;s, cl&ocirc;tur&eacute;s, refus&eacute;s, annul&eacute;s.</p>
+<p>Donne une vue d'ensemble : combien de portages sont initial, enCours, diffuse, termine, refuse, annule.</p>
 
 <h4>Nombre de fichiers par jour</h4>
-<pre><code>SELECT date, COUNT(*) AS nb_fichiers
+<pre><code>SELECT date_creation, COUNT(*) AS nb_fichiers
 FROM porta_fichier
-GROUP BY date
-ORDER BY date DESC;</code></pre>
+GROUP BY date_creation
+ORDER BY date_creation DESC;</code></pre>
 
-<h4>Portages par op&eacute;rateur d'origine</h4>
+<h4>Portages par op&eacute;rateur donneur</h4>
 <pre><code>SELECT o.nom AS operateur, COUNT(*) AS portages_sortants
 FROM porta_dossier d
-JOIN porta_operateur o ON o.code = d.operateur_id_origine
+JOIN porta_operateur o ON o.code = d.operateur_id_donneur
 GROUP BY o.nom
 ORDER BY portages_sortants DESC;</code></pre>
 <p>Quel op&eacute;rateur perd le plus de clients ?</p>
 
 <h4>Refus par motif</h4>
-<pre><code>SELECT cr.label AS motif, COUNT(*) AS total
-FROM porta_data d
-JOIN porta_code_reponse cr ON cr.code = d.code_motif
-WHERE d.code_ticket = '1220'
-GROUP BY cr.label
+<pre><code>SELECT cr.description AS motif, COUNT(*) AS total
+FROM porta_portage_data pd
+JOIN porta_code_reponse cr ON cr.code = pd.code_reponse
+WHERE pd.code_ticket = 200
+GROUP BY cr.description
 ORDER BY total DESC;</code></pre>
 <p>Quels sont les motifs de refus les plus fr&eacute;quents ?</p>
 
 <h3>HAVING &mdash; Filtrer apr&egrave;s le regroupement</h3>
 <p><code>WHERE</code> filtre <strong>avant</strong> le regroupement, <code>HAVING</code> filtre <strong>apr&egrave;s</strong> :</p>
 
-<pre><code>SELECT date, COUNT(*) AS nb_fichiers
+<pre><code>SELECT date_creation, COUNT(*) AS nb_fichiers
 FROM porta_fichier
-GROUP BY date
+GROUP BY date_creation
 HAVING COUNT(*) > 20
 ORDER BY nb_fichiers DESC;</code></pre>
 <p>Jours o&ugrave; plus de 20 fichiers ont &eacute;t&eacute; &eacute;chang&eacute;s (jours &agrave; fort trafic).</p>
@@ -69,15 +68,14 @@ ORDER BY nb_fichiers DESC;</code></pre>
 <h3>Combiner GROUP BY et JOIN</h3>
 <pre><code>SELECT
     o.nom AS operateur,
-    e.classe AS etat,
+    p.portage_etat AS etat,
     COUNT(*) AS total
 FROM porta_portage p
 JOIN porta_dossier d ON d.id = p.dossier_id
-JOIN porta_operateur o ON o.code = d.operateur_id_destination
-JOIN porta_etat e ON e.id = p.etat_id_actuel
-GROUP BY o.nom, e.classe
+JOIN porta_operateur o ON o.code = d.operateur_id_receveur
+GROUP BY o.nom, p.portage_etat
 ORDER BY o.nom, total DESC;</code></pre>
-<p>Tableau crois&eacute; : pour chaque op&eacute;rateur de destination, combien de portages dans chaque &eacute;tat.</p>
+<p>Tableau crois&eacute; : pour chaque op&eacute;rateur receveur, combien de portages dans chaque &eacute;tat.</p>
 
 <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px;">
 <strong>Exercices :</strong>
@@ -85,6 +83,6 @@ ORDER BY o.nom, total DESC;</code></pre>
 <li>Comptez les portages par &eacute;tat</li>
 <li>Comptez les fichiers par exp&eacute;diteur (avec le nom de l'op&eacute;rateur)</li>
 <li>Trouvez les jours o&ugrave; plus de 10 fichiers ont &eacute;t&eacute; &eacute;chang&eacute;s</li>
-<li>Comptez les refus par type de code motif</li>
+<li>Comptez les refus par type de code r&eacute;ponse</li>
 </ol>
 </div>

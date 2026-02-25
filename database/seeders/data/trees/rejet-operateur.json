@@ -9,7 +9,7 @@
     "diagnosis": "Le RIO fourni ne correspond pas au numéro. Le format attendu est OO-Q-RRRRRR-CCC (12 caractères). Le RIO peut avoir expiré ou être erroné.",
     "recommended_action": "Demander au client de redemander son RIO en appelant le 3179 depuis sa ligne. Vérifier le format et l'algorithme de contrôle.",
     "severity": "error",
-    "related_codes": ["R123", "1220"]
+    "related_codes": ["R123", "500"]
   },
   "no": {
     "id": "q2",
@@ -22,7 +22,7 @@
       "diagnosis": "Un portage est déjà en cours pour ce numéro. Il peut s'agir d'une demande concurrente d'un autre OPR ou d'un portage précédent non clôturé.",
       "recommended_action": "Attendre la clôture du portage en cours (max 90 jours de péremption). Vérifier dans PortaDB l'état du dossier existant.",
       "severity": "error",
-      "sql_query": "SELECT p.*, e.classe FROM PORTAGE p JOIN ETAT e ON p.id_etat = e.id WHERE p.msisdn = ? AND e.classe NOT IN ('cloture', 'refuse', 'annule')",
+      "sql_query": "SELECT p.*, p.portage_etat FROM porta_portage p WHERE p.portage_msisdn = ? AND p.portage_etat NOT IN ('termine', 'refuse', 'annule')",
       "related_codes": ["R220", "E613"]
     },
     "no": {
