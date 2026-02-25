@@ -17,6 +17,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        User::factory()->create([
+            'name' => 'Utilisateur Invité',
+            'email' => 'invite@pnm.local',
+        ]);
+
         $this->call(KnowledgeSeeder::class);
         $this->call(ResolveSeeder::class);
         $this->call(PortaSeeder::class);
