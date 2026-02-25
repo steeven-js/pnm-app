@@ -13,6 +13,9 @@ import { iconButtonClasses } from '@mui/material/IconButton';
 
 import { Iconify } from 'src/components/iconify';
 import { ChatPanel } from 'src/components/chat-panel';
+import { CONFIG } from 'src/global-config';
+import { paths } from 'src/routes/paths';
+import { RouterLink } from 'src/routes/components';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext, SettingsDrawer, defaultSettings } from 'src/components/settings';
@@ -188,6 +191,28 @@ export function DashboardLayout({
             >
               {!isNavMini && 'Assistant IA'}
             </Button>
+
+            <Box
+              component={RouterLink}
+              href={paths.changelog}
+              sx={{
+                mt: 1.5,
+                py: 0.75,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: isNavMini ? 'center' : 'center',
+                gap: 0.75,
+                borderRadius: 1,
+                textDecoration: 'none',
+                color: 'var(--layout-nav-text-disabled-color)',
+                typography: 'caption',
+                transition: (t) => t.transitions.create(['color']),
+                '&:hover': { color: 'var(--layout-nav-text-primary-color)' },
+              }}
+            >
+              <Iconify icon="solar:history-bold-duotone" width={16} />
+              {!isNavMini && `v${CONFIG.appVersion}`}
+            </Box>
           </Box>
         ),
       }}

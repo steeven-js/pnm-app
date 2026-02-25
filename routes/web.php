@@ -44,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Glossary
     Route::get('/glossary', [GlossaryController::class, 'index'])->name('glossary.index');
 
+    // Changelog
+    Route::get('/changelog', fn () => Inertia::render('Changelog'))->name('changelog');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 

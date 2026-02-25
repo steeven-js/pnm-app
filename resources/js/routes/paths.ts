@@ -82,4 +82,6 @@ export const paths = {
   },
   // GLOSSARY
   glossary: '/glossary',
+  // CHANGELOG
+  changelog: '/changelog',
 };
