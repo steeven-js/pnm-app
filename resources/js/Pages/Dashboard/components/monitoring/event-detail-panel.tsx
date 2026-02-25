@@ -9,8 +9,10 @@ import Collapse from '@mui/material/Collapse';
 
 import { Iconify } from 'src/components/iconify';
 import type { EnrichedPnmEvent, EventStatus } from 'src/types/monitoring';
+import { SUPPORTED_EVENT_KEYS } from 'src/utils/parse-mgrntlog';
 import { EventChecklist } from './event-checklist';
 import { EventNotes } from './event-notes';
+import { LogPasteDialog } from './log-paste-dialog';
 
 type EventDetailPanelProps = {
     event: EnrichedPnmEvent | null;
@@ -29,6 +31,14 @@ const STATUS_LABELS: Record<EventStatus, { label: string; color: 'default' | 'su
 export function EventDetailPanel({ event, onSave, saving = false, readOnly = false }: EventDetailPanelProps) {
     const [checkedItems, setCheckedItems] = useState<string[]>([]);
     const [notes, setNotes] = useState('');
+    const [logDialogOpen, setLogDialogOpen] = useState(false);
+
+    const supportsLogPaste = event ? SUPPORTED_EVENT_KEYS.includes(event.key) : false;
+
+    const handleLogApply = useCallback((autoChecked: string[], autoNotes: string) => {
+        setCheckedItems((prev) => [...new Set([...prev, ...autoChecked])]);
+        setNotes((prev) => (prev ? `${prev}\n\n${autoNotes}` : autoNotes));
+    }, []);
 
     useEffect(() => {
         if (event) {
@@ -62,6 +72,18 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
 
                     <Divider sx={{ mb: 2 }} />
 
+                    {supportsLogPaste && !readOnly && (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<Iconify icon="solar:clipboard-text-bold-duotone" width={18} />}
+                            onClick={() => setLogDialogOpen(true)}
+                            sx={{ mb: 1.5 }}
+                        >
+                            Auto-remplir depuis log
+                        </Button>
+                    )}
+
                     <EventChecklist items={event.checklist} checkedItems={checkedItems} onChange={setCheckedItems} readOnly={readOnly} />
                     <Box sx={{ mt: 2 }} />
                     <EventNotes value={notes} onChange={setNotes} readOnly={readOnly} />
@@ -75,6 +97,16 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                                 Marquer vérifié
                             </Button>
                         </Stack>
+                    )}
+
+                    {supportsLogPaste && (
+                        <LogPasteDialog
+                            open={logDialogOpen}
+                            onClose={() => setLogDialogOpen(false)}
+                            eventKey={event.key}
+                            checklist={event.checklist}
+                            onApply={handleLogApply}
+                        />
                     )}
                 </Box>
             )}
