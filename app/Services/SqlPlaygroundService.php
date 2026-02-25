@@ -27,6 +27,15 @@ class SqlPlaygroundService
         'porta_ack',
         'porta_sync',
         'porta_sync_status',
+        // W3Schools SQL Tutorial tables
+        'w3_categories',
+        'w3_customers',
+        'w3_employees',
+        'w3_orders',
+        'w3_order_details',
+        'w3_products',
+        'w3_shippers',
+        'w3_suppliers',
     ];
 
     /**
@@ -149,7 +158,7 @@ class SqlPlaygroundService
             $tableLower = strtolower($table);
             if (! in_array($tableLower, self::ALLOWED_TABLES)) {
                 throw new \InvalidArgumentException(
-                    "Table non autorisée : {$table}. Seules les tables porta_* sont accessibles."
+                    "Table non autorisée : {$table}. Seules les tables porta_* et w3_* sont accessibles."
                 );
             }
         }
