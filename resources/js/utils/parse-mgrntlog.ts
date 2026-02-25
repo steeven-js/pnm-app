@@ -69,11 +69,10 @@ type AutoFillRules = {
 };
 
 const AUTO_FILL_RULES: Record<string, AutoFillRules> = {
-    bascule_in: {
+    automates_report: {
         checkRules: {
-            'Email mgrntlog reçu (démarrage automate)': (entries) =>
-                entries.some((e) => e.dossier === 'BASCULE_IN'),
-            'Aucune erreur de bascule signalée': (entries) =>
+            'Email rapport activité automates reçu': (entries) => entries.length > 0,
+            'Automate BASCULE_IN : SUCCESS': (entries) =>
                 entries.find((e) => e.dossier === 'BASCULE_IN')?.statut === 'SUCCESS',
             'Durée de bascule raisonnable (< 3h)': (entries) => {
                 const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
@@ -81,55 +80,6 @@ const AUTO_FILL_RULES: Record<string, AutoFillRules> = {
                 const mins = calcDurationMinutes(bi.heureDebut, bi.heureFin);
                 return mins !== null && mins < 180;
             },
-        },
-        generateNotes: (entries) => {
-            const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-            if (!bi) return 'BASCULE_IN non trouvé dans le log.';
-            const duration = formatDuration(bi.heureDebut, bi.heureFin);
-            return [
-                `[Auto] BASCULE_IN — ${bi.dateBascule ?? 'N/A'}`,
-                `Démarrage: ${bi.heureDebut} | Fin: ${bi.heureFin} | Durée: ${duration}`,
-                `Statut: ${bi.statut}`,
-                `Fichier: ${bi.fichier}`,
-            ].join('\n');
-        },
-    },
-
-    bascule_exploit: {
-        checkRules: {
-            'Email mgrntlog BASCULE_IN terminé reçu': (entries) => {
-                const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-                return !!bi?.heureFin;
-            },
-            'Automate EXPLOIT démarré': (entries) =>
-                entries.some((e) => e.dossier === 'EXPLOIT'),
-            "Pas d'erreur dans les logs": (entries) => {
-                const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-                const ex = entries.find((e) => e.dossier === 'EXPLOIT');
-                return bi?.statut === 'SUCCESS' && ex?.statut === 'SUCCESS';
-            },
-        },
-        generateNotes: (entries) => {
-            const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-            const ex = entries.find((e) => e.dossier === 'EXPLOIT');
-            const lines: string[] = ['[Auto] BASCULE_IN + EXPLOIT'];
-            if (bi) {
-                const d = formatDuration(bi.heureDebut, bi.heureFin);
-                lines.push(`BASCULE_IN: ${bi.heureDebut}→${bi.heureFin} (${d}) — ${bi.statut}`);
-            }
-            if (ex) {
-                const d = formatDuration(ex.heureDebut, ex.heureFin);
-                lines.push(`EXPLOIT: ${ex.heureDebut}→${ex.heureFin} (${d}) — ${ex.statut}`);
-            }
-            return lines.join('\n');
-        },
-    },
-
-    automates_report: {
-        checkRules: {
-            'Email rapport activité automates reçu': (entries) => entries.length > 0,
-            'Automate BASCULE_IN : SUCCESS': (entries) =>
-                entries.find((e) => e.dossier === 'BASCULE_IN')?.statut === 'SUCCESS',
             'Automate EXPLOIT : SUCCESS': (entries) =>
                 entries.find((e) => e.dossier === 'EXPLOIT')?.statut === 'SUCCESS',
             'Automate RATP_OLN : SUCCESS': (entries) =>
@@ -146,10 +96,15 @@ const AUTO_FILL_RULES: Record<string, AutoFillRules> = {
             },
         },
         generateNotes: (entries) => {
+            const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
             const lines = ['[Auto] Rapport activité automates'];
             for (const e of entries) {
                 const d = formatDuration(e.heureDebut, e.heureFin);
                 lines.push(`${e.dossier}: ${e.heureDebut}→${e.heureFin} (${d}) — ${e.statut}`);
+            }
+            if (bi) {
+                const duration = formatDuration(bi.heureDebut, bi.heureFin);
+                lines.push(`\nBASCULE_IN: ${bi.dateBascule ?? 'N/A'} | Durée: ${duration}`);
             }
             return lines.join('\n');
         },

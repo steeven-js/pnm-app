@@ -2,36 +2,6 @@ import type { PnmEventConfig } from 'src/types/monitoring';
 
 export const pnmEventsConfig: PnmEventConfig[] = [
     {
-        key: 'bascule_in',
-        label: 'Automate BASCULE_IN',
-        description:
-            "L'automate BASCULE_IN démarre à 00:15. Il bascule les numéros portés vers le réseau Digicel. Vérifier que l'automate a bien démarré et terminé sans erreur.",
-        scheduledTime: '00:15',
-        icon: 'solar:transfer-horizontal-bold-duotone',
-        category: 'bascule',
-        checklist: [
-            'Email mgrntlog reçu (démarrage automate)',
-            'Vérifier le nombre de lignes basculées',
-            'Aucune erreur de bascule signalée',
-            'Durée de bascule raisonnable (< 3h)',
-        ],
-    },
-    {
-        key: 'bascule_exploit',
-        label: 'BASCULE_IN terminé + EXPLOIT',
-        description:
-            "L'automate BASCULE_IN est terminé et l'automate EXPLOIT démarre. Vérifier la volumétrie et que l'enchaînement est correct.",
-        scheduledTime: '02:06',
-        icon: 'solar:settings-bold-duotone',
-        category: 'bascule',
-        checklist: [
-            'Email mgrntlog BASCULE_IN terminé reçu',
-            'Automate EXPLOIT démarré',
-            'Volumétrie BASCULE_IN cohérente',
-            "Pas d'erreur dans les logs",
-        ],
-    },
-    {
         key: 'cto_rattrapage',
         label: 'CTO Bascule tardive/échec',
         description:
@@ -151,13 +121,14 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         key: 'automates_report',
         label: 'Rapport activité automates',
         description:
-            "Rapport d'activité des automates : BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER. Fichiers CSV et LOG joints.",
+            "Email [PROD] Rapport d'activité automates (supervision@digicelgroup.fr) avec PJ : automates_activity.csv, automates_detail.csv, mgrntlog_global.log. Couvre BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.",
         scheduledTime: '15:25',
         icon: 'solar:monitor-smartphone-bold-duotone',
         category: 'supervision',
         checklist: [
             'Email rapport activité automates reçu',
             'Automate BASCULE_IN : SUCCESS',
+            'Durée de bascule raisonnable (< 3h)',
             'Automate EXPLOIT : SUCCESS',
             'Automate RATP_OLN : SUCCESS',
             'Automate TRACE : SUCCESS',
