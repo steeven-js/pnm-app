@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 
 import { Iconify } from 'src/components/iconify';
-import { parseMgrntlog, autoFillFromLog, type AutoFillResult } from 'src/utils/parse-mgrntlog';
+import { autoFillFromPaste, type AutoFillResult } from 'src/utils/parse-mgrntlog';
 
 type LogPasteDialogProps = {
     open: boolean;
@@ -20,24 +20,38 @@ type LogPasteDialogProps = {
     onApply: (checkedItems: string[], notes: string) => void;
 };
 
+const DIALOG_CONFIG: Record<string, { title: string; description: string; placeholder: string }> = {
+    automates_report: {
+        title: 'Auto-remplir depuis le log',
+        description: 'Collez le contenu du fichier mgrntlog_global_*.log pour remplir automatiquement la checklist.',
+        placeholder: `Collez le contenu du fichier .log ici...\n\n---------------------------------------------\nDossier        : BASCULE_IN\nDate Bascule   : 24/02/2026 MODE : NORMAL\n...`,
+    },
+    vacation: {
+        title: 'Auto-remplir depuis le rapport vacation',
+        description: "Collez le contenu de l'email [PNM] vacation (rapport envoi/réception) pour remplir automatiquement la checklist.",
+        placeholder: `Collez le contenu du mail ici...\n\nRapport envoi/réception des vacations du 16-02-2026\n\nNombre de fichiers transférés : 20 fichiers échangés / 20 attendus\n\nFichiers reçus d'Orange Caraïbe:\n/home/porta_pnmv3/.../PNMDATA.01.02...\n...`,
+    },
+};
+
+function getConfig(eventKey: string) {
+    if (eventKey.startsWith('vacation_')) return DIALOG_CONFIG.vacation;
+    return DIALOG_CONFIG[eventKey] ?? DIALOG_CONFIG.automates_report;
+}
+
 export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: LogPasteDialogProps) {
-    const [logContent, setLogContent] = useState('');
+    const [pastedContent, setPastedContent] = useState('');
     const [preview, setPreview] = useState<AutoFillResult | null>(null);
     const [error, setError] = useState('');
+
+    const config = getConfig(eventKey);
 
     const handleParse = () => {
         setError('');
         setPreview(null);
 
-        const entries = parseMgrntlog(logContent);
-        if (entries.length === 0) {
-            setError('Aucun bloc automate trouvé dans le contenu collé.');
-            return;
-        }
-
-        const result = autoFillFromLog(eventKey, checklist, entries);
+        const result = autoFillFromPaste(eventKey, checklist, pastedContent);
         if (!result) {
-            setError("Cet événement ne supporte pas l'auto-remplissage.");
+            setError('Impossible de parser le contenu collé. Vérifiez le format.');
             return;
         }
 
@@ -52,7 +66,7 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
     };
 
     const handleClose = () => {
-        setLogContent('');
+        setPastedContent('');
         setPreview(null);
         setError('');
         onClose();
@@ -62,12 +76,11 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Iconify icon="solar:clipboard-text-bold-duotone" width={24} />
-                Auto-remplir depuis le log
+                {config.title}
             </DialogTitle>
             <DialogContent>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Collez le contenu du fichier <strong>mgrntlog_global_*.log</strong> pour remplir
-                    automatiquement la checklist et les notes.
+                    {config.description}
                 </Typography>
 
                 <TextField
@@ -76,10 +89,10 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
                     maxRows={12}
                     fullWidth
                     size="small"
-                    placeholder={`Collez le contenu du fichier .log ici...\n\n---------------------------------------------\nDossier        : BASCULE_IN\nDate Bascule   : 24/02/2026 MODE : NORMAL\n...`}
-                    value={logContent}
+                    placeholder={config.placeholder}
+                    value={pastedContent}
                     onChange={(e) => {
-                        setLogContent(e.target.value);
+                        setPastedContent(e.target.value);
                         setPreview(null);
                         setError('');
                     }}
@@ -130,7 +143,7 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
             <DialogActions>
                 <Button onClick={handleClose}>Annuler</Button>
                 {!preview ? (
-                    <Button variant="contained" onClick={handleParse} disabled={!logContent.trim()}
+                    <Button variant="contained" onClick={handleParse} disabled={!pastedContent.trim()}
                         startIcon={<Iconify icon="solar:magnifer-bold-duotone" width={18} />}>
                         Analyser
                     </Button>
