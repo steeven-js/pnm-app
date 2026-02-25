@@ -16,11 +16,11 @@
 <tr><th>Table</th><th>R&ocirc;le</th><th>Exemple</th></tr>
 </thead>
 <tbody>
-<tr><td><code>porta_operateur</code></td><td>Liste des op&eacute;rateurs (Orange, Digicel, SFR...)</td><td>Code &laquo; 02 &raquo; = Digicel</td></tr>
-<tr><td><code>porta_code_ticket</code></td><td>Types de tickets PNM</td><td>1110 = Demande de portage</td></tr>
-<tr><td><code>porta_code_reponse</code></td><td>Codes erreur et motifs de refus</td><td>R100 = RIO invalide</td></tr>
-<tr><td><code>porta_etat</code></td><td>&Eacute;tats possibles d'un portage</td><td>saisi, encours, bascule, cl&ocirc;tur&eacute;</td></tr>
-<tr><td><code>porta_transition</code></td><td>R&egrave;gles de passage d'un &eacute;tat &agrave; un autre</td><td>saisi &rarr; encours (via ticket 1210)</td></tr>
+<tr><td><code>porta_operateur</code></td><td>Liste des op&eacute;rateurs (Orange, Digicel, SFR...)</td><td>Code 2 = Digicel</td></tr>
+<tr><td><code>porta_code_ticket</code></td><td>Types de tickets PNM</td><td>100 = Demande de portage</td></tr>
+<tr><td><code>porta_code_reponse</code></td><td>Codes de proc&eacute;dure et motifs de refus</td><td>1 = RIO invalide</td></tr>
+<tr><td><code>porta_etat</code></td><td>&Eacute;tats possibles d'un portage</td><td>initial, enCours, diffuse, termine</td></tr>
+<tr><td><code>porta_transition</code></td><td>R&egrave;gles de passage d'un &eacute;tat &agrave; un autre</td><td>initial &rarr; enCours (via code 200)</td></tr>
 <tr><td><code>porta_tranche</code></td><td>Plages de num&eacute;ros attribu&eacute;es par op&eacute;rateur</td><td>0690500000-0690999999 = Digicel</td></tr>
 <tr><td><code>porta_ferryday</code></td><td>Jours f&eacute;ri&eacute;s GPMAG (pas d'&eacute;change ces jours-l&agrave;)</td><td>2026-02-17 = Mardi Gras</td></tr>
 </tbody>
@@ -35,14 +35,14 @@
 </thead>
 <tbody>
 <tr><td><code>porta_msisdn</code></td><td>Chaque num&eacute;ro de t&eacute;l&eacute;phone connu</td><td>0690123456 chez Digicel</td></tr>
-<tr><td><code>porta_msisdn_historique</code></td><td>Historique des changements d'op&eacute;rateur</td><td>0690123456 : Orange &rarr; Digicel le 15/01/2026</td></tr>
+<tr><td><code>porta_msisdn_historique</code></td><td>Historique des changements d'op&eacute;rateur</td><td>0690123456 : changement le 15/01/2026</td></tr>
 <tr><td><code>porta_dossier</code></td><td>Regroupement de portages (dossier client)</td><td>Un dossier pour 2 lignes d'un m&ecirc;me client</td></tr>
-<tr><td><code>porta_portage</code></td><td>Chaque demande de portage individuelle</td><td>Portage du 0690123456, &eacute;tat &laquo; bascule &raquo;</td></tr>
-<tr><td><code>porta_portage_historique</code></td><td>Chaque changement d'&eacute;tat d'un portage</td><td>saisi &rarr; encours le 18/01 &agrave; 10h15</td></tr>
-<tr><td><code>porta_portage_data</code></td><td>Donn&eacute;es temporaires de bascule</td><td>Num&eacute;ro provisoire pendant la bascule</td></tr>
+<tr><td><code>porta_portage</code></td><td>Chaque demande de portage individuelle</td><td>Portage du 0690123456, &eacute;tat &laquo; diffuse &raquo;</td></tr>
+<tr><td><code>porta_portage_historique</code></td><td>Chaque changement d'&eacute;tat d'un portage</td><td>initial &rarr; enCours le 18/01 &agrave; 10h15</td></tr>
+<tr><td><code>porta_portage_data</code></td><td>Tickets de suivi li&eacute;s aux portages</td><td>Code ticket 200 pour le portage #42</td></tr>
 <tr><td><code>porta_fichier</code></td><td>Fichiers PNMDATA/PNMSYNC &eacute;chang&eacute;s</td><td>PNMDATA_02_01_20260118_V10_0001.txt</td></tr>
-<tr><td><code>porta_data</code></td><td>Tickets contenus dans les fichiers</td><td>Ticket 1110 pour le 0690123456</td></tr>
-<tr><td><code>porta_ack</code></td><td>Accus&eacute;s de r&eacute;ception (ACR/ERR)</td><td>ACR re&ccedil;u pour le fichier 42</td></tr>
+<tr><td><code>porta_data</code></td><td>Donn&eacute;es des demandes de portage</td><td>Demande pour le 0690123456</td></tr>
+<tr><td><code>porta_ack</code></td><td>Accus&eacute;s de r&eacute;ception (ACR/ERR)</td><td>ACR re&ccedil;u pour le fichier data_20260118.txt</td></tr>
 <tr><td><code>porta_sync</code></td><td>Donn&eacute;es de synchronisation hebdomadaire</td><td>MSISDN chez Digicel confirm&eacute; par Orange</td></tr>
 <tr><td><code>porta_sync_status</code></td><td>R&eacute;sultat de la synchro (conflit ou OK)</td><td>Conflit : num&eacute;ro pr&eacute;sent chez 2 op&eacute;rateurs</td></tr>
 </tbody>
@@ -52,9 +52,9 @@
 <p>Les tables ne sont pas isol&eacute;es. Elles sont reli&eacute;es par des <strong>cl&eacute;s &eacute;trang&egrave;res</strong> (foreign keys). Par exemple :</p>
 <ul>
 <li>Un <code>portage</code> r&eacute;f&eacute;rence un <code>dossier</code> (par <code>dossier_id</code>)</li>
-<li>Un <code>portage</code> r&eacute;f&eacute;rence un <code>etat</code> (par <code>etat_id_actuel</code>)</li>
+<li>Un <code>portage</code> r&eacute;f&eacute;rence un <code>etat</code> (par <code>portage_etat</code>)</li>
 <li>Un <code>fichier</code> r&eacute;f&eacute;rence deux <code>operateur</code> (exp&eacute;diteur et destinataire)</li>
-<li>Un ticket <code>data</code> r&eacute;f&eacute;rence un <code>fichier</code> et un <code>code_ticket</code></li>
+<li>Un ticket <code>portage_data</code> r&eacute;f&eacute;rence un <code>portage</code> et un <code>code_ticket</code></li>
 </ul>
 
 <p>Ces liens permettent de <strong>naviguer</strong> d'une information &agrave; l'autre. Par exemple, &agrave; partir d'un num&eacute;ro de t&eacute;l&eacute;phone, on peut retrouver son portage, puis son dossier, puis les fichiers &eacute;chang&eacute;s, puis les accus&eacute;s de r&eacute;ception.</p>
@@ -63,7 +63,7 @@
 <p><strong>SQL</strong> (Structured Query Language) est le langage utilis&eacute; pour interroger une base de donn&eacute;es. C'est comme poser des questions au classeur :</p>
 <ul>
 <li>&laquo; Montre-moi tous les op&eacute;rateurs &raquo; &rarr; <code>SELECT * FROM porta_operateur</code></li>
-<li>&laquo; Combien de portages sont en cours ? &raquo; &rarr; <code>SELECT COUNT(*) FROM porta_portage WHERE etat_id_actuel = 2</code></li>
+<li>&laquo; Combien de portages sont en cours ? &raquo; &rarr; <code>SELECT COUNT(*) FROM porta_portage WHERE portage_etat = 'enCours'</code></li>
 </ul>
 
 <p>Dans les articles suivants, vous apprendrez pas &agrave; pas les commandes SQL pour interroger ces tables et mener des enqu&ecirc;tes sur les anomalies PNM.</p>

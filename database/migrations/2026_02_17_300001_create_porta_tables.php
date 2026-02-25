@@ -13,57 +13,55 @@ return new class extends Migration
         // ──────────────────────────────────────────────
 
         Schema::create('porta_operateur', function (Blueprint $table) {
-            $table->string('code', 10)->primary();
-            $table->string('nom', 100);
+            $table->integer('code')->primary();
             $table->boolean('is_active')->default(true);
-            $table->string('contact', 100)->nullable();
-            $table->string('email', 100)->nullable();
+            $table->boolean('is_actor')->default(true);
+            $table->string('nom', 32);
+            $table->string('contact', 150)->nullable();
+            $table->string('email', 150)->nullable();
+            $table->string('fax', 10)->nullable();
+            $table->string('directory', 255)->nullable();
+            $table->text('comment')->nullable();
         });
 
         Schema::create('porta_code_ticket', function (Blueprint $table) {
-            $table->string('code', 10)->primary();
-            $table->string('name', 50);
-            $table->string('label', 200);
-            $table->text('description')->nullable();
+            $table->integer('code')->primary();
+            $table->string('description', 255);
         });
 
         Schema::create('porta_code_reponse', function (Blueprint $table) {
-            $table->string('code', 10)->primary();
-            $table->string('type', 30); // erreur, annulation, eligibilite
-            $table->string('label', 200);
+            $table->integer('code')->primary();
+            $table->string('procedure', 255);
+            $table->string('description', 255);
         });
 
         Schema::create('porta_etat', function (Blueprint $table) {
-            $table->id();
-            $table->string('type', 30);       // normal, inverse, restitution
-            $table->string('direction', 30);   // entrante, sortante, etrangere
-            $table->string('classe', 30);      // saisi, encours, bascule, cloture, refuse, annule
-            $table->string('label', 100);
-            $table->boolean('is_begin')->default(false);
-            $table->boolean('is_end')->default(false);
+            $table->integer('id')->primary();
+            $table->string('etat_name', 45);
+            $table->string('etat_code', 45)->nullable();
         });
 
         Schema::create('porta_transition', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('etat_id_from')->constrained('porta_etat');
-            $table->foreignId('etat_id_to')->constrained('porta_etat');
-            $table->string('evenement', 100);
-            $table->string('ticket_id_evenement', 10)->nullable();
-
-            $table->foreign('ticket_id_evenement')->references('code')->on('porta_code_ticket');
+            $table->integer('code');
+            $table->string('etat_initial', 45);
+            $table->string('etat_final', 45);
+            $table->string('description', 255);
         });
 
         Schema::create('porta_tranche', function (Blueprint $table) {
             $table->id();
-            $table->string('operateur_id', 10);
-            $table->string('debut', 15);
-            $table->string('fin', 15);
+            $table->boolean('is_active')->default(true);
+            $table->integer('operateur_id');
+            $table->string('debut', 10);
+            $table->string('fin', 10);
 
             $table->foreign('operateur_id')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_ferryday', function (Blueprint $table) {
             $table->date('ferryday')->primary();
+            $table->timestamp('creation')->useCurrent();
             $table->boolean('is_active')->default(true);
         });
 
@@ -73,73 +71,97 @@ return new class extends Migration
 
         Schema::create('porta_dossier', function (Blueprint $table) {
             $table->id();
-            $table->string('id_portage_multiple', 50)->nullable();
-            $table->foreignId('etat_id_actuel')->nullable()->constrained('porta_etat');
-            $table->string('operateur_id_origine', 10);
-            $table->string('operateur_id_destination', 10);
-            $table->timestamps();
+            $table->string('portage_msisdn', 45)->nullable();
+            $table->string('portage_rio', 45)->nullable();
+            $table->string('portage_nom', 45)->nullable();
+            $table->string('portage_prenom', 45)->nullable();
+            $table->string('portage_type_demande', 45)->nullable();
+            $table->dateTime('portage_date_souhaitee')->nullable();
+            $table->integer('portage_etat')->nullable();
+            $table->dateTime('portage_date_creation')->nullable();
+            $table->integer('opr_e_actuel')->nullable();
+            $table->integer('opr_e_d_attribution')->nullable();
+            $table->integer('operateur_id_donneur');
+            $table->integer('operateur_id_receveur');
+            $table->text('remarque')->nullable();
 
-            $table->foreign('operateur_id_origine')->references('code')->on('porta_operateur');
-            $table->foreign('operateur_id_destination')->references('code')->on('porta_operateur');
+            $table->foreign('portage_etat')->references('id')->on('porta_etat');
+            $table->foreign('operateur_id_donneur')->references('code')->on('porta_operateur');
+            $table->foreign('operateur_id_receveur')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_portage', function (Blueprint $table) {
             $table->id();
-            $table->string('id_portage', 32)->unique(); // MD5
-            $table->string('msisdn', 15);
-            $table->foreignId('dossier_id')->constrained('porta_dossier');
-            $table->date('date_portage');
-            $table->foreignId('etat_id_actuel')->nullable()->constrained('porta_etat');
-            $table->timestamps();
+            $table->string('portage_msisdn', 45);
+            $table->string('portage_rio', 45)->nullable();
+            $table->string('portage_nom', 45)->nullable();
+            $table->string('portage_prenom', 45)->nullable();
+            $table->string('portage_type_demande', 45)->nullable();
+            $table->dateTime('portage_date_souhaitee');
+            $table->integer('portage_etat')->nullable();
+            $table->dateTime('portage_date_creation');
+            $table->integer('opr_e_actuel');
+            $table->integer('opr_e_d_attribution')->nullable();
+            $table->foreignId('dossier_id')->nullable()->constrained('porta_dossier');
+
+            $table->foreign('portage_etat')->references('id')->on('porta_etat');
+            $table->foreign('opr_e_actuel')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_msisdn', function (Blueprint $table) {
-            $table->string('msisdn', 15)->primary();
+            $table->string('msisdn', 10)->primary();
             $table->foreignId('tranche_id')->nullable()->constrained('porta_tranche');
             $table->foreignId('portage_id_actuel')->nullable()->constrained('porta_portage');
-            $table->string('operateur_id_actuel', 10);
+            $table->integer('operateur_id_actuel');
 
             $table->foreign('operateur_id_actuel')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_msisdn_historique', function (Blueprint $table) {
             $table->id();
-            $table->string('msisdn', 15);
-            $table->string('operateur_id', 10);
-            $table->date('date_debut');
-            $table->date('date_fin')->nullable();
-            $table->foreignId('portage_id')->nullable()->constrained('porta_portage');
+            $table->string('msisdn', 10);
+            $table->dateTime('date');
 
             $table->foreign('msisdn')->references('msisdn')->on('porta_msisdn');
-            $table->foreign('operateur_id')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_portage_historique', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('portage_id')->constrained('porta_portage');
-            $table->foreignId('transition_id')->nullable()->constrained('porta_transition');
-            $table->foreignId('etat_id_from')->nullable()->constrained('porta_etat');
-            $table->timestamp('date_debut');
-            $table->timestamp('date_fin')->nullable();
+            $table->foreignId('id_portage')->constrained('porta_portage');
+            $table->string('etat', 45);
+            $table->dateTime('date');
+            $table->string('commentaire', 255)->nullable();
         });
 
         Schema::create('porta_portage_data', function (Blueprint $table) {
-            $table->foreignId('portage_id')->primary()->constrained('porta_portage');
-            $table->string('temporary_msisdn', 15)->nullable();
-            $table->timestamp('creation_date');
-            $table->timestamp('change_date')->nullable();
+            $table->id();
+            $table->foreignId('id_portage')->constrained('porta_portage');
+            $table->integer('code_ticket');
+            $table->integer('code_reponse')->nullable();
+            $table->dateTime('date');
+            $table->dateTime('date_traitement')->nullable();
+            $table->text('commentaire')->nullable();
+            $table->string('etat', 45)->nullable();
+            $table->integer('operateur_emetteur')->nullable();
+            $table->integer('operateur_recepteur')->nullable();
+            $table->integer('transition_id')->nullable();
+            $table->text('remarque')->nullable();
+
+            $table->foreign('code_ticket')->references('code')->on('porta_code_ticket');
+            $table->foreign('code_reponse')->references('code')->on('porta_code_reponse');
         });
 
         Schema::create('porta_fichier', function (Blueprint $table) {
             $table->id();
-            $table->string('filename', 200);
-            $table->string('expediteur', 10);
-            $table->string('destinataire', 10);
-            $table->string('direction', 20); // entrant, sortant
-            $table->string('type', 10);      // data, sync
-            $table->date('date');
-            $table->integer('sequence')->default(1);
-            $table->timestamp('created_at')->useCurrent();
+            $table->string('nom', 255);
+            $table->string('type', 45);
+            $table->dateTime('date_creation');
+            $table->dateTime('date_import')->nullable();
+            $table->integer('taille')->nullable();
+            $table->string('checksum', 255)->nullable();
+            $table->string('repertoire', 255)->nullable();
+            $table->integer('expediteur');
+            $table->integer('destinataire');
 
             $table->foreign('expediteur')->references('code')->on('porta_operateur');
             $table->foreign('destinataire')->references('code')->on('porta_operateur');
@@ -147,44 +169,42 @@ return new class extends Migration
 
         Schema::create('porta_data', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fichier_id')->constrained('porta_fichier');
-            $table->string('code_ticket', 10);
-            $table->string('msisdn', 15);
-            $table->string('rio', 12)->nullable();
-            $table->string('id_portage', 32)->nullable();
-            $table->string('code_motif', 10)->nullable();
-            $table->timestamp('created_at')->useCurrent();
-
-            $table->foreign('code_ticket')->references('code')->on('porta_code_ticket');
-            $table->foreign('code_motif')->references('code')->on('porta_code_reponse');
+            $table->string('msisdn', 10);
+            $table->string('rio', 20)->nullable();
+            $table->string('nom', 255)->nullable();
+            $table->string('prenom', 255)->nullable();
+            $table->dateTime('date_demande')->nullable();
+            $table->dateTime('date_demande_portage')->nullable();
+            $table->dateTime('date_bascule_portage')->nullable();
+            $table->dateTime('date_verification')->nullable();
+            $table->integer('id_portage_fini')->nullable();
         });
 
         Schema::create('porta_ack', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fichier_id')->constrained('porta_fichier');
-            $table->string('code_erreur', 10)->nullable();
-            $table->text('commentaire')->nullable();
-            $table->timestamp('created_at')->useCurrent();
-
-            $table->foreign('code_erreur')->references('code')->on('porta_code_reponse');
+            $table->dateTime('date');
+            $table->string('type', 45)->nullable();
+            $table->string('file_name', 255);
+            $table->text('content')->nullable();
         });
 
         Schema::create('porta_sync', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fichier_id')->constrained('porta_fichier');
-            $table->string('operateur_receveur', 10);
-            $table->string('msisdn', 15);
-            $table->date('date_portage');
+            $table->string('msisdn', 45);
+            $table->dateTime('date');
+            $table->integer('operateur_id');
+            $table->integer('sync_status')->nullable();
+            $table->dateTime('date_portage')->nullable();
 
-            $table->foreign('operateur_receveur')->references('code')->on('porta_operateur');
+            $table->foreign('operateur_id')->references('code')->on('porta_operateur');
         });
 
         Schema::create('porta_sync_status', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sync_id')->constrained('porta_sync');
-            $table->boolean('is_conflict')->default(false);
-            $table->text('commentaire')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->string('statut_name', 45);
+            $table->string('statut_code', 45)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->string('commentaire', 255)->nullable();
         });
     }
 
