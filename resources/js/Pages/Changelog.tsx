@@ -44,6 +44,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: '3 nouvelles vérifications serveur PORTA : bascule/valorisation (EmaExtracter + EmmExtracter), génération PNMDATA, acquittements' },
       { type: 'new', description: 'Page Guide des Opérations : architecture, vérifications quotidiennes, infrastructure (serveurs + scripts), mails, contacts GPMAG et modèles de mails' },
       { type: 'new', description: 'Schémas d\'architecture interactifs : diagramme Porta Digicel (flux fichiers/SOAP) et paysage production complet (opérateurs → MOBI) avec légendes couleur' },
+      { type: 'new', description: 'Export PDF du Guide des Opérations : 4 pages avec diagrammes, flux, horaires, serveurs, liens et contacts' },
       { type: 'new', description: 'Bouton "Essayer" interactif dans les articles SQL avec exécution directe des requêtes' },
       { type: 'improvement', description: 'Différenciation claire EmaExtracter.log (bascule) et EmmExtracter.log (valorisation) avec 14 items de checklist séparés' },
       { type: 'improvement', description: 'Horaires des vacations ajustés selon les heures réelles de réception des mails (11h35, 15h35, 20h35)' },
