@@ -46,6 +46,7 @@
         "@mui/x-data-grid": "^8.27.1",
         "@mui/x-date-pickers": "^8.27.0",
         "@mui/x-tree-view": "^8.27.1",
+        "@react-pdf/renderer": "^4.3.2",
         "autosuggest-highlight": "^3.3.4",
         "dayjs": "^1.11.19",
         "es-toolkit": "^1.44.0",

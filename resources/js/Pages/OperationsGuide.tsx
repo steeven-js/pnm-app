@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
@@ -933,17 +934,40 @@ const TABS = [
 
 export default function OperationsGuide() {
   const [tab, setTab] = useState('overview');
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setPdfLoading(true);
+    try {
+      const { generateOperationsGuidePdf } = await import('./OperationsGuidePdf');
+      await generateOperationsGuidePdf();
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout>
       <Head title="Guide des Opérations" />
 
       <Box sx={{ p: { xs: 3, md: 5 } }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4">Guide des Opérations PNM</Typography>
-          <Typography sx={{ mt: 1, color: 'text.secondary' }}>
-            Documentation complète : architecture, vérifications quotidiennes, infrastructure, contacts
-          </Typography>
+        <Box sx={{ mb: 4, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="h4">Guide des Opérations PNM</Typography>
+            <Typography sx={{ mt: 1, color: 'text.secondary' }}>
+              Documentation complète : architecture, vérifications quotidiennes, infrastructure, contacts
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<Iconify icon="solar:file-download-bold-duotone" width={20} />}
+            onClick={handleDownloadPdf}
+            disabled={pdfLoading}
+            sx={{ flexShrink: 0 }}
+          >
+            {pdfLoading ? 'Génération...' : 'Télécharger PDF'}
+          </Button>
         </Box>
 
         <Tabs
