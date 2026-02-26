@@ -98,6 +98,7 @@ export function getHolidaysBetween(start: Date, end: Date): string[] {
 // ─── Opérateurs PNM ─────────────────────────────────────────────────────────
 
 export const OPERATOR_MAP: Record<string, string> = {
+    '00': 'Tous (Opérateurs)',
     '01': 'Orange Caraïbe',
     '02': 'Digicel',
     '03': 'SFR / Only (Outremer)',
@@ -258,16 +259,29 @@ export function decodeFilename(filename: string): FilenameResult {
 
 export const TICKET_TYPE_MAP: Record<string, { label: string; abbrev: string; direction: string }> = {
     '0000': { label: 'Ticket générique', abbrev: 'GEN', direction: '—' },
-    '1110': { label: 'Demande de portage', abbrev: 'DP', direction: 'OPR → OPD' },
-    '1120': { label: 'Confirmation de demande', abbrev: 'CD', direction: 'OPR → OPD' },
-    '1210': { label: 'Réponse positive', abbrev: 'RP+', direction: 'OPD → OPR' },
-    '1220': { label: 'Réponse négative', abbrev: 'RP−', direction: 'OPD → OPR' },
-    '1410': { label: 'Notification tiers', abbrev: 'NT', direction: 'OPR → OPX' },
+    // Portage simple
+    '1110': { label: 'Demande de portage (particulier)', abbrev: 'DP', direction: 'OPR → OPD' },
+    '1120': { label: 'Demande de portage (personne morale)', abbrev: 'DE', direction: 'OPR → OPD' },
+    '1210': { label: 'Réponse — acceptation', abbrev: 'RP+', direction: 'OPD → OPR' },
+    '1220': { label: 'Réponse — refus', abbrev: 'RP−', direction: 'OPD → OPR' },
+    '1410': { label: 'Envoi des données de portage', abbrev: 'EP', direction: 'OPR → OPX' },
     '1430': { label: 'Confirmation de portage', abbrev: 'CP', direction: 'OPX → OPR' },
-    '1510': { label: "Demande d'éligibilité", abbrev: 'DE', direction: 'OPR → OPD' },
-    '1530': { label: "Réponse d'éligibilité", abbrev: 'RE', direction: 'OPD → OPR' },
-    '3430': { label: 'Synchronisation portage', abbrev: 'SYNC', direction: 'EBP → OP' },
-    '7000': { label: 'Ticket technique', abbrev: 'TECH', direction: '—' },
+    // Annulation
+    '1510': { label: 'Annulation OPR avant information opérateurs', abbrev: 'AP', direction: 'OPR → OPD' },
+    '1520': { label: 'Annulation OPD d\'un numéro', abbrev: 'AN', direction: 'OPD → OPR' },
+    '1530': { label: 'Confirmation d\'annulation', abbrev: 'CA', direction: 'OPD → OPR' },
+    // Portage inverse
+    '2400': { label: 'Bon accord portage inverse', abbrev: 'BI', direction: 'OPD → OPR' },
+    '2410': { label: 'Envoi des données de portage inverse', abbrev: 'PI', direction: 'OPR → OPX' },
+    '2420': { label: 'Confirmation prise en compte portage inverse', abbrev: 'DI', direction: 'OPX → OPR' },
+    '2430': { label: 'Confirmation portage inverse', abbrev: 'CI', direction: 'OPX → OPR' },
+    // Restitution
+    '3400': { label: 'Bon accord pour restitution', abbrev: 'BR', direction: 'OPD → OPR' },
+    '3410': { label: 'Envoi des données de restitution', abbrev: 'RN', direction: 'OPR → OPX' },
+    '3420': { label: 'Prise en compte des données de restitution', abbrev: 'RS', direction: 'OPX → OPR' },
+    '3430': { label: 'Confirmation mise à jour opérateurs', abbrev: 'CS', direction: 'OPX → OPR' },
+    // Erreurs
+    '7000': { label: 'Erreurs et dysfonctionnements', abbrev: 'ER', direction: '—' },
 };
 
 export const RESPONSE_CODE_MAP: Record<string, string> = {
@@ -439,9 +453,11 @@ function parseTicketSpecific(code: string, fields: string[]): TicketSpecificFiel
             if (extra[6]) result['Code postal'] = extra[6];
             if (extra[7]) result['Date souscription'] = formatPnmTimestamp(extra[7]);
             break;
-        case '1120': // CD
+        case '1120': // DE — demande portage personne morale
             if (extra[0]) result['Séquence'] = extra[0];
-            if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
+            if (extra[1]) result['RIO'] = extra[1];
+            if (extra[2]) result['Date envoi'] = formatPnmTimestamp(extra[2]);
+            if (extra[3]) result['Date portage'] = formatPnmTimestamp(extra[3]);
             break;
         case '1210': // RP+
             if (extra[0]) result['Séquence'] = extra[0];
@@ -456,12 +472,61 @@ function parseTicketSpecific(code: string, fields: string[]): TicketSpecificFiel
             if (extra[2]) result['Date refus'] = formatPnmTimestamp(extra[2]);
             if (extra[4]) result['Motif refus'] = extra[4];
             break;
+        case '1410': // EP — envoi données de portage
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date envoi'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date portage'] = formatPnmTimestamp(extra[2]);
+            break;
         case '1430': // CP
             if (extra[0]) result['Séquence'] = extra[0];
             if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
             if (extra[2]) result['Date effectif'] = formatPnmTimestamp(extra[2]);
             break;
-        case '3430': // SYNC
+        case '1510': // AP — annulation OPR
+        case '1520': // AN — annulation OPD
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date annulation'] = formatPnmTimestamp(extra[1]);
+            break;
+        case '1530': // CA — confirmation annulation
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
+            break;
+        case '2400': // BI — bon accord portage inverse
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date accord'] = formatPnmTimestamp(extra[1]);
+            break;
+        case '2410': // PI — envoi données portage inverse
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date envoi'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date portage'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '2420': // DI — confirmation prise en compte portage inverse
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date prise en compte'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date portage'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '2430': // CI — confirmation portage inverse
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date confirmation'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date effectif'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '3400': // BR — bon accord restitution
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date restitution'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date cible'] = formatPnmTimestamp(extra[2]);
+            if (extra[3]) result['Hash portage'] = extra[3];
+            break;
+        case '3410': // RN — envoi données restitution
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date envoi'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date restitution'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '3420': // RS — prise en compte restitution
+            if (extra[0]) result['Séquence'] = extra[0];
+            if (extra[1]) result['Date prise en compte'] = formatPnmTimestamp(extra[1]);
+            if (extra[2]) result['Date effectif'] = formatPnmTimestamp(extra[2]);
+            break;
+        case '3430': // CS — confirmation mise à jour opérateurs
             if (extra[0]) result['Séquence'] = extra[0];
             if (extra[1]) result['Date sync'] = formatPnmTimestamp(extra[1]);
             if (extra[2]) result['Date cible'] = formatPnmTimestamp(extra[2]);
@@ -530,12 +595,14 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
     }
 
     // Validate footer count
+    // The footer declares total lines (tickets + header + footer = tickets + 2)
     if (footer) {
         const actualCount = tickets.length;
-        if (footer.declaredCount !== actualCount) {
+        const expectedTickets = footer.declaredCount - 2; // subtract header + footer
+        if (expectedTickets !== actualCount) {
             issues.push({
                 severity: 'error',
-                message: `Compteur pied de page (${footer.declaredCount}) ≠ nombre réel de tickets (${actualCount}).`,
+                message: `Compteur pied de page (${footer.declaredCount} lignes = ${expectedTickets} tickets attendus) ≠ nombre réel de tickets (${actualCount}).`,
             });
         }
     }
