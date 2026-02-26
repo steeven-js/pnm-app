@@ -56,6 +56,21 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         description: "Collez le contenu de l'email [PNM] Ticket(s) 1210 en attente et/ou Ticket(s) en attente pour remplir la checklist.",
         placeholder: `Collez le contenu du/des mail(s) ici...\n\nIl y a 1 ticket(s) 1210 en attente.\nVeuillez trouver ci-joint les portages en attente de reponse.\n\n---\n\nIl y a 23 ticket(s) en attente.\nVeuillez trouver ci-joint les portages en attente de tickets.`,
     },
+    verif_bascule_valorisation: {
+        title: 'Auto-remplir depuis les logs serveur',
+        description: 'Collez le contenu de EmaExtracter.log et/ou EmmExtracter.log (tail -n 12) pour vérifier la bascule et la valorisation.',
+        placeholder: `Collez le résultat de tail ici...\n\nEmaExtracter.php|2026-01-05T09:00:02| Initialisation\nEmaExtracter.php|2026-01-05T09:00:02| ..Verification operateur Orange Caraibe : Check success\n...\nEmaExtracter.php|2026-01-05T09:02:02| ..........423 bascules ajoutes.\nEmaExtracter.php|2026-01-05T09:02:02| Fin de Traitement`,
+    },
+    verif_generation_pnmdata: {
+        title: 'Auto-remplir depuis PnmDataManager.log',
+        description: 'Collez le contenu de PnmDataManager.log (tail -n 14) pour vérifier la génération des fichiers PNMDATA de vacation.',
+        placeholder: `Collez le résultat de tail ici...\n\nPnmDataManager.php|...| Traitement operateur 01\nPnmDataManager.php|...| ..........Generation du fichier PNMDATA.02.01... (#tickets: 360)\n...\nPnmDataManager.php|...| Fin de Traitement`,
+    },
+    verif_acquittements: {
+        title: 'Auto-remplir depuis PnmAckManager.log',
+        description: 'Collez le contenu de PnmSyncAckManager.log (tail -f PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
+        placeholder: `Collez le résultat de tail ici...\n\nPnmSyncAckManager.php|...| Traitement operateur 03\nPnmSyncAckManager.php|...| *** Aucune notification d'AR SYNC non-recu ***\n...\nPnmSyncAckManager.php|...| Fin de Traitement`,
+    },
     prevision_portabilites: {
         title: 'Auto-remplir depuis le reporting portabilités',
         description: "Collez le contenu de l'email [PNM] Reporting - Portabilités DIGICEL-WIZZEE pour remplir la checklist.",

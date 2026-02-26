@@ -19,6 +19,26 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         ],
     },
     {
+        key: 'verif_bascule_valorisation',
+        label: 'Vérif bascule & valorisation PORTA',
+        description:
+            'Vérification serveur vmqproportasync01 : traitement bascule (EmaExtracter.log) et valorisation (EmmExtracter.log). Tous les opérateurs doivent être "Check success".',
+        scheduledTime: '09:00',
+        icon: 'solar:server-bold-duotone',
+        category: 'supervision',
+        checklist: [
+            'EmaExtracter : Opérateur Orange Caraïbe Check success',
+            'EmaExtracter : Opérateur Digicel AFG Check success',
+            'EmaExtracter : Opérateur Outremer Telecom / SFR Check success',
+            'EmaExtracter : Opérateur Dauphin Telecom Check success',
+            'EmaExtracter : Opérateur UTS Caraibe Check success',
+            'EmaExtracter : Opérateur Free Caraibes Check success',
+            'EmaExtracter : Bascules ajoutées (nombre)',
+            'EmmExtracter : Tous opérateurs Check success',
+            'EmmExtracter : Valorisation terminée',
+        ],
+    },
+    {
         key: 'vacation_1',
         label: '1ère vacation (6 opérateurs)',
         description:
@@ -83,6 +103,40 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'Ouvrir fichier Pnm_PSO_MOBI CSV',
             'Volumétrie cohérente avec prévisions veille',
             "Pas d'écart > 20% avec la prévision",
+        ],
+    },
+    {
+        key: 'verif_generation_pnmdata',
+        label: 'Vérif génération fichiers vacation',
+        description:
+            'Vérification serveur vmqproportasync01 : génération des fichiers PNMDATA de vacation (PnmDataManager.log). Vérifier que les fichiers ont été générés pour les 5 opérateurs avec le nombre de tickets.',
+        scheduledTime: '10:15',
+        icon: 'solar:file-check-bold-duotone',
+        category: 'supervision',
+        checklist: [
+            'PnmDataManager : Fichier PNMDATA op. 01 généré',
+            'PnmDataManager : Fichier PNMDATA op. 03 généré',
+            'PnmDataManager : Fichier PNMDATA op. 04 généré',
+            'PnmDataManager : Fichier PNMDATA op. 05 généré',
+            'PnmDataManager : Fichier PNMDATA op. 06 généré',
+            'PnmDataManager : Traitement terminé sans erreur',
+        ],
+    },
+    {
+        key: 'verif_acquittements',
+        label: 'Vérif acquittements & portages en cours',
+        description:
+            'Vérification serveur vmqproportasync01 : acquittements fichiers PNMDATA (PnmAckManager.log). Vérifier absence d\'AR SYNC non-reçu. Contrôler les portages entrants "En cours" via PortaWs.',
+        scheduledTime: '11:15',
+        icon: 'solar:shield-check-bold-duotone',
+        category: 'supervision',
+        checklist: [
+            'PnmAckManager : Op. 03 — Aucun AR SYNC non-reçu',
+            'PnmAckManager : Op. 04 — Aucun AR SYNC non-reçu',
+            'PnmAckManager : Op. 05 — Aucun AR SYNC non-reçu',
+            'PnmAckManager : Op. 06 — Aucun AR SYNC non-reçu',
+            'Portages entrants "En cours" vérifiés sur PortaWs',
+            'Si portage en attente > 24h : relancer opérateur donneur',
         ],
     },
     {

@@ -25,12 +25,15 @@ type ParserFn = (eventKey: string, checklist: string[], content: string) => Auto
 
 const PARSERS: Record<string, ParserFn> = {
     cto_rattrapage: autoFillCto,
+    verif_bascule_valorisation: autoFillVerifBascule,
     vacation_1: autoFillVacation,
     vacation_2: autoFillVacation,
     vacation_3: autoFillVacation,
     incidents: autoFillIncidents,
     rio_reporting: autoFillRio,
     pso_jour: autoFillPso,
+    verif_generation_pnmdata: autoFillVerifGeneration,
+    verif_acquittements: autoFillVerifAcquittements,
     tickets_attente: autoFillTickets,
     automates_report: (_ek, cl, c) => autoFillAutomates(cl, c),
     prevision_portabilites: autoFillPrevisions,
@@ -514,6 +517,165 @@ function autoFillPrevisions(
         lines.push(`  WIZZEE   IN: ${wizzeeIn ?? '?'}  OUT: ${wizzeeOut ?? '?'}`);
     }
     lines.push(`  Total    IN: ${totalIn}  OUT: ${totalOut}`);
+
+    return { checkedItems, notes: lines.join('\n') };
+}
+
+// ===================================================================
+// 9.  Vérif bascule & valorisation (EmaExtracter.log + EmmExtracter.log)
+// ===================================================================
+
+function autoFillVerifBascule(
+    _eventKey: string,
+    checklist: string[],
+    content: string,
+): AutoFillResult | null {
+    const hasEma = /EmaExtracter/i.test(content);
+    const hasEmm = /EmmExtracter/i.test(content);
+
+    if (!hasEma && !hasEmm) return null;
+
+    // EmaExtracter operator checks
+    const emaOperators: Record<string, string> = {
+        'Orange Caraibe': 'EmaExtracter : Opérateur Orange Caraïbe Check success',
+        'Digicel AFG': 'EmaExtracter : Opérateur Digicel AFG Check success',
+        'Outremer Telecom': 'EmaExtracter : Opérateur Outremer Telecom / SFR Check success',
+        'Dauphin Telecom': 'EmaExtracter : Opérateur Dauphin Telecom Check success',
+        'UTS Caraibe': 'EmaExtracter : Opérateur UTS Caraibe Check success',
+        'Free Caraibes': 'EmaExtracter : Opérateur Free Caraibes Check success',
+    };
+
+    // Extract bascule count from EmaExtracter
+    const basculeMatch = content.match(/EmaExtracter.*?(\d+)\s*bascules?\s*ajoute/i);
+    const basculeCount = basculeMatch ? parseInt(basculeMatch[1], 10) : null;
+
+    // EmmExtracter checks
+    const emmAllSuccess = hasEmm && Object.keys(emaOperators).every((op) => {
+        const pattern = new RegExp(`EmmExtracter.*${op}.*Check success`, 'i');
+        return pattern.test(content);
+    });
+    const emmFinished = /EmmExtracter.*Fin de Traitement/i.test(content);
+    const valorisationMatch = content.match(/EmmExtracter.*?(\d+)\s*bascules?\s*ajoute/i);
+    const valorisationCount = valorisationMatch ? parseInt(valorisationMatch[1], 10) : null;
+
+    const rules: Record<string, () => boolean> = {};
+
+    for (const [opKey, checklistItem] of Object.entries(emaOperators)) {
+        const pattern = new RegExp(`EmaExtracter.*${opKey}.*Check success`, 'i');
+        rules[checklistItem] = () => pattern.test(content);
+    }
+
+    rules['EmaExtracter : Bascules ajoutées (nombre)'] = () => basculeCount !== null && basculeCount > 0;
+    rules['EmmExtracter : Tous opérateurs Check success'] = () => emmAllSuccess;
+    rules['EmmExtracter : Valorisation terminée'] = () => emmFinished;
+
+    const checkedItems = checklist.filter((item) => rules[item]?.());
+
+    const lines = ['[Auto] Vérification bascule & valorisation'];
+    if (hasEma) {
+        lines.push('\nEmaExtracter (bascule):');
+        for (const opKey of Object.keys(emaOperators)) {
+            const pattern = new RegExp(`EmaExtracter.*${opKey}.*Check success`, 'i');
+            const status = pattern.test(content) ? 'OK' : 'ECHEC';
+            lines.push(`  ${opKey}: ${status}`);
+        }
+        if (basculeCount !== null) lines.push(`  Bascules ajoutées: ${basculeCount}`);
+    }
+    if (hasEmm) {
+        lines.push('\nEmmExtracter (valorisation):');
+        lines.push(`  Tous opérateurs OK: ${emmAllSuccess ? 'OUI' : 'NON'}`);
+        if (valorisationCount !== null) lines.push(`  Enregistrements: ${valorisationCount}`);
+        lines.push(`  Traitement terminé: ${emmFinished ? 'OUI' : 'NON'}`);
+    }
+
+    return { checkedItems, notes: lines.join('\n') };
+}
+
+// ===================================================================
+// 10. Vérif génération fichiers vacation (PnmDataManager.log)
+// ===================================================================
+
+function autoFillVerifGeneration(
+    _eventKey: string,
+    checklist: string[],
+    content: string,
+): AutoFillResult | null {
+    if (!/PnmDataManager/i.test(content) && !/Generation du fichier PNMDATA/i.test(content)) return null;
+
+    const opCodes = ['01', '03', '04', '05', '06'];
+    const generated: Record<string, { file: string; tickets: number } | null> = {};
+
+    for (const code of opCodes) {
+        const pattern = new RegExp(
+            `Traitement operateur ${code}[\\s\\S]*?Generation du fichier (PNMDATA\\.\\S+).*?#tickets:\\s*(\\d+)`,
+            'i',
+        );
+        const match = content.match(pattern);
+        generated[code] = match ? { file: match[1], tickets: parseInt(match[2], 10) } : null;
+    }
+
+    const finTraitement = /Fin de Traitement/i.test(content);
+
+    const rules: Record<string, () => boolean> = {
+        'PnmDataManager : Fichier PNMDATA op. 01 généré': () => !!generated['01'],
+        'PnmDataManager : Fichier PNMDATA op. 03 généré': () => !!generated['03'],
+        'PnmDataManager : Fichier PNMDATA op. 04 généré': () => !!generated['04'],
+        'PnmDataManager : Fichier PNMDATA op. 05 généré': () => !!generated['05'],
+        'PnmDataManager : Fichier PNMDATA op. 06 généré': () => !!generated['06'],
+        'PnmDataManager : Traitement terminé sans erreur': () => finTraitement,
+    };
+
+    const checkedItems = checklist.filter((item) => rules[item]?.());
+
+    const lines = ['[Auto] Génération fichiers vacation PNMDATA'];
+    for (const code of opCodes) {
+        const g = generated[code];
+        if (g) {
+            lines.push(`  Op. ${code}: ${g.file} (${g.tickets} tickets)`);
+        } else {
+            lines.push(`  Op. ${code}: non généré`);
+        }
+    }
+    lines.push(`Traitement terminé: ${finTraitement ? 'OUI' : 'NON'}`);
+
+    return { checkedItems, notes: lines.join('\n') };
+}
+
+// ===================================================================
+// 11. Vérif acquittements (PnmSyncAckManager.log)
+// ===================================================================
+
+function autoFillVerifAcquittements(
+    _eventKey: string,
+    checklist: string[],
+    content: string,
+): AutoFillResult | null {
+    if (!/PnmSyncAckManager|PnmAckManager|Aucune notification/i.test(content)) return null;
+
+    const opChecks: Record<string, boolean> = {};
+    for (const code of ['03', '04', '05', '06']) {
+        const pattern = new RegExp(
+            `Traitement operateur ${code}[\\s\\S]*?Aucune notification d['']AR SYNC non-recu`,
+            'i',
+        );
+        opChecks[code] = pattern.test(content);
+    }
+
+    const rules: Record<string, () => boolean> = {
+        'PnmAckManager : Op. 03 — Aucun AR SYNC non-reçu': () => opChecks['03'],
+        'PnmAckManager : Op. 04 — Aucun AR SYNC non-reçu': () => opChecks['04'],
+        'PnmAckManager : Op. 05 — Aucun AR SYNC non-reçu': () => opChecks['05'],
+        'PnmAckManager : Op. 06 — Aucun AR SYNC non-reçu': () => opChecks['06'],
+    };
+
+    const checkedItems = checklist.filter((item) => rules[item]?.());
+
+    const opNames: Record<string, string> = { '03': 'SFR Caraïbe', '04': 'Dauphin Télécom', '05': 'UTS', '06': 'FREEC' };
+    const lines = ['[Auto] Vérification acquittements PNMDATA'];
+    for (const code of ['03', '04', '05', '06']) {
+        const status = opChecks[code] ? 'OK (aucun AR non-reçu)' : '⚠ AR SYNC non-reçu détecté';
+        lines.push(`  Op. ${code} (${opNames[code]}): ${status}`);
+    }
 
     return { checkedItems, notes: lines.join('\n') };
 }
