@@ -58,8 +58,8 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
     },
     verif_bascule_valorisation: {
         title: 'Auto-remplir depuis les logs serveur',
-        description: 'Collez le contenu de EmaExtracter.log et/ou EmmExtracter.log (tail -n 12) pour vérifier la bascule et la valorisation.',
-        placeholder: `Collez le résultat de tail ici...\n\nEmaExtracter.php|2026-01-05T09:00:02| Initialisation\nEmaExtracter.php|2026-01-05T09:00:02| ..Verification operateur Orange Caraibe : Check success\n...\nEmaExtracter.php|2026-01-05T09:02:02| ..........423 bascules ajoutes.\nEmaExtracter.php|2026-01-05T09:02:02| Fin de Traitement`,
+        description: 'Collez le résultat des deux commandes : tail -n 12 EmaExtracter.log puis tail -n 12 EmmExtracter.log (les deux l\'un après l\'autre).',
+        placeholder: `--- tail -n 12 EmaExtracter.log ---\nEmaExtracter.php|2026-02-26T09:00:01-04:00| Initialisation\nEmaExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\nEmaExtracter.php|..| ..Verification operateur Digicel AFG : Check success\n...\nEmaExtracter.php|..| ..........194 bascules ajoutés.\nEmaExtracter.php|..| Fin de Traitement 63.46secondes.\n\n--- tail -n 12 EmmExtracter.log ---\nEmmExtracter.php|2026-02-26T09:01:01-04:00| Initialisation\nEmmExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\n...\nEmmExtracter.php|..| ..........353361 bascules ajoutés.\nEmmExtracter.php|..| Fin de Traitement 13.54secondes.`,
     },
     verif_generation_pnmdata: {
         title: 'Auto-remplir depuis PnmDataManager.log',

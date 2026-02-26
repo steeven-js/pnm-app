@@ -525,6 +525,48 @@ function autoFillPrevisions(
 // 9.  Vérif bascule & valorisation (EmaExtracter.log + EmmExtracter.log)
 // ===================================================================
 
+const VERIF_OPERATORS = [
+    'Orange Caraibe',
+    'Digicel AFG',
+    'Outremer Telecom',
+    'Dauphin Telecom',
+    'UTS Caraibe',
+    'Free Caraibes',
+] as const;
+
+/** Map operator log names to checklist label suffixes */
+const OP_CHECKLIST_LABELS: Record<string, string> = {
+    'Orange Caraibe': 'Orange Caraïbe',
+    'Digicel AFG': 'Digicel AFG',
+    'Outremer Telecom': 'Outremer Telecom / SFR',
+    'Dauphin Telecom': 'Dauphin Telecom',
+    'UTS Caraibe': 'UTS Caraibe',
+    'Free Caraibes': 'Free Caraibes',
+};
+
+function extractLogSection(content: string, prefix: 'EmaExtracter' | 'EmmExtracter') {
+    // Extract only lines belonging to this log file
+    const lines = content.split('\n').filter((l) => l.includes(prefix));
+    const section = lines.join('\n');
+
+    const opResults: Record<string, boolean> = {};
+    for (const op of VERIF_OPERATORS) {
+        // Pattern from real log: "..Verification operateur Orange Caraibe : Check success"
+        const pat = new RegExp(`${prefix}.*${op}.*Check success`, 'i');
+        opResults[op] = pat.test(section);
+    }
+
+    const countMatch = section.match(/\.{5,}(\d+)\s*bascules?\s*ajout/i);
+    const count = countMatch ? parseInt(countMatch[1], 10) : null;
+
+    const durationMatch = section.match(/Fin de Traitement\s+([\d.]+)\s*secondes/i);
+    const duration = durationMatch ? parseFloat(durationMatch[1]) : null;
+
+    const finished = /Fin de Traitement/i.test(section);
+
+    return { opResults, count, duration, finished, hasContent: lines.length > 0 };
+}
+
 function autoFillVerifBascule(
     _eventKey: string,
     checklist: string[],
@@ -535,58 +577,58 @@ function autoFillVerifBascule(
 
     if (!hasEma && !hasEmm) return null;
 
-    // EmaExtracter operator checks
-    const emaOperators: Record<string, string> = {
-        'Orange Caraibe': 'EmaExtracter : Opérateur Orange Caraïbe Check success',
-        'Digicel AFG': 'EmaExtracter : Opérateur Digicel AFG Check success',
-        'Outremer Telecom': 'EmaExtracter : Opérateur Outremer Telecom / SFR Check success',
-        'Dauphin Telecom': 'EmaExtracter : Opérateur Dauphin Telecom Check success',
-        'UTS Caraibe': 'EmaExtracter : Opérateur UTS Caraibe Check success',
-        'Free Caraibes': 'EmaExtracter : Opérateur Free Caraibes Check success',
-    };
-
-    // Extract bascule count from EmaExtracter
-    const basculeMatch = content.match(/EmaExtracter.*?(\d+)\s*bascules?\s*ajoute/i);
-    const basculeCount = basculeMatch ? parseInt(basculeMatch[1], 10) : null;
-
-    // EmmExtracter checks
-    const emmAllSuccess = hasEmm && Object.keys(emaOperators).every((op) => {
-        const pattern = new RegExp(`EmmExtracter.*${op}.*Check success`, 'i');
-        return pattern.test(content);
-    });
-    const emmFinished = /EmmExtracter.*Fin de Traitement/i.test(content);
-    const valorisationMatch = content.match(/EmmExtracter.*?(\d+)\s*bascules?\s*ajoute/i);
-    const valorisationCount = valorisationMatch ? parseInt(valorisationMatch[1], 10) : null;
+    const ema = extractLogSection(content, 'EmaExtracter');
+    const emm = extractLogSection(content, 'EmmExtracter');
 
     const rules: Record<string, () => boolean> = {};
 
-    for (const [opKey, checklistItem] of Object.entries(emaOperators)) {
-        const pattern = new RegExp(`EmaExtracter.*${opKey}.*Check success`, 'i');
-        rules[checklistItem] = () => pattern.test(content);
+    // EmaExtracter per-operator rules
+    for (const op of VERIF_OPERATORS) {
+        const label = OP_CHECKLIST_LABELS[op];
+        rules[`EmaExtracter : ${label} Check success`] = () => ema.opResults[op];
     }
+    rules['EmaExtracter : Bascules ajoutées + Fin traitement'] = () =>
+        ema.count !== null && ema.count > 0 && ema.finished;
 
-    rules['EmaExtracter : Bascules ajoutées (nombre)'] = () => basculeCount !== null && basculeCount > 0;
-    rules['EmmExtracter : Tous opérateurs Check success'] = () => emmAllSuccess;
-    rules['EmmExtracter : Valorisation terminée'] = () => emmFinished;
+    // EmmExtracter per-operator rules
+    for (const op of VERIF_OPERATORS) {
+        const label = OP_CHECKLIST_LABELS[op];
+        rules[`EmmExtracter : ${label} Check success`] = () => emm.opResults[op];
+    }
+    rules['EmmExtracter : Valorisation + Fin traitement'] = () =>
+        emm.count !== null && emm.count > 0 && emm.finished;
 
     const checkedItems = checklist.filter((item) => rules[item]?.());
 
+    // Build notes with clear separation
     const lines = ['[Auto] Vérification bascule & valorisation'];
-    if (hasEma) {
-        lines.push('\nEmaExtracter (bascule):');
-        for (const opKey of Object.keys(emaOperators)) {
-            const pattern = new RegExp(`EmaExtracter.*${opKey}.*Check success`, 'i');
-            const status = pattern.test(content) ? 'OK' : 'ECHEC';
-            lines.push(`  ${opKey}: ${status}`);
+
+    if (ema.hasContent) {
+        lines.push('');
+        lines.push('--- EmaExtracter.log (bascule) ---');
+        for (const op of VERIF_OPERATORS) {
+            const status = ema.opResults[op] ? 'Check success' : 'ECHEC';
+            lines.push(`  ${op}: ${status}`);
         }
-        if (basculeCount !== null) lines.push(`  Bascules ajoutées: ${basculeCount}`);
+        if (ema.count !== null) lines.push(`  Bascules ajoutées: ${ema.count}`);
+        if (ema.duration !== null) lines.push(`  Durée traitement: ${ema.duration}s`);
+        lines.push(`  Fin traitement: ${ema.finished ? 'OUI' : 'NON'}`);
     }
-    if (hasEmm) {
-        lines.push('\nEmmExtracter (valorisation):');
-        lines.push(`  Tous opérateurs OK: ${emmAllSuccess ? 'OUI' : 'NON'}`);
-        if (valorisationCount !== null) lines.push(`  Enregistrements: ${valorisationCount}`);
-        lines.push(`  Traitement terminé: ${emmFinished ? 'OUI' : 'NON'}`);
+
+    if (emm.hasContent) {
+        lines.push('');
+        lines.push('--- EmmExtracter.log (valorisation) ---');
+        for (const op of VERIF_OPERATORS) {
+            const status = emm.opResults[op] ? 'Check success' : 'ECHEC';
+            lines.push(`  ${op}: ${status}`);
+        }
+        if (emm.count !== null) lines.push(`  Enregistrements valorisés: ${emm.count}`);
+        if (emm.duration !== null) lines.push(`  Durée traitement: ${emm.duration}s`);
+        lines.push(`  Fin traitement: ${emm.finished ? 'OUI' : 'NON'}`);
     }
+
+    if (!ema.hasContent) lines.push('\n⚠ EmaExtracter.log non détecté dans le contenu collé');
+    if (!emm.hasContent) lines.push('\n⚠ EmmExtracter.log non détecté dans le contenu collé');
 
     return { checkedItems, notes: lines.join('\n') };
 }
