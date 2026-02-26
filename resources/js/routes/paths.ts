@@ -80,6 +80,8 @@ export const paths = {
     intermediaire: '/sql-playground/intermediaire',
     investigation: '/sql-playground/investigation',
   },
+  // OPERATIONS GUIDE
+  operationsGuide: '/operations-guide',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG

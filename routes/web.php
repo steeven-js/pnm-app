@@ -47,6 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Changelog
     Route::get('/changelog', fn () => Inertia::render('Changelog'))->name('changelog');
 
+    // Operations Guide
+    Route::get('/operations-guide', fn () => Inertia::render('OperationsGuide'))->name('operations-guide');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 

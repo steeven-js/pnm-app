@@ -42,6 +42,7 @@ const CHANGELOG: ChangelogEntry[] = [
     changes: [
       { type: 'new', description: 'Auto-remplissage des checklists monitoring depuis le contenu collé (emails et logs serveur) pour les 13 événements' },
       { type: 'new', description: '3 nouvelles vérifications serveur PORTA : bascule/valorisation (EmaExtracter + EmmExtracter), génération PNMDATA, acquittements' },
+      { type: 'new', description: 'Page Guide des Opérations : architecture, vérifications quotidiennes, infrastructure (serveurs + scripts), mails, contacts GPMAG et modèles de mails' },
       { type: 'new', description: 'Bouton "Essayer" interactif dans les articles SQL avec exécution directe des requêtes' },
       { type: 'improvement', description: 'Différenciation claire EmaExtracter.log (bascule) et EmmExtracter.log (valorisation) avec 14 items de checklist séparés' },
       { type: 'improvement', description: 'Horaires des vacations ajustés selon les heures réelles de réception des mails (11h35, 15h35, 20h35)' },

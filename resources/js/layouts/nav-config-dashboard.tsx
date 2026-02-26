@@ -60,6 +60,11 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Diagrammes', path: paths.resolve.diagrams },
         ],
       },
+      {
+        title: 'Guide Opérations',
+        path: paths.operationsGuide,
+        icon: <Iconify icon="solar:clipboard-check-bold-duotone" width={24} />,
+      },
     ],
   },
   /**
