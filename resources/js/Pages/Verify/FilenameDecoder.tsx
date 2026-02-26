@@ -293,16 +293,16 @@ export default function FilenameDecoder() {
                 </Card>
 
                 {/* Footer */}
-                <Card sx={{ borderLeft: 3, borderColor: fileResult.footer && fileResult.footer.declaredCount === fileResult.tickets.length ? '#16a34a' : '#dc2626' }}>
+                <Card sx={{ borderLeft: 3, borderColor: fileResult.footer && (fileResult.footer.declaredCount - 2) === fileResult.tickets.length ? '#16a34a' : '#dc2626' }}>
                   <CardContent>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>Pied de page / Validation</Typography>
                     {fileResult.footer ? (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                        <Typography variant="body2">Déclaré : <strong>{fileResult.footer.declaredCount}</strong> lignes</Typography>
+                        <Typography variant="body2">Déclaré : <strong>{fileResult.footer.declaredCount}</strong> lignes ({fileResult.footer.declaredCount - 2} tickets + entête + pied de page)</Typography>
                         <Typography variant="body2">Effectif : <strong>{fileResult.tickets.length}</strong> tickets</Typography>
                         <Chip
-                          label={fileResult.footer.declaredCount === fileResult.tickets.length ? 'Compteur valide' : 'Compteur invalide'}
-                          color={fileResult.footer.declaredCount === fileResult.tickets.length ? 'success' : 'error'}
+                          label={(fileResult.footer.declaredCount - 2) === fileResult.tickets.length ? 'Compteur valide' : 'Compteur invalide'}
+                          color={(fileResult.footer.declaredCount - 2) === fileResult.tickets.length ? 'success' : 'error'}
                           size="small"
                           sx={{ mt: 0.5, width: 'fit-content' }}
                         />
