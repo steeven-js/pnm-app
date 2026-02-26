@@ -294,6 +294,283 @@ function ServerCard({ server }: { server: Server }) {
   );
 }
 
+// ─── Architecture Diagram Components ────────────────────────────────────────
+
+type DiagramNodeProps = {
+  label: string;
+  sublabel?: string;
+  ip?: string;
+  color: string;
+  icon: string;
+  width?: number;
+  small?: boolean;
+};
+
+function DiagramNode({ label, sublabel, ip, color, icon, width = 170, small }: DiagramNodeProps) {
+  return (
+    <Box sx={{
+      width, minHeight: small ? 56 : 72, border: 2, borderColor: color, borderRadius: 2,
+      bgcolor: 'background.paper', display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', px: 1.5, py: small ? 0.75 : 1, position: 'relative',
+      boxShadow: `0 2px 8px ${color}22`, transition: 'all 0.2s',
+      '&:hover': { boxShadow: `0 4px 16px ${color}44`, transform: 'translateY(-2px)' },
+    }}>
+      <Stack direction="row" alignItems="center" spacing={0.75}>
+        <Iconify icon={icon} width={small ? 16 : 20} sx={{ color }} />
+        <Typography variant={small ? 'caption' : 'body2'} fontWeight={700} noWrap>{label}</Typography>
+      </Stack>
+      {sublabel && <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', mt: 0.25 }}>{sublabel}</Typography>}
+      {ip && <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'text.disabled' }}>{ip}</Typography>}
+    </Box>
+  );
+}
+
+function ConnectionArrow({ label, direction = 'right', color = '#94a3b8' }: { label: string; direction?: 'right' | 'down' | 'both'; color?: string }) {
+  const isVertical = direction === 'down';
+  return (
+    <Box sx={{
+      display: 'flex', flexDirection: isVertical ? 'column' : 'row', alignItems: 'center',
+      gap: 0.5, color, mx: isVertical ? 0 : 0.5, my: isVertical ? 0.5 : 0,
+    }}>
+      {direction === 'both' && <Typography sx={{ fontSize: '0.7rem' }}>◄</Typography>}
+      <Box sx={{
+        [isVertical ? 'height' : 'width']: isVertical ? 24 : 40,
+        [isVertical ? 'width' : 'height']: 2,
+        bgcolor: color, borderRadius: 1,
+      }} />
+      <Typography variant="caption" sx={{
+        fontSize: '0.6rem', fontWeight: 600, whiteSpace: 'nowrap',
+        position: isVertical ? 'relative' : 'absolute',
+        ...(isVertical ? {} : { top: -14, left: '50%', transform: 'translateX(-50%)' }),
+      }}>{label}</Typography>
+      <Box sx={{
+        [isVertical ? 'height' : 'width']: isVertical ? 24 : 40,
+        [isVertical ? 'width' : 'height']: 2,
+        bgcolor: color, borderRadius: 1,
+      }} />
+      {direction !== 'both' && <Typography sx={{ fontSize: '0.7rem' }}>{isVertical ? '▼' : '►'}</Typography>}
+      {direction === 'both' && <Typography sx={{ fontSize: '0.7rem' }}>►</Typography>}
+    </Box>
+  );
+}
+
+function ArchitectureDiagramPorta() {
+  return (
+    <Card sx={{ p: 3, mb: 3, overflow: 'auto' }}>
+      <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>Architecture Porta Digicel</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
+        Flux de données entre les serveurs internes et les opérateurs externes via BTCTF
+      </Typography>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, minWidth: 700, py: 2 }}>
+        {/* Row 1: Operators */}
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
+          {['01 Orange', '03 SFR', '04 Dauphin', '05 UTS', '06 Free'].map((op) => (
+            <DiagramNode key={op} label={op} color="#6b7280" icon="solar:user-rounded-bold-duotone" width={110} small />
+          ))}
+        </Box>
+
+        <ConnectionArrow label="SFTP (fichiers plats)" direction="both" color="#16a34a" />
+
+        {/* Row 2: BTCTF */}
+        <DiagramNode label="BTCTF" sublabel="Hub transfert SFTP" ip="172.24.119.70" color="#16a34a" icon="solar:transfer-horizontal-bold-duotone" width={240} />
+
+        <ConnectionArrow label="SCP (fichiers plats)" direction="both" color="#2563eb" />
+
+        {/* Row 3: Main servers */}
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+          <DiagramNode label="DigimqPortaSync01" sublabel="Synchronisation" ip="172.24.119.69" color="#2563eb" icon="solar:server-bold-duotone" width={190} />
+
+          <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Box sx={{ width: 60, height: 2, bgcolor: '#d97706' }} />
+            <Typography variant="caption" sx={{ fontSize: '0.6rem', position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', color: '#d97706', fontWeight: 600, whiteSpace: 'nowrap' }}>XML/SOAP</Typography>
+            <Box sx={{ fontSize: '0.7rem', color: '#d97706' }}>►</Box>
+          </Box>
+
+          <DiagramNode label="DigimqPortaWebdb" sublabel="PortaDB / PortaWebDB" ip="172.24.119.68 — MySQL :3306" color="#d97706" icon="solar:database-bold-duotone" width={220} />
+        </Box>
+
+        {/* Row 4: Connections down from Sync and DB */}
+        <Box sx={{ display: 'flex', gap: 6, mt: 1 }}>
+          {/* Left: EMA/EMM from Sync */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ConnectionArrow label="Fichiers EMA/EMM" direction="down" color="#ea580c" />
+            <DiagramNode label="EMA / EMM" sublabel="ema15-digicel" color="#ea580c" icon="solar:file-send-bold-duotone" width={160} />
+          </Box>
+
+          {/* Right: ESB from DB */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ConnectionArrow label="XML/SOAP" direction="down" color="#dc2626" />
+            <DiagramNode label="ESB DataPower" sublabel="Proxy SOAP" ip="VIP f5-vip-kong" color="#dc2626" icon="solar:routing-bold-duotone" width={170} />
+            <ConnectionArrow label="SOAP" direction="down" color="#dc2626" />
+            <DiagramNode label="MOBI" sublabel="SI Facturation" color="#9333ea" icon="solar:bill-list-bold-duotone" width={140} />
+          </Box>
+        </Box>
+
+        {/* Row 5: Portails */}
+        <Divider sx={{ width: '80%', my: 2 }} />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <DiagramNode label="PortaWebUI" sublabel="Gestion dossiers" ip=":8080" color="#7c3aed" icon="solar:monitor-bold-duotone" width={150} />
+          <DiagramNode label="PortaWs" sublabel="Web services" ip=":4848" color="#7c3aed" icon="solar:code-bold-duotone" width={150} />
+        </Box>
+      </Box>
+
+      {/* Legend */}
+      <Divider sx={{ my: 2 }} />
+      <Stack direction="row" flexWrap="wrap" gap={2}>
+        {[
+          { color: '#16a34a', label: 'SFTP / SCP (fichiers plats)' },
+          { color: '#2563eb', label: 'Synchronisation interne' },
+          { color: '#d97706', label: 'Base de données MySQL' },
+          { color: '#dc2626', label: 'XML / SOAP (ESB)' },
+          { color: '#ea580c', label: 'Fichiers EMA / EMM' },
+          { color: '#7c3aed', label: 'Portails Web (Tomcat / Glassfish)' },
+        ].map((item) => (
+          <Stack key={item.label} direction="row" alignItems="center" spacing={0.75}>
+            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
+            <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+          </Stack>
+        ))}
+      </Stack>
+    </Card>
+  );
+}
+
+function ArchitectureDiagramProduction() {
+  return (
+    <Card sx={{ p: 3, mb: 4, overflow: 'auto' }}>
+      <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>Paysage Portabilité — Production</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
+        Vue complète de l'environnement de production : du réseau opérateurs jusqu'au SI Facturation MOBI
+      </Typography>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, minWidth: 800, py: 2 }}>
+        {/* Top: External operators */}
+        <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2, bgcolor: 'action.hover', width: '90%' }}>
+          <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ mb: 1, display: 'block' }}>OPÉRATEURS EXTERNES</Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {['Orange', 'SFR/Only', 'Dauphin', 'UTS', 'Free'].map((op) => (
+              <DiagramNode key={op} label={op} color="#6b7280" icon="solar:user-rounded-bold-duotone" width={100} small />
+            ))}
+          </Box>
+        </Box>
+
+        <ConnectionArrow label="SFTP" direction="down" color="#16a34a" />
+
+        {/* BTCTF + HUB */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <DiagramNode label="btctf" sublabel="Transfert fichiers" ip="172.24.119.70" color="#16a34a" icon="solar:transfer-horizontal-bold-duotone" width={170} />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#6b7280' }}>◄</Typography>
+            <Box sx={{ width: 40, height: 2, bgcolor: '#6b7280' }} />
+            <Typography sx={{ fontSize: '0.7rem', color: '#6b7280' }}>►</Typography>
+          </Box>
+          <DiagramNode label="HUB" sublabel="hub.fwi.digicelgroup.local" color="#6b7280" icon="solar:global-bold-duotone" width={200} />
+        </Box>
+
+        <ConnectionArrow label="SCP" direction="down" color="#2563eb" />
+
+        {/* Core: Sync → DB → Portails */}
+        <Box sx={{ border: 1, borderColor: 'primary.main', borderRadius: 2, p: 2.5, width: '95%', borderStyle: 'dashed' }}>
+          <Typography variant="caption" fontWeight={700} color="primary.main" sx={{ mb: 2, display: 'block' }}>INFRASTRUCTURE PORTA DIGICEL</Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+            {/* Sync server */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              <DiagramNode label="vmqproportasync01" sublabel="Synchronisation" ip="172.24.119.69" color="#2563eb" icon="solar:server-bold-duotone" width={190} />
+              <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#ea580c', fontWeight: 600 }}>EMA/EMM ▼</Typography>
+              <DiagramNode label="ema15-digicel" sublabel="EMA (bascule) + EMM (valo)" color="#ea580c" icon="solar:file-send-bold-duotone" width={190} small />
+            </Box>
+
+            {/* Arrow Sync → DB */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 3 }}>
+              <Typography sx={{ fontSize: '0.7rem', color: '#d97706' }}>◄</Typography>
+              <Box sx={{ width: 30, height: 2, bgcolor: '#d97706' }} />
+              <Typography sx={{ fontSize: '0.7rem', color: '#d97706' }}>►</Typography>
+            </Box>
+
+            {/* DB server */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              <DiagramNode label="vmqproportawebdb01" sublabel="PortaDB (MySQL :3306)" ip="172.24.119.68" color="#d97706" icon="solar:database-bold-duotone" width={200} />
+            </Box>
+
+            {/* Arrow DB → Portails */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 3 }}>
+              <Box sx={{ width: 20, height: 2, bgcolor: '#7c3aed' }} />
+              <Typography sx={{ fontSize: '0.7rem', color: '#7c3aed' }}>►</Typography>
+            </Box>
+
+            {/* Portails */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              <DiagramNode label="PortaWebUI" sublabel="vmqproportaweb01" ip=":8080" color="#7c3aed" icon="solar:monitor-bold-duotone" width={160} />
+              <DiagramNode label="PortaWs" sublabel="vmqproportaws01" ip=":4848" color="#7c3aed" icon="solar:code-bold-duotone" width={160} />
+            </Box>
+          </Box>
+        </Box>
+
+        <ConnectionArrow label="XML / SOAP" direction="down" color="#dc2626" />
+
+        {/* Bottom: ESB → MOBI chain */}
+        <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2, width: '90%', bgcolor: 'action.hover' }}>
+          <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>SI FACTURATION & SERVICES</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+            <DiagramNode label="Micro Services" sublabel="vmqpromsbox01/02" ip="VIP: 172.24.119.36" color="#0891b2" icon="solar:widget-bold-duotone" width={170} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 2, bgcolor: '#dc2626' }} />
+              <Typography sx={{ fontSize: '0.7rem', color: '#dc2626' }}>►</Typography>
+            </Box>
+
+            <DiagramNode label="ESB DataPower" sublabel="vmqprotopapi01/02" ip="Proxy SOAP" color="#dc2626" icon="solar:routing-bold-duotone" width={170} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 2, bgcolor: '#dc2626' }} />
+              <Typography sx={{ fontSize: '0.7rem', color: '#dc2626' }}>►</Typography>
+            </Box>
+
+            <DiagramNode label="FrontEnd SOAP" sublabel="Digimqbillmobi0" color="#b91c1c" icon="solar:server-2-bold-duotone" width={160} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 2, bgcolor: '#9333ea' }} />
+              <Typography sx={{ fontSize: '0.7rem', color: '#9333ea' }}>►</Typography>
+            </Box>
+
+            <DiagramNode label="MOBI MCST" sublabel="vmqprombdb01" ip="SI Facturation" color="#9333ea" icon="solar:bill-list-bold-duotone" width={160} />
+          </Box>
+        </Box>
+
+        {/* Users */}
+        <Divider sx={{ width: '60%', my: 1 }} />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <DiagramNode label="Points de vente" sublabel="rdp-pdvunipaas" color="#059669" icon="solar:shop-bold-duotone" width={160} small />
+          <DiagramNode label="Custom Care" sublabel="rdp-ccarecrm" color="#059669" icon="solar:headphones-round-bold-duotone" width={160} small />
+          <DiagramNode label="FNR" sublabel="Fichier National Routage" color="#6b7280" icon="solar:routing-2-bold-duotone" width={160} small />
+        </Box>
+      </Box>
+
+      {/* Legend */}
+      <Divider sx={{ my: 2 }} />
+      <Stack direction="row" flexWrap="wrap" gap={2}>
+        {[
+          { color: '#16a34a', label: 'SFTP (opérateurs)' },
+          { color: '#2563eb', label: 'SCP / Sync interne' },
+          { color: '#d97706', label: 'Base de données' },
+          { color: '#dc2626', label: 'ESB / SOAP' },
+          { color: '#9333ea', label: 'SI MOBI' },
+          { color: '#0891b2', label: 'Micro services' },
+          { color: '#7c3aed', label: 'Portails Web' },
+          { color: '#059669', label: 'Utilisateurs finaux' },
+        ].map((item) => (
+          <Stack key={item.label} direction="row" alignItems="center" spacing={0.75}>
+            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
+            <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+          </Stack>
+        ))}
+      </Stack>
+    </Card>
+  );
+}
+
 // ─── Tab Panels ─────────────────────────────────────────────────────────────
 
 function TabOverview() {
@@ -307,6 +584,10 @@ function TabOverview() {
         Les échanges se font par <strong>fichiers plats (PNMDATA/PNMSYNC)</strong> transférés en SFTP via le serveur BTCTF,
         avec 3 vacations par jour ouvré et une synchronisation le dimanche.
       </Alert>
+
+      {/* Architecture diagrams */}
+      <ArchitectureDiagramPorta />
+      <ArchitectureDiagramProduction />
 
       {/* Flux step by step */}
       <SectionTitle icon="solar:routing-bold-duotone" title="Flux des échanges" subtitle="Les 6 étapes du cycle de portabilité quotidien" />
