@@ -37,6 +37,21 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.1.0',
+    date: '26 Février 2026',
+    changes: [
+      { type: 'new', description: 'Auto-remplissage des checklists monitoring depuis le contenu collé (emails et logs serveur) pour les 13 événements' },
+      { type: 'new', description: '3 nouvelles vérifications serveur PORTA : bascule/valorisation (EmaExtracter + EmmExtracter), génération PNMDATA, acquittements' },
+      { type: 'new', description: 'Bouton "Essayer" interactif dans les articles SQL avec exécution directe des requêtes' },
+      { type: 'improvement', description: 'Différenciation claire EmaExtracter.log (bascule) et EmmExtracter.log (valorisation) avec 14 items de checklist séparés' },
+      { type: 'improvement', description: 'Horaires des vacations ajustés selon les heures réelles de réception des mails (11h35, 15h35, 20h35)' },
+      { type: 'improvement', description: 'Schéma SQL Playground aligné avec la structure de production PortaDB' },
+      { type: 'improvement', description: 'Fusion des 3 événements bascule en un seul rapport activité automates' },
+      { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
+      { type: 'fix', description: 'Ajout de user_id au modèle MonitoringEvent pour la sauvegarde' },
+    ],
+  },
+  {
     version: '2.0.0',
     date: '17 Février 2026',
     changes: [
