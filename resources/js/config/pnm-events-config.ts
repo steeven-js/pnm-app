@@ -50,7 +50,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         label: '1ère vacation (6 opérateurs)',
         description:
             'Premier échange de fichiers PNMDATA avec les 6 opérateurs. Vérifier que tous les fichiers attendus ont été reçus et acquittés.',
-        scheduledTime: '09:00',
+        scheduledTime: '11:35',
         icon: 'solar:file-send-bold-duotone',
         category: 'vacation',
         checklist: [
@@ -167,7 +167,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         label: '2ème vacation',
         description:
             'Deuxième échange de fichiers PNMDATA. Comparer avec la 1ère vacation : les fichiers manquants en Vac1 sont-ils réapparus ?',
-        scheduledTime: '14:00',
+        scheduledTime: '15:35',
         icon: 'solar:file-download-bold-duotone',
         category: 'vacation',
         checklist: [
@@ -218,7 +218,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         label: '3ème vacation + clôture',
         description:
             'Troisième et dernière vacation. Rapport envoi/réception du jour. Clôture de la journée PNM.',
-        scheduledTime: '19:00',
+        scheduledTime: '20:35',
         icon: 'solar:check-circle-bold-duotone',
         category: 'vacation',
         checklist: [
