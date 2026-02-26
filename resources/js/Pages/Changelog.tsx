@@ -49,7 +49,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'improvement', description: 'Fusion des 3 événements bascule en un seul rapport activité automates' },
       { type: 'improvement', description: 'Décodeur PNMDATA : 18 codes tickets complets selon la spec officielle (DP, DE, EP, AP, AN, CA, BI, PI, DI, CI, BR, RN, RS, CS, ER…)' },
       { type: 'fix', description: 'Opérateur 00 affiché comme « Tous (Opérateurs) » au lieu de « Inconnu »' },
-      { type: 'fix', description: 'Compteur pied de page PNMDATA corrigé : entête et pied de page exclus du décompte tickets' },
+      { type: 'fix', description: 'Compteur pied de page PNMDATA corrigé dans le parsing et l\'affichage : entête et pied de page exclus du décompte tickets' },
       { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
       { type: 'fix', description: 'Ajout de user_id au modèle MonitoringEvent pour la sauvegarde' },
     ],
