@@ -31,6 +31,36 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         description: "Collez le contenu de l'email [PNM] vacation (rapport envoi/réception) pour remplir automatiquement la checklist.",
         placeholder: `Collez le contenu du mail ici...\n\nRapport envoi/réception des vacations du 16-02-2026\n\nNombre de fichiers transférés : 20 fichiers échangés / 20 attendus\n\nFichiers reçus d'Orange Caraïbe:\n/home/porta_pnmv3/.../PNMDATA.01.02...\n...`,
     },
+    cto_rattrapage: {
+        title: 'Auto-remplir depuis le mail CTO',
+        description: "Collez le contenu de l'email [CTO] Bascule du jour tardive ou en echec pour remplir automatiquement la checklist.",
+        placeholder: `Collez le contenu du mail ici...\n\nBonjour,\n\nCi-joint la liste des CTO du jour par departements\n\nFin de traitement de l'automate bascule : 02:00 (Heure:minute)\n\n=> Volumetrie des CTO du jour : 61\n\nCordialement\nAPP_VENTES`,
+    },
+    incidents: {
+        title: 'Auto-remplir depuis le mail incidents',
+        description: "Collez le contenu de l'email [PNM][INCIDENT] pour analyser les incidents détectés et remplir la checklist.",
+        placeholder: `Collez le contenu du mail ici...\n\nCe mail a ete genere automatiquement par l'application DIGICEL.PORTA-V3.\n\n1 - Les incidents suivant ont ete detectes...\n  - 1 refu(s) (1210/1220) ;\n...`,
+    },
+    rio_reporting: {
+        title: 'Auto-remplir depuis le reporting RIO',
+        description: "Collez le contenu de l'email [PNM] Reporting RIO incorrect pour remplir automatiquement la checklist.",
+        placeholder: `Collez le contenu du mail ici...\n\nStats du 11/02/2026 pour les demandes de portabilite refusees pour motif RIO incorrect :\n\nIl y a 0 cas de refus en porta entrante.\n\nIl y a 0 cas de refus en porta sortante.`,
+    },
+    pso_jour: {
+        title: 'Auto-remplir depuis le PSO',
+        description: "Collez le contenu de l'email [PNMV3] PSO du jour ou le contenu du fichier CSV joint pour remplir la checklist.",
+        placeholder: `Collez le contenu du mail ou du CSV ici...\n\nBonjour,\nVeuillez trouver ci-joint le detail des PSO du jour.\n\n--- ou le CSV ---\n\nRECORD_NO;ACTION_COD;OPERATEUR;N_DE_MOBILE...\n72035481;RLPS;GPMAG;0690199788...`,
+    },
+    tickets_attente: {
+        title: 'Auto-remplir depuis les mails tickets',
+        description: "Collez le contenu de l'email [PNM] Ticket(s) 1210 en attente et/ou Ticket(s) en attente pour remplir la checklist.",
+        placeholder: `Collez le contenu du/des mail(s) ici...\n\nIl y a 1 ticket(s) 1210 en attente.\nVeuillez trouver ci-joint les portages en attente de reponse.\n\n---\n\nIl y a 23 ticket(s) en attente.\nVeuillez trouver ci-joint les portages en attente de tickets.`,
+    },
+    prevision_portabilites: {
+        title: 'Auto-remplir depuis le reporting portabilités',
+        description: "Collez le contenu de l'email [PNM] Reporting - Portabilités DIGICEL-WIZZEE pour remplir la checklist.",
+        placeholder: `Collez le contenu du mail ici...\n\nNombre de portabilites internes de la veille: 9\n\nNombre de portabilites prevues le 12/02/2026:\n\nDIGICEL\nIN: 15\nOUT: 40\n\nWIZZEE\nIN: 5\nOUT: 19`,
+    },
 };
 
 function getConfig(eventKey: string) {

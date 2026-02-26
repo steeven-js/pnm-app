@@ -33,7 +33,9 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
     const [notes, setNotes] = useState('');
     const [logDialogOpen, setLogDialogOpen] = useState(false);
 
-    const supportsLogPaste = event ? SUPPORTED_EVENT_KEYS.includes(event.key) : false;
+    const supportsLogPaste = event
+        ? SUPPORTED_EVENT_KEYS.includes(event.key) || event.key.startsWith('vacation_')
+        : false;
 
     const handleLogApply = useCallback((autoChecked: string[], autoNotes: string) => {
         setCheckedItems((prev) => [...new Set([...prev, ...autoChecked])]);
@@ -80,7 +82,7 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                             onClick={() => setLogDialogOpen(true)}
                             sx={{ mb: 1.5 }}
                         >
-                            Auto-remplir depuis log
+                            Auto-remplir depuis email
                         </Button>
                     )}
 
