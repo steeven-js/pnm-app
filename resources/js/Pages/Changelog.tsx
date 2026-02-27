@@ -60,6 +60,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'fix', description: 'Compteur pied de page PNMDATA corrigé dans le parsing et l\'affichage : entête et pied de page exclus du décompte tickets' },
       { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
       { type: 'fix', description: 'Ajout de user_id au modèle MonitoringEvent pour la sauvegarde' },
+      { type: 'fix', description: 'Timeline Dashboard monitoring réordonnée en ordre chronologique ascendant (les événements apparaissaient dans le désordre, ex. 11h35 entre 09h00 et 09h01)' },
     ],
   },
   {
