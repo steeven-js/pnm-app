@@ -78,6 +78,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: 'Dictionnaire complet des codes PNM : 25 codes (17 réponses R1xx-R5xx + 8 erreurs E0xx-E6xx) avec label, description, catégorie, sévérité et action recommandée' },
       { type: 'new', description: 'Procédures d\'investigation par type d\'incident : étapes numérotées avec vérifications PortaWs, contrôles RIO, commandes SSH copiables (logs, SFTP), contacts opérateur et escalade GPMAG' },
       { type: 'improvement', description: 'Analyseur d\'incidents enrichi : chaque ticket affiche le détail du code (description + action) depuis le dictionnaire, avec couleur de sévérité' },
+      { type: 'new', description: 'Encart « Localisation SFTP (FileZilla) » dans chaque procédure d\'investigation : adresse serveur copiable, arborescence des 6 dossiers opérateurs (01-06) avec sous-dossiers send/recv/arch_send/arch_recv, chemin exact du fichier incident avec dossier et opérateur surlignés' },
     ],
   },
   {

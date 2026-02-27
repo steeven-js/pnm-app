@@ -32,6 +32,27 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }
   file_not_ack: { label: 'Fichier non acquitté', color: '#f97316', icon: 'solar:file-remove-bold' },
 };
 
+const SFTP_OPERATORS: Record<string, string> = {
+  '01': 'Orange Caraibe',
+  '02': 'Digicel',
+  '03': 'SFR / Outremer',
+  '04': 'Dauphin Telecom',
+  '05': 'UTS Caraibe',
+  '06': 'Free Caraibes',
+};
+
+const SFTP_HOST = 'sftp://porta_pnmv3@172.24.119.69';
+const SFTP_BASE = '/home/porta_pnmv3/PortaSync/pnmdata';
+
+function getSftpLocation(incident: ParsedIncident): { folder: string; sub: string; arch: string; label: string } | null {
+  const fp = incident.filenameParsed;
+  if (!fp.valid) return null;
+  if (fp.sourceOperator === '02') {
+    return { folder: fp.destOperator, sub: 'send', arch: 'arch_send', label: `${SFTP_OPERATORS[fp.destOperator] ?? fp.destOperator} (envoi)` };
+  }
+  return { folder: fp.sourceOperator, sub: 'recv', arch: 'arch_recv', label: `${SFTP_OPERATORS[fp.sourceOperator] ?? fp.sourceOperator} (reception)` };
+}
+
 export default function IncidentsPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<ParsedIncidentEmail | null>(null);
@@ -452,7 +473,7 @@ function getInvestigationSteps(type: string, incident: ParsedIncident): Investig
       {
         icon: 'solar:folder-check-bold',
         label: 'Vérifier le répertoire SFTP',
-        detail: `Vérifier que le fichier a bien été déposé dans le répertoire d'envoi de l'opérateur destinataire.`,
+        detail: `Vérifier que le fichier a bien été déposé dans le répertoire d'envoi de l'opérateur destinataire (send/). Si absent, vérifier dans arch_send/.`,
         command: `ls -la /home/porta_pnmv3/PortaSync/pnmdata/${incident.filenameParsed?.valid ? incident.filenameParsed.destOperator : 'XX'}/send/`,
       },
       {
@@ -484,7 +505,7 @@ function getInvestigationSteps(type: string, incident: ParsedIncident): Investig
       {
         icon: 'solar:folder-check-bold',
         label: 'Vérifier le dépôt SFTP',
-        detail: `Confirmer que le fichier est bien présent dans le répertoire d'envoi de l'opérateur.`,
+        detail: `Confirmer que le fichier est bien présent dans le répertoire d'envoi de l'opérateur (send/). Si absent, vérifier dans arch_send/.`,
         command: `ls -la /home/porta_pnmv3/PortaSync/pnmdata/${incident.filenameParsed?.valid ? incident.filenameParsed.destOperator : 'XX'}/send/${incident.filename}*`,
       },
       {
@@ -512,6 +533,7 @@ function getInvestigationSteps(type: string, incident: ParsedIncident): Investig
 function InvestigationPanel({ type, incident }: { type: string; incident: ParsedIncident }) {
   const [copied, setCopied] = useState<string | null>(null);
   const steps = getInvestigationSteps(type, incident);
+  const sftp = getSftpLocation(incident);
 
   if (steps.length === 0) return null;
 
@@ -529,6 +551,86 @@ function InvestigationPanel({ type, incident }: { type: string; incident: Parsed
         <Typography variant="subtitle2" color="primary.main">
           Procédure d&apos;investigation
         </Typography>
+      </Box>
+
+      {/* SFTP folder structure */}
+      <Box sx={{ mb: 1.5, p: 1.25, borderRadius: 1, border: '1px dashed', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+          <Iconify icon="solar:folder-with-files-bold" width={15} sx={{ color: 'info.main' }} />
+          <Typography variant="caption" fontWeight={700} sx={{ color: 'info.main' }}>
+            Localisation SFTP (FileZilla)
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            p: 0.75,
+            borderRadius: 0.5,
+            bgcolor: 'grey.900',
+            color: '#4ade80',
+            fontFamily: 'monospace',
+            fontSize: '0.7rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            mb: 1,
+          }}
+        >
+          <code>{SFTP_HOST}</code>
+          <Button
+            size="small"
+            onClick={() => handleCopy(SFTP_HOST)}
+            sx={{ minWidth: 'auto', p: 0.25, color: copied === SFTP_HOST ? '#4ade80' : 'grey.500' }}
+          >
+            <Iconify icon={copied === SFTP_HOST ? 'solar:check-circle-bold' : 'solar:copy-linear'} width={14} />
+          </Button>
+        </Box>
+
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ fontFamily: 'monospace', mb: 0.75 }}>
+          {SFTP_BASE}/
+        </Typography>
+
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.75 }}>
+          {Object.entries(SFTP_OPERATORS).map(([code, name]) => (
+            <Chip
+              key={code}
+              label={`${code} ${name}`}
+              size="small"
+              variant={sftp?.folder === code ? 'soft' : 'outlined'}
+              color={sftp?.folder === code ? 'primary' : 'default'}
+              sx={{ fontSize: '0.65rem', height: 22 }}
+            />
+          ))}
+        </Box>
+
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
+          Sous-dossiers de chaque operateur :
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: sftp ? 1 : 0 }}>
+          {['send', 'recv', 'arch_send', 'arch_recv'].map((f) => (
+            <Chip
+              key={f}
+              label={`${f}/`}
+              size="small"
+              variant={sftp?.sub === f ? 'soft' : 'outlined'}
+              color={sftp?.sub === f ? 'info' : 'default'}
+              sx={{ fontSize: '0.65rem', height: 22, fontFamily: 'monospace' }}
+            />
+          ))}
+        </Box>
+
+        {sftp && (
+          <Box sx={{ p: 0.75, borderRadius: 0.5, bgcolor: 'primary.lighter', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Iconify icon="solar:arrow-right-bold" width={14} sx={{ color: 'primary.main', flexShrink: 0 }} />
+            <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+              pnmdata/{sftp.folder}/{sftp.sub}/{incident.filename}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              (si absent : {sftp.arch}/)
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
