@@ -40,14 +40,6 @@ type Script = {
   schedule: string;
 };
 
-type DailyMail = {
-  time: string;
-  subject: string;
-  from: string;
-  action: string;
-  category: 'vacation' | 'supervision' | 'incident' | 'reporting';
-};
-
 type UsefulLink = {
   label: string;
   url: string;
@@ -208,18 +200,64 @@ const SCRIPTS: Script[] = [
   },
 ];
 
-const DAILY_MAILS: DailyMail[] = [
-  { time: '~04:00', subject: '[CTO] Bascule du jour tardive ou en echec', from: 'APP_VENTES', action: 'Vérifier si des MSISDN nécessitent un rattrapage manuel. Fichiers Rattrapage_CTO_MQ/GF/GP.', category: 'supervision' },
-  { time: '~09:00', subject: '[PNM] Reporting RIO incorrect', from: 'porta_pnmv3', action: 'Vérifier le nombre de refus entrante/sortante pour RIO incorrect. Si > 0, investiguer.', category: 'reporting' },
-  { time: '~09:01', subject: '[PNM][INCIDENT] Incidents détectés', from: 'porta_pnmv3', action: 'Analyser chaque incident : refus 1210/1220, erreurs 7000, AR non-reçus, conflits.', category: 'incident' },
-  { time: '~10:16', subject: '[PNMV3] PSO du jour Forfait', from: 'porta_pnmv3', action: 'Ouvrir le CSV Pnm_PSO_MOBI, vérifier la volumétrie vs prévisions veille.', category: 'reporting' },
-  { time: '~11:30', subject: '[PNM] Ticket(s) 1210 en attente', from: 'porta_pnmv3', action: 'Trier par ancienneté. < 3j surveiller, 3-5j relancer, > 5j escalader.', category: 'incident' },
-  { time: '~11:30', subject: '[PNM] Ticket(s) en attente', from: 'porta_pnmv3', action: 'Traiter les tickets les plus anciens en priorité (XLS joint).', category: 'incident' },
-  { time: '~11:35', subject: '[PNM] Rapport vacation 1', from: 'porta_pnmv3', action: 'Vérifier fichiers échangés = attendus, ACR OK pour les 5 opérateurs, aucun .ERR.', category: 'vacation' },
-  { time: '~15:25', subject: '[PROD] Rapport activité automates', from: 'supervision@digicelgroup.fr', action: 'Vérifier SUCCESS pour BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.', category: 'supervision' },
-  { time: '~15:31', subject: '[PNM] Portabilités prévues DIGICEL-WIZZEE', from: 'porta_pnmv3', action: 'Vérifier IN/OUT DIGICEL + WIZZEE, portabilités internes veille.', category: 'reporting' },
-  { time: '~15:35', subject: '[PNM] Rapport vacation 2', from: 'porta_pnmv3', action: 'Comparer avec vacation 1 : fichiers manquants réapparus ? ACR OK.', category: 'vacation' },
-  { time: '~20:35', subject: '[PNM] Rapport vacation 3 + clôture', from: 'porta_pnmv3', action: 'Dernier rapport du jour. Vérifier, clôturer la journée PNM.', category: 'vacation' },
+// Timeline unifiée : serveur + mails regroupés par créneau horaire (ordre asc)
+type TimelineSlotItem = {
+  type: 'mail' | 'server';
+  title: string;
+  detail: string;
+  category?: 'vacation' | 'supervision' | 'incident' | 'reporting';
+  from?: string;
+  commands?: string[];
+  check?: string;
+  server?: string;
+};
+type TimelineSlot = { time: string; items: TimelineSlotItem[] };
+
+const DAILY_TIMELINE: TimelineSlot[] = [
+  {
+    time: '~04:00',
+    items: [
+      { type: 'mail', title: '[CTO] Bascule du jour tardive ou en echec', detail: 'Vérifier si des MSISDN nécessitent un rattrapage manuel. Fichiers Rattrapage_CTO_MQ/GF/GP.', category: 'supervision', from: 'APP_VENTES' },
+    ],
+  },
+  {
+    time: '~09:00',
+    items: [
+      { type: 'server', title: 'Bascule & Valorisation', detail: 'Tous les opérateurs "Check success" + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log', 'tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log'], check: 'Tous les opérateurs "Check success" + "Fin de Traitement"' },
+      { type: 'mail', title: '[PNM] Reporting RIO incorrect', detail: 'Vérifier le nombre de refus entrante/sortante pour RIO incorrect. Si > 0, investiguer.', category: 'reporting', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM][INCIDENT] Incidents détectés', detail: 'Analyser chaque incident : refus 1210/1220, erreurs 7000, AR non-reçus, conflits.', category: 'incident', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~10:15',
+    items: [
+      { type: 'server', title: 'Génération fichiers vacation', detail: 'Fichier PNMDATA généré pour op. 01, 03, 04, 05, 06 + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log'], check: 'Fichier PNMDATA généré pour op. 01, 03, 04, 05, 06 + "Fin de Traitement"' },
+      { type: 'mail', title: '[PNMV3] PSO du jour Forfait', detail: 'Ouvrir le CSV Pnm_PSO_MOBI, vérifier la volumétrie vs prévisions veille.', category: 'reporting', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~11:15',
+    items: [
+      { type: 'server', title: 'Acquittements fichiers', detail: '"Aucune notification d\'AR SYNC non-reçu" pour chaque opérateur', server: 'vmqproportasync01', commands: ['tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log'], check: '"Aucune notification d\'AR SYNC non-reçu" pour chaque opérateur' },
+      { type: 'mail', title: '[PNM] Ticket(s) 1210 en attente', detail: 'Trier par ancienneté. < 3j surveiller, 3-5j relancer, > 5j escalader.', category: 'incident', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Ticket(s) en attente', detail: 'Traiter les tickets les plus anciens en priorité (XLS joint).', category: 'incident', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Rapport vacation 1', detail: 'Vérifier fichiers échangés = attendus, ACR OK pour les 5 opérateurs, aucun .ERR.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~15:25',
+    items: [
+      { type: 'mail', title: '[PROD] Rapport activité automates', detail: 'Vérifier SUCCESS pour BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.', category: 'supervision', from: 'supervision@digicelgroup.fr' },
+      { type: 'mail', title: '[PNM] Portabilités prévues DIGICEL-WIZZEE', detail: 'Vérifier IN/OUT DIGICEL + WIZZEE, portabilités internes veille.', category: 'reporting', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Rapport vacation 2', detail: 'Comparer avec vacation 1 : fichiers manquants réapparus ? ACR OK.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~20:35',
+    items: [
+      { type: 'mail', title: '[PNM] Rapport vacation 3 + clôture', detail: 'Dernier rapport du jour. Vérifier, clôturer la journée PNM.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
 ];
 
 const USEFUL_LINKS: UsefulLink[] = [
@@ -685,100 +723,66 @@ function TabDailyChecks() {
       <SectionTitle
         icon="solar:checklist-minimalistic-bold-duotone"
         title="Vérifications quotidiennes"
-        subtitle="Checklist chronologique des vérifications à effectuer chaque jour ouvré"
+        subtitle="Timeline chronologique des vérifications à effectuer chaque jour ouvré"
       />
 
       <Alert severity="warning" sx={{ mb: 3 }} icon={<Iconify icon="solar:info-circle-bold" width={24} />}>
         Les heures indiquées sont approximatives. Utiliser le <strong>Dashboard Monitoring</strong> pour le suivi en temps réel avec auto-remplissage.
       </Alert>
 
-      {/* Server checks */}
-      <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
-        <Iconify icon="solar:server-bold-duotone" width={22} sx={{ mr: 1, verticalAlign: 'text-bottom' }} />
-        Vérifications serveur (SSH)
-      </Typography>
-
-      <Stack spacing={2} sx={{ mb: 4 }}>
-        {[
-          {
-            time: '09:00',
-            title: 'Bascule & Valorisation',
-            server: 'vmqproportasync01',
-            commands: [
-              'tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log',
-              'tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log',
-            ],
-            check: 'Tous les opérateurs "Check success" + "Fin de Traitement"',
-          },
-          {
-            time: '10:15',
-            title: 'Génération fichiers vacation',
-            server: 'vmqproportasync01',
-            commands: ['tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log'],
-            check: 'Fichier PNMDATA généré pour op. 01, 03, 04, 05, 06 + "Fin de Traitement"',
-          },
-          {
-            time: '11:15',
-            title: 'Acquittements fichiers',
-            server: 'vmqproportasync01',
-            commands: ['tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log'],
-            check: '"Aucune notification d\'AR SYNC non-reçu" pour chaque opérateur',
-          },
-        ].map((check) => (
-          <Card key={check.title} variant="outlined">
-            <CardContent>
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                <Chip label={check.time} size="small" color="primary" />
-                <Typography variant="subtitle2">{check.title}</Typography>
-                <Chip label={check.server} size="small" variant="outlined" sx={{ ml: 'auto', fontFamily: 'monospace', fontSize: '0.7rem' }} />
+      <Stack spacing={2}>
+        {DAILY_TIMELINE.map((slot) => (
+          <Card key={slot.time} variant="outlined">
+            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+                <Chip label={slot.time} color="primary" size="small" sx={{ fontFamily: 'monospace', fontWeight: 700, minWidth: 64 }} />
+                <Typography variant="caption" color="text.secondary">
+                  {slot.items.length} vérification{slot.items.length > 1 ? 's' : ''}
+                </Typography>
               </Stack>
-              <Box sx={{ bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1.5, mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                {check.commands.map((cmd, i) => (
-                  <Box key={i}>$ {cmd}</Box>
-                ))}
-              </Box>
-              <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Iconify icon="solar:check-circle-bold" width={16} color="success.main" />
-                <Typography variant="body2" color="text.secondary">{check.check}</Typography>
+
+              <Stack spacing={1.5}>
+                {slot.items.map((item, i) => {
+                  const cat = item.category ? MAIL_CATEGORY_CONFIG[item.category] : null;
+                  return (
+                    <Box key={i} sx={{ pl: 2, borderLeft: 2, borderColor: item.type === 'server' ? 'primary.main' : (cat ? `${cat.color}.main` : 'divider') }}>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.25 }}>
+                        <Iconify
+                          icon={item.type === 'server' ? 'solar:server-bold-duotone' : 'solar:letter-bold-duotone'}
+                          width={16}
+                          sx={{ color: item.type === 'server' ? 'primary.main' : 'text.secondary', flexShrink: 0 }}
+                        />
+                        <Typography variant="subtitle2" sx={{ fontSize: '0.8rem' }}>{item.title}</Typography>
+                        {cat && <Chip label={cat.label} size="small" color={cat.color} variant="soft" sx={{ height: 20, fontSize: '0.65rem' }} />}
+                        {item.server && <Chip label={item.server} size="small" variant="outlined" sx={{ height: 20, fontFamily: 'monospace', fontSize: '0.65rem' }} />}
+                      </Stack>
+
+                      {item.commands && (
+                        <Box sx={{ bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1, my: 0.5, fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                          {item.commands.map((cmd, j) => (
+                            <Box key={j}>$ {cmd}</Box>
+                          ))}
+                        </Box>
+                      )}
+
+                      {item.check && (
+                        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 0.5 }}>
+                          <Iconify icon="solar:check-circle-bold" width={14} color="success.main" />
+                          <Typography variant="caption" color="text.secondary">{item.check}</Typography>
+                        </Stack>
+                      )}
+
+                      {item.type === 'mail' && (
+                        <Typography variant="caption" color="text.secondary">{item.detail}</Typography>
+                      )}
+                    </Box>
+                  );
+                })}
               </Stack>
             </CardContent>
           </Card>
         ))}
       </Stack>
-
-      {/* Mail checks */}
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        <Iconify icon="solar:letter-bold-duotone" width={22} sx={{ mr: 1, verticalAlign: 'text-bottom' }} />
-        Mails à vérifier (chronologique)
-      </Typography>
-
-      <TableContainer component={Card}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell width={80}>Heure</TableCell>
-              <TableCell width={100}>Type</TableCell>
-              <TableCell>Objet du mail</TableCell>
-              <TableCell>Expéditeur</TableCell>
-              <TableCell>Action requise</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {DAILY_MAILS.map((mail, i) => {
-              const cat = MAIL_CATEGORY_CONFIG[mail.category];
-              return (
-                <TableRow key={i} hover>
-                  <TableCell><Typography variant="body2" fontFamily="monospace" fontWeight={600}>{mail.time}</Typography></TableCell>
-                  <TableCell><Chip label={cat.label} size="small" color={cat.color} variant="soft" /></TableCell>
-                  <TableCell><Typography variant="body2" fontWeight={500}>{mail.subject}</Typography></TableCell>
-                  <TableCell><Typography variant="caption" color="text.secondary">{mail.from}</Typography></TableCell>
-                  <TableCell><Typography variant="body2" color="text.secondary">{mail.action}</Typography></TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
     </Box>
   );
 }
