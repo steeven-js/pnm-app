@@ -24,6 +24,11 @@ export type MonitoringData = {
 
 export type EventCategory = 'bascule' | 'vacation' | 'incident' | 'reporting' | 'supervision';
 
+export type EmailSubject = {
+    subject: string;
+    origin: 'internal' | 'external';
+};
+
 export type PnmEventConfig = {
     key: string;
     label: string;
@@ -32,6 +37,7 @@ export type PnmEventConfig = {
     icon: string;
     checklist: string[];
     category: EventCategory;
+    emailSubjects?: EmailSubject[];
 };
 
 export type EnrichedPnmEvent = PnmEventConfig & {

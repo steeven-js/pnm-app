@@ -6,9 +6,11 @@ import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 import { Iconify } from 'src/components/iconify';
-import type { EnrichedPnmEvent, EventStatus } from 'src/types/monitoring';
+import type { EnrichedPnmEvent, EventStatus, EmailSubject } from 'src/types/monitoring';
 import { SUPPORTED_EVENT_KEYS } from 'src/utils/parse-mgrntlog';
 import { EventChecklist } from './event-checklist';
 import { EventNotes } from './event-notes';
@@ -20,6 +22,52 @@ type EventDetailPanelProps = {
     saving?: boolean;
     readOnly?: boolean;
 };
+
+function EmailSubjectRow({ item }: { item: EmailSubject }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = useCallback(async () => {
+        await navigator.clipboard.writeText(item.subject);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, [item.subject]);
+
+    return (
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+            <Chip
+                label={item.origin === 'internal' ? 'Interne' : 'Externe'}
+                size="small"
+                color={item.origin === 'internal' ? 'info' : 'warning'}
+                variant="soft"
+                sx={{ minWidth: 64, fontSize: '0.7rem' }}
+            />
+            <Typography
+                variant="body2"
+                sx={{
+                    flex: 1,
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem',
+                    bgcolor: 'action.hover',
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1,
+                    userSelect: 'all',
+                }}
+            >
+                {item.subject}
+            </Typography>
+            <Tooltip title={copied ? 'Copie !' : 'Copier pour rechercher'}>
+                <IconButton size="small" onClick={handleCopy}>
+                    <Iconify
+                        icon={copied ? 'solar:check-circle-bold' : 'solar:copy-linear'}
+                        width={18}
+                        color={copied ? 'success.main' : undefined}
+                    />
+                </IconButton>
+            </Tooltip>
+        </Stack>
+    );
+}
 
 const STATUS_LABELS: Record<EventStatus, { label: string; color: 'default' | 'success' | 'error' | 'warning' }> = {
     pending: { label: 'En attente', color: 'default' },
@@ -71,6 +119,17 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                     </Stack>
 
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{event.description}</Typography>
+
+                    {event.emailSubjects && event.emailSubjects.length > 0 && (
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                                Rechercher dans la boite mail
+                            </Typography>
+                            {event.emailSubjects.map((es) => (
+                                <EmailSubjectRow key={es.subject} item={es} />
+                            ))}
+                        </Box>
+                    )}
 
                     <Divider sx={{ mb: 2 }} />
 

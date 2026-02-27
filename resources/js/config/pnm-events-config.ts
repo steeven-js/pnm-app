@@ -28,6 +28,11 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '09:00',
         icon: 'solar:server-bold-duotone',
         category: 'supervision',
+        emailSubjects: [
+            { subject: '[PNMV3]Verification Bascule Porta MOBI', origin: 'internal' },
+            { subject: '[PNMV3]Verification Bascule Porta MOBI : FIN', origin: 'internal' },
+            { subject: '[PNM]Controle fichier batchhandler FNR_V3 sur EMA', origin: 'internal' },
+        ],
         checklist: [
             // EmaExtracter — bascule
             'EmaExtracter : Orange Caraïbe Check success',
@@ -72,6 +77,10 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '09:01',
         icon: 'solar:bug-bold-duotone',
         category: 'incident',
+        emailSubjects: [
+            { subject: '[PNM][INCIDENT]', origin: 'internal' },
+            { subject: 'PNM INCIDENT : Numeros en ecart dans le fichier de synchronisation', origin: 'external' },
+        ],
         checklist: [
             "Email [PNM][INCIDENT] reçu (ou aucun = pas d'incident)",
             'Refus 1210/1220 : lire motifs, traiter ou informer commercial',
@@ -108,6 +117,9 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '10:16',
         icon: 'solar:clipboard-list-bold-duotone',
         category: 'reporting',
+        emailSubjects: [
+            { subject: '[PNM] Verification des resiliations pour PSO', origin: 'internal' },
+        ],
         checklist: [
             'Email [PNMV3] PSO du jour reçu',
             'Ouvrir fichier Pnm_PSO_MOBI CSV',
@@ -159,6 +171,9 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '11:35',
         icon: 'solar:file-send-bold-duotone',
         category: 'vacation',
+        emailSubjects: [
+            { subject: '[PNM] 1ere vacation', origin: 'internal' },
+        ],
         checklist: [
             'Email porta_pnmv3 vacation reçu',
             'Fichiers échangés = fichiers attendus',
@@ -216,6 +231,9 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '15:35',
         icon: 'solar:file-download-bold-duotone',
         category: 'vacation',
+        emailSubjects: [
+            { subject: '[PNM] 2eme vacation', origin: 'internal' },
+        ],
         checklist: [
             'Email porta_pnmv3 2ème vacation reçu',
             'Fichiers échangés = fichiers attendus',
@@ -233,6 +251,9 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '20:35',
         icon: 'solar:check-circle-bold-duotone',
         category: 'vacation',
+        emailSubjects: [
+            { subject: '[PNM] 3eme vacation', origin: 'internal' },
+        ],
         checklist: [
             'Email porta_pnmv3 3ème vacation reçu',
             'Fichiers échangés = fichiers attendus',
