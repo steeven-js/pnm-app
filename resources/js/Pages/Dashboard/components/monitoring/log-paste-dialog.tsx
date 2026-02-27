@@ -68,8 +68,8 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
     },
     verif_acquittements: {
         title: 'Auto-remplir depuis PnmAckManager.log',
-        description: 'Collez le contenu de PnmSyncAckManager.log (tail -f PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
-        placeholder: `Collez le résultat de tail ici...\n\nPnmSyncAckManager.php|...| Traitement operateur 03\nPnmSyncAckManager.php|...| *** Aucune notification d'AR SYNC non-recu ***\n...\nPnmSyncAckManager.php|...| Fin de Traitement`,
+        description: 'Collez le contenu de PnmAckManager.log (tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
+        placeholder: `Collez le résultat de tail ici...\n\nPnmDataAckManager.php|2026-02-27T14:10:01-04:00| ..Verification operateur Dauphin Telecom : Check success\nPnmDataAckManager.php|...| ..Verification operateur UTS Caraibe : Check success\nPnmDataAckManager.php|...| ..Verification operateur Free Caraibes : Check success\nPnmDataAckManager.php|...| Fin Initialisation\nPnmDataAckManager.php|...| .........Accusé reçu PNMDATA.02.01... .ACR => E000:\nPnmDataAckManager.php|...| Fin de Traitement 9.44secondes.`,
     },
 };
 

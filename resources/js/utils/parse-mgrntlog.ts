@@ -761,23 +761,52 @@ function autoFillVerifBasculeEmail(
 }
 
 // ===================================================================
-// 12. Vérif acquittements (PnmSyncAckManager.log)
+// 12. Vérif acquittements (PnmAckManager.log / PnmDataAckManager.php)
 // ===================================================================
+
+/** Map operator log names → codes */
+const ACK_OP_MAP: { name: string; pattern: RegExp; code: string }[] = [
+    { name: 'Outremer Telecom / SFR', pattern: /Outremer Telecom|SFR/i, code: '03' },
+    { name: 'Dauphin Telecom', pattern: /Dauphin Telecom/i, code: '04' },
+    { name: 'UTS Caraibe', pattern: /UTS Caraibe/i, code: '05' },
+    { name: 'Free Caraibes', pattern: /Free Caraibes/i, code: '06' },
+];
 
 function autoFillVerifAcquittements(
     _eventKey: string,
     checklist: string[],
     content: string,
 ): AutoFillResult | null {
-    if (!/PnmSyncAckManager|PnmAckManager|Aucune notification/i.test(content)) return null;
+    // Accept both PnmDataAckManager.php and PnmSyncAckManager.php formats
+    if (!/PnmDataAckManager|PnmAckManager|PnmSyncAckManager|Accus[eé] re[cç]u/i.test(content)) return null;
 
+    // --- Detect operator verifications (Check success) ---
     const opChecks: Record<string, boolean> = {};
-    for (const code of ['03', '04', '05', '06']) {
-        const pattern = new RegExp(
-            `Traitement operateur ${code}[\\s\\S]*?Aucune notification d['']AR SYNC non-recu`,
-            'i',
-        );
-        opChecks[code] = pattern.test(content);
+    for (const op of ACK_OP_MAP) {
+        const pat = new RegExp(`Verification operateur\\s+${op.pattern.source}.*Check success`, 'i');
+        opChecks[op.code] = pat.test(content);
+    }
+
+    // --- Count ACR received (Accusé reçu ... => E000) ---
+    const acrReceivedMatches = content.match(/Accus[eé] re[cç]u\s+\S+\.ACR\s*=>\s*E000/gi) || [];
+    const acrCount = acrReceivedMatches.length;
+
+    // --- Count NOT FOUND errors ---
+    const notFoundMatches = content.match(/NOT FOUND!/gi) || [];
+    const notFoundCount = notFoundMatches.length;
+
+    // --- Fin de Traitement ---
+    const finTraitement = /Fin de Traitement/i.test(content);
+
+    // --- Legacy format support: "Aucune notification d'AR SYNC non-recu" ---
+    for (const op of ACK_OP_MAP) {
+        if (!opChecks[op.code]) {
+            const legacyPat = new RegExp(
+                `Traitement operateur ${op.code}[\\s\\S]*?Aucune notification d['']AR SYNC non-recu`,
+                'i',
+            );
+            if (legacyPat.test(content)) opChecks[op.code] = true;
+        }
     }
 
     const rules: Record<string, () => boolean> = {
@@ -791,10 +820,13 @@ function autoFillVerifAcquittements(
 
     const opNames: Record<string, string> = { '03': 'SFR Caraïbe', '04': 'Dauphin Télécom', '05': 'UTS', '06': 'FREEC' };
     const lines = ['[Auto] Vérification acquittements PNMDATA'];
-    for (const code of ['03', '04', '05', '06']) {
-        const status = opChecks[code] ? 'OK (aucun AR non-reçu)' : '⚠ AR SYNC non-reçu détecté';
-        lines.push(`  Op. ${code} (${opNames[code]}): ${status}`);
+    for (const op of ACK_OP_MAP) {
+        const status = opChecks[op.code] ? 'OK (Check success)' : '⚠ Non détecté ou échec';
+        lines.push(`  Op. ${op.code} (${opNames[op.code]}): ${status}`);
     }
+    if (acrCount > 0) lines.push(`\nACR traités: ${acrCount} accusé(s) reçu(s) (E000)`);
+    if (notFoundCount > 0) lines.push(`⚠ ${notFoundCount} fichier(s) NOT FOUND`);
+    lines.push(`Fin de traitement: ${finTraitement ? 'OUI' : 'NON'}`);
 
     return { checkedItems, notes: lines.join('\n') };
 }
