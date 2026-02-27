@@ -21,6 +21,8 @@ import { Iconify } from 'src/components/iconify';
 
 import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
+import Tooltip from '@mui/material/Tooltip';
+
 import type {
   FileAnalysisResult,
   FilenameResult,
@@ -143,6 +145,20 @@ export default function FilenameDecoder() {
     return tickets;
   }, [fileResult, typeFilter, msisdnSearch]);
 
+  // Build a map: lineNumber → issues for that line
+  const issuesByLine = useMemo(() => {
+    if (!fileResult) return new Map<number, ValidationIssue[]>();
+    const map = new Map<number, ValidationIssue[]>();
+    for (const issue of fileResult.issues) {
+      if (issue.lineNumber) {
+        const arr = map.get(issue.lineNumber) ?? [];
+        arr.push(issue);
+        map.set(issue.lineNumber, arr);
+      }
+    }
+    return map;
+  }, [fileResult]);
+
   return (
     <DashboardLayout>
       <Head title="Analyseur de fichier PNM" />
@@ -200,7 +216,7 @@ export default function FilenameDecoder() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".acr,.err,.txt"
+                accept=".acr,.err,.txt,*"
                 onChange={handleFileImport}
                 hidden
               />
@@ -334,6 +350,28 @@ export default function FilenameDecoder() {
                 </Card>
               </Box>
 
+              {/* Inconsistencies / Issues — prominent display above ticket list */}
+              {fileResult.issues.length > 0 && (
+                <Card sx={{ borderLeft: 4, borderColor: fileResult.issues.some((i) => i.severity === 'error') ? '#dc2626' : '#d97706' }}>
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify
+                        icon={fileResult.issues.some((i) => i.severity === 'error') ? 'solar:close-circle-bold' : 'solar:danger-triangle-bold'}
+                        width={20}
+                        sx={{ color: fileResult.issues.some((i) => i.severity === 'error') ? '#dc2626' : '#d97706' }}
+                      />
+                      <Typography variant="subtitle1" fontWeight={700}>
+                        {fileResult.issues.length} incohérence{fileResult.issues.length > 1 ? 's' : ''} détectée{fileResult.issues.length > 1 ? 's' : ''}
+                      </Typography>
+                    </Box>
+
+                    {fileResult.issues.map((issue, i) => (
+                      <IssueRow key={i} issue={issue} />
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Ticket list */}
               {fileResult.tickets.length > 0 && (
                 <Card>
@@ -384,21 +422,15 @@ export default function FilenameDecoder() {
                         </Typography>
                       )}
                       {filteredTickets.map((ticket, idx) => (
-                        <TicketRow key={idx} ticket={ticket} expanded={expandedTickets.has(idx)} onToggle={() => toggleTicket(idx)} />
+                        <TicketRow
+                          key={idx}
+                          ticket={ticket}
+                          expanded={expandedTickets.has(idx)}
+                          onToggle={() => toggleTicket(idx)}
+                          issues={issuesByLine.get(ticket.lineNumber) ?? []}
+                        />
                       ))}
                     </Box>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Issues */}
-              {fileResult.issues.length > 0 && (
-                <Card>
-                  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography variant="subtitle2">Avertissements ({fileResult.issues.length})</Typography>
-                    {fileResult.issues.map((issue, i) => (
-                      <IssueRow key={i} issue={issue} />
-                    ))}
                   </CardContent>
                 </Card>
               )}
@@ -421,14 +453,23 @@ function LabelValue({ label, value, mono }: { label: string; value: string; mono
   );
 }
 
-function TicketRow({ ticket, expanded, onToggle }: { ticket: ParsedTicket; expanded: boolean; onToggle: () => void }) {
+function TicketRow({ ticket, expanded, onToggle, issues = [] }: { ticket: ParsedTicket; expanded: boolean; onToggle: () => void; issues?: ValidationIssue[] }) {
   const color = getTicketColor(ticket.common.code);
   const hasSpecific = Object.keys(ticket.specific).length > 0;
+  const hasIssues = issues.length > 0;
+  const col3Mismatch = issues.find((i) => i.type === 'col3_mismatch');
 
   return (
-    <Box sx={{ borderLeft: 3, borderColor: color, borderRadius: 1, bgcolor: `${color}08`, overflow: 'hidden' }}>
+    <Box sx={{
+      borderLeft: 3,
+      borderColor: hasIssues ? '#d97706' : color,
+      borderRadius: 1,
+      bgcolor: hasIssues ? 'rgba(217, 119, 6, 0.06)' : `${color}08`,
+      overflow: 'hidden',
+      ...(hasIssues && { outline: '1px solid rgba(217, 119, 6, 0.25)' }),
+    }}>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: `${color}12` } }}
+        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: hasIssues ? 'rgba(217, 119, 6, 0.10)' : `${color}12` } }}
         onClick={onToggle}
       >
         <IconButton size="small" sx={{ p: 0 }}>
@@ -451,6 +492,17 @@ function TicketRow({ ticket, expanded, onToggle }: { ticket: ParsedTicket; expan
           variant="outlined"
           sx={{ fontSize: 10, height: 20, display: { xs: 'none', md: 'inline-flex' } }}
         />
+        {hasIssues && (
+          <Tooltip title={issues.map((i) => i.message).join('\n')}>
+            <Chip
+              icon={<Iconify icon="solar:danger-triangle-bold" width={14} />}
+              label="Incohérence"
+              size="small"
+              color="warning"
+              sx={{ fontWeight: 700, fontSize: 11, height: 22 }}
+            />
+          </Tooltip>
+        )}
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12, ml: 'auto' }}>
           {ticket.common.oprName} → {ticket.common.opdName}
         </Typography>
@@ -458,11 +510,44 @@ function TicketRow({ ticket, expanded, onToggle }: { ticket: ParsedTicket; expan
 
       <Collapse in={expanded}>
         <Box sx={{ px: 2, pb: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* Inline issue alert with details */}
+          {col3Mismatch && (
+            <Alert severity="warning" variant="outlined" sx={{ py: 0.5, '& .MuiAlert-message': { width: '100%' } }}>
+              <Typography variant="caption" fontWeight={700} sx={{ display: 'block', mb: 0.5 }}>
+                Incohérence col.3 vs destinataire fichier
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Col.3 « {col3Mismatch.details?.col3Role} » :</Typography>
+                  <Typography variant="caption" fontWeight={700} sx={{ color: '#d97706', display: 'block' }}>
+                    {col3Mismatch.details?.col3Name} ({col3Mismatch.details?.col3Value})
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Destinataire fichier attendu :</Typography>
+                  <Typography variant="caption" fontWeight={700} sx={{ color: '#16a34a', display: 'block' }}>
+                    {col3Mismatch.details?.expectedName} ({col3Mismatch.details?.expectedValue})
+                  </Typography>
+                </Box>
+              </Box>
+            </Alert>
+          )}
+
+          {/* Other (non col3_mismatch) issues */}
+          {issues.filter((i) => i.type !== 'col3_mismatch').map((issue, i) => (
+            <Alert key={i} severity={issue.severity === 'error' ? 'error' : issue.severity === 'warning' ? 'warning' : 'info'} variant="outlined" sx={{ py: 0.5 }}>
+              <Typography variant="caption">{issue.message}</Typography>
+            </Alert>
+          ))}
+
           <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0.5, fontSize: 13 }}>
             <Typography variant="caption" color="text.secondary">Col.2 — {ticket.common.col2Role} (origine)</Typography>
             <Typography variant="caption">{ticket.common.opr} — {ticket.common.oprName}</Typography>
             <Typography variant="caption" color="text.secondary">Col.3 — {ticket.common.col3Role} (destination)</Typography>
-            <Typography variant="caption">{ticket.common.opd} — {ticket.common.opdName}</Typography>
+            <Typography variant="caption" sx={col3Mismatch ? { color: '#d97706', fontWeight: 700 } : undefined}>
+              {ticket.common.opd} — {ticket.common.opdName}
+              {col3Mismatch && ' ⚠'}
+            </Typography>
             <Typography variant="caption" color="text.secondary">Col.4 — OPR</Typography>
             <Typography variant="caption">{ticket.common.opa} — {ticket.common.opaName}</Typography>
             <Typography variant="caption" color="text.secondary">Col.5 — {ticket.common.col5Label}</Typography>
@@ -506,6 +591,38 @@ function IssueRow({ issue }: { issue: ValidationIssue }) {
     warning: '#d97706',
     info: '#2563eb',
   };
+
+  // Rich display for col3 mismatch issues
+  if (issue.type === 'col3_mismatch' && issue.details) {
+    const d = issue.details;
+    return (
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: 'rgba(217, 119, 6, 0.06)', border: '1px solid rgba(217, 119, 6, 0.18)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+          <Iconify icon="solar:danger-triangle-bold" width={16} sx={{ color: '#d97706', flexShrink: 0 }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
+            Ligne {issue.lineNumber} — {d.ticketAbbrev} ({d.ticketCode}) — MSISDN {d.msisdn}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 3, ml: 3 }}>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Col.3 « {d.col3Role} » dans le ticket :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
+              {d.col3Name} ({d.col3Value})
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Iconify icon="solar:transfer-horizontal-bold" width={20} sx={{ color: 'text.disabled' }} />
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Destinataire fichier (entête) :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#16a34a' }}>
+              {d.expectedName} ({d.expectedValue})
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 0.5 }}>

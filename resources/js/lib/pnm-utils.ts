@@ -383,6 +383,12 @@ export type ParsedTicket = {
 export type ValidationIssue = {
     severity: 'error' | 'warning' | 'info';
     message: string;
+    /** Line number in the file (1-based) — links the issue to a specific ticket row */
+    lineNumber?: number;
+    /** Short machine-readable type for UI styling */
+    type?: 'col3_mismatch' | 'unknown_code' | 'count_mismatch' | 'bad_header' | 'bad_footer' | 'format';
+    /** Extra structured details for rich UI display */
+    details?: Record<string, string>;
 };
 
 export type TicketSummary = {
@@ -618,7 +624,7 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
         const fields = raw.split('|').map((f) => f.trim());
 
         if (fields.length < 2) {
-            issues.push({ severity: 'warning', message: `Ligne ${(header ? 2 : 1) + i} : format non reconnu (moins de 2 champs).` });
+            issues.push({ severity: 'warning', message: `Ligne ${(header ? 2 : 1) + i} : format non reconnu (moins de 2 champs).`, lineNumber: (header ? 2 : 1) + i, type: 'format' });
             continue;
         }
 
@@ -626,7 +632,7 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
         const specific = parseTicketSpecific(common.code, fields);
 
         if (!TICKET_TYPE_MAP[common.code]) {
-            issues.push({ severity: 'info', message: `Ligne ${(header ? 2 : 1) + i} : code ticket inconnu "${common.code}".` });
+            issues.push({ severity: 'info', message: `Ligne ${(header ? 2 : 1) + i} : code ticket inconnu "${common.code}".`, lineNumber: (header ? 2 : 1) + i, type: 'unknown_code' });
         }
 
         // Validate: col3 (Opérateur Destination) must match the file's destination operator
@@ -638,9 +644,22 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
             if (ticketCol3 !== '00' && ticketCol3 !== fileDestOp) {
                 const roles = TICKET_COLUMN_ROLES[common.code];
                 const col3Label = roles?.col3Role ?? 'Destination';
+                const lineNum = (header ? 2 : 1) + i;
                 issues.push({
                     severity: 'warning',
-                    message: `Ligne ${(header ? 2 : 1) + i} (${common.typeInfo.abbrev}) : col. 3 « ${col3Label} » = ${getOperatorName(ticketCol3)} (${ticketCol3}) ≠ destinataire fichier ${getOperatorName(fileDestOp)} (${fileDestOp}).`,
+                    message: `Ligne ${lineNum} (${common.typeInfo.abbrev}) : col. 3 « ${col3Label} » = ${getOperatorName(ticketCol3)} (${ticketCol3}) ≠ destinataire fichier ${getOperatorName(fileDestOp)} (${fileDestOp}).`,
+                    lineNumber: lineNum,
+                    type: 'col3_mismatch',
+                    details: {
+                        ticketCode: common.code,
+                        ticketAbbrev: common.typeInfo.abbrev,
+                        col3Role: col3Label,
+                        col3Value: ticketCol3,
+                        col3Name: getOperatorName(ticketCol3),
+                        expectedValue: fileDestOp,
+                        expectedName: getOperatorName(fileDestOp),
+                        msisdn: common.msisdn,
+                    },
                 });
             }
         }
@@ -662,6 +681,7 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
             issues.push({
                 severity: 'error',
                 message: `Compteur pied de page (${footer.declaredCount} lignes = ${expectedTickets} tickets attendus) ≠ nombre réel de tickets (${actualCount}).`,
+                type: 'count_mismatch',
             });
         }
     }
