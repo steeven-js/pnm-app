@@ -53,7 +53,7 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
     },
     verif_bascule_server: {
         title: 'Auto-remplir depuis les logs serveur',
-        description: 'Collez le résultat des deux commandes : tail -n 12 EmaExtracter.log puis tail -n 12 EmmExtracter.log (les deux l\'un après l\'autre).',
+        description: 'Collez le résultat des deux commandes : tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log puis tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log (les deux l\'un après l\'autre).',
         placeholder: `--- tail -n 12 EmaExtracter.log ---\nEmaExtracter.php|2026-02-26T09:00:01-04:00| Initialisation\nEmaExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\nEmaExtracter.php|..| ..Verification operateur Digicel AFG : Check success\n...\nEmaExtracter.php|..| ..........194 bascules ajoutés.\nEmaExtracter.php|..| Fin de Traitement 63.46secondes.\n\n--- tail -n 12 EmmExtracter.log ---\nEmmExtracter.php|2026-02-26T09:01:01-04:00| Initialisation\nEmmExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\n...\nEmmExtracter.php|..| ..........353361 bascules ajoutés.\nEmmExtracter.php|..| Fin de Traitement 13.54secondes.`,
     },
     verif_bascule_email: {
@@ -63,13 +63,13 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
     },
     verif_generation_pnmdata: {
         title: 'Auto-remplir depuis PnmDataManager.log',
-        description: 'Collez le contenu de PnmDataManager.log (tail -n 14) pour vérifier la génération des fichiers PNMDATA de vacation.',
+        description: 'Collez le contenu de PnmDataManager.log (tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log) pour vérifier la génération des fichiers PNMDATA de vacation.',
         placeholder: `Collez le résultat de tail ici...\n\nPnmDataManager.php|...| Traitement operateur 01\nPnmDataManager.php|...| ..........Generation du fichier PNMDATA.02.01... (#tickets: 360)\n...\nPnmDataManager.php|...| Fin de Traitement`,
     },
     verif_acquittements: {
         title: 'Auto-remplir depuis PnmAckManager.log',
-        description: 'Collez le contenu de PnmAckManager.log (tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
-        placeholder: `Collez le résultat de tail ici...\n\nPnmDataAckManager.php|2026-02-27T14:10:01-04:00| ..Verification operateur Dauphin Telecom : Check success\nPnmDataAckManager.php|...| ..Verification operateur UTS Caraibe : Check success\nPnmDataAckManager.php|...| ..Verification operateur Free Caraibes : Check success\nPnmDataAckManager.php|...| Fin Initialisation\nPnmDataAckManager.php|...| .........Accusé reçu PNMDATA.02.01... .ACR => E000:\nPnmDataAckManager.php|...| Fin de Traitement 9.44secondes.`,
+        description: 'Collez le contenu de PnmAckManager.log (tail -n 50 /home/porta_pnmv3/PortaSync/log/PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
+        placeholder: `Collez le résultat de tail -n 50 ici...\n\nPnmDataAckManager.php|...| Initialisation\nPnmDataAckManager.php|...| ..Verification operateur Orange Caraibe : Check success\nPnmDataAckManager.php|...| ..Verification operateur Digicel AFG : Check success\nPnmDataAckManager.php|...| ..Verification operateur Outremer Telecom / SFR : Check success\nPnmDataAckManager.php|...| ..Verification operateur Dauphin Telecom : Check success\nPnmDataAckManager.php|...| ..Verification operateur UTS Caraibe : Check success\nPnmDataAckManager.php|...| ..Verification operateur Free Caraibes : Check success\nPnmDataAckManager.php|...| Fin Initialisation\nPnmDataAckManager.php|...| .........Accusé reçu PNMDATA.02.01...ACR => E000:\nPnmDataAckManager.php|...| Fin de Traitement 9.44secondes.`,
     },
 };
 

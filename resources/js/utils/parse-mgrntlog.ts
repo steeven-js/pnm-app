@@ -603,27 +603,35 @@ function autoFillVerifBascule(
     const lines = ['[Auto] Vérification bascule & valorisation'];
 
     if (ema.hasContent) {
+        const missingEma = VERIF_OPERATORS.filter((op) => !ema.opResults[op]);
         lines.push('');
         lines.push('--- EmaExtracter.log (bascule) ---');
         for (const op of VERIF_OPERATORS) {
-            const status = ema.opResults[op] ? 'Check success' : 'ECHEC';
+            const status = ema.opResults[op] ? 'Check success' : '⚠ Non détecté';
             lines.push(`  ${op}: ${status}`);
         }
         if (ema.count !== null) lines.push(`  Bascules ajoutées: ${ema.count}`);
         if (ema.duration !== null) lines.push(`  Durée traitement: ${ema.duration}s`);
         lines.push(`  Fin traitement: ${ema.finished ? 'OUI' : 'NON'}`);
+        if (missingEma.length > 0) {
+            lines.push(`  ⚠ ${missingEma.length} opérateur(s) non détecté(s) — le log est peut-être tronqué, réessayez avec plus de lignes`);
+        }
     }
 
     if (emm.hasContent) {
+        const missingEmm = VERIF_OPERATORS.filter((op) => !emm.opResults[op]);
         lines.push('');
         lines.push('--- EmmExtracter.log (valorisation) ---');
         for (const op of VERIF_OPERATORS) {
-            const status = emm.opResults[op] ? 'Check success' : 'ECHEC';
+            const status = emm.opResults[op] ? 'Check success' : '⚠ Non détecté';
             lines.push(`  ${op}: ${status}`);
         }
         if (emm.count !== null) lines.push(`  Enregistrements valorisés: ${emm.count}`);
         if (emm.duration !== null) lines.push(`  Durée traitement: ${emm.duration}s`);
         lines.push(`  Fin traitement: ${emm.finished ? 'OUI' : 'NON'}`);
+        if (missingEmm.length > 0) {
+            lines.push(`  ⚠ ${missingEmm.length} opérateur(s) non détecté(s) — le log est peut-être tronqué, réessayez avec plus de lignes`);
+        }
     }
 
     if (!ema.hasContent) lines.push('\n⚠ EmaExtracter.log non détecté dans le contenu collé');
@@ -668,16 +676,22 @@ function autoFillVerifGeneration(
 
     const checkedItems = checklist.filter((item) => rules[item]?.());
 
+    const missingOps = opCodes.filter((code) => !generated[code]);
+
     const lines = ['[Auto] Génération fichiers vacation PNMDATA'];
     for (const code of opCodes) {
         const g = generated[code];
         if (g) {
             lines.push(`  Op. ${code}: ${g.file} (${g.tickets} tickets)`);
         } else {
-            lines.push(`  Op. ${code}: non généré`);
+            lines.push(`  Op. ${code}: ⚠ non détecté`);
         }
     }
     lines.push(`Traitement terminé: ${finTraitement ? 'OUI' : 'NON'}`);
+
+    if (missingOps.length > 0 && !finTraitement) {
+        lines.push(`\n⚠ ${missingOps.length} opérateur(s) non détecté(s) et pas de Fin de Traitement — le log est peut-être tronqué, réessayez avec plus de lignes (ex. tail -n 20).`);
+    }
 
     return { checkedItems, notes: lines.join('\n') };
 }
@@ -819,14 +833,20 @@ function autoFillVerifAcquittements(
     const checkedItems = checklist.filter((item) => rules[item]?.());
 
     const opNames: Record<string, string> = { '03': 'SFR Caraïbe', '04': 'Dauphin Télécom', '05': 'UTS', '06': 'FREEC' };
+    const missingOps = ACK_OP_MAP.filter((op) => !opChecks[op.code]);
+
     const lines = ['[Auto] Vérification acquittements PNMDATA'];
     for (const op of ACK_OP_MAP) {
-        const status = opChecks[op.code] ? 'OK (Check success)' : '⚠ Non détecté ou échec';
+        const status = opChecks[op.code] ? 'OK (Check success)' : '⚠ Non détecté';
         lines.push(`  Op. ${op.code} (${opNames[op.code]}): ${status}`);
     }
     if (acrCount > 0) lines.push(`\nACR traités: ${acrCount} accusé(s) reçu(s) (E000)`);
     if (notFoundCount > 0) lines.push(`⚠ ${notFoundCount} fichier(s) NOT FOUND`);
     lines.push(`Fin de traitement: ${finTraitement ? 'OUI' : 'NON'}`);
+
+    if (missingOps.length > 0) {
+        lines.push(`\n⚠ ${missingOps.length} opérateur(s) non détecté(s) dans le contenu collé (${missingOps.map((o) => o.name).join(', ')}). Le log est peut-être tronqué — réessayez avec plus de lignes (ex. tail -n 100).`);
+    }
 
     return { checkedItems, notes: lines.join('\n') };
 }
