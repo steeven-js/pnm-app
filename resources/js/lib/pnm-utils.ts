@@ -316,6 +316,66 @@ export const TICKET_COLUMN_ROLES: Record<string, { context: TicketContext; col2R
     '7000': { context: 'erreur', col2Role: 'Émetteur', col3Role: 'Destinataire', col5Label: '—' },
 };
 
+// ── Lecture en langage naturel d'un ticket ──────────────────────────────────
+// Génère une phrase explicative du type :
+// "L'opérateur X informe l'opérateur Y que le numéro XXXXXXXXXX est …"
+// Les champs opr/opd/opa/opx correspondent aux colonnes 2/3/4/5.
+
+export function getTicketReadableSentence(t: TicketCommonFields): string {
+    const m = t.msisdn || '(inconnu)';
+    // col2 = t.opr/oprName, col3 = t.opd/opdName, col4 = t.opa/opaName, col5 = t.opx/opxName
+    switch (t.code) {
+        // ── Portage normal ──
+        case '1110': // DP — OPR → OPD
+            return `L'opérateur receveur ${t.oprName} demande à l'opérateur donneur ${t.opdName} le portage du numéro ${m} (abonné particulier).`;
+        case '1120': // DE — OPR → OPD
+            return `L'opérateur receveur ${t.oprName} demande à l'opérateur donneur ${t.opdName} le portage du numéro ${m} (personne morale).`;
+        case '1210': // RP+ — OPD → OPR
+            return `L'opérateur donneur ${t.oprName} accepte la demande de portage du numéro ${m} vers l'opérateur receveur ${t.opdName}.`;
+        case '1220': // RP− — OPD → OPR
+            return `L'opérateur donneur ${t.oprName} refuse la demande de portage du numéro ${m} à l'opérateur receveur ${t.opdName}.`;
+        case '1410': // EP — OPR → Tous (col5 = OPD)
+            return `L'opérateur receveur ${t.oprName} informe tous les opérateurs que le numéro ${m} va être porté (donneur : ${t.opxName}).`;
+        case '1430': // CP — OPX → OPR (col5 = OPD)
+            return `L'opérateur ${t.oprName} confirme à l'opérateur receveur ${t.opdName} la prise en compte du portage du numéro ${m} (donneur : ${t.opxName}).`;
+
+        // ── Annulation ──
+        case '1510': // AP — OPR → OPD
+            return `L'opérateur receveur ${t.oprName} annule la demande de portage du numéro ${m} auprès de l'opérateur donneur ${t.opdName}.`;
+        case '1520': // AN — OPD → OPR
+            return `L'opérateur donneur ${t.oprName} annule le portage du numéro ${m} et en informe l'opérateur receveur ${t.opdName}.`;
+        case '1530': // CA — confirmation d'annulation
+            return `Confirmation de l'annulation du portage du numéro ${m} entre ${t.oprName} et ${t.opdName}.`;
+
+        // ── Portage inverse ──
+        case '2400': // BI — OPR initial → OPD initial
+            return `L'opérateur receveur initial ${t.oprName} donne son accord pour le portage inverse du numéro ${m} à l'opérateur donneur initial ${t.opdName}.`;
+        case '2410': // PI — OPD initial → Tous
+            return `L'opérateur donneur initial ${t.oprName} informe tous les opérateurs du portage inverse du numéro ${m}.`;
+        case '2420': // DI — OPX → OPD initial
+            return `L'opérateur ${t.oprName} confirme à l'opérateur donneur initial ${t.opdName} la prise en compte du portage inverse du numéro ${m}.`;
+        case '2430': // CI — OPX → OPD initial
+            return `L'opérateur ${t.oprName} confirme à l'opérateur donneur initial ${t.opdName} la mise à jour du portage inverse du numéro ${m}.`;
+
+        // ── Restitution ──
+        case '3400': // BR — OPR → OPA
+            return `L'opérateur receveur ${t.oprName} donne son accord pour la restitution du numéro ${m} à l'opérateur attributaire ${t.opdName}.`;
+        case '3410': // RN — OPA → Tous
+            return `L'opérateur attributaire ${t.oprName} informe tous les opérateurs de la restitution du numéro ${m}.`;
+        case '3420': // RS — OPX → OPA
+            return `L'opérateur ${t.oprName} confirme à l'opérateur attributaire ${t.opdName} la prise en compte de la restitution du numéro ${m}.`;
+        case '3430': // CS — OPX → OPA
+            return `L'opérateur ${t.oprName} confirme à l'opérateur attributaire ${t.opdName} la mise à jour pour la restitution du numéro ${m}.`;
+
+        // ── Erreur ──
+        case '7000': // ER
+            return `L'opérateur ${t.oprName} signale une erreur ou un dysfonctionnement à l'opérateur ${t.opdName} concernant le numéro ${m}.`;
+
+        default:
+            return `Ticket ${t.code} concernant le numéro ${m} de ${t.oprName} vers ${t.opdName}.`;
+    }
+}
+
 export const RESPONSE_CODE_MAP: Record<string, string> = {
     'A001': 'Accord de portage',
     'R123': 'RIO invalide ou expiré',

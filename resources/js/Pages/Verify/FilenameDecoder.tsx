@@ -30,7 +30,7 @@ import type {
   ValidationIssue,
 } from 'src/lib/pnm-utils';
 
-import { analyzeFileContent, decodeFilename } from 'src/lib/pnm-utils';
+import { analyzeFileContent, decodeFilename, getTicketReadableSentence } from 'src/lib/pnm-utils';
 
 // ----------------------------------------------------------------------
 
@@ -539,6 +539,13 @@ function TicketRow({ ticket, expanded, onToggle, issues = [] }: { ticket: Parsed
               <Typography variant="caption">{issue.message}</Typography>
             </Alert>
           ))}
+
+          {/* Lecture en langage naturel */}
+          <Box sx={{ p: 1.5, bgcolor: 'background.neutral', borderRadius: 1, borderLeft: 3, borderColor: color }}>
+            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.6 }}>
+              {getTicketReadableSentence(ticket.common)}
+            </Typography>
+          </Box>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0.5, fontSize: 13 }}>
             <Typography variant="caption" color="text.secondary">Col.2 — {ticket.common.col2Role} (origine)</Typography>

@@ -54,6 +54,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'improvement', description: 'Lecture contextuelle des tickets PNMDATA : colonnes 2/3/5 adaptées aux 3 contextes (portage, portage inverse, restitution) avec badge et labels dynamiques' },
       { type: 'new', description: 'Validation col. 3 vs destinataire fichier : alerte si l\'opérateur destination d\'un ticket ne correspond pas au destinataire déclaré dans l\'entête' },
       { type: 'new', description: 'Panneau d\'incohérences enrichi : détails structurés (ligne, code, MSISDN, comparaison col.3 vs entête), badge « Incohérence » sur les tickets concernés et alerte inline dans le détail étendu' },
+      { type: 'new', description: 'Lecture en langage naturel des tickets PNMDATA : chaque ticket est expliqué sous forme de phrase (ex. « L\'opérateur X informe l\'opérateur Y que le numéro… ») pour les 18 types de tickets dans les 3 contextes' },
       { type: 'fix', description: 'Opérateur 00 affiché comme « Tous (Opérateurs) » au lieu de « Inconnu »' },
       { type: 'fix', description: 'Compteur pied de page PNMDATA corrigé dans le parsing et l\'affichage : entête et pied de page exclus du décompte tickets' },
       { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
