@@ -61,6 +61,12 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
       { type: 'fix', description: 'Ajout de user_id au modèle MonitoringEvent pour la sauvegarde' },
       { type: 'fix', description: 'Timeline Dashboard monitoring réordonnée en ordre chronologique ascendant (les événements apparaissaient dans le désordre, ex. 11h35 entre 09h00 et 09h01)' },
+      { type: 'new', description: 'Sujets email avec bouton copier sur les événements monitoring pour rechercher facilement dans la boite mail (internes et externes)' },
+      { type: 'new', description: 'Détection nom de fichier importé vs en-tête PNMDATA : alerte si le fichier physique ne correspond pas au nom déclaré dans la première ligne' },
+      { type: 'new', description: 'Détection hash MD5 invalide : alerte rouge si un identifiant de portage contient des caractères non-hexadécimaux' },
+      { type: 'new', description: 'Détection doublons de séquence : alerte si deux tickets partagent le même numéro de séquence dans un fichier' },
+      { type: 'new', description: 'Détection tickets en doublon : alerte si un même ticket (code + MSISDN + hash) apparaît plusieurs fois' },
+      { type: 'new', description: 'Détection incohérence temporelle en-tête/pied de page : alerte si le timestamp de l\'en-tête est postérieur à celui du pied de page' },
     ],
   },
   {
