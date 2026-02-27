@@ -75,6 +75,9 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'fix', description: 'Bouton auto-remplissage adapté au type d\'événement : « depuis log serveur » pour les vérifications SSH, « depuis email » pour les mails' },
       { type: 'improvement', description: 'Détection log tronqué : avertissement actionnable si des opérateurs manquent dans le contenu collé (acquittements, bascule serveur, génération PNMDATA) avec suggestion de tail -n plus large' },
       { type: 'improvement', description: 'Commandes tail avec chemins complets du serveur vmqproportasync01 dans les descriptions des dialogs auto-remplissage' },
+      { type: 'new', description: 'Dictionnaire complet des codes PNM : 25 codes (17 réponses R1xx-R5xx + 8 erreurs E0xx-E6xx) avec label, description, catégorie, sévérité et action recommandée' },
+      { type: 'new', description: 'Procédures d\'investigation par type d\'incident : étapes numérotées avec vérifications PortaWs, contrôles RIO, commandes SSH copiables (logs, SFTP), contacts opérateur et escalade GPMAG' },
+      { type: 'improvement', description: 'Analyseur d\'incidents enrichi : chaque ticket affiche le détail du code (description + action) depuis le dictionnaire, avec couleur de sévérité' },
     ],
   },
   {

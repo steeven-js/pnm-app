@@ -376,18 +376,9 @@ export function getTicketReadableSentence(t: TicketCommonFields): string {
     }
 }
 
-export const RESPONSE_CODE_MAP: Record<string, string> = {
-    'A001': 'Accord de portage',
-    'R123': 'RIO invalide ou expiré',
-    'R201': 'Numéro non attribué à l\'opérateur',
-    'R202': 'Numéro non éligible (engagement en cours)',
-    'R203': 'Demande en cours sur ce numéro',
-    'R301': 'Données incohérentes',
-    'R322': 'Refus technique — erreur de format',
-    'R401': 'Délai de réponse dépassé',
-    'R501': 'Numéro en cours de suspension',
-    'R502': 'Numéro résilié',
-};
+import { RESPONSE_CODE_LABELS, ERROR_CODE_LABELS } from './pnm-code-dictionary';
+
+export const RESPONSE_CODE_MAP = RESPONSE_CODE_LABELS;
 
 // ── Types ──
 
@@ -1286,10 +1277,7 @@ function vacLabel(v: Vacation): string {
  */
 // ─── V6 — Analyseur d'incidents PNM (emails DIGICEL.PORTA-V3) ───────────────
 
-export const ERROR_CODE_MAP: Record<string, string> = {
-    'E011': 'AR non-reçu — fichier non acquitté',
-    'E205': 'Champ obligatoire non renseigné',
-};
+export const ERROR_CODE_MAP = ERROR_CODE_LABELS;
 
 export type IncidentTicket = {
     raw: string;

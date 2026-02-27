@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
@@ -17,9 +18,11 @@ import { Iconify } from 'src/components/iconify';
 
 import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
-import type { ParsedIncidentEmail, ParsedIncident, FilenameResult } from 'src/lib/pnm-utils';
+import type { ParsedIncidentEmail, ParsedIncident, FilenameResult, IncidentTicket } from 'src/lib/pnm-utils';
 
 import { parseIncidentEmail, decodeFilename } from 'src/lib/pnm-utils';
+
+import { lookupCode } from 'src/lib/pnm-code-dictionary';
 
 // ----------------------------------------------------------------------
 
@@ -266,45 +269,13 @@ function IncidentCard({ incident }: { incident: ParsedIncident }) {
               {incident.errorCount} erreur(s), {incident.refusalCount} refus
             </Typography>
             {incident.tickets.length > 0 && (
-              <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {incident.tickets.map((t, i) => (
-                  <Box
-                    key={i}
-                    sx={{
-                      p: 1,
-                      borderRadius: 0.5,
-                      bgcolor: 'background.neutral',
-                      fontFamily: 'monospace',
-                      fontSize: '0.75rem',
-                    }}
-                  >
-                    <Typography variant="caption" fontWeight={600}>
-                      {t.code} — {t.codeLabel}
-                    </Typography>
-                    {t.msisdn && (
-                      <Typography variant="caption" display="block">
-                        MSISDN : {t.msisdn}
-                      </Typography>
-                    )}
-                    {t.responseCode && (
-                      <Typography variant="caption" display="block">
-                        Réponse : {t.responseCode} {t.responseCodeLabel && `(${t.responseCodeLabel})`}
-                      </Typography>
-                    )}
-                    {t.errorCode && (
-                      <Typography variant="caption" display="block">
-                        Erreur : {t.errorCode} {t.errorCodeLabel && `(${t.errorCodeLabel})`}
-                      </Typography>
-                    )}
-                    {t.description && (
-                      <Typography variant="caption" display="block" color="text.secondary">
-                        {t.description}
-                      </Typography>
-                    )}
-                  </Box>
+                  <TicketDetail key={i} ticket={t} />
                 ))}
               </Box>
             )}
+            <InvestigationPanel type="file_error" incident={incident} />
           </Box>
         )}
 
@@ -313,6 +284,7 @@ function IncidentCard({ incident }: { incident: ParsedIncident }) {
             <Typography variant="body2">
               Envoyé par {incident.senderName} ({incident.senderCode}) depuis {incident.delayMinutes} minutes
             </Typography>
+            <InvestigationPanel type="ar_non_recu" incident={incident} />
           </Box>
         )}
 
@@ -322,30 +294,317 @@ function IncidentCard({ incident }: { incident: ParsedIncident }) {
               Non acquitté par {incident.recipientName} ({incident.recipientCode})
             </Typography>
             {incident.errorTicket && (
-              <Box
-                sx={{
-                  mt: 1,
-                  p: 1,
-                  borderRadius: 0.5,
-                  bgcolor: 'background.neutral',
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                }}
-              >
-                <Typography variant="caption" fontWeight={600}>
-                  {incident.errorTicket.code} — {incident.errorTicket.codeLabel}
-                </Typography>
-                {incident.errorTicket.description && (
-                  <Typography variant="caption" display="block" color="text.secondary">
-                    {incident.errorTicket.description}
-                  </Typography>
-                )}
-              </Box>
+              <TicketDetail ticket={incident.errorTicket} />
             )}
+            <InvestigationPanel type="file_not_ack" incident={incident} />
           </Box>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+const SEVERITY_COLORS: Record<string, string> = {
+  info: '#3b82f6',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  critical: '#dc2626',
+};
+
+function TicketDetail({ ticket }: { ticket: IncidentTicket }) {
+  const actionCode = ticket.responseCode || ticket.errorCode;
+  const dictEntry = actionCode ? lookupCode(actionCode) : null;
+  const sevColor = dictEntry ? SEVERITY_COLORS[dictEntry.severity] ?? '#6b7280' : undefined;
+
+  return (
+    <Box
+      sx={{
+        p: 1.5,
+        borderRadius: 1,
+        bgcolor: 'background.neutral',
+        fontSize: '0.75rem',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+        <Typography variant="caption" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
+          {ticket.code} — {ticket.codeLabel}
+        </Typography>
+      </Box>
+
+      {ticket.msisdn && (
+        <Typography variant="caption" display="block" sx={{ fontFamily: 'monospace' }}>
+          MSISDN : {ticket.msisdn}
+        </Typography>
+      )}
+      {ticket.responseCode && (
+        <Typography variant="caption" display="block" sx={{ fontFamily: 'monospace' }}>
+          Réponse : <Box component="span" sx={{ fontWeight: 700, color: sevColor }}>{ticket.responseCode}</Box> {ticket.responseCodeLabel && `— ${ticket.responseCodeLabel}`}
+        </Typography>
+      )}
+      {ticket.errorCode && (
+        <Typography variant="caption" display="block" sx={{ fontFamily: 'monospace' }}>
+          Erreur : <Box component="span" sx={{ fontWeight: 700, color: sevColor }}>{ticket.errorCode}</Box> {ticket.errorCodeLabel && `— ${ticket.errorCodeLabel}`}
+        </Typography>
+      )}
+      {ticket.description && (
+        <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.25 }}>
+          {ticket.description}
+        </Typography>
+      )}
+
+      {dictEntry && (
+        <Box sx={{ mt: 1, p: 1, borderRadius: 0.75, bgcolor: `${sevColor}10`, borderLeft: 3, borderColor: sevColor }}>
+          <Typography variant="caption" display="block" sx={{ fontWeight: 600, color: sevColor, mb: 0.25 }}>
+            {dictEntry.label}
+          </Typography>
+          <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 0.5 }}>
+            {dictEntry.description}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+            <Iconify icon="solar:lightbulb-bolt-bold" width={14} sx={{ color: '#f59e0b', mt: 0.25, flexShrink: 0 }} />
+            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+              {dictEntry.action}
+            </Typography>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+
+type InvestigationStep = {
+  icon: string;
+  label: string;
+  detail: string;
+  command?: string;
+};
+
+function getInvestigationSteps(type: string, incident: ParsedIncident): InvestigationStep[] {
+  if (type === 'file_error') {
+    const hasRefusal = 'refusalCount' in incident && (incident as any).refusalCount > 0;
+    const hasError = 'errorCount' in incident && (incident as any).errorCount > 0;
+    const steps: InvestigationStep[] = [];
+
+    if (hasRefusal) {
+      steps.push(
+        {
+          icon: 'solar:magnifer-bold',
+          label: 'Vérifier le dossier dans PortaWs',
+          detail: `Rechercher le(s) MSISDN concerné(s) dans PortaWs (172.24.119.72:8080) → Supervision → Liste des mandats. Vérifier l'état du portage et l'historique.`,
+        },
+        {
+          icon: 'solar:card-search-bold',
+          label: 'Contrôler le RIO si refus R1xx',
+          detail: `Si le motif est lié au RIO (R101/R102/R103/R123), vérifier le RIO via l'outil Vérifier → RIO Validator. Demander au client un nouveau RIO (appeler le 3179).`,
+        },
+        {
+          icon: 'solar:user-speak-bold',
+          label: 'Informer le commercial / client',
+          detail: `Selon le motif de refus : résiliation (R322/R502) → numéro perdu, engagement (R202) → attendre fin engagement, RIO (R1xx) → relancer avec bon RIO. Transmettre le motif de refus au commercial.`,
+        },
+      );
+    }
+
+    if (hasError) {
+      steps.push(
+        {
+          icon: 'solar:file-check-bold',
+          label: 'Analyser le fichier PNMDATA',
+          detail: `Utiliser l'outil Vérifier → Décodeur de fichiers pour analyser le fichier ${incident.filename}. Vérifier les colonnes opérateur, les hash MD5 et les timestamps.`,
+        },
+        {
+          icon: 'solar:server-bold',
+          label: 'Consulter les logs PORTA',
+          detail: 'Vérifier les logs de traitement sur vmqproportasync01 pour identifier la cause technique.',
+          command: `tail -n 50 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log`,
+        },
+        {
+          icon: 'solar:phone-calling-bold',
+          label: "Contacter l'opérateur émetteur",
+          detail: `Si l'erreur provient du fichier reçu, contacter l'opérateur émetteur pour signaler le problème. Fournir le nom du fichier et le détail de l'erreur.`,
+        },
+      );
+    }
+
+    steps.push({
+      icon: 'solar:clipboard-list-bold',
+      label: 'Documenter et suivre',
+      detail: 'Si non résolu immédiatement : noter dans les notes du monitoring, créer un ticket de suivi si > 24h. Si récurrent avec le même opérateur ou le même motif, escalader vers le GPMAG.',
+    });
+
+    return steps;
+  }
+
+  if (type === 'ar_non_recu') {
+    return [
+      {
+        icon: 'solar:server-bold',
+        label: 'Vérifier PnmAckManager.log',
+        detail: `Vérifier si l'AR est arrivé entre-temps dans les logs d'acquittement.`,
+        command: `tail -n 50 /home/porta_pnmv3/PortaSync/log/PnmAckManager.log`,
+      },
+      {
+        icon: 'solar:folder-check-bold',
+        label: 'Vérifier le répertoire SFTP',
+        detail: `Vérifier que le fichier a bien été déposé dans le répertoire d'envoi de l'opérateur destinataire.`,
+        command: `ls -la /home/porta_pnmv3/PortaSync/pnmdata/${incident.filenameParsed?.valid ? incident.filenameParsed.destOperator : 'XX'}/send/`,
+      },
+      {
+        icon: 'solar:refresh-bold',
+        label: "Vérifier l'arrivée différée",
+        detail: `L'AR peut arriver avec retard. Revérifier après la prochaine vacation (toutes les ~4-5h). Si l'AR arrive, le ticket 0000/E011 sera automatiquement clos.`,
+      },
+      {
+        icon: 'solar:phone-calling-bold',
+        label: "Contacter l'opérateur",
+        detail: `Si l'AR n'arrive toujours pas après 2 vacations : contacter l'opérateur destinataire par email en indiquant le nom du fichier ${incident.filename} et l'heure d'envoi.`,
+      },
+      {
+        icon: 'solar:danger-triangle-bold',
+        label: 'Escalader si récurrent',
+        detail: `Si cet opérateur accumule les AR en retard (> 3 fois/semaine), signaler au GPMAG avec les dates et fichiers concernés.`,
+      },
+    ];
+  }
+
+  if (type === 'file_not_ack') {
+    return [
+      {
+        icon: 'solar:server-bold',
+        label: 'Vérifier les logs d\'envoi',
+        detail: `Vérifier dans PnmDataManager.log que le fichier a bien été généré et envoyé.`,
+        command: `grep "${incident.filename}" /home/porta_pnmv3/PortaSync/log/PnmDataManager.log`,
+      },
+      {
+        icon: 'solar:folder-check-bold',
+        label: 'Vérifier le dépôt SFTP',
+        detail: `Confirmer que le fichier est bien présent dans le répertoire d'envoi de l'opérateur.`,
+        command: `ls -la /home/porta_pnmv3/PortaSync/pnmdata/${incident.filenameParsed?.valid ? incident.filenameParsed.destOperator : 'XX'}/send/${incident.filename}*`,
+      },
+      {
+        icon: 'solar:shield-check-bold',
+        label: 'Vérifier PnmAckManager.log',
+        detail: 'Chercher si un AR a été reçu tardivement pour ce fichier.',
+        command: `grep "${incident.filename}" /home/porta_pnmv3/PortaSync/log/PnmAckManager.log`,
+      },
+      {
+        icon: 'solar:phone-calling-bold',
+        label: `Contacter ${'recipientName' in incident ? (incident as any).recipientName : 'l\'opérateur'}`,
+        detail: `Envoyer un email à ${'recipientName' in incident ? (incident as any).recipientName : 'l\'opérateur'} (${'recipientCode' in incident ? (incident as any).recipientCode : '??'}) pour vérifier la réception du fichier. Joindre le nom du fichier et demander le renvoi de l'AR.`,
+      },
+      {
+        icon: 'solar:danger-triangle-bold',
+        label: 'Escalader si persistant',
+        detail: 'Si le fichier n\'est toujours pas acquitté après 24h et que l\'opérateur ne répond pas, escalader au GPMAG en fournissant les détails : fichier, date d\'envoi, opérateur destinataire.',
+      },
+    ];
+  }
+
+  return [];
+}
+
+function InvestigationPanel({ type, incident }: { type: string; incident: ParsedIncident }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const steps = getInvestigationSteps(type, incident);
+
+  if (steps.length === 0) return null;
+
+  const handleCopy = (cmd: string) => {
+    navigator.clipboard.writeText(cmd);
+    setCopied(cmd);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Divider sx={{ mb: 1.5 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
+        <Iconify icon="solar:checklist-bold" width={16} sx={{ color: 'primary.main' }} />
+        <Typography variant="subtitle2" color="primary.main">
+          Procédure d&apos;investigation
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {steps.map((step, i) => (
+          <Box
+            key={i}
+            sx={{
+              display: 'flex',
+              gap: 1.5,
+              p: 1.25,
+              borderRadius: 1,
+              bgcolor: 'background.neutral',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', pt: 0.25 }}>
+              <Box
+                sx={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  bgcolor: 'primary.main',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {i + 1}
+              </Box>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+                <Iconify icon={step.icon} width={14} sx={{ color: 'text.secondary' }} />
+                <Typography variant="caption" fontWeight={700}>
+                  {step.label}
+                </Typography>
+              </Box>
+              <Typography variant="caption" color="text.secondary" display="block">
+                {step.detail}
+              </Typography>
+              {step.command && (
+                <Box
+                  sx={{
+                    mt: 0.75,
+                    p: 0.75,
+                    borderRadius: 0.5,
+                    bgcolor: 'grey.900',
+                    color: '#4ade80',
+                    fontFamily: 'monospace',
+                    fontSize: '0.7rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                  }}
+                >
+                  <Box component="code" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    $ {step.command}
+                  </Box>
+                  <Button
+                    size="small"
+                    onClick={() => handleCopy(step.command!)}
+                    sx={{ minWidth: 'auto', p: 0.25, color: copied === step.command ? '#4ade80' : 'grey.500' }}
+                  >
+                    <Iconify icon={copied === step.command ? 'solar:check-circle-bold' : 'solar:copy-linear'} width={14} />
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
   );
 }
 
