@@ -77,6 +77,7 @@ type Mode = 'idle' | 'filename' | 'file';
 export default function FilenameDecoder() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState('');
+  const [importedFilename, setImportedFilename] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('idle');
   const [filenameResult, setFilenameResult] = useState<FilenameResult | null>(null);
   const [fileResult, setFileResult] = useState<FileAnalysisResult | null>(null);
@@ -95,7 +96,7 @@ export default function FilenameDecoder() {
       setFileResult(null);
     } else {
       setMode('file');
-      setFileResult(analyzeFileContent(trimmed));
+      setFileResult(analyzeFileContent(trimmed, importedFilename ?? undefined));
       setFilenameResult(null);
     }
     setTypeFilter(null);
@@ -105,6 +106,7 @@ export default function FilenameDecoder() {
 
   function clear() {
     setInput('');
+    setImportedFilename(null);
     setMode('idle');
     setFilenameResult(null);
     setFileResult(null);
@@ -116,6 +118,7 @@ export default function FilenameDecoder() {
   function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setImportedFilename(file.name);
     const reader = new FileReader();
     reader.onload = (evt) => {
       const content = evt.target?.result;
@@ -289,13 +292,22 @@ export default function FilenameDecoder() {
               {/* Summary cards */}
               <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
                 {/* Header */}
-                <Card sx={{ borderLeft: 3, borderColor: '#3b82f6' }}>
+                <Card sx={{ borderLeft: 3, borderColor: fileResult.issues.some((i) => i.type === 'filename_mismatch') ? '#dc2626' : '#3b82f6' }}>
                   <CardContent>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>En-tête</Typography>
                     {fileResult.header ? (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all' }}>
+                        {importedFilename && (
+                          <Typography variant="caption" color="text.secondary">
+                            Fichier : <strong>{importedFilename}</strong>
+                          </Typography>
+                        )}
+                        <Typography variant="body2" sx={{
+                          fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all',
+                          ...(fileResult.issues.some((i) => i.type === 'filename_mismatch') && { color: '#dc2626', fontWeight: 700 }),
+                        }}>
                           {fileResult.header.filename}
+                          {fileResult.issues.some((i) => i.type === 'filename_mismatch') && ' ⚠'}
                         </Typography>
                         <Typography variant="body2">
                           <strong>{fileResult.header.operatorName}</strong> ({fileResult.header.operatorCode})
@@ -457,19 +469,32 @@ function TicketRow({ ticket, expanded, onToggle, issues = [] }: { ticket: Parsed
   const color = getTicketColor(ticket.common.code);
   const hasSpecific = Object.keys(ticket.specific).length > 0;
   const hasIssues = issues.length > 0;
+  const hasErrors = issues.some((i) => i.severity === 'error');
+  const issueColor = hasErrors ? '#dc2626' : '#d97706';
+  const issueBg = hasErrors ? 'rgba(220, 38, 38, 0.06)' : 'rgba(217, 119, 6, 0.06)';
+  const issueHover = hasErrors ? 'rgba(220, 38, 38, 0.10)' : 'rgba(217, 119, 6, 0.10)';
+  const issueOutline = hasErrors ? 'rgba(220, 38, 38, 0.25)' : 'rgba(217, 119, 6, 0.25)';
   const col3Mismatch = issues.find((i) => i.type === 'col3_mismatch');
+
+  // Build distinct badge labels
+  const badgeLabels: string[] = [];
+  if (col3Mismatch) badgeLabels.push('Incohérence');
+  if (issues.some((i) => i.type === 'bad_hash')) badgeLabels.push('Hash invalide');
+  if (issues.some((i) => i.type === 'duplicate_sequence')) badgeLabels.push('Doublon séq.');
+  if (issues.some((i) => i.type === 'duplicate_ticket')) badgeLabels.push('Doublon');
+  if (badgeLabels.length === 0 && hasIssues) badgeLabels.push('Problème');
 
   return (
     <Box sx={{
       borderLeft: 3,
-      borderColor: hasIssues ? '#d97706' : color,
+      borderColor: hasIssues ? issueColor : color,
       borderRadius: 1,
-      bgcolor: hasIssues ? 'rgba(217, 119, 6, 0.06)' : `${color}08`,
+      bgcolor: hasIssues ? issueBg : `${color}08`,
       overflow: 'hidden',
-      ...(hasIssues && { outline: '1px solid rgba(217, 119, 6, 0.25)' }),
+      ...(hasIssues && { outline: `1px solid ${issueOutline}` }),
     }}>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: hasIssues ? 'rgba(217, 119, 6, 0.10)' : `${color}12` } }}
+        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: hasIssues ? issueHover : `${color}12` } }}
         onClick={onToggle}
       >
         <IconButton size="small" sx={{ p: 0 }}>
@@ -492,17 +517,17 @@ function TicketRow({ ticket, expanded, onToggle, issues = [] }: { ticket: Parsed
           variant="outlined"
           sx={{ fontSize: 10, height: 20, display: { xs: 'none', md: 'inline-flex' } }}
         />
-        {hasIssues && (
-          <Tooltip title={issues.map((i) => i.message).join('\n')}>
+        {hasIssues && badgeLabels.map((label) => (
+          <Tooltip key={label} title={issues.map((i) => i.message).join('\n')}>
             <Chip
-              icon={<Iconify icon="solar:danger-triangle-bold" width={14} />}
-              label="Incohérence"
+              icon={<Iconify icon={hasErrors ? 'solar:close-circle-bold' : 'solar:danger-triangle-bold'} width={14} />}
+              label={label}
               size="small"
-              color="warning"
+              color={hasErrors ? 'error' : 'warning'}
               sx={{ fontWeight: 700, fontSize: 11, height: 22 }}
             />
           </Tooltip>
-        )}
+        ))}
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12, ml: 'auto' }}>
           {ticket.common.oprName} → {ticket.common.opdName}
         </Typography>
@@ -598,12 +623,25 @@ function IssueRow({ issue }: { issue: ValidationIssue }) {
     warning: '#d97706',
     info: '#2563eb',
   };
+  const bgMap: Record<string, string> = {
+    error: 'rgba(220, 38, 38, 0.06)',
+    warning: 'rgba(217, 119, 6, 0.06)',
+    info: 'rgba(37, 99, 235, 0.06)',
+  };
+  const borderMap: Record<string, string> = {
+    error: 'rgba(220, 38, 38, 0.18)',
+    warning: 'rgba(217, 119, 6, 0.18)',
+    info: 'rgba(37, 99, 235, 0.18)',
+  };
 
-  // Rich display for col3 mismatch issues
+  // Skip per-line duplicates in the global panel (they show on the ticket rows)
+  if ((issue.type === 'duplicate_sequence' || issue.type === 'duplicate_ticket') && issue.lineNumber) return null;
+
+  // Rich display for col3 mismatch
   if (issue.type === 'col3_mismatch' && issue.details) {
     const d = issue.details;
     return (
-      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: 'rgba(217, 119, 6, 0.06)', border: '1px solid rgba(217, 119, 6, 0.18)' }}>
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: bgMap.warning, border: `1px solid ${borderMap.warning}` }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
           <Iconify icon="solar:danger-triangle-bold" width={16} sx={{ color: '#d97706', flexShrink: 0 }} />
           <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
@@ -626,6 +664,98 @@ function IssueRow({ issue }: { issue: ValidationIssue }) {
               {d.expectedName} ({d.expectedValue})
             </Typography>
           </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Rich display for filename mismatch
+  if (issue.type === 'filename_mismatch' && issue.details) {
+    const d = issue.details;
+    return (
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: bgMap.error, border: `1px solid ${borderMap.error}` }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+          <Iconify icon="solar:close-circle-bold" width={16} sx={{ color: '#dc2626', flexShrink: 0 }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#dc2626' }}>
+            Nom de fichier incohérent
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 3, ml: 3 }}>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Fichier importé :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#dc2626', fontFamily: 'monospace', fontSize: 12 }}>
+              {d.importedFilename}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Iconify icon="solar:transfer-horizontal-bold" width={20} sx={{ color: 'text.disabled' }} />
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary">En-tête du fichier :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#16a34a', fontFamily: 'monospace', fontSize: 12 }}>
+              {d.headerFilename}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Rich display for timestamp order
+  if (issue.type === 'timestamp_order' && issue.details) {
+    const d = issue.details;
+    return (
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: bgMap.warning, border: `1px solid ${borderMap.warning}` }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+          <Iconify icon="solar:danger-triangle-bold" width={16} sx={{ color: '#d97706', flexShrink: 0 }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
+            Incohérence temporelle en-tête / pied de page
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 3, ml: 3 }}>
+          <Box>
+            <Typography variant="caption" color="text.secondary">En-tête :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
+              {d.headerFormatted}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="caption" color="text.disabled">devrait ≤</Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Pied de page :</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ color: '#16a34a' }}>
+              {d.footerFormatted}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Rich display for duplicate sequence (global summary only)
+  if (issue.type === 'duplicate_sequence' && issue.details) {
+    return (
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: bgMap.error, border: `1px solid ${borderMap.error}` }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:copy-bold" width={16} sx={{ color: '#dc2626', flexShrink: 0 }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#dc2626' }}>
+            Séquence « {issue.details.sequence} » dupliquée — lignes {issue.details.lines}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Rich display for duplicate ticket (global summary only)
+  if (issue.type === 'duplicate_ticket' && issue.details) {
+    return (
+      <Box sx={{ py: 0.75, px: 1.5, borderRadius: 1, bgcolor: bgMap.warning, border: `1px solid ${borderMap.warning}` }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:copy-bold" width={16} sx={{ color: '#d97706', flexShrink: 0 }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#d97706' }}>
+            Ticket en doublon — {issue.details.abbrev} ({issue.details.code}) MSISDN {issue.details.msisdn} — lignes {issue.details.lines}
+          </Typography>
         </Box>
       </Box>
     );

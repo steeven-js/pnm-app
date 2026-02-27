@@ -446,7 +446,8 @@ export type ValidationIssue = {
     /** Line number in the file (1-based) — links the issue to a specific ticket row */
     lineNumber?: number;
     /** Short machine-readable type for UI styling */
-    type?: 'col3_mismatch' | 'unknown_code' | 'count_mismatch' | 'bad_header' | 'bad_footer' | 'format';
+    type?: 'col3_mismatch' | 'unknown_code' | 'count_mismatch' | 'bad_header' | 'bad_footer' | 'format'
+        | 'filename_mismatch' | 'timestamp_order' | 'bad_hash' | 'duplicate_sequence' | 'duplicate_ticket';
     /** Extra structured details for rich UI display */
     details?: Record<string, string>;
 };
@@ -651,7 +652,7 @@ function parseTicketSpecific(code: string, fields: string[]): TicketSpecificFiel
     return result;
 }
 
-export function analyzeFileContent(content: string): FileAnalysisResult {
+export function analyzeFileContent(content: string, importedFilename?: string): FileAnalysisResult {
     const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
     const issues: ValidationIssue[] = [];
 
@@ -672,6 +673,40 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
         issues.push({ severity: 'warning', message: `Pied de page non reconnu (sentinelle 9876543210 attendue). Ligne : "${lines[lines.length - 1].slice(0, 60)}…"` });
     }
 
+    // ── Validate: imported filename vs header filename ──
+    if (importedFilename && header) {
+        const cleanImported = importedFilename.replace(/^.*[\\/]/, ''); // strip path
+        const headerFilename = header.filename;
+        if (cleanImported !== headerFilename) {
+            issues.push({
+                severity: 'error',
+                message: `Nom du fichier importé « ${cleanImported} » ≠ nom déclaré dans l'en-tête « ${headerFilename} ».`,
+                type: 'filename_mismatch',
+                details: {
+                    importedFilename: cleanImported,
+                    headerFilename,
+                },
+            });
+        }
+    }
+
+    // ── Validate: header timestamp ≤ footer timestamp ──
+    if (header && footer && header.timestamp && footer.timestamp) {
+        if (header.timestamp > footer.timestamp) {
+            issues.push({
+                severity: 'warning',
+                message: `Timestamp en-tête (${formatPnmTimestamp(header.timestamp)}) postérieur au timestamp pied de page (${formatPnmTimestamp(footer.timestamp)}).`,
+                type: 'timestamp_order',
+                details: {
+                    headerTimestamp: header.timestamp,
+                    headerFormatted: formatPnmTimestamp(header.timestamp),
+                    footerTimestamp: footer.timestamp,
+                    footerFormatted: formatPnmTimestamp(footer.timestamp),
+                },
+            });
+        }
+    }
+
     // Parse tickets (lines between header and footer)
     const ticketLines = lines.slice(
         header ? 1 : 0,
@@ -679,12 +714,14 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
     );
 
     const tickets: ParsedTicket[] = [];
+    const MD5_REGEX = /^[0-9a-f]{32}$/;
     for (let i = 0; i < ticketLines.length; i++) {
         const raw = ticketLines[i];
         const fields = raw.split('|').map((f) => f.trim());
+        const lineNum = (header ? 2 : 1) + i;
 
         if (fields.length < 2) {
-            issues.push({ severity: 'warning', message: `Ligne ${(header ? 2 : 1) + i} : format non reconnu (moins de 2 champs).`, lineNumber: (header ? 2 : 1) + i, type: 'format' });
+            issues.push({ severity: 'warning', message: `Ligne ${lineNum} : format non reconnu (moins de 2 champs).`, lineNumber: lineNum, type: 'format' });
             continue;
         }
 
@@ -692,7 +729,18 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
         const specific = parseTicketSpecific(common.code, fields);
 
         if (!TICKET_TYPE_MAP[common.code]) {
-            issues.push({ severity: 'info', message: `Ligne ${(header ? 2 : 1) + i} : code ticket inconnu "${common.code}".`, lineNumber: (header ? 2 : 1) + i, type: 'unknown_code' });
+            issues.push({ severity: 'info', message: `Ligne ${lineNum} : code ticket inconnu "${common.code}".`, lineNumber: lineNum, type: 'unknown_code' });
+        }
+
+        // ── Validate: MD5 hash format ──
+        if (common.hash && !MD5_REGEX.test(common.hash)) {
+            issues.push({
+                severity: 'error',
+                message: `Ligne ${lineNum} (${common.typeInfo.abbrev}) : hash MD5 invalide « ${common.hash} » — attendu 32 caractères hexadécimaux [0-9a-f].`,
+                lineNumber: lineNum,
+                type: 'bad_hash',
+                details: { hash: common.hash, msisdn: common.msisdn },
+            });
         }
 
         // Validate: col3 (Opérateur Destination) must match the file's destination operator
@@ -704,7 +752,6 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
             if (ticketCol3 !== '00' && ticketCol3 !== fileDestOp) {
                 const roles = TICKET_COLUMN_ROLES[common.code];
                 const col3Label = roles?.col3Role ?? 'Destination';
-                const lineNum = (header ? 2 : 1) + i;
                 issues.push({
                     severity: 'warning',
                     message: `Ligne ${lineNum} (${common.typeInfo.abbrev}) : col. 3 « ${col3Label} » = ${getOperatorName(ticketCol3)} (${ticketCol3}) ≠ destinataire fichier ${getOperatorName(fileDestOp)} (${fileDestOp}).`,
@@ -725,11 +772,74 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
         }
 
         tickets.push({
-            lineNumber: (header ? 2 : 1) + i,
+            lineNumber: lineNum,
             raw,
             common,
             specific,
         });
+    }
+
+    // ── Validate: duplicate sequence numbers ──
+    const seqMap = new Map<string, number[]>(); // sequence → line numbers
+    for (const t of tickets) {
+        const seq = t.specific['Séquence'];
+        if (seq) {
+            const arr = seqMap.get(seq) ?? [];
+            arr.push(t.lineNumber);
+            seqMap.set(seq, arr);
+        }
+    }
+    for (const [seq, lineNums] of seqMap) {
+        if (lineNums.length > 1) {
+            issues.push({
+                severity: 'error',
+                message: `N° de séquence « ${seq} » en doublon sur les lignes ${lineNums.join(', ')}.`,
+                type: 'duplicate_sequence',
+                details: { sequence: seq, lines: lineNums.join(', ') },
+            });
+            // Tag each involved line
+            for (const ln of lineNums) {
+                issues.push({
+                    severity: 'error',
+                    message: `Séquence « ${seq} » dupliquée (aussi en ligne${lineNums.length > 2 ? 's' : ''} ${lineNums.filter((n) => n !== ln).join(', ')}).`,
+                    lineNumber: ln,
+                    type: 'duplicate_sequence',
+                    details: { sequence: seq, lines: lineNums.join(', ') },
+                });
+            }
+        }
+    }
+
+    // ── Validate: duplicate tickets (same code + MSISDN + hash) ──
+    const ticketSigMap = new Map<string, number[]>(); // signature → line numbers
+    for (const t of tickets) {
+        if (t.common.msisdn && t.common.hash) {
+            const sig = `${t.common.code}|${t.common.msisdn}|${t.common.hash}`;
+            const arr = ticketSigMap.get(sig) ?? [];
+            arr.push(t.lineNumber);
+            ticketSigMap.set(sig, arr);
+        }
+    }
+    for (const [sig, lineNums] of ticketSigMap) {
+        if (lineNums.length > 1) {
+            const [code, msisdn] = sig.split('|');
+            const abbrev = TICKET_TYPE_MAP[code]?.abbrev ?? code;
+            issues.push({
+                severity: 'warning',
+                message: `Ticket en doublon (${abbrev}, MSISDN ${msisdn}) sur les lignes ${lineNums.join(', ')}.`,
+                type: 'duplicate_ticket',
+                details: { code, abbrev, msisdn, lines: lineNums.join(', ') },
+            });
+            for (const ln of lineNums) {
+                issues.push({
+                    severity: 'warning',
+                    message: `Doublon détecté — même ${abbrev} pour ${msisdn} (aussi ligne${lineNums.length > 2 ? 's' : ''} ${lineNums.filter((n) => n !== ln).join(', ')}).`,
+                    lineNumber: ln,
+                    type: 'duplicate_ticket',
+                    details: { code, abbrev, msisdn, lines: lineNums.join(', ') },
+                });
+            }
+        }
     }
 
     // Validate footer count
