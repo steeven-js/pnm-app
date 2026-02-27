@@ -21,12 +21,12 @@ export function TimelineTrack({ events, selectedKey, onSelect }: TimelineTrackPr
     return (
         <Box sx={{ position: 'relative', px: 1 }}>
             {/* Background rail */}
-            <Box sx={{ position: 'absolute', top: 22, left: 28, right: 28, height: 4, bgcolor: 'divider', borderRadius: 2, zIndex: 0 }} />
+            <Box sx={{ position: 'absolute', top: 19, left: 28, right: 28, height: 3, bgcolor: 'divider', borderRadius: 1.5, zIndex: 0 }} />
             {/* Progress rail */}
             <Box sx={{
-                position: 'absolute', top: 22, left: 28,
+                position: 'absolute', top: 19, left: 28,
                 width: `calc((100% - 56px) * ${Math.min(progressPercent, 100)} / 100)`,
-                height: 4, bgcolor: 'success.main', borderRadius: 2, zIndex: 1,
+                height: 3, bgcolor: 'success.main', borderRadius: 1.5, zIndex: 1,
                 transition: 'width 0.5s ease',
             }} />
             {/* Nodes */}

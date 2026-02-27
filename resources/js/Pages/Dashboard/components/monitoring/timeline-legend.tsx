@@ -3,6 +3,8 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 
+import { Iconify } from 'src/components/iconify';
+
 const STATUS_ITEMS = [
     { label: 'En attente', color: 'text.disabled' },
     { label: 'Vérifié', color: 'success.main' },
@@ -11,8 +13,8 @@ const STATUS_ITEMS = [
 ] as const;
 
 const CHECK_TYPE_ITEMS = [
-    { label: 'Vérif. email', ringColor: '#f59e0b' },
-    { label: 'Vérif. serveur (SSH)', ringColor: '#06b6d4' },
+    { label: 'Vérif. email', icon: 'solar:letter-bold', color: '#f59e0b' },
+    { label: 'Vérif. serveur (SSH)', icon: 'solar:monitor-bold', color: '#06b6d4' },
 ] as const;
 
 export function TimelineLegend() {
@@ -42,10 +44,7 @@ export function TimelineLegend() {
 
             {CHECK_TYPE_ITEMS.map((item) => (
                 <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                    <Box sx={{
-                        width: 14, height: 14, borderRadius: '50%',
-                        border: `3px solid ${item.ringColor}`,
-                    }} />
+                    <Iconify icon={item.icon} width={14} sx={{ color: item.color }} />
                     <Typography variant="caption" color="text.secondary">{item.label}</Typography>
                 </Box>
             ))}
