@@ -55,6 +55,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: 'Validation col. 3 vs destinataire fichier : alerte si l\'opérateur destination d\'un ticket ne correspond pas au destinataire déclaré dans l\'entête' },
       { type: 'new', description: 'Panneau d\'incohérences enrichi : détails structurés (ligne, code, MSISDN, comparaison col.3 vs entête), badge « Incohérence » sur les tickets concernés et alerte inline dans le détail étendu' },
       { type: 'new', description: 'Lecture en langage naturel des tickets PNMDATA : chaque ticket est expliqué sous forme de phrase (ex. « L\'opérateur X informe l\'opérateur Y que le numéro… ») pour les 18 types de tickets dans les 3 contextes' },
+      { type: 'improvement', description: 'Timeline vérifications quotidiennes unifiée : serveur SSH et mails regroupés par créneau horaire en ordre ascendant (6 cartes au lieu de 14 éléments séparés)' },
       { type: 'fix', description: 'Opérateur 00 affiché comme « Tous (Opérateurs) » au lieu de « Inconnu »' },
       { type: 'fix', description: 'Compteur pied de page PNMDATA corrigé dans le parsing et l\'affichage : entête et pied de page exclus du décompte tickets' },
       { type: 'fix', description: 'Correction du regex accent pour le parsing des logs serveur (ajoutés/ajoutes)' },
