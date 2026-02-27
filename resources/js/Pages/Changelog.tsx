@@ -70,6 +70,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'improvement', description: 'Séparation vérif. bascule serveur (SSH logs EmaExtracter/EmmExtracter) et vérif. bascule email ([PNMV3] FIN + [PNM] Controle fichier EMA) en deux étapes distinctes' },
       { type: 'improvement', description: 'Code couleur email/serveur SSH : petite icône colorée (enveloppe ambre, écran cyan) sous chaque nœud de la timeline au lieu d\'un anneau englobant, légende et badge dans le détail' },
       { type: 'fix', description: 'Suppression de l\'étape CTO Bascule tardive/échec (changement d\'offre, pas de portabilité) et Portabilités prévues DIGICEL/WIZZEE (surcouche inutile)' },
+      { type: 'fix', description: 'Parser auto-remplissage bascule email : nouveau parser dédié pour les emails [PNMV3] FIN et [PNM] Controle EMA (distinct du parser logs serveur)' },
     ],
   },
   {

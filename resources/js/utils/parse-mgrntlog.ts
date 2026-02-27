@@ -25,7 +25,7 @@ type ParserFn = (eventKey: string, checklist: string[], content: string) => Auto
 
 const PARSERS: Record<string, ParserFn> = {
     verif_bascule_server: autoFillVerifBascule,
-    verif_bascule_email: autoFillVerifBascule,
+    verif_bascule_email: autoFillVerifBasculeEmail,
     vacation_1: autoFillVacation,
     vacation_2: autoFillVacation,
     vacation_3: autoFillVacation,
@@ -683,7 +683,85 @@ function autoFillVerifGeneration(
 }
 
 // ===================================================================
-// 11. Vérif acquittements (PnmSyncAckManager.log)
+// 11. Vérif bascule email ([PNMV3] FIN + [PNM] Controle EMA)
+// ===================================================================
+
+function autoFillVerifBasculeEmail(
+    _eventKey: string,
+    checklist: string[],
+    content: string,
+): AutoFillResult | null {
+    // Detect [PNMV3] Verification Bascule Porta MOBI : FIN email
+    const hasBasculeFinEmail =
+        /Verification Bascule Porta MOBI/i.test(content) ||
+        /\bFIN\b.*bascule/i.test(content) ||
+        /Rapport RL/i.test(content) ||
+        /Tout est OK pour la prochaine bascule/i.test(content);
+
+    // Detect [PNM] Controle fichier batchhandler FNR_V3 sur EMA email
+    const hasControleEmaEmail =
+        /Controle fichier batchhandler/i.test(content) ||
+        /FNR_V3/i.test(content) ||
+        /Verification integrite.*PORTAGE_DATA/i.test(content);
+
+    if (!hasBasculeFinEmail && !hasControleEmaEmail) return null;
+
+    // --- Parse bascule FIN email ---
+    const rlMatch = content.match(/(\d+)\s*RL\s*OK\s*sur\s*un\s*total\s*de\s*(\d+)/i);
+    const rlOk = rlMatch ? parseInt(rlMatch[1], 10) : null;
+    const rlTotal = rlMatch ? parseInt(rlMatch[2], 10) : null;
+    const allRlOk = rlOk !== null && rlTotal !== null && rlOk === rlTotal;
+    const toutEstOk = /Tout est OK pour la prochaine bascule/i.test(content);
+    const basculeFin = /FIN/i.test(content) && hasBasculeFinEmail;
+    const basculeNoError = toutEstOk || allRlOk || /aucune?\s*erreur/i.test(content);
+
+    // --- Parse controle EMA email ---
+    const integriteOk =
+        /Pas d['']information erron[eé]e/i.test(content) ||
+        /aucune?\s*erreur.*PORTAGE_DATA/i.test(content) ||
+        /integrite.*OK/i.test(content);
+    const controleOk = hasControleEmaEmail && (integriteOk || /traitement.*OK/i.test(content) || /Pas d['']information erron/i.test(content));
+
+    const rules: Record<string, () => boolean> = {
+        'Email [PNMV3] Verification Bascule Porta MOBI : FIN reçu': () => hasBasculeFinEmail,
+        'Bascule terminée sans erreur': () => basculeNoError,
+        'Email [PNM] Controle fichier batchhandler FNR_V3 sur EMA reçu': () => hasControleEmaEmail,
+        'Fichiers EMA traités correctement': () => controleOk,
+    };
+
+    const checkedItems = checklist.filter((item) => rules[item]?.());
+
+    const lines = ['[Auto] Contrôle bascule & fichiers EMA (emails)'];
+
+    if (hasBasculeFinEmail) {
+        lines.push('');
+        lines.push('--- [PNMV3] Verification Bascule Porta MOBI : FIN ---');
+        if (rlOk !== null && rlTotal !== null) {
+            lines.push(`  Rapport RL: ${rlOk}/${rlTotal} OK`);
+        }
+        if (toutEstOk) lines.push('  Tout est OK pour la prochaine bascule');
+        lines.push(`  Bascule sans erreur: ${basculeNoError ? 'OUI' : 'NON'}`);
+    }
+
+    if (hasControleEmaEmail) {
+        lines.push('');
+        lines.push('--- [PNM] Controle fichier batchhandler FNR_V3 sur EMA ---');
+        if (integriteOk) {
+            lines.push('  Intégrité PORTAGE_DATA: OK (pas d\'information erronée)');
+        } else {
+            lines.push('  ⚠ Intégrité PORTAGE_DATA: à vérifier');
+        }
+        lines.push(`  Fichiers EMA: ${controleOk ? 'OK' : 'à vérifier'}`);
+    }
+
+    if (!hasBasculeFinEmail) lines.push('\n⚠ Email [PNMV3] FIN non détecté');
+    if (!hasControleEmaEmail) lines.push('\n⚠ Email [PNM] Controle EMA non détecté');
+
+    return { checkedItems, notes: lines.join('\n') };
+}
+
+// ===================================================================
+// 12. Vérif acquittements (PnmSyncAckManager.log)
 // ===================================================================
 
 function autoFillVerifAcquittements(
