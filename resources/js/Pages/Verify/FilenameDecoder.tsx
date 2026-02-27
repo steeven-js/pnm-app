@@ -445,6 +445,12 @@ function TicketRow({ ticket, expanded, onToggle }: { ticket: ParsedTicket; expan
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>
           {ticket.common.formattedDate}
         </Typography>
+        <Chip
+          label={ticket.common.context === 'restitution' ? 'Restitution' : ticket.common.context === 'inverse' ? 'Inverse' : ticket.common.context === 'erreur' ? 'Erreur' : 'Portage'}
+          size="small"
+          variant="outlined"
+          sx={{ fontSize: 10, height: 20, display: { xs: 'none', md: 'inline-flex' } }}
+        />
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12, ml: 'auto' }}>
           {ticket.common.oprName} → {ticket.common.opdName}
         </Typography>
@@ -452,14 +458,14 @@ function TicketRow({ ticket, expanded, onToggle }: { ticket: ParsedTicket; expan
 
       <Collapse in={expanded}>
         <Box sx={{ px: 2, pb: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 0.5, fontSize: 13 }}>
-            <Typography variant="caption" color="text.secondary">OPR (receveur)</Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 0.5, fontSize: 13 }}>
+            <Typography variant="caption" color="text.secondary">Col.2 — {ticket.common.col2Role} (origine)</Typography>
             <Typography variant="caption">{ticket.common.opr} — {ticket.common.oprName}</Typography>
-            <Typography variant="caption" color="text.secondary">OPD (donneur)</Typography>
+            <Typography variant="caption" color="text.secondary">Col.3 — {ticket.common.col3Role} (destination)</Typography>
             <Typography variant="caption">{ticket.common.opd} — {ticket.common.opdName}</Typography>
-            <Typography variant="caption" color="text.secondary">OPA (attributaire)</Typography>
+            <Typography variant="caption" color="text.secondary">Col.4 — OPR</Typography>
             <Typography variant="caption">{ticket.common.opa} — {ticket.common.opaName}</Typography>
-            <Typography variant="caption" color="text.secondary">OPX (exploitant)</Typography>
+            <Typography variant="caption" color="text.secondary">Col.5 — {ticket.common.col5Label}</Typography>
             <Typography variant="caption">{ticket.common.opx} — {ticket.common.opxName}</Typography>
             <Typography variant="caption" color="text.secondary">Hash MD5</Typography>
             <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>

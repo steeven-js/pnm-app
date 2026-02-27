@@ -284,6 +284,38 @@ export const TICKET_TYPE_MAP: Record<string, { label: string; abbrev: string; di
     '7000': { label: 'Erreurs et dysfonctionnements', abbrev: 'ER', direction: '—' },
 };
 
+// ── Rôles des colonnes 2 (Opérateur Origine) et 3 (Opérateur Destination) par type de ticket ──
+// Selon la spec GPMAG Annexe 4 ter, les colonnes 2 et 3 changent de signification
+// en fonction du contexte : portage normal, portage inverse, restitution.
+
+export type TicketContext = 'portage' | 'inverse' | 'restitution' | 'erreur';
+
+export const TICKET_COLUMN_ROLES: Record<string, { context: TicketContext; col2Role: string; col3Role: string; col5Label: string }> = {
+    // Portage normal
+    '1110': { context: 'portage', col2Role: 'OPR', col3Role: 'OPD', col5Label: 'OPD' },
+    '1120': { context: 'portage', col2Role: 'OPR', col3Role: 'OPD', col5Label: 'OPD' },
+    '1210': { context: 'portage', col2Role: 'OPD', col3Role: 'OPR', col5Label: 'OPD' },
+    '1220': { context: 'portage', col2Role: 'OPD', col3Role: 'OPR', col5Label: 'OPD' },
+    '1410': { context: 'portage', col2Role: 'OPR', col3Role: 'Tous (00)', col5Label: 'OPD' },
+    '1430': { context: 'portage', col2Role: 'OPX', col3Role: 'OPR', col5Label: 'OPD' },
+    // Annulation
+    '1510': { context: 'portage', col2Role: 'OPR', col3Role: 'OPD', col5Label: 'OPD' },
+    '1520': { context: 'portage', col2Role: 'OPD', col3Role: 'OPR', col5Label: 'OPD' },
+    '1530': { context: 'portage', col2Role: 'OPD/OPR', col3Role: 'OPR/OPD', col5Label: 'OPD' },
+    // Portage inverse — OPR initial = ancien OPR, OPD initial = ancien OPD
+    '2400': { context: 'inverse', col2Role: 'OPR initial', col3Role: 'OPD initial', col5Label: 'OPD initial' },
+    '2410': { context: 'inverse', col2Role: 'OPD initial', col3Role: 'Tous (00)', col5Label: 'OPD initial' },
+    '2420': { context: 'inverse', col2Role: 'OPX', col3Role: 'OPD initial', col5Label: 'OPD initial' },
+    '2430': { context: 'inverse', col2Role: 'OPX', col3Role: 'OPD initial', col5Label: 'OPD initial' },
+    // Restitution — OPA remplace OPD (opérateur attributaire de la tranche)
+    '3400': { context: 'restitution', col2Role: 'OPR', col3Role: 'OPA', col5Label: 'OPA' },
+    '3410': { context: 'restitution', col2Role: 'OPA', col3Role: 'Tous (00)', col5Label: 'OPA' },
+    '3420': { context: 'restitution', col2Role: 'OPX', col3Role: 'OPA', col5Label: 'OPA' },
+    '3430': { context: 'restitution', col2Role: 'OPX', col3Role: 'OPA', col5Label: 'OPA' },
+    // Erreurs
+    '7000': { context: 'erreur', col2Role: 'Émetteur', col3Role: 'Destinataire', col5Label: '—' },
+};
+
 export const RESPONSE_CODE_MAP: Record<string, string> = {
     'A001': 'Accord de portage',
     'R123': 'RIO invalide ou expiré',
@@ -321,6 +353,10 @@ export type ParsedFooter = {
 export type TicketCommonFields = {
     code: string;
     typeInfo: { label: string; abbrev: string; direction: string };
+    context: TicketContext;
+    col2Role: string; // Rôle sémantique de la colonne 2 (Opérateur Origine)
+    col3Role: string; // Rôle sémantique de la colonne 3 (Opérateur Destination)
+    col5Label: string; // Libellé de la colonne 5 (OPD, OPA, OPD initial...)
     opr: string;
     oprName: string;
     opd: string;
@@ -414,24 +450,31 @@ export function parseFooter(line: string): ParsedFooter | null {
 
 function parseTicketCommon(fields: string[]): TicketCommonFields {
     const code = fields[0] ?? '';
-    const opr = fields[1] ?? '';
-    const opd = fields[2] ?? '';
-    const opa = fields[3] ?? '';
-    const opx = fields[4] ?? '';
+    const col2 = fields[1] ?? ''; // Opérateur Origine (rôle variable selon contexte)
+    const col3 = fields[2] ?? ''; // Opérateur Destination (rôle variable selon contexte)
+    const col4 = fields[3] ?? ''; // OPR (toujours OPR)
+    const col5 = fields[4] ?? ''; // OPD/OPA/OPD initial (selon contexte)
     const ts = fields[5] ?? '';
     const msisdn = fields[6] ?? '';
     const hash = fields[7] ?? '';
+
+    const roles = TICKET_COLUMN_ROLES[code];
+
     return {
         code,
         typeInfo: TICKET_TYPE_MAP[code] ?? { label: `Ticket inconnu (${code})`, abbrev: '???', direction: '—' },
-        opr,
-        oprName: getOperatorName(opr),
-        opd,
-        opdName: getOperatorName(opd),
-        opa,
-        opaName: getOperatorName(opa),
-        opx,
-        opxName: getOperatorName(opx),
+        context: roles?.context ?? 'portage',
+        col2Role: roles?.col2Role ?? 'Origine',
+        col3Role: roles?.col3Role ?? 'Destination',
+        col5Label: roles?.col5Label ?? 'OPD',
+        opr: col2,
+        oprName: getOperatorName(col2),
+        opd: col3,
+        opdName: getOperatorName(col3),
+        opa: col4,
+        opaName: getOperatorName(col4),
+        opx: col5,
+        opxName: getOperatorName(col5),
         timestamp: ts,
         formattedDate: formatPnmTimestamp(ts),
         msisdn,
@@ -584,6 +627,22 @@ export function analyzeFileContent(content: string): FileAnalysisResult {
 
         if (!TICKET_TYPE_MAP[common.code]) {
             issues.push({ severity: 'info', message: `Ligne ${(header ? 2 : 1) + i} : code ticket inconnu "${common.code}".` });
+        }
+
+        // Validate: col3 (Opérateur Destination) must match the file's destination operator
+        // extracted from the header filename (PNMDATA.SOURCE.DEST.timestamp.seq)
+        // Exception: col3 = '00' means broadcast to all operators
+        if (header?.filenameDecoded.valid && header.filenameDecoded.destOperator) {
+            const fileDestOp = header.filenameDecoded.destOperator;
+            const ticketCol3 = common.opd; // col3 = Opérateur Destination du ticket
+            if (ticketCol3 !== '00' && ticketCol3 !== fileDestOp) {
+                const roles = TICKET_COLUMN_ROLES[common.code];
+                const col3Label = roles?.col3Role ?? 'Destination';
+                issues.push({
+                    severity: 'warning',
+                    message: `Ligne ${(header ? 2 : 1) + i} (${common.typeInfo.abbrev}) : col. 3 « ${col3Label} » = ${getOperatorName(ticketCol3)} (${ticketCol3}) ≠ destinataire fichier ${getOperatorName(fileDestOp)} (${fileDestOp}).`,
+                });
+            }
         }
 
         tickets.push({
