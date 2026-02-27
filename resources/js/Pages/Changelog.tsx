@@ -68,7 +68,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: 'Détection tickets en doublon : alerte si un même ticket (code + MSISDN + hash) apparaît plusieurs fois' },
       { type: 'new', description: 'Détection incohérence temporelle en-tête/pied de page : alerte si le timestamp de l\'en-tête est postérieur à celui du pied de page' },
       { type: 'improvement', description: 'Séparation vérif. bascule serveur (SSH logs EmaExtracter/EmmExtracter) et vérif. bascule email ([PNMV3] FIN + [PNM] Controle fichier EMA) en deux étapes distinctes' },
-      { type: 'improvement', description: 'Code couleur email (ambre) / serveur SSH (cyan) sur les nœuds de la timeline monitoring avec légende et badge dans le détail' },
+      { type: 'improvement', description: 'Code couleur email/serveur SSH : petite icône colorée (enveloppe ambre, écran cyan) sous chaque nœud de la timeline au lieu d\'un anneau englobant, légende et badge dans le détail' },
       { type: 'fix', description: 'Suppression de l\'étape CTO Bascule tardive/échec (changement d\'offre, pas de portabilité) et Portabilités prévues DIGICEL/WIZZEE (surcouche inutile)' },
     ],
   },
