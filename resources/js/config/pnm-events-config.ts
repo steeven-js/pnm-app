@@ -1,24 +1,6 @@
 import type { PnmEventConfig } from 'src/types/monitoring';
 
 export const pnmEventsConfig: PnmEventConfig[] = [
-    // ── 04:00 ──
-    {
-        key: 'cto_rattrapage',
-        label: 'CTO Bascule tardive/échec',
-        description:
-            'Email CTO de rattrapage pour bascules échouées ou tardives. Contient les fichiers Rattrapage_CTO pour MQ, GF, GP avec les MSISDN à rattraper.',
-        scheduledTime: '04:00',
-        icon: 'solar:danger-triangle-bold-duotone',
-        category: 'bascule',
-        checklist: [
-            'Email CTO rattrapage reçu',
-            'Lire fichiers Rattrapage_CTO_MQ.txt, _GF.txt, _GP.txt',
-            'Vérifier si des MSISDN nécessitent rattrapage',
-            'Pour chaque MSISDN : vérifier statut dans PORTA-V3',
-            'Relancer bascule manuelle si nécessaire',
-            'Escalader N+1 si échec persistant',
-        ],
-    },
     // ── 09:00 ──
     {
         key: 'verif_bascule_valorisation',
