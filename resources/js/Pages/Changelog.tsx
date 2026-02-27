@@ -37,6 +37,15 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.2.0',
+    date: '27 Février 2026',
+    changes: [
+      { type: 'new', description: 'Navigation par date sur le dashboard monitoring : boutons jour précédent/suivant, sélecteur de date et bouton « Aujourd\'hui » pour revenir au mode live' },
+      { type: 'new', description: 'Consultation en lecture seule des événements des jours passés avec checklists et notes sauvegardées' },
+      { type: 'improvement', description: 'Détection des jours fériés fonctionnelle aussi sur les dates historiques' },
+    ],
+  },
+  {
     version: '2.1.0',
     date: '26 Février 2026',
     changes: [
