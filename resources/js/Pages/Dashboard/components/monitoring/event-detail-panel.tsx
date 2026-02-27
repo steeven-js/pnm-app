@@ -151,7 +151,7 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                             onClick={() => setLogDialogOpen(true)}
                             sx={{ mb: 1.5 }}
                         >
-                            Auto-remplir depuis email
+                            Auto-remplir depuis {event.checkType === 'server' ? 'log serveur' : 'email'}
                         </Button>
                     )}
 

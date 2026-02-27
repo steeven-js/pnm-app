@@ -72,6 +72,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'fix', description: 'Suppression de l\'étape CTO Bascule tardive/échec (changement d\'offre, pas de portabilité) et Portabilités prévues DIGICEL/WIZZEE (surcouche inutile)' },
       { type: 'fix', description: 'Parser auto-remplissage bascule email : nouveau parser dédié pour les emails [PNMV3] FIN et [PNM] Controle EMA (distinct du parser logs serveur)' },
       { type: 'fix', description: 'Parser acquittements réécrit pour le vrai format PnmDataAckManager.php : détection par nom d\'opérateur (Check success), comptage ACR (E000) et alertes NOT FOUND' },
+      { type: 'fix', description: 'Bouton auto-remplissage adapté au type d\'événement : « depuis log serveur » pour les vérifications SSH, « depuis email » pour les mails' },
     ],
   },
   {
