@@ -31,11 +31,6 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         description: "Collez le contenu de l'email [PNM] vacation (rapport envoi/réception) pour remplir automatiquement la checklist.",
         placeholder: `Collez le contenu du mail ici...\n\nRapport envoi/réception des vacations du 16-02-2026\n\nNombre de fichiers transférés : 20 fichiers échangés / 20 attendus\n\nFichiers reçus d'Orange Caraïbe:\n/home/porta_pnmv3/.../PNMDATA.01.02...\n...`,
     },
-    cto_rattrapage: {
-        title: 'Auto-remplir depuis le mail CTO',
-        description: "Collez le contenu de l'email [CTO] Bascule du jour tardive ou en echec pour remplir automatiquement la checklist.",
-        placeholder: `Collez le contenu du mail ici...\n\nBonjour,\n\nCi-joint la liste des CTO du jour par departements\n\nFin de traitement de l'automate bascule : 02:00 (Heure:minute)\n\n=> Volumetrie des CTO du jour : 61\n\nCordialement\nAPP_VENTES`,
-    },
     incidents: {
         title: 'Auto-remplir depuis le mail incidents',
         description: "Collez le contenu de l'email [PNM][INCIDENT] pour analyser les incidents détectés et remplir la checklist.",
@@ -56,10 +51,15 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         description: "Collez le contenu de l'email [PNM] Ticket(s) 1210 en attente et/ou Ticket(s) en attente pour remplir la checklist.",
         placeholder: `Collez le contenu du/des mail(s) ici...\n\nIl y a 1 ticket(s) 1210 en attente.\nVeuillez trouver ci-joint les portages en attente de reponse.\n\n---\n\nIl y a 23 ticket(s) en attente.\nVeuillez trouver ci-joint les portages en attente de tickets.`,
     },
-    verif_bascule_valorisation: {
+    verif_bascule_server: {
         title: 'Auto-remplir depuis les logs serveur',
         description: 'Collez le résultat des deux commandes : tail -n 12 EmaExtracter.log puis tail -n 12 EmmExtracter.log (les deux l\'un après l\'autre).',
         placeholder: `--- tail -n 12 EmaExtracter.log ---\nEmaExtracter.php|2026-02-26T09:00:01-04:00| Initialisation\nEmaExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\nEmaExtracter.php|..| ..Verification operateur Digicel AFG : Check success\n...\nEmaExtracter.php|..| ..........194 bascules ajoutés.\nEmaExtracter.php|..| Fin de Traitement 63.46secondes.\n\n--- tail -n 12 EmmExtracter.log ---\nEmmExtracter.php|2026-02-26T09:01:01-04:00| Initialisation\nEmmExtracter.php|..| ..Verification operateur Orange Caraibe : Check success\n...\nEmmExtracter.php|..| ..........353361 bascules ajoutés.\nEmmExtracter.php|..| Fin de Traitement 13.54secondes.`,
+    },
+    verif_bascule_email: {
+        title: 'Auto-remplir depuis les emails bascule',
+        description: 'Collez le contenu de l\'email [PNMV3] Verification Bascule Porta MOBI : FIN et/ou [PNM] Controle fichier batchhandler FNR_V3 sur EMA.',
+        placeholder: `Collez le contenu du/des mail(s) ici...`,
     },
     verif_generation_pnmdata: {
         title: 'Auto-remplir depuis PnmDataManager.log',
@@ -70,11 +70,6 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         title: 'Auto-remplir depuis PnmAckManager.log',
         description: 'Collez le contenu de PnmSyncAckManager.log (tail -f PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
         placeholder: `Collez le résultat de tail ici...\n\nPnmSyncAckManager.php|...| Traitement operateur 03\nPnmSyncAckManager.php|...| *** Aucune notification d'AR SYNC non-recu ***\n...\nPnmSyncAckManager.php|...| Fin de Traitement`,
-    },
-    prevision_portabilites: {
-        title: 'Auto-remplir depuis le reporting portabilités',
-        description: "Collez le contenu de l'email [PNM] Reporting - Portabilités DIGICEL-WIZZEE pour remplir la checklist.",
-        placeholder: `Collez le contenu du mail ici...\n\nNombre de portabilites internes de la veille: 9\n\nNombre de portabilites prevues le 12/02/2026:\n\nDIGICEL\nIN: 15\nOUT: 40\n\nWIZZEE\nIN: 5\nOUT: 19`,
     },
 };
 

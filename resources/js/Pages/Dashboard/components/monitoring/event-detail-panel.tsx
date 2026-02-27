@@ -115,6 +115,16 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                             <Typography variant="subtitle1" fontWeight={700}>{event.label}</Typography>
                             <Typography variant="caption" color="text.secondary">{event.scheduledTime} — {event.category}</Typography>
                         </Box>
+                        <Chip
+                            icon={<Iconify icon={event.checkType === 'server' ? 'solar:monitor-bold' : 'solar:letter-bold'} width={14} />}
+                            label={event.checkType === 'server' ? 'Serveur' : 'Email'}
+                            size="small"
+                            sx={{
+                                bgcolor: event.checkType === 'server' ? '#06b6d418' : '#f59e0b18',
+                                color: event.checkType === 'server' ? '#06b6d4' : '#f59e0b',
+                                fontWeight: 600, fontSize: 11,
+                            }}
+                        />
                         <Chip label={STATUS_LABELS[event.status].label} color={STATUS_LABELS[event.status].color} size="small" />
                     </Stack>
 

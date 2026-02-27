@@ -3,18 +3,14 @@ import type { PnmEventConfig } from 'src/types/monitoring';
 export const pnmEventsConfig: PnmEventConfig[] = [
     // ── 09:00 ──
     {
-        key: 'verif_bascule_valorisation',
-        label: 'Vérif bascule & valorisation PORTA',
+        key: 'verif_bascule_server',
+        label: 'Vérif bascule & valorisation (serveur)',
         description:
             'Vérification serveur vmqproportasync01 : traitement bascule (EmaExtracter.log) et valorisation (EmmExtracter.log). Tous les opérateurs doivent être "Check success".',
         scheduledTime: '09:00',
         icon: 'solar:server-bold-duotone',
         category: 'supervision',
-        emailSubjects: [
-            { subject: '[PNMV3]Verification Bascule Porta MOBI', origin: 'internal' },
-            { subject: '[PNMV3]Verification Bascule Porta MOBI : FIN', origin: 'internal' },
-            { subject: '[PNM]Controle fichier batchhandler FNR_V3 sur EMA', origin: 'internal' },
-        ],
+        checkType: 'server',
         checklist: [
             // EmaExtracter — bascule
             'EmaExtracter : Orange Caraïbe Check success',
@@ -35,6 +31,26 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         ],
     },
     {
+        key: 'verif_bascule_email',
+        label: 'Contrôle bascule & fichiers EMA (email)',
+        description:
+            'Emails de confirmation de bascule PORTA MOBI et de contrôle des fichiers batchhandler FNR_V3 sur EMA. Vérifier la fin du traitement et l\'absence d\'erreur.',
+        scheduledTime: '09:00',
+        icon: 'solar:letter-bold-duotone',
+        category: 'supervision',
+        checkType: 'email',
+        emailSubjects: [
+            { subject: '[PNMV3]Verification Bascule Porta MOBI : FIN', origin: 'internal' },
+            { subject: '[PNM]Controle fichier batchhandler FNR_V3 sur EMA', origin: 'internal' },
+        ],
+        checklist: [
+            'Email [PNMV3] Verification Bascule Porta MOBI : FIN reçu',
+            'Bascule terminée sans erreur',
+            'Email [PNM] Controle fichier batchhandler FNR_V3 sur EMA reçu',
+            'Fichiers EMA traités correctement',
+        ],
+    },
+    {
         key: 'rio_reporting',
         label: 'Reporting RIO incorrect',
         description:
@@ -42,6 +58,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '09:00',
         icon: 'solar:card-bold-duotone',
         category: 'reporting',
+        checkType: 'email',
         checklist: [
             'Email reporting RIO reçu',
             'Nombre de refus entrante (RIO incorrect)',
@@ -59,6 +76,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '09:01',
         icon: 'solar:bug-bold-duotone',
         category: 'incident',
+        checkType: 'email',
         emailSubjects: [
             { subject: '[PNM][INCIDENT]', origin: 'internal' },
             { subject: 'PNM INCIDENT : Numeros en ecart dans le fichier de synchronisation', origin: 'external' },
@@ -81,6 +99,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '10:15',
         icon: 'solar:file-check-bold-duotone',
         category: 'supervision',
+        checkType: 'server',
         checklist: [
             'PnmDataManager : Fichier PNMDATA op. 01 généré',
             'PnmDataManager : Fichier PNMDATA op. 03 généré',
@@ -99,6 +118,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '10:16',
         icon: 'solar:clipboard-list-bold-duotone',
         category: 'reporting',
+        checkType: 'email',
         emailSubjects: [
             { subject: '[PNM] Verification des resiliations pour PSO', origin: 'internal' },
         ],
@@ -118,6 +138,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '11:15',
         icon: 'solar:shield-check-bold-duotone',
         category: 'supervision',
+        checkType: 'server',
         checklist: [
             'PnmAckManager : Op. 03 — Aucun AR SYNC non-reçu',
             'PnmAckManager : Op. 04 — Aucun AR SYNC non-reçu',
@@ -136,6 +157,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '11:30',
         icon: 'solar:ticket-bold-duotone',
         category: 'incident',
+        checkType: 'email',
         checklist: [
             'Email tickets 1210 reçu',
             'Email tickets en attente reçu',
@@ -153,6 +175,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '11:35',
         icon: 'solar:file-send-bold-duotone',
         category: 'vacation',
+        checkType: 'email',
         emailSubjects: [
             { subject: '[PNM] 1ere vacation', origin: 'internal' },
         ],
@@ -176,6 +199,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '15:25',
         icon: 'solar:monitor-smartphone-bold-duotone',
         category: 'supervision',
+        checkType: 'email',
         checklist: [
             'Email rapport activité automates reçu',
             'Automate BASCULE_IN : SUCCESS',
@@ -187,23 +211,6 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'Si KO : escalader supervision avec détail',
         ],
     },
-    // ── 15:31 ──
-    {
-        key: 'prevision_portabilites',
-        label: 'Portabilités prévues DIGICEL/WIZZEE',
-        description:
-            'Reporting des portabilités prévues pour DIGICEL et WIZZEE (entrantes/sortantes) + portabilités internes de la veille.',
-        scheduledTime: '15:31',
-        icon: 'solar:chart-bold-duotone',
-        category: 'reporting',
-        checklist: [
-            'Email prévision portabilités reçu',
-            'Nombre portabilités IN prévues',
-            'Nombre portabilités OUT prévues',
-            'Vérifier portabilités internes veille',
-            'Volumétrie cohérente avec tendance',
-        ],
-    },
     // ── 15:35 ──
     {
         key: 'vacation_2',
@@ -213,6 +220,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '15:35',
         icon: 'solar:file-download-bold-duotone',
         category: 'vacation',
+        checkType: 'email',
         emailSubjects: [
             { subject: '[PNM] 2eme vacation', origin: 'internal' },
         ],
@@ -233,6 +241,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         scheduledTime: '20:35',
         icon: 'solar:check-circle-bold-duotone',
         category: 'vacation',
+        checkType: 'email',
         emailSubjects: [
             { subject: '[PNM] 3eme vacation', origin: 'internal' },
         ],

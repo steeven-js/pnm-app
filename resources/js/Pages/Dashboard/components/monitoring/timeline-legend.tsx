@@ -1,19 +1,25 @@
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 
-const LEGEND_ITEMS = [
+const STATUS_ITEMS = [
     { label: 'En attente', color: 'text.disabled' },
     { label: 'Vérifié', color: 'success.main' },
     { label: 'Problème', color: 'error.main' },
     { label: 'Ignoré', color: 'warning.main' },
 ] as const;
 
+const CHECK_TYPE_ITEMS = [
+    { label: 'Vérif. email', ringColor: '#f59e0b' },
+    { label: 'Vérif. serveur (SSH)', ringColor: '#06b6d4' },
+] as const;
+
 export function TimelineLegend() {
     const theme = useTheme();
     return (
-        <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
-            {LEGEND_ITEMS.map((item) => (
+        <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap', alignItems: 'center' }}>
+            {STATUS_ITEMS.map((item) => (
                 <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                     <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: item.color }} />
                     <Typography variant="caption" color="text.secondary">{item.label}</Typography>
@@ -31,6 +37,18 @@ export function TimelineLegend() {
                 }} />
                 <Typography variant="caption" color="text.secondary">En cours</Typography>
             </Box>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+            {CHECK_TYPE_ITEMS.map((item) => (
+                <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <Box sx={{
+                        width: 14, height: 14, borderRadius: '50%',
+                        border: `3px solid ${item.ringColor}`,
+                    }} />
+                    <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                </Box>
+            ))}
         </Box>
     );
 }

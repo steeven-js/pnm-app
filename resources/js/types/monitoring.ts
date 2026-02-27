@@ -29,6 +29,8 @@ export type EmailSubject = {
     origin: 'internal' | 'external';
 };
 
+export type CheckType = 'email' | 'server';
+
 export type PnmEventConfig = {
     key: string;
     label: string;
@@ -37,6 +39,7 @@ export type PnmEventConfig = {
     icon: string;
     checklist: string[];
     category: EventCategory;
+    checkType: CheckType;
     emailSubjects?: EmailSubject[];
 };
 

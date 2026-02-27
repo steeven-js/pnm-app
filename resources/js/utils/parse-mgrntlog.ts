@@ -24,8 +24,8 @@ export function autoFillFromPaste(
 type ParserFn = (eventKey: string, checklist: string[], content: string) => AutoFillResult | null;
 
 const PARSERS: Record<string, ParserFn> = {
-    cto_rattrapage: autoFillCto,
-    verif_bascule_valorisation: autoFillVerifBascule,
+    verif_bascule_server: autoFillVerifBascule,
+    verif_bascule_email: autoFillVerifBascule,
     vacation_1: autoFillVacation,
     vacation_2: autoFillVacation,
     vacation_3: autoFillVacation,
@@ -36,7 +36,6 @@ const PARSERS: Record<string, ParserFn> = {
     verif_acquittements: autoFillVerifAcquittements,
     tickets_attente: autoFillTickets,
     automates_report: (_ek, cl, c) => autoFillAutomates(cl, c),
-    prevision_portabilites: autoFillPrevisions,
 };
 
 export const SUPPORTED_EVENT_KEYS = Object.keys(PARSERS);
