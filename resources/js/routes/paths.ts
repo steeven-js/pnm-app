@@ -82,6 +82,8 @@ export const paths = {
   },
   // OPERATIONS GUIDE
   operationsGuide: '/operations-guide',
+  // CRONTAB SCRIPTS
+  crontabScripts: '/crontab-scripts',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG

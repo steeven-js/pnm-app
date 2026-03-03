@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Operations Guide
     Route::get('/operations-guide', fn () => Inertia::render('OperationsGuide'))->name('operations-guide');
 
+    // Crontab Scripts
+    Route::get('/crontab-scripts', fn () => Inertia::render('CrontabScripts'))->name('crontab-scripts');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 

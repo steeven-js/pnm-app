@@ -65,6 +65,11 @@ export const navData: NavSectionProps['data'] = [
         path: paths.operationsGuide,
         icon: <Iconify icon="solar:clipboard-check-bold-duotone" width={24} />,
       },
+      {
+        title: 'Scripts Crontab',
+        path: paths.crontabScripts,
+        icon: <Iconify icon="solar:clock-circle-bold-duotone" width={24} />,
+      },
     ],
   },
   /**
