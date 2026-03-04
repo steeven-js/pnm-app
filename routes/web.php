@@ -18,9 +18,6 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SqlPlaygroundController;
 use App\Http\Controllers\VerifyController;
 use App\Http\Controllers\VerifyToolController;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -98,26 +95,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('api/chat/stream', [ChatController::class, 'stream'])->name('api.chat.stream');
     Route::delete('api/chat/conversations/{conversation}', [ChatController::class, 'destroy'])->name('api.chat.destroy');
 });
-
-// Dev login route (local only)
-if (app()->environment('local')) {
-    Route::post('/dev-login', function () {
-        $user = User::firstOrCreate(
-            ['email' => 'dev@pnm.local'],
-            [
-                'name' => 'Dev User',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'level' => 'maitrise',
-                'onboarding_completed' => true,
-            ]
-        );
-
-        Auth::login($user);
-        request()->session()->regenerate();
-
-        return redirect()->intended('/dashboard');
-    })->name('dev-login');
-}
 
 require __DIR__.'/auth.php';

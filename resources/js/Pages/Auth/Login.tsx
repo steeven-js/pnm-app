@@ -1,11 +1,10 @@
-import { Head, useForm, Link as InertiaLink, usePage, router } from '@inertiajs/react';
+import { Head, useForm, Link as InertiaLink } from '@inertiajs/react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -17,7 +16,6 @@ import { AuthSplitLayout } from 'src/layouts/auth-split';
 // ----------------------------------------------------------------------
 
 export default function Login({ status, canResetPassword }: { status?: string; canResetPassword: boolean }) {
-    const { appEnv } = usePage().props as { appEnv?: string };
     const showPassword = useBoolean();
 
     const { data, setData, post, processing, errors } = useForm({
@@ -144,25 +142,6 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                     {processing ? 'Connexion...' : 'Se connecter'}
                 </Button>
             </Box>
-
-            {appEnv === 'local' && (
-                <>
-                    <Divider sx={{ my: 3, typography: 'overline', color: 'text.disabled' }}>
-                        DEV
-                    </Divider>
-
-                    <Button
-                        fullWidth
-                        size="large"
-                        variant="soft"
-                        color="warning"
-                        onClick={() => router.post('/dev-login')}
-                        startIcon={<Iconify icon="solar:bolt-bold" />}
-                    >
-                        Connexion Dev (1 clic)
-                    </Button>
-                </>
-            )}
         </AuthSplitLayout>
     );
 }
