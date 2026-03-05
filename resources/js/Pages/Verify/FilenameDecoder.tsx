@@ -565,10 +565,26 @@ function TicketRow({ ticket, expanded, onToggle, issues = [] }: { ticket: Parsed
             </Alert>
           ))}
 
-          {/* Lecture en langage naturel */}
-          <Box sx={{ p: 1.5, bgcolor: 'background.neutral', borderRadius: 1, borderLeft: 3, borderColor: color }}>
-            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.6 }}>
-              {getTicketReadableSentence(ticket.common)}
+          {/* Lecture en langage naturel ou explication de l'incohérence */}
+          <Box sx={{ p: 1.5, bgcolor: issues.length > 0 ? 'error.lighter' : 'background.neutral', borderRadius: 1, borderLeft: 3, borderColor: issues.length > 0 ? 'error.main' : color }}>
+            <Typography variant="body2" sx={{ fontStyle: 'italic', color: issues.length > 0 ? 'error.dark' : 'text.secondary', lineHeight: 1.6 }}>
+              {issues.length > 0
+                ? issues.map((issue) => {
+                    if (issue.type === 'col3_mismatch' && issue.details) {
+                      return `Ligne ${issue.lineNumber ?? '?'} (${ticket.common.typeInfo.abbrev}) : col. 3 « ${issue.details.col3Role} » = ${issue.details.col3Name} (${issue.details.col3Value}) ≠ destinataire fichier ${issue.details.expectedName} (${issue.details.expectedValue}).`;
+                    }
+                    if (issue.type === 'bad_hash') {
+                      return `Ligne ${issue.lineNumber ?? '?'} (${ticket.common.typeInfo.abbrev}) : le hash MD5 calculé ne correspond pas au hash présent dans le ticket.`;
+                    }
+                    if (issue.type === 'duplicate_sequence') {
+                      return `Ligne ${issue.lineNumber ?? '?'} (${ticket.common.typeInfo.abbrev}) : numéro de séquence en doublon dans le fichier.`;
+                    }
+                    if (issue.type === 'duplicate_ticket') {
+                      return `Ligne ${issue.lineNumber ?? '?'} (${ticket.common.typeInfo.abbrev}) : ticket en doublon (même MSISDN, même type, même séquence).`;
+                    }
+                    return issue.message;
+                  }).join(' — ')
+                : getTicketReadableSentence(ticket.common)}
             </Typography>
           </Box>
 

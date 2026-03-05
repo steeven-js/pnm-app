@@ -144,6 +144,80 @@ const LEGEND_ITEMS = [
   { color: c.purple, label: 'Portails Web' },
 ];
 
+// Timeline vérifications quotidiennes
+type TimelineSlotItem = {
+  type: 'mail' | 'server';
+  title: string;
+  detail: string;
+  category?: 'vacation' | 'supervision' | 'incident' | 'reporting';
+  from?: string;
+  commands?: string[];
+  check?: string;
+  server?: string;
+};
+type TimelineSlot = { time: string; items: TimelineSlotItem[] };
+
+const DAILY_TIMELINE: TimelineSlot[] = [
+  {
+    time: '~04:00',
+    items: [
+      { type: 'mail', title: '[CTO] Bascule du jour tardive ou en echec', detail: 'Vérifier si des MSISDN nécessitent un rattrapage manuel. Fichiers Rattrapage_CTO_MQ/GF/GP.', category: 'supervision', from: 'APP_VENTES' },
+    ],
+  },
+  {
+    time: '~09:00',
+    items: [
+      { type: 'server', title: 'Bascule & Valorisation', detail: 'Tous les opérateurs "Check success" + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log', 'tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log'], check: 'Tous les opérateurs "Check success" + "Fin de Traitement"' },
+      { type: 'mail', title: '[PNM] Reporting RIO incorrect', detail: 'Vérifier le nombre de refus entrante/sortante pour RIO incorrect. Si > 0, investiguer.', category: 'reporting', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM][INCIDENT] Incidents détectés', detail: 'Analyser chaque incident : refus 1210/1220, erreurs 7000, AR non-reçus, conflits.', category: 'incident', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~10:15',
+    items: [
+      { type: 'server', title: 'Génération fichiers vacation', detail: 'Fichier PNMDATA généré pour op. 01, 03, 04, 05, 06 + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log'], check: 'Fichier PNMDATA généré pour op. 01, 03, 04, 05, 06 + "Fin de Traitement"' },
+      { type: 'mail', title: '[PNMV3] PSO du jour Forfait', detail: 'Ouvrir le CSV Pnm_PSO_MOBI, vérifier la volumétrie vs prévisions veille.', category: 'reporting', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~11:15',
+    items: [
+      { type: 'server', title: 'Acquittements fichiers', detail: '"Aucune notification d\'AR SYNC non-reçu" pour chaque opérateur', server: 'vmqproportasync01', commands: ['tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log'], check: '"Aucune notification d\'AR SYNC non-reçu" pour chaque opérateur' },
+      { type: 'mail', title: '[PNM] Ticket(s) 1210 en attente', detail: 'Trier par ancienneté. < 3j surveiller, 3-5j relancer, > 5j escalader.', category: 'incident', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Ticket(s) en attente', detail: 'Traiter les tickets les plus anciens en priorité (XLS joint).', category: 'incident', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Rapport vacation 1', detail: 'Vérifier fichiers échangés = attendus, ACR OK pour les 5 opérateurs, aucun .ERR.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~15:25',
+    items: [
+      { type: 'mail', title: '[PROD] Rapport activité automates', detail: 'Vérifier SUCCESS pour BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.', category: 'supervision', from: 'supervision@digicelgroup.fr' },
+      { type: 'mail', title: '[PNM] Portabilités prévues DIGICEL-WIZZEE', detail: 'Vérifier IN/OUT DIGICEL + WIZZEE, portabilités internes veille.', category: 'reporting', from: 'porta_pnmv3' },
+      { type: 'mail', title: '[PNM] Rapport vacation 2', detail: 'Comparer avec vacation 1 : fichiers manquants réapparus ? ACR OK.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
+  {
+    time: '~20:35',
+    items: [
+      { type: 'mail', title: '[PNM] Rapport vacation 3 + clôture', detail: 'Dernier rapport du jour. Vérifier, clôturer la journée PNM.', category: 'vacation', from: 'porta_pnmv3' },
+    ],
+  },
+];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  vacation: c.green,
+  supervision: c.blue,
+  incident: c.red,
+  reporting: c.orange,
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  vacation: 'Vacation',
+  supervision: 'Supervision',
+  incident: 'Incident',
+  reporting: 'Reporting',
+};
+
 const PROD_LEGEND = [
   { color: c.green, label: 'SFTP (opérateurs)' },
   { color: c.blue, label: 'SCP / Sync interne' },
@@ -244,7 +318,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 1 / 4</Text>
+          <Text>Page 1 / 5</Text>
         </View>
       </Page>
 
@@ -349,7 +423,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 2 / 4</Text>
+          <Text>Page 2 / 5</Text>
         </View>
       </Page>
 
@@ -419,7 +493,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 3 / 4</Text>
+          <Text>Page 3 / 5</Text>
         </View>
       </Page>
 
@@ -507,7 +581,84 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 4 / 4</Text>
+          <Text>Page 4 / 5</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 5 — Vérifications quotidiennes */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <Text style={s.headerTitle}>Vérifications quotidiennes</Text>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.infoBox}>
+          <Text style={s.infoText}>
+            Chronologie des vérifications à effectuer chaque jour ouvré : contrôles serveur et emails de rapport. Chaque créneau regroupe les actions à réaliser dans l'ordre.
+          </Text>
+        </View>
+
+        {DAILY_TIMELINE.map((slot) => (
+          <View key={slot.time} style={{ marginBottom: 10 }} wrap={false}>
+            {/* Time header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={{ backgroundColor: c.primary, borderRadius: 3, paddingHorizontal: 6, paddingVertical: 2 }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', color: c.white }}>{slot.time}</Text>
+              </View>
+              <View style={{ flex: 1, height: 0.5, backgroundColor: c.border, marginLeft: 6 }} />
+            </View>
+
+            {/* Items */}
+            {slot.items.map((item, idx) => (
+              <View key={idx} style={{ flexDirection: 'row', marginBottom: 3, paddingLeft: 4 }}>
+                {/* Type indicator */}
+                <View style={{ width: 50, flexDirection: 'row', alignItems: 'flex-start', gap: 2, paddingTop: 1 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: item.type === 'server' ? c.blue : (item.category ? CATEGORY_COLORS[item.category] || c.grey : c.grey), marginTop: 2 }} />
+                  <Text style={{ fontSize: 6.5, color: c.light }}>{item.type === 'server' ? 'Serveur' : (item.category ? CATEGORY_LABELS[item.category] || '' : 'Mail')}</Text>
+                </View>
+
+                {/* Content */}
+                <View style={{ flex: 1, paddingLeft: 4 }}>
+                  <Text style={{ fontSize: 8, fontWeight: 'bold', color: c.dark }}>{item.title}</Text>
+                  <Text style={{ fontSize: 7.5, color: c.light, marginTop: 1 }}>{item.detail}</Text>
+                  {item.check && (
+                    <Text style={{ fontSize: 7, color: c.green, marginTop: 1 }}>✓ {item.check}</Text>
+                  )}
+                  {item.commands && item.commands.length > 0 && (
+                    <View style={{ backgroundColor: '#F4F6F8', borderRadius: 2, padding: 3, marginTop: 2 }}>
+                      {item.commands.map((cmd, ci) => (
+                        <Text key={ci} style={{ fontSize: 6.5, fontFamily: 'Courier', color: c.dark }}>$ {cmd}</Text>
+                      ))}
+                    </View>
+                  )}
+                  {item.server && (
+                    <Text style={{ fontSize: 6.5, color: c.primary, marginTop: 1 }}>Serveur : {item.server}</Text>
+                  )}
+                </View>
+              </View>
+            ))}
+          </View>
+        ))}
+
+        {/* Legend */}
+        <View style={[s.legendRow, { marginTop: 8 }]}>
+          {[
+            { color: c.blue, label: 'Contrôle serveur' },
+            { color: c.green, label: 'Vacation' },
+            { color: c.orange, label: 'Reporting' },
+            { color: c.red, label: 'Incident' },
+            { color: c.blue, label: 'Supervision' },
+          ].map((item) => (
+            <View key={item.label} style={s.legendItem}>
+              <View style={[s.legendDot, { backgroundColor: item.color }]} />
+              <Text style={s.legendText}>{item.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Guide des Opérations</Text>
+          <Text>Page 5 / 5</Text>
         </View>
       </Page>
     </Document>

@@ -1,0 +1,235 @@
+<h2>Cas pratique — Correction d'une incohérence col.3 dans un fichier PNMDATA</h2>
+
+<p>Ce guide documente un cas réel rencontré le <strong>04/03/2026</strong> sur le fichier <code>PNMDATA.04.02.20260303123443.002</code> envoyé par <strong>Dauphin Télécom (04)</strong> à destination de <strong>Digicel (02)</strong>. Une incohérence a été détectée sur la colonne 3 d'un ticket, nécessitant une correction manuelle avant réintégration.</p>
+
+<div style="background: #FFF4E5; border-left: 4px solid #d97706; padding: 16px; border-radius: 4px; margin: 16px 0;">
+  <strong>⚠ Contexte</strong><br>
+  Ce type d'anomalie survient lorsqu'un opérateur envoie un ticket dont la colonne 3 (OPR — opérateur destinataire) ne correspond pas au destinataire réel du fichier. Le fichier est adressé à Digicel (02), mais un ticket pointe vers Free Caraïbe (06).
+</div>
+
+<h3>1. Détection de l'incohérence</h3>
+
+<p>En analysant le fichier avec le <strong>Décodeur fichier</strong> de PNM App, l'outil détecte automatiquement :</p>
+
+<table style="width:100%; border-collapse: collapse; margin: 12px 0;">
+  <tr style="background: #f8fafc;">
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Élément</th>
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Valeur</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Fichier</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>PNMDATA.04.02.20260303123443.002</code></td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Ligne concernée</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Ligne 12</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Type de ticket</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">1430 CP (Confirmation de Portage)</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>MSISDN</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">0696861327</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Col.3 dans le ticket</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px; color: #d97706;"><strong>06 — Free Caraïbe</strong></td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Destinataire attendu (entête)</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px; color: #16a34a;"><strong>02 — Digicel</strong></td>
+  </tr>
+</table>
+
+<p>La ligne brute incriminée :</p>
+<pre style="background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px;">1430|04|<span style="color: #fbbf24; font-weight: bold;">06</span>|<span style="color: #fbbf24; font-weight: bold;">06</span>|03|20260226102713|0696861327|2d404a42c6d2db55116a944148c0327d|0011|20260303123659|20260303000000|</pre>
+
+<p>On voit que les colonnes 2 et 3 contiennent <code>04|06</code> au lieu de <code>04|02</code>. Ce ticket aurait dû être dans le fichier <code>PNMDATA.04.06</code> (Dauphin → Free Caraïbe) et non dans <code>PNMDATA.04.02</code> (Dauphin → Digicel).</p>
+
+<h3>2. Procédure de correction</h3>
+
+<div style="background: #EFF6FF; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px; margin: 16px 0;">
+  <strong>ℹ Principe</strong><br>
+  On ne peut pas simplement supprimer la ligne car cela créerait un trou dans la séquence des numéros de ticket. La méthode consiste à <strong>remplacer la ligne incohérente par le dernier ticket du fichier</strong>, en ajustant le numéro de séquence.
+</div>
+
+<h4>Étape 1 — Identifier les éléments clés</h4>
+
+<table style="width:100%; border-collapse: collapse; margin: 12px 0;">
+  <tr style="background: #f8fafc;">
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Élément</th>
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Valeur dans notre cas</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Ligne à supprimer</td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Ligne 12 (séquence <code>0011</code>)</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Dernier ticket du fichier</td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Ligne 66 (séquence <code>0065</code>, ticket 3410 RN pour MSISDN 0690660689)</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Nombre total de tickets avant</td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">65 tickets (67 lignes avec entête + pied de page)</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">Nombre total de tickets après</td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;">64 tickets (66 lignes avec entête + pied de page)</td>
+  </tr>
+</table>
+
+<h4>Étape 2 — Supprimer la ligne incohérente</h4>
+
+<p>Ouvrir le fichier dans un éditeur de texte (Notepad++, VS Code...). Supprimer la <strong>ligne 12</strong> :</p>
+<pre style="background: #1e293b; color: #ef4444; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; text-decoration: line-through;">1430|04|06|06|03|20260226102713|0696861327|2d404a42c6d2db55116a944148c0327d|0011|20260303123659|20260303000000|</pre>
+
+<h4>Étape 3 — Déplacer le dernier ticket à la place</h4>
+
+<p>Prendre le <strong>dernier ticket</strong> du fichier (ancienne ligne 66) :</p>
+<pre style="background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px;">3410|04|00|01|04|20260227014913|0690660689|9158f2f3eecf1084d8f0b2b287b877d6|<span style="color: #fbbf24; font-weight: bold;">0065</span>|20260227062551|20260303000000</pre>
+
+<p>Le placer à l'emplacement de la ligne 12 et <strong>changer son numéro de séquence</strong> de <code>0065</code> à <code>0011</code> :</p>
+<pre style="background: #1e293b; color: #22c55e; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px;">3410|04|00|01|04|20260227014913|0690660689|9158f2f3eecf1084d8f0b2b287b877d6|<span style="color: #fbbf24; font-weight: bold;">0011</span>|20260227062551|20260303000000</pre>
+
+<div style="background: #FEF2F2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 4px; margin: 16px 0;">
+  <strong>⚠ Important</strong><br>
+  Le dernier ticket (ligne 66) est <strong>supprimé de sa position d'origine</strong> puisqu'il a été déplacé. On passe donc de 65 à 64 tickets.
+</div>
+
+<h4>Étape 4 — Renommer le fichier avec un nouvel horodatage</h4>
+
+<p>Le fichier corrigé ne peut pas garder le même nom, sinon il sera rejeté (<em>"fichier déjà reçu"</em>). Il faut générer un <strong>nouvel horodatage</strong> et un nouveau <strong>numéro de séquence</strong> :</p>
+
+<table style="width:100%; border-collapse: collapse; margin: 12px 0;">
+  <tr style="background: #f8fafc;">
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Élément</th>
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Avant</th>
+    <th style="border: 1px solid #e2e8f0; padding: 8px; text-align: left;">Après (exemple)</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Nom du fichier</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>PNMDATA.04.02.20260303123443.002</code></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>PNMDATA.04.02.20260304143000.005</code></td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Ligne 1 (entête)</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>0123456789|PNMDATA.04.02.20260303123443.002|04|20260303123443</code></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>0123456789|PNMDATA.04.02.20260304143000.005|04|20260304143000</code></td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><strong>Dernière ligne (pied de page)</strong></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>9876543210|04|20260303123443|000067</code></td>
+    <td style="border: 1px solid #e2e8f0; padding: 8px;"><code>9876543210|04|20260304143000|000066</code></td>
+  </tr>
+</table>
+
+<p>Les 3 éléments à mettre à jour :</p>
+<ol>
+  <li><strong>Nom du fichier</strong> : nouvel horodatage + nouveau numéro de séquence</li>
+  <li><strong>Entête (ligne 1)</strong> : même horodatage que le nom</li>
+  <li><strong>Pied de page (dernière ligne)</strong> : même horodatage + <strong>compteur de lignes totales</strong> (entête + tickets + pied de page = 64 + 2 = <code>000066</code>)</li>
+</ol>
+
+<h4>Étape 5 — Transférer et intégrer</h4>
+
+<ol>
+  <li>Transférer le fichier corrigé via <strong>FileZilla</strong> dans le répertoire <code>recv/</code> sur le serveur <strong>vmqproportasync01</strong> :
+    <pre style="background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; font-size: 13px;">/home/porta_pnmv3/PortaSync/pnmdata/04/recv/</pre>
+  </li>
+  <li>Exécuter le script d'intégration <strong>PnmAckManager</strong> pour traiter le fichier corrigé</li>
+  <li>Vérifier les logs :
+    <pre style="background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; font-size: 13px;">tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log</pre>
+  </li>
+</ol>
+
+<h3>3. Résumé de la procédure</h3>
+
+<svg viewBox="0 0 800 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="380" fill="#f8fafc" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">Procédure de correction d'une incohérence col.3</text>
+
+  <!-- Step 1 -->
+  <circle cx="80" cy="80" r="22" fill="#3b82f6"/>
+  <text x="80" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">1</text>
+  <text x="115" y="75" font-size="12" font-weight="bold" fill="#1e293b">Détecter l'incohérence</text>
+  <text x="115" y="92" font-size="10" fill="#64748b">Utiliser le Décodeur fichier de PNM App</text>
+
+  <!-- Arrow -->
+  <line x1="80" y1="105" x2="80" y2="125" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="75,125 85,125 80,132" fill="#cbd5e1"/>
+
+  <!-- Step 2 -->
+  <circle cx="80" cy="155" r="22" fill="#d97706"/>
+  <text x="80" y="160" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">2</text>
+  <text x="115" y="150" font-size="12" font-weight="bold" fill="#1e293b">Supprimer la ligne incohérente</text>
+  <text x="115" y="167" font-size="10" fill="#64748b">Remplacer par le dernier ticket (changer séquence)</text>
+
+  <!-- Arrow -->
+  <line x1="80" y1="180" x2="80" y2="200" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="75,200 85,200 80,207" fill="#cbd5e1"/>
+
+  <!-- Step 3 -->
+  <circle cx="80" cy="230" r="22" fill="#8b5cf6"/>
+  <text x="80" y="235" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">3</text>
+  <text x="115" y="225" font-size="12" font-weight="bold" fill="#1e293b">Renommer le fichier</text>
+  <text x="115" y="242" font-size="10" fill="#64748b">Nouvel horodatage dans : nom, entête, pied de page + compteur</text>
+
+  <!-- Arrow -->
+  <line x1="80" y1="255" x2="80" y2="275" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="75,275 85,275 80,282" fill="#cbd5e1"/>
+
+  <!-- Step 4 -->
+  <circle cx="80" cy="305" r="22" fill="#10b981"/>
+  <text x="80" y="310" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">4</text>
+  <text x="115" y="300" font-size="12" font-weight="bold" fill="#1e293b">Transférer via FileZilla dans recv/</text>
+  <text x="115" y="317" font-size="10" fill="#64748b">/home/porta_pnmv3/PortaSync/pnmdata/04/recv/</text>
+
+  <!-- Arrow -->
+  <line x1="80" y1="330" x2="80" y2="345" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="75,345 85,345 80,352" fill="#cbd5e1"/>
+
+  <!-- Step 5 -->
+  <circle cx="80" cy="365" r="12" fill="#ef4444"/>
+  <text x="80" y="369" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff">5</text>
+  <text x="100" y="369" font-size="11" font-weight="bold" fill="#1e293b">Exécuter PnmAckManager + vérifier les logs</text>
+
+  <!-- Right side: file structure -->
+  <rect x="450" y="55" width="320" height="305" rx="6" fill="#1e293b"/>
+  <text x="470" y="78" font-size="11" font-weight="bold" fill="#94a3b8">Fichier corrigé (structure)</text>
+
+  <text x="470" y="105" font-size="10" font-family="monospace" fill="#22c55e">Ligne 1  : 0123456789|PNMDATA.04.02.{NEW}|04|{NEW}</text>
+  <text x="470" y="125" font-size="10" font-family="monospace" fill="#94a3b8">Ligne 2  : 1210|04|02|02|04|... (ticket RP+)</text>
+  <text x="470" y="145" font-size="10" font-family="monospace" fill="#94a3b8">...</text>
+  <text x="470" y="165" font-size="10" font-family="monospace" fill="#94a3b8">Ligne 11 : 1430|04|02|02|01|... (séq. 0010)</text>
+  <text x="470" y="190" font-size="10" font-family="monospace" fill="#fbbf24">Ligne 12 : 3410|04|00|01|04|... séq. 0011</text>
+  <text x="470" y="205" font-size="9" font-family="monospace" fill="#fbbf24">         ↑ dernier ticket déplacé ici</text>
+  <text x="470" y="225" font-size="10" font-family="monospace" fill="#94a3b8">Ligne 13 : 1430|04|02|02|03|... (séq. 0012)</text>
+  <text x="470" y="245" font-size="10" font-family="monospace" fill="#94a3b8">...</text>
+  <text x="470" y="265" font-size="10" font-family="monospace" fill="#94a3b8">Ligne 65 : 3420|04|02|06|02|... (séq. 0064)</text>
+  <text x="470" y="290" font-size="10" font-family="monospace" fill="#22c55e">Ligne 66 : 9876543210|04|{NEW}|000066</text>
+
+  <text x="470" y="320" font-size="9" fill="#64748b">64 tickets + entête + pied de page = 66 lignes</text>
+  <text x="470" y="340" font-size="9" fill="#ef4444">⚠ Le dernier ticket (ancien 0065) est maintenant à la ligne 12</text>
+</svg>
+
+<h3>4. Points de vigilance</h3>
+
+<ul>
+  <li><strong>Ne jamais renuméroter toutes les séquences</strong> — c'est trop risqué et long. La méthode du remplacement par le dernier ticket est la plus simple.</li>
+  <li><strong>Toujours renommer le fichier</strong> avec un nouvel horodatage, sinon erreur <em>"fichier déjà reçu"</em>.</li>
+  <li><strong>Mettre à jour 3 endroits</strong> : nom du fichier, entête (ligne 1) et pied de page (dernière ligne).</li>
+  <li><strong>Le compteur en pied de page</strong> doit refléter le nombre total de lignes (entête + tickets + pied de page).</li>
+  <li><strong>Vérifier avec le Décodeur fichier</strong> de PNM App avant de transférer, pour s'assurer qu'il n'y a plus d'incohérence.</li>
+</ul>
+
+<div style="background: #F0FDF4; border-left: 4px solid #16a34a; padding: 16px; border-radius: 4px; margin: 16px 0;">
+  <strong>✓ Bonnes pratiques</strong><br>
+  <ul style="margin: 8px 0 0 0;">
+    <li>Toujours conserver une copie du fichier original avant modification</li>
+    <li>Documenter l'intervention (date, fichier, ligne corrigée, raison)</li>
+    <li>Informer l'opérateur émetteur (ici Dauphin Télécom) de l'anomalie</li>
+  </ul>
+</div>

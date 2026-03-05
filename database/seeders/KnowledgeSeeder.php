@@ -116,6 +116,7 @@ class KnowledgeSeeder extends Seeder
             ['domain' => 'outils-scripts', 'title' => 'Processus de bascule', 'slug' => 'bascule', 'excerpt' => 'Le script TraitementBascule.sh en détail.', 'file' => 'outils-bascule.html', 'level' => 'maitrise', 'sort_order' => 4, 'reading_time' => 6],
             ['domain' => 'outils-scripts', 'title' => 'Monitoring et santé des systèmes', 'slug' => 'monitoring', 'excerpt' => 'Indicateurs de santé et résolution.', 'file' => 'outils-monitoring.html', 'level' => 'maitrise', 'sort_order' => 5, 'reading_time' => 5],
             ['domain' => 'outils-scripts', 'title' => 'Exploitation quotidienne', 'slug' => 'exploitation-quotidienne', 'excerpt' => 'Procédures opérationnelles PORTA.', 'file' => 'outils-exploitation-quotidienne.html', 'level' => 'maitrise', 'sort_order' => 6, 'reading_time' => 8],
+            ['domain' => 'outils-scripts', 'title' => 'Cas pratique — Correction incohérence col.3', 'slug' => 'cas-pratique-incoherence-col3', 'excerpt' => 'Procédure complète pour corriger un ticket avec une col.3 incohérente dans un fichier PNMDATA reçu.', 'file' => 'outils-cas-pratique-incoherence.html', 'level' => 'maitrise', 'sort_order' => 7, 'reading_time' => 10],
             // SQL & Investigation
             ['domain' => 'sql-investigation', 'title' => 'C\'est quoi une base de données ?', 'slug' => 'base-de-donnees', 'excerpt' => 'Les 18 tables PORTA, à quoi sert chacune, le schéma relationnel.', 'file' => 'sql-01-base-de-donnees.html', 'level' => 'decouverte', 'sort_order' => 1, 'reading_time' => 6],
             ['domain' => 'sql-investigation', 'title' => 'SELECT — Lire des données', 'slug' => 'select', 'excerpt' => 'SELECT, LIMIT, ORDER BY, COUNT, DISTINCT — les bases de la lecture SQL.', 'file' => 'sql-02-select.html', 'level' => 'decouverte', 'sort_order' => 2, 'reading_time' => 5],
@@ -175,6 +176,7 @@ class KnowledgeSeeder extends Seeder
             'bascule' => ['EMA/EMM', 'MOBI', 'PortaDB', 'PortaSync'],
             'monitoring' => ['PortaDB', 'PortaSync', 'ESB', 'BTCTF'],
             'exploitation-quotidienne' => ['PortaSync', 'PortaDB', 'EMA/EMM', 'PNMDATA', 'MOBI', 'PortaWs', 'PortaWebUi', 'DAPI', 'AR'],
+            'cas-pratique-incoherence-col3' => ['PNMDATA', 'OPR', 'OPD', 'MSISDN', 'ACR', 'PortaSync', 'BTCTF', 'sFTP'],
             // SQL & Investigation
             'base-de-donnees' => ['PortaDB', 'PNM', 'MSISDN', 'PNMDATA', 'PNMSYNC', 'ACR'],
             'select' => ['PortaDB', 'MSISDN'],

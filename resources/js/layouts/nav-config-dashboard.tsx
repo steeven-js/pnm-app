@@ -70,6 +70,21 @@ export const navData: NavSectionProps['data'] = [
         path: paths.crontabScripts,
         icon: <Iconify icon="solar:clock-circle-bold-duotone" width={24} />,
       },
+      {
+        title: 'Cas Pratiques',
+        path: paths.casPratiques,
+        icon: <Iconify icon="solar:case-round-bold-duotone" width={24} />,
+      },
+      {
+        title: 'Scripts PNM',
+        path: paths.scriptsPnm,
+        icon: <Iconify icon="solar:server-bold-duotone" width={24} />,
+      },
+      {
+        title: 'Requetes SQL',
+        path: paths.requetesPnm,
+        icon: <Iconify icon="solar:database-bold-duotone" width={24} />,
+      },
     ],
   },
   /**

@@ -50,6 +50,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Crontab Scripts
     Route::get('/crontab-scripts', fn () => Inertia::render('CrontabScripts'))->name('crontab-scripts');
 
+    // Cas Pratiques
+    Route::get('/cas-pratiques', fn () => Inertia::render('CasPratiques'))->name('cas-pratiques');
+
+    // Scripts PNM
+    Route::get('/scripts-pnm', fn () => Inertia::render('ScriptsPnm'))->name('scripts-pnm');
+
+    // Requetes PNM
+    Route::get('/requetes-pnm', fn () => Inertia::render('RequetesPnm'))->name('requetes-pnm');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 
