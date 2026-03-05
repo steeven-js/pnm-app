@@ -136,6 +136,8 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
                         setPreview(null);
                         setError('');
                     }}
+                    autoComplete="off"
+                    inputProps={{ autoComplete: 'off', 'data-form-type': 'other' }}
                     sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                 />
 
