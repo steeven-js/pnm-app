@@ -111,8 +111,17 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
 
     return (
         <Box sx={{ mb: 2, p: 2, borderRadius: 1.5, bgcolor: '#fff3e018', border: '1px solid', borderColor: 'warning.light' }}>
+            {/* Title */}
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                Analyse de l'email incident
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                Le systeme PNM envoie un email automatique quand des anomalies sont detectees lors des echanges de fichiers de portabilite entre operateurs.
+                Voici le detail des incidents trouves dans cet email.
+            </Typography>
+
             {/* Summary chips */}
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ mb: 1.5 }}>
+            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
                 <SummaryChip type="refusals" count={summary.refusals} />
                 <SummaryChip type="fileErrors" count={summary.fileErrors} />
                 <SummaryChip type="arNonRecu" count={summary.arNonRecu} />
@@ -122,10 +131,13 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
             {/* Operators involved */}
             {operatorsInvolved.length > 0 && (
                 <Box sx={{ mb: 1.5 }}>
-                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                        Opérateurs impliqués
+                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
+                        Operateurs concernes
                     </Typography>
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.5 }}>
+                        Les operateurs impliques dans les incidents (expediteur et destinataire des fichiers PNMDATA).
+                    </Typography>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                         {operatorsInvolved.map((op) => (
                             <Chip key={op} label={op} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
                         ))}
@@ -136,8 +148,11 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
             {/* MSISDN concerned */}
             {msisdnsConcerned.length > 0 && (
                 <Box sx={{ mb: 1.5 }}>
-                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                        MSISDN concernés
+                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
+                        Numeros de telephone (MSISDN) concernes
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.5 }}>
+                        Les numeros de mobile dont le portage a rencontre un probleme. Vous pouvez les rechercher dans l'outil Verify pour plus de details.
                     </Typography>
                     <Typography
                         variant="body2"
@@ -148,32 +163,39 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
                 </Box>
             )}
 
+            <Divider sx={{ my: 1.5 }} />
+
             {/* File errors detail */}
             {fileErrors.length > 0 && (
                 <Box sx={{ mb: 1.5 }}>
-                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileErrors.color, display: 'block', mb: 0.5 }}>
-                        Erreurs fichiers ({fileErrors.length})
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileErrors.color, display: 'block', mb: 0.25 }}>
+                        Erreurs dans les fichiers ({fileErrors.length})
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.75 }}>
+                        Des tickets de portage contenus dans un fichier PNMDATA ont ete rejetes ou ont provoque une erreur.
+                        Les refus (1210/1220) signifient que l'operateur destinataire a refuse le portage.
+                        Les erreurs 7000 indiquent un dysfonctionnement technique (ex: doublon, donnees incoherentes).
                     </Typography>
                     {fileErrors.map((fe, idx) => (
                         <Box key={idx} sx={{ mb: 1, pl: 1, borderLeft: '2px solid', borderColor: 'warning.light' }}>
                             <Typography variant="caption" fontWeight={600} sx={{ fontFamily: 'monospace', display: 'block' }}>
                                 {fe.filenameParsed.valid
-                                    ? `${fe.filenameParsed.sourceOperatorName} → ${fe.filenameParsed.destOperatorName} (${fe.filename})`
+                                    ? `${fe.filenameParsed.sourceOperatorName} \u2192 ${fe.filenameParsed.destOperatorName} (${fe.filename})`
                                     : fe.filename}
                             </Typography>
-                            {fe.refusalCount > 0 && (
-                                <Typography variant="caption" color="error.main">
-                                    {fe.refusalCount} refus
+                            {fe.filenameParsed.valid && (
+                                <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.25 }}>
+                                    Fichier envoye le {fe.filenameParsed.formattedDate}
                                 </Typography>
                             )}
-                            {fe.refusalCount > 0 && fe.errorCount > 0 && (
-                                <Typography variant="caption" color="text.secondary"> · </Typography>
-                            )}
-                            {fe.errorCount > 0 && (
-                                <Typography variant="caption" color="warning.main">
-                                    {fe.errorCount} erreurs 7000
-                                </Typography>
-                            )}
+                            <Stack direction="row" spacing={0.5} sx={{ mb: 0.25 }}>
+                                {fe.refusalCount > 0 && (
+                                    <Chip label={`${fe.refusalCount} refus`} size="small" sx={{ bgcolor: '#d32f2f18', color: '#d32f2f', fontSize: '0.7rem', height: 20 }} />
+                                )}
+                                {fe.errorCount > 0 && (
+                                    <Chip label={`${fe.errorCount} erreurs 7000`} size="small" sx={{ bgcolor: '#ed6c0218', color: '#ed6c02', fontSize: '0.7rem', height: 20 }} />
+                                )}
+                            </Stack>
                             {fe.tickets.length > 0 && (
                                 <Box component="table" sx={{ mt: 0.5, width: '100%', fontSize: '0.7rem', fontFamily: 'monospace', '& td, & th': { px: 0.75, py: 0.25, textAlign: 'left' }, '& th': { fontWeight: 600, color: 'text.secondary', borderBottom: '1px solid', borderColor: 'divider' } }}>
                                     <thead>
@@ -181,7 +203,7 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
                                             <th>Code</th>
                                             <th>MSISDN</th>
                                             <th>Motif</th>
-                                            <th>Opérateurs</th>
+                                            <th>Operateurs</th>
                                             <th>Date</th>
                                         </tr>
                                     </thead>
@@ -189,10 +211,10 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
                                         {fe.tickets.slice(0, 10).map((t, ti) => (
                                             <tr key={ti}>
                                                 <td>{t.code}</td>
-                                                <td>{t.msisdn || '—'}</td>
-                                                <td>{t.errorCodeLabel || t.responseCodeLabel || '—'}</td>
-                                                <td>{[t.oprName, t.opdName].filter(Boolean).join(' → ') || '—'}</td>
-                                                <td>{t.formattedDate || '—'}</td>
+                                                <td>{t.msisdn || '\u2014'}</td>
+                                                <td title={t.description}>{t.errorCodeLabel || t.responseCodeLabel || '\u2014'}</td>
+                                                <td>{[t.oprName, t.opdName].filter(Boolean).join(' \u2192 ') || '\u2014'}</td>
+                                                <td>{t.formattedDate || '\u2014'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -206,18 +228,22 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
             {/* AR non reçus */}
             {arNonRecus.length > 0 && (
                 <Box sx={{ mb: 1.5 }}>
-                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.arNonRecu.color, display: 'block', mb: 0.5 }}>
-                        AR non-reçus ({arNonRecus.length})
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.arNonRecu.color, display: 'block', mb: 0.25 }}>
+                        Accuses de reception non recus ({arNonRecus.length})
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.75 }}>
+                        Quand un operateur envoie un fichier PNMDATA, l'operateur destinataire doit renvoyer un accuse de reception (AR) dans un delai de 60 minutes.
+                        Si l'AR n'est pas recu a temps, cela peut indiquer un probleme chez l'operateur destinataire. Il faut le contacter.
                     </Typography>
                     {arNonRecus.map((ar, idx) => (
                         <Box key={idx} sx={{ pl: 1, mb: 0.5, borderLeft: '2px solid', borderColor: '#9c27b040' }}>
-                            <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontFamily: 'monospace', display: 'block' }}>
                                 {ar.filenameParsed.valid
-                                    ? `${ar.filenameParsed.sourceOperatorName} → ${ar.filenameParsed.destOperatorName}`
+                                    ? `${ar.filenameParsed.sourceOperatorName} \u2192 ${ar.filenameParsed.destOperatorName}`
                                     : ar.filename}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                                Expéditeur : {ar.senderName} ({ar.senderCode}) · Délai : {ar.delayMinutes} min
+                                Envoye par {ar.senderName} (code {ar.senderCode}) - en attente depuis {ar.delayMinutes} min
                             </Typography>
                         </Box>
                     ))}
@@ -227,18 +253,22 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
             {/* Fichiers non acquittés */}
             {fileNotAcks.length > 0 && (
                 <Box>
-                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileNotAck.color, display: 'block', mb: 0.5 }}>
-                        Fichiers non acquittés ({fileNotAcks.length})
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileNotAck.color, display: 'block', mb: 0.25 }}>
+                        Fichiers non acquittes ({fileNotAcks.length})
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 0.75 }}>
+                        Un fichier PNMDATA envoye a un operateur n'a pas ete acquitte (confirme comme recu et traite).
+                        Si ce probleme se repete sur plusieurs vacations, il faut le signaler a la supervision.
                     </Typography>
                     {fileNotAcks.map((fna, idx) => (
                         <Box key={idx} sx={{ pl: 1, mb: 0.5, borderLeft: '2px solid', borderColor: '#0288d140' }}>
-                            <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontFamily: 'monospace', display: 'block' }}>
                                 {fna.filenameParsed.valid
-                                    ? `${fna.filenameParsed.sourceOperatorName} → ${fna.filenameParsed.destOperatorName}`
+                                    ? `${fna.filenameParsed.sourceOperatorName} \u2192 ${fna.filenameParsed.destOperatorName}`
                                     : fna.filename}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                                Destinataire : {fna.recipientName} ({fna.recipientCode})
+                                L'operateur {fna.recipientName} (code {fna.recipientCode}) n'a pas acquitte ce fichier
                             </Typography>
                         </Box>
                     ))}
