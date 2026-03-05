@@ -571,7 +571,7 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
   const config = pdfMap[casId];
   if (!config) return;
 
-  const blob = await pdf(config.document).toBlob();
+  const blob = await pdf(config.document as React.ReactElement<import('@react-pdf/renderer').DocumentProps>).toBlob();
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
