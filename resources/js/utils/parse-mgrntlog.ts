@@ -2,9 +2,12 @@
 // Parsers for monitoring auto-fill (all PNM event types)
 // ---------------------------------------------------------------------------
 
+import { parseIncidentEmail, type ParsedIncidentEmail } from 'src/lib/pnm-utils';
+
 export type AutoFillResult = {
     checkedItems: string[];
     notes: string;
+    parsedData?: unknown;
 };
 
 // ---------------------------------------------------------------------------
@@ -281,26 +284,18 @@ function autoFillIncidents(
     const isIncidentMail = /DIGICEL\.PORTA-V3/i.test(content) || /incidents?\s+(ont\s+ete|a\s+ete)\s+detect/i.test(content);
     if (!isIncidentMail) return null;
 
-    // Count incident types
-    const refusCount = (content.match(/refu\(s\)\s*\(1210\/1220\)/gi) || []).length;
-    const erreurCount = (content.match(/erreur\(s\)\s*\(7000\)/gi) || []).length;
-    const arNonRecu = /AR non-recu/i.test(content);
-    const nonAcquitte = /n['']a pas [eé]t[eé] acquit[eé]/i.test(content);
+    // Use the rich parser for structured data
+    const parsed = parseIncidentEmail(content);
+    const { summary } = parsed;
+
+    const arNonRecu = summary.arNonRecu > 0;
+    const nonAcquitte = summary.fileNotAck > 0;
     const conflitsOuvert = /conflit\s*\[OUVERT\]/i.test(content);
-
-    // Extract ticket details for notes
-    const ticketLines = content.match(/\[[\d, ]+,.*?\]/g) || [];
-    const refusTickets = ticketLines.filter((t) => t.startsWith('[1210') || t.startsWith('[1220'));
-    const erreurTickets = ticketLines.filter((t) => t.startsWith('[7000'));
-
-    // Count total incidents from subject line
-    const totalMatch = content.match(/(\d+)\s*incidents?\s+(ont\s+ete|a\s+ete)\s+detect/i);
-    const totalIncidents = totalMatch ? parseInt(totalMatch[1], 10) : null;
 
     const rules: Record<string, () => boolean> = {
         "Email [PNM][INCIDENT] reçu (ou aucun = pas d'incident)": () => true,
-        'Refus 1210/1220 : lire motifs, traiter ou informer commercial': () => refusCount === 0,
-        'Erreurs 7000 : vérifier données dossier': () => erreurCount === 0,
+        'Refus 1210/1220 : lire motifs, traiter ou informer commercial': () => summary.refusals === 0,
+        'Erreurs 7000 : vérifier données dossier': () => summary.fileErrors === 0,
         'AR non-reçus > 60 min : contacter opérateur': () => !arNonRecu,
         'Fichiers non acquittés : signaler si récurrent': () => !nonAcquitte,
         'Conflits [OUVERT] : investiguer si récent (< 7j)': () => !conflitsOuvert,
@@ -308,36 +303,30 @@ function autoFillIncidents(
 
     const checkedItems = checklist.filter((item) => rules[item]?.());
 
+    // Build text notes (kept for backwards compat)
     const lines = ['[Auto] Incidents PNM détectés'];
-    if (totalIncidents !== null) lines.push(`Total incidents: ${totalIncidents}`);
-    if (refusCount > 0) {
-        lines.push(`\nRefus 1210/1220: ${refusCount} détecté(s)`);
-        for (const t of refusTickets.slice(0, 5)) {
-            // Extract MSISDN from ticket: [1220, from, to, op1, op2, date, MSISDN, ...]
-            const parts = t.split(',').map((s) => s.trim());
-            const msisdn = parts[6] || '?';
-            const motif = parts.slice(-1)[0]?.replace(/]$/, '').trim() || '?';
-            lines.push(`  - ${msisdn}: ${motif}`);
-        }
+    lines.push(`Total incidents: ${parsed.totalCount}`);
+    if (summary.refusals > 0) {
+        lines.push(`\nRefus 1210/1220: ${summary.refusals} détecté(s)`);
     } else {
         lines.push('Refus 1210/1220: aucun');
     }
-    if (erreurCount > 0) {
-        lines.push(`\nErreurs 7000: ${erreurCount} détectée(s)`);
-        for (const t of erreurTickets.slice(0, 5)) {
-            const parts = t.split(',').map((s) => s.trim());
-            const msisdn = parts[5] || '?';
-            const errCode = parts[7] || '?';
-            lines.push(`  - ${msisdn}: ${errCode}`);
-        }
+    if (summary.fileErrors > 0) {
+        lines.push(`Erreurs 7000: ${summary.fileErrors} détectée(s)`);
     } else {
         lines.push('Erreurs 7000: aucune');
     }
     if (arNonRecu) lines.push('\n⚠ AR non-reçu(s) > 60 min détecté(s)');
     if (nonAcquitte) lines.push('⚠ Fichier(s) non acquitté(s)');
     if (conflitsOuvert) lines.push('⚠ Conflit(s) [OUVERT] détecté(s)');
+    if (parsed.operatorsInvolved.length > 0) {
+        lines.push(`\nOpérateurs: ${parsed.operatorsInvolved.join(', ')}`);
+    }
+    if (parsed.msisdnsConcerned.length > 0) {
+        lines.push(`MSISDN: ${parsed.msisdnsConcerned.join(', ')}`);
+    }
 
-    return { checkedItems, notes: lines.join('\n') };
+    return { checkedItems, notes: lines.join('\n'), parsedData: parsed };
 }
 
 // ===================================================================

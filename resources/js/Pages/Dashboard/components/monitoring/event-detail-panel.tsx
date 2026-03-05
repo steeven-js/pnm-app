@@ -12,6 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { Iconify } from 'src/components/iconify';
 import type { EnrichedPnmEvent, EventStatus, EmailSubject } from 'src/types/monitoring';
 import { SUPPORTED_EVENT_KEYS } from 'src/utils/parse-mgrntlog';
+import type { ParsedIncidentEmail, ParsedIncident } from 'src/lib/pnm-utils';
 import { EventChecklist } from './event-checklist';
 import { EventNotes } from './event-notes';
 import { LogPasteDialog } from './log-paste-dialog';
@@ -76,24 +77,200 @@ const STATUS_LABELS: Record<EventStatus, { label: string; color: 'default' | 'su
     skipped: { label: 'Ignoré', color: 'warning' },
 };
 
+// ---------------------------------------------------------------------------
+// Incident detail block — structured view of parsed incident email
+// ---------------------------------------------------------------------------
+
+const INCIDENT_TYPE_LABELS: Record<string, { label: string; color: string; bgColor: string }> = {
+    refusals: { label: 'Refus 1210/1220', color: '#d32f2f', bgColor: '#d32f2f18' },
+    fileErrors: { label: 'Erreurs 7000', color: '#ed6c02', bgColor: '#ed6c0218' },
+    arNonRecu: { label: 'AR non-reçus', color: '#9c27b0', bgColor: '#9c27b018' },
+    fileNotAck: { label: 'Non acquittés', color: '#0288d1', bgColor: '#0288d118' },
+};
+
+function SummaryChip({ type, count }: { type: string; count: number }) {
+    const cfg = INCIDENT_TYPE_LABELS[type];
+    if (!cfg || count === 0) return null;
+    return (
+        <Chip
+            label={`${count} ${cfg.label}`}
+            size="small"
+            sx={{ bgcolor: cfg.bgColor, color: cfg.color, fontWeight: 600, fontSize: '0.75rem' }}
+        />
+    );
+}
+
+function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
+    const { incidents, summary, operatorsInvolved, msisdnsConcerned } = data;
+    const hasAny = summary.refusals + summary.fileErrors + summary.arNonRecu + summary.fileNotAck > 0;
+    if (!hasAny) return null;
+
+    const fileErrors = incidents.filter((i): i is Extract<ParsedIncident, { type: 'file_error' }> => i.type === 'file_error');
+    const arNonRecus = incidents.filter((i): i is Extract<ParsedIncident, { type: 'ar_non_recu' }> => i.type === 'ar_non_recu');
+    const fileNotAcks = incidents.filter((i): i is Extract<ParsedIncident, { type: 'file_not_ack' }> => i.type === 'file_not_ack');
+
+    return (
+        <Box sx={{ mb: 2, p: 2, borderRadius: 1.5, bgcolor: '#fff3e018', border: '1px solid', borderColor: 'warning.light' }}>
+            {/* Summary chips */}
+            <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ mb: 1.5 }}>
+                <SummaryChip type="refusals" count={summary.refusals} />
+                <SummaryChip type="fileErrors" count={summary.fileErrors} />
+                <SummaryChip type="arNonRecu" count={summary.arNonRecu} />
+                <SummaryChip type="fileNotAck" count={summary.fileNotAck} />
+            </Stack>
+
+            {/* Operators involved */}
+            {operatorsInvolved.length > 0 && (
+                <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                        Opérateurs impliqués
+                    </Typography>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                        {operatorsInvolved.map((op) => (
+                            <Chip key={op} label={op} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                        ))}
+                    </Stack>
+                </Box>
+            )}
+
+            {/* MSISDN concerned */}
+            {msisdnsConcerned.length > 0 && (
+                <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                        MSISDN concernés
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        sx={{ fontFamily: 'monospace', fontSize: '0.75rem', bgcolor: 'action.hover', px: 1, py: 0.5, borderRadius: 0.75 }}
+                    >
+                        {msisdnsConcerned.join(', ')}
+                    </Typography>
+                </Box>
+            )}
+
+            {/* File errors detail */}
+            {fileErrors.length > 0 && (
+                <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileErrors.color, display: 'block', mb: 0.5 }}>
+                        Erreurs fichiers ({fileErrors.length})
+                    </Typography>
+                    {fileErrors.map((fe, idx) => (
+                        <Box key={idx} sx={{ mb: 1, pl: 1, borderLeft: '2px solid', borderColor: 'warning.light' }}>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontFamily: 'monospace', display: 'block' }}>
+                                {fe.filenameParsed.valid
+                                    ? `${fe.filenameParsed.sourceOperatorName} → ${fe.filenameParsed.destOperatorName} (${fe.filename})`
+                                    : fe.filename}
+                            </Typography>
+                            {fe.refusalCount > 0 && (
+                                <Typography variant="caption" color="error.main">
+                                    {fe.refusalCount} refus
+                                </Typography>
+                            )}
+                            {fe.refusalCount > 0 && fe.errorCount > 0 && (
+                                <Typography variant="caption" color="text.secondary"> · </Typography>
+                            )}
+                            {fe.errorCount > 0 && (
+                                <Typography variant="caption" color="warning.main">
+                                    {fe.errorCount} erreurs 7000
+                                </Typography>
+                            )}
+                            {fe.tickets.length > 0 && (
+                                <Box component="table" sx={{ mt: 0.5, width: '100%', fontSize: '0.7rem', fontFamily: 'monospace', '& td, & th': { px: 0.75, py: 0.25, textAlign: 'left' }, '& th': { fontWeight: 600, color: 'text.secondary', borderBottom: '1px solid', borderColor: 'divider' } }}>
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>MSISDN</th>
+                                            <th>Motif</th>
+                                            <th>Opérateurs</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {fe.tickets.slice(0, 10).map((t, ti) => (
+                                            <tr key={ti}>
+                                                <td>{t.code}</td>
+                                                <td>{t.msisdn || '—'}</td>
+                                                <td>{t.errorCodeLabel || t.responseCodeLabel || '—'}</td>
+                                                <td>{[t.oprName, t.opdName].filter(Boolean).join(' → ') || '—'}</td>
+                                                <td>{t.formattedDate || '—'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Box>
+                            )}
+                        </Box>
+                    ))}
+                </Box>
+            )}
+
+            {/* AR non reçus */}
+            {arNonRecus.length > 0 && (
+                <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.arNonRecu.color, display: 'block', mb: 0.5 }}>
+                        AR non-reçus ({arNonRecus.length})
+                    </Typography>
+                    {arNonRecus.map((ar, idx) => (
+                        <Box key={idx} sx={{ pl: 1, mb: 0.5, borderLeft: '2px solid', borderColor: '#9c27b040' }}>
+                            <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                                {ar.filenameParsed.valid
+                                    ? `${ar.filenameParsed.sourceOperatorName} → ${ar.filenameParsed.destOperatorName}`
+                                    : ar.filename}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Expéditeur : {ar.senderName} ({ar.senderCode}) · Délai : {ar.delayMinutes} min
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+            )}
+
+            {/* Fichiers non acquittés */}
+            {fileNotAcks.length > 0 && (
+                <Box>
+                    <Typography variant="caption" fontWeight={600} sx={{ color: INCIDENT_TYPE_LABELS.fileNotAck.color, display: 'block', mb: 0.5 }}>
+                        Fichiers non acquittés ({fileNotAcks.length})
+                    </Typography>
+                    {fileNotAcks.map((fna, idx) => (
+                        <Box key={idx} sx={{ pl: 1, mb: 0.5, borderLeft: '2px solid', borderColor: '#0288d140' }}>
+                            <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                                {fna.filenameParsed.valid
+                                    ? `${fna.filenameParsed.sourceOperatorName} → ${fna.filenameParsed.destOperatorName}`
+                                    : fna.filename}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Destinataire : {fna.recipientName} ({fna.recipientCode})
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+            )}
+        </Box>
+    );
+}
+
 export function EventDetailPanel({ event, onSave, saving = false, readOnly = false }: EventDetailPanelProps) {
     const [checkedItems, setCheckedItems] = useState<string[]>([]);
     const [notes, setNotes] = useState('');
     const [logDialogOpen, setLogDialogOpen] = useState(false);
+    const [incidentData, setIncidentData] = useState<ParsedIncidentEmail | null>(null);
 
     const supportsLogPaste = event
         ? SUPPORTED_EVENT_KEYS.includes(event.key) || event.key.startsWith('vacation_')
         : false;
 
-    const handleLogApply = useCallback((autoChecked: string[], autoNotes: string) => {
+    const handleLogApply = useCallback((autoChecked: string[], autoNotes: string, parsedData?: unknown) => {
         setCheckedItems((prev) => [...new Set([...prev, ...autoChecked])]);
         setNotes((prev) => (prev ? `${prev}\n\n${autoNotes}` : autoNotes));
+        if (parsedData && typeof parsedData === 'object' && 'incidents' in parsedData) {
+            setIncidentData(parsedData as ParsedIncidentEmail);
+        }
     }, []);
 
     useEffect(() => {
         if (event) {
             setCheckedItems(event.dbEvent?.checked_items ?? []);
             setNotes(event.dbEvent?.notes ?? '');
+            setIncidentData(null);
         }
     }, [event?.key, event?.dbEvent]);
 
@@ -154,6 +331,8 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                             Auto-remplir depuis {event.checkType === 'server' ? 'log serveur' : 'email'}
                         </Button>
                     )}
+
+                    {incidentData && <IncidentDetailBlock data={incidentData} />}
 
                     <EventChecklist items={event.checklist} checkedItems={checkedItems} onChange={setCheckedItems} readOnly={readOnly} />
                     <Box sx={{ mt: 2 }} />

@@ -17,7 +17,7 @@ type LogPasteDialogProps = {
     onClose: () => void;
     eventKey: string;
     checklist: string[];
-    onApply: (checkedItems: string[], notes: string) => void;
+    onApply: (checkedItems: string[], notes: string, parsedData?: unknown) => void;
 };
 
 const DIALOG_CONFIG: Record<string, { title: string; description: string; placeholder: string }> = {
@@ -100,7 +100,7 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
 
     const handleApply = () => {
         if (preview) {
-            onApply(preview.checkedItems, preview.notes);
+            onApply(preview.checkedItems, preview.notes, preview.parsedData);
             handleClose();
         }
     };
