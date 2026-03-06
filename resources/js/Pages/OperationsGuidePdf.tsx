@@ -218,6 +218,81 @@ const CATEGORY_LABELS: Record<string, string> = {
   reporting: 'Reporting',
 };
 
+// Scripts PNM et logs associés
+const PNM_SCRIPTS = [
+  {
+    script: 'EmaExtracter.sh',
+    description: 'Traitement de la bascule et génération du fichier de mise à jour du routage + envoi du fichier via EMA pour mise à jour sur le FNR',
+    log: 'EmaExtracter.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/EmaExtracter.log',
+    server: 'vmqproportasync01',
+    schedule: 'Quotidien ~08h30 (après bascule)',
+    category: 'Bascule',
+  },
+  {
+    script: 'EmmExtracter.sh',
+    description: 'Génération et envoi du fichier répertoriant tous les MSISDN portés vers l\'EMM',
+    log: 'EmmExtracter.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/EmmExtracter.log',
+    server: 'vmqproportasync01',
+    schedule: 'Quotidien ~08h30 (après bascule)',
+    category: 'Valorisation',
+  },
+  {
+    script: 'PnmDataManager.sh',
+    description: 'Génération des fichiers de vacation PNMDATA pour chaque opérateur (01, 03, 04, 05, 06)',
+    log: 'PnmDataManager.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/PnmDataManager.log',
+    server: 'vmqproportasync01',
+    schedule: '3x/jour (V1: 10h, V2: 14h, V3: 19h)',
+    category: 'Vacation',
+  },
+  {
+    script: 'PnmDataAckManager.sh',
+    description: 'Intégration des fichiers de vacation PNMDATA reçus des opérateurs et génération des fichiers d\'acquittement (ACR)',
+    log: 'PnmAckManager.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/PnmAckManager.log',
+    server: 'vmqproportasync01',
+    schedule: '3x/jour (après chaque vacation)',
+    category: 'Acquittement',
+  },
+  {
+    script: 'PnmDataAckGenerator.sh',
+    description: 'Vérification des fichiers d\'acquittement et génération des fichiers d\'erreur si anomalie détectée',
+    log: 'PnmDataAckGenerator.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/PnmDataAckGenerator.log',
+    server: 'vmqproportasync01',
+    schedule: 'Après réception des ACR',
+    category: 'Acquittement',
+  },
+  {
+    script: 'PnmSyncManager.sh',
+    description: 'Génération des fichiers de synchronisation PNMSYNC (mise à jour complète de la base inter-opérateurs)',
+    log: 'PnmSyncManager.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/PnmSyncManager.log',
+    server: 'vmqproportasync01',
+    schedule: 'Dimanche soir (~22h)',
+    category: 'Synchronisation',
+  },
+  {
+    script: 'PnmSyncAckManager.sh',
+    description: 'Intégration des fichiers de synchronisation PNMSYNC reçus et génération des fichiers d\'acquittement correspondants',
+    log: 'PnmAckManager.log',
+    logPath: '/home/porta_pnmv3/PortaSync/log/PnmAckManager.log',
+    server: 'vmqproportasync01',
+    schedule: 'Dimanche soir (après PNMSYNC)',
+    category: 'Synchronisation',
+  },
+];
+
+const SCRIPT_CATEGORY_COLORS: Record<string, string> = {
+  Bascule: c.red,
+  Valorisation: c.deepOrange,
+  Vacation: c.green,
+  Acquittement: c.blue,
+  Synchronisation: c.purple,
+};
+
 const PROD_LEGEND = [
   { color: c.green, label: 'SFTP (opérateurs)' },
   { color: c.blue, label: 'SCP / Sync interne' },
@@ -318,7 +393,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 1 / 5</Text>
+          <Text>Page 1 / 6</Text>
         </View>
       </Page>
 
@@ -423,7 +498,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 2 / 5</Text>
+          <Text>Page 2 / 6</Text>
         </View>
       </Page>
 
@@ -493,7 +568,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 3 / 5</Text>
+          <Text>Page 3 / 6</Text>
         </View>
       </Page>
 
@@ -581,7 +656,7 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 4 / 5</Text>
+          <Text>Page 4 / 6</Text>
         </View>
       </Page>
 
@@ -658,7 +733,90 @@ function OperationsGuidePdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Guide des Opérations</Text>
-          <Text>Page 5 / 5</Text>
+          <Text>Page 5 / 6</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 6 — Scripts PNM & Logs */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <Text style={s.headerTitle}>Scripts PNM & Logs associés</Text>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.infoBox}>
+          <Text style={s.infoText}>
+            Liste des scripts exécutés par le crontab sur le serveur vmqproportasync01 (172.24.119.69). Chaque script génère un fichier de log dans /home/porta_pnmv3/PortaSync/log/. Ces logs sont essentiels pour vérifier le bon déroulement des traitements quotidiens.
+          </Text>
+        </View>
+
+        {/* Scripts table */}
+        <View style={s.table}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Script</Text>
+            <Text style={[s.tableHeaderCell, { width: '10%' }]}>Type</Text>
+            <Text style={[s.tableHeaderCell, { width: '46%' }]}>Description</Text>
+            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Planification</Text>
+          </View>
+          {PNM_SCRIPTS.map((script) => (
+            <View key={script.script} style={s.tableRow} wrap={false}>
+              <View style={{ width: '22%' }}>
+                <Text style={[s.tableCell, { fontWeight: 'bold', fontSize: 7.5 }]}>{script.script}</Text>
+              </View>
+              <View style={{ width: '10%' }}>
+                <View style={{ backgroundColor: (SCRIPT_CATEGORY_COLORS[script.category] || c.grey) + '18', borderRadius: 2, paddingHorizontal: 3, paddingVertical: 1, alignSelf: 'flex-start' }}>
+                  <Text style={{ fontSize: 6, color: SCRIPT_CATEGORY_COLORS[script.category] || c.grey, fontWeight: 'bold' }}>{script.category}</Text>
+                </View>
+              </View>
+              <Text style={[s.tableCellLight, { width: '46%' }]}>{script.description}</Text>
+              <Text style={[s.tableCellLight, { width: '22%', fontSize: 7 }]}>{script.schedule}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Logs reference */}
+        <Text style={s.sectionTitle}>Fichiers de logs</Text>
+        <Text style={s.sectionSub}>Correspondance entre chaque script et son fichier de log. Tous les logs sont dans /home/porta_pnmv3/PortaSync/log/</Text>
+
+        <View style={s.table}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Script</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Fichier de log</Text>
+            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Commande de vérification</Text>
+          </View>
+          {PNM_SCRIPTS.map((script) => (
+            <View key={script.script + '-log'} style={s.tableRow} wrap={false}>
+              <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold', fontSize: 7.5 }]}>{script.script}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: c.primary, fontSize: 7.5 }]}>{script.log}</Text>
+              <View style={{ width: '50%', backgroundColor: '#F4F6F8', borderRadius: 2, padding: 2 }}>
+                <Text style={{ fontSize: 6, fontFamily: 'Courier', color: c.dark }}>$ tail -n 15 {script.logPath}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Important notes */}
+        <View style={[s.infoBox, { marginTop: 12, backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
+          <Text style={[s.infoText, { fontWeight: 'bold', marginBottom: 3 }]}>Points importants</Text>
+          <Text style={s.infoText}>• PnmDataAckManager.sh et PnmSyncAckManager.sh écrivent tous les deux dans le même fichier PnmAckManager.log</Text>
+          <Text style={s.infoText}>• Vérifier systématiquement la présence de "Fin de Traitement" dans chaque log pour confirmer l'exécution complète</Text>
+          <Text style={s.infoText}>• Vérifier "Check success" pour chaque opérateur dans les logs EmaExtracter et EmmExtracter</Text>
+          <Text style={s.infoText}>• En cas d'anomalie, vérifier d'abord le log concerné avant d'escalader</Text>
+        </View>
+
+        {/* Legend */}
+        <View style={[s.legendRow, { marginTop: 8 }]}>
+          {Object.entries(SCRIPT_CATEGORY_COLORS).map(([label, color]) => (
+            <View key={label} style={s.legendItem}>
+              <View style={[s.legendDot, { backgroundColor: color }]} />
+              <Text style={s.legendText}>{label}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Guide des Opérations</Text>
+          <Text>Page 6 / 6</Text>
         </View>
       </Page>
     </Document>
