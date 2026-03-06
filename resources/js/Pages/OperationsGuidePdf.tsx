@@ -750,53 +750,40 @@ function OperationsGuidePdfDocument() {
           </Text>
         </View>
 
-        {/* Scripts table */}
-        <View style={s.table}>
-          <View style={s.tableHeader}>
-            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Script</Text>
-            <Text style={[s.tableHeaderCell, { width: '10%' }]}>Type</Text>
-            <Text style={[s.tableHeaderCell, { width: '46%' }]}>Description</Text>
-            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Planification</Text>
-          </View>
-          {PNM_SCRIPTS.map((script) => (
-            <View key={script.script} style={s.tableRow} wrap={false}>
-              <View style={{ width: '22%' }}>
-                <Text style={[s.tableCell, { fontWeight: 'bold', fontSize: 7.5 }]}>{script.script}</Text>
-              </View>
-              <View style={{ width: '10%' }}>
-                <View style={{ backgroundColor: (SCRIPT_CATEGORY_COLORS[script.category] || c.grey) + '18', borderRadius: 2, paddingHorizontal: 3, paddingVertical: 1, alignSelf: 'flex-start' }}>
-                  <Text style={{ fontSize: 6, color: SCRIPT_CATEGORY_COLORS[script.category] || c.grey, fontWeight: 'bold' }}>{script.category}</Text>
+        {/* Scripts list — each script as a card with log side by side */}
+        {PNM_SCRIPTS.map((script) => {
+          const catColor = SCRIPT_CATEGORY_COLORS[script.category] || c.grey;
+          return (
+            <View key={script.script} style={{ marginBottom: 8, borderWidth: 0.5, borderColor: c.border, borderRadius: 4, overflow: 'hidden' }} wrap={false}>
+              {/* Script header row */}
+              <View style={{ flexDirection: 'row', backgroundColor: c.bg, paddingVertical: 5, paddingHorizontal: 8, borderBottomWidth: 0.5, borderBottomColor: c.border, alignItems: 'center' }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', color: c.dark, flex: 1 }}>{script.script}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ backgroundColor: catColor + '18', borderRadius: 2, paddingHorizontal: 4, paddingVertical: 1 }}>
+                    <Text style={{ fontSize: 6.5, color: catColor, fontWeight: 'bold' }}>{script.category}</Text>
+                  </View>
+                  <Text style={{ fontSize: 7, color: c.light }}>{script.schedule}</Text>
                 </View>
               </View>
-              <Text style={[s.tableCellLight, { width: '46%' }]}>{script.description}</Text>
-              <Text style={[s.tableCellLight, { width: '22%', fontSize: 7 }]}>{script.schedule}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Logs reference */}
-        <Text style={s.sectionTitle}>Fichiers de logs</Text>
-        <Text style={s.sectionSub}>Correspondance entre chaque script et son fichier de log. Tous les logs sont dans /home/porta_pnmv3/PortaSync/log/</Text>
-
-        <View style={s.table}>
-          <View style={s.tableHeader}>
-            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Script</Text>
-            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Fichier de log</Text>
-            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Commande de vérification</Text>
-          </View>
-          {PNM_SCRIPTS.map((script) => (
-            <View key={script.script + '-log'} style={s.tableRow} wrap={false}>
-              <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold', fontSize: 7.5 }]}>{script.script}</Text>
-              <Text style={[s.tableCell, { width: '25%', color: c.primary, fontSize: 7.5 }]}>{script.log}</Text>
-              <View style={{ width: '50%', backgroundColor: '#F4F6F8', borderRadius: 2, padding: 2 }}>
-                <Text style={{ fontSize: 6, fontFamily: 'Courier', color: c.dark }}>$ tail -n 15 {script.logPath}</Text>
+              {/* Description + Log row */}
+              <View style={{ flexDirection: 'row', paddingHorizontal: 8, paddingVertical: 6 }}>
+                {/* Left: description */}
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <Text style={{ fontSize: 8, color: c.dark, lineHeight: 1.4 }}>{script.description}</Text>
+                </View>
+                {/* Right: log info */}
+                <View style={{ width: '40%', backgroundColor: '#F4F6F8', borderRadius: 3, padding: 6 }}>
+                  <Text style={{ fontSize: 7, color: c.light, marginBottom: 2 }}>Logs :</Text>
+                  <Text style={{ fontSize: 8, fontWeight: 'bold', color: c.primary, marginBottom: 3 }}>{script.log}</Text>
+                  <Text style={{ fontSize: 6, fontFamily: 'Courier', color: c.dark }}>$ tail -n 15 {script.logPath}</Text>
+                </View>
               </View>
             </View>
-          ))}
-        </View>
+          );
+        })}
 
         {/* Important notes */}
-        <View style={[s.infoBox, { marginTop: 12, backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
+        <View style={[s.infoBox, { marginTop: 6, backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
           <Text style={[s.infoText, { fontWeight: 'bold', marginBottom: 3 }]}>Points importants</Text>
           <Text style={s.infoText}>• PnmDataAckManager.sh et PnmSyncAckManager.sh écrivent tous les deux dans le même fichier PnmAckManager.log</Text>
           <Text style={s.infoText}>• Vérifier systématiquement la présence de "Fin de Traitement" dans chaque log pour confirmer l'exécution complète</Text>
@@ -805,7 +792,7 @@ function OperationsGuidePdfDocument() {
         </View>
 
         {/* Legend */}
-        <View style={[s.legendRow, { marginTop: 8 }]}>
+        <View style={[s.legendRow, { marginTop: 6 }]}>
           {Object.entries(SCRIPT_CATEGORY_COLORS).map(([label, color]) => (
             <View key={label} style={s.legendItem}>
               <View style={[s.legendDot, { backgroundColor: color }]} />
