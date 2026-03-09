@@ -783,7 +783,7 @@ function OperationsGuidePdfDocument() {
         })}
 
         {/* Important notes */}
-        <View style={[s.infoBox, { marginTop: 6, backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
+        <View style={[s.infoBox, { marginTop: 6, backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]} wrap={false}>
           <Text style={[s.infoText, { fontWeight: 'bold', marginBottom: 3 }]}>Points importants</Text>
           <Text style={s.infoText}>• PnmDataAckManager.sh et PnmSyncAckManager.sh écrivent tous les deux dans le même fichier PnmAckManager.log</Text>
           <Text style={s.infoText}>• Vérifier systématiquement la présence de "Fin de Traitement" dans chaque log pour confirmer l'exécution complète</Text>
