@@ -22,22 +22,10 @@ const TOOLS = [
     href: '/resolve/codes',
   },
   {
-    title: 'Arbres de décision',
-    description: 'Diagnostiquez un problème étape par étape avec des arbres de décision interactifs.',
-    icon: 'solar:branching-paths-up-bold-duotone',
-    href: '/resolve/decision-trees',
-  },
-  {
     title: 'Incidents',
     description: 'Analysez les emails d\'incidents DIGICEL.PORTA-V3 et extrayez les informations clés.',
     icon: 'solar:danger-triangle-bold-duotone',
     href: '/resolve/incidents',
-  },
-  {
-    title: 'Diagrammes',
-    description: 'Visualisez les diagrammes de flux et processus PNM extraits des articles.',
-    icon: 'solar:diagram-up-bold-duotone',
-    href: '/diagrams',
   },
 ];
 
