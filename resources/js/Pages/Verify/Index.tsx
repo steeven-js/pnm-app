@@ -25,15 +25,6 @@ const TOOLS = [
     count: 'Jours ouvrés, fériés, vacations',
   },
   {
-    title: 'Validateur de RIO',
-    description:
-      "Validez et décodez un Relevé d'Identité Opérateur : opérateur, qualifiant, référence et clé de contrôle.",
-    icon: 'solar:shield-check-bold-duotone',
-    href: '/verify/rio-validator',
-    color: '#8b5cf6',
-    count: 'Format OO-Q-RRRRRR-CCC',
-  },
-  {
     title: 'Analyseur de fichier PNM',
     description:
       "Analysez le contenu complet d'un fichier PNMDATA ou PNMSYNC : en-tête, tickets, pied de page et validation.",
@@ -50,15 +41,6 @@ const TOOLS = [
     href: '/verify/portage-id',
     color: '#ef4444',
     count: 'Hash MD5 : OPR + OPD + Date + MSISDN',
-  },
-  {
-    title: 'Vérificateur de MSISDN',
-    description:
-      'Vérifiez un numéro mobile Antilles-Guyane : format, opérateur attributaire et zone géographique.',
-    icon: 'solar:phone-bold-duotone',
-    href: '/verify/msisdn-checker',
-    color: '#10b981',
-    count: 'Tranches 069x, opérateurs, zones',
   },
 ];
 

@@ -42,11 +42,8 @@ export const navData: NavSectionProps['data'] = [
         icon: <Iconify icon="solar:check-circle-bold-duotone" width={24} />,
         children: [
           { title: 'Calcul de dates', path: paths.verify.dateCalculator },
-          { title: 'Validation RIO', path: paths.verify.rioValidator },
           { title: 'Décodeur fichier', path: paths.verify.filenameDecoder },
           { title: 'ID Portage', path: paths.verify.portageId },
-          { title: 'Vérif. MSISDN', path: paths.verify.msisdnChecker },
-          { title: 'SQL Playground', path: paths.sqlPlayground.root },
         ],
       },
       {
