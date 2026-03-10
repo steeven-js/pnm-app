@@ -38,108 +38,12 @@ const PARSERS: Record<string, ParserFn> = {
     verif_generation_pnmdata: autoFillVerifGeneration,
     verif_acquittements: autoFillVerifAcquittements,
     tickets_attente: autoFillTickets,
-    automates_report: (_ek, cl, c) => autoFillAutomates(cl, c),
 };
 
 export const SUPPORTED_EVENT_KEYS = Object.keys(PARSERS);
 
 // ===================================================================
-// 1.  mgrntlog parser  (automates_report)
-// ===================================================================
-
-type MgrntlogEntry = {
-    dossier: string;
-    dateBascule: string | null;
-    fichier: string;
-    heureDebut: string;
-    heureFin: string;
-    statut: string;
-};
-
-function parseMgrntlog(content: string): MgrntlogEntry[] {
-    const blocks = content.split(/^-{3,}$/m).filter((b) => b.trim());
-    return blocks
-        .map((block) => {
-            const get = (key: string): string => {
-                const match = block.match(new RegExp(`${key}\\s*:\\s*(.+)`, 'i'));
-                return match ? match[1].trim() : '';
-            };
-            return {
-                dossier: get('Dossier'),
-                dateBascule: get('Date Bascule') || null,
-                fichier: get('Fichier'),
-                heureDebut: get('Heure Début') || get('Heure Debut'),
-                heureFin: get('Heure Fin'),
-                statut: get('Statut'),
-            };
-        })
-        .filter((e) => e.dossier);
-}
-
-function calcDurationMinutes(start: string, end: string): number | null {
-    const [sh, sm, ss] = start.split(':').map(Number);
-    const [eh, em, es] = end.split(':').map(Number);
-    if ([sh, sm, ss, eh, em, es].some(isNaN)) return null;
-    const startMin = sh * 60 + sm + ss / 60;
-    const endMin = eh * 60 + em + es / 60;
-    return endMin >= startMin ? endMin - startMin : endMin + 1440 - startMin;
-}
-
-function formatDuration(start: string, end: string): string {
-    const mins = calcDurationMinutes(start, end);
-    if (mins === null) return '?';
-    const h = Math.floor(mins / 60);
-    const m = Math.floor(mins % 60);
-    const s = Math.round((mins % 1) * 60);
-    if (h > 0) return `${h}h${String(m).padStart(2, '0')}m${String(s).padStart(2, '0')}s`;
-    return `${m}m${String(s).padStart(2, '0')}s`;
-}
-
-function autoFillAutomates(checklist: string[], content: string): AutoFillResult | null {
-    const entries = parseMgrntlog(content);
-    if (entries.length === 0) return null;
-
-    const rules: Record<string, () => boolean> = {
-        'Email rapport activité automates reçu': () => entries.length > 0,
-        'Automate BASCULE_IN : SUCCESS': () =>
-            entries.find((e) => e.dossier === 'BASCULE_IN')?.statut === 'SUCCESS',
-        'Durée de bascule raisonnable (< 3h)': () => {
-            const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-            if (!bi) return false;
-            const mins = calcDurationMinutes(bi.heureDebut, bi.heureFin);
-            return mins !== null && mins < 180;
-        },
-        'Automate EXPLOIT : SUCCESS': () =>
-            entries.find((e) => e.dossier === 'EXPLOIT')?.statut === 'SUCCESS',
-        'Automate RATP_OLN : SUCCESS': () =>
-            entries.find((e) => e.dossier === 'RATP_OLN')?.statut === 'SUCCESS',
-        'Automate TRACE : SUCCESS': () =>
-            entries.find((e) => e.dossier === 'TRACE')?.statut === 'SUCCESS',
-        'Automate WATCHER : SUCCESS': () =>
-            entries.find((e) => e.dossier === 'WATCHER')?.statut === 'SUCCESS',
-        'Si KO : escalader supervision avec détail': () => {
-            const expected = ['BASCULE_IN', 'EXPLOIT', 'RATP_OLN', 'TRACE', 'WATCHER'];
-            return expected.every((d) => entries.find((e) => e.dossier === d)?.statut === 'SUCCESS');
-        },
-    };
-
-    const checkedItems = checklist.filter((item) => rules[item]?.());
-
-    const bi = entries.find((e) => e.dossier === 'BASCULE_IN');
-    const lines = ['[Auto] Rapport activité automates'];
-    for (const e of entries) {
-        const d = formatDuration(e.heureDebut, e.heureFin);
-        lines.push(`${e.dossier}: ${e.heureDebut}→${e.heureFin} (${d}) — ${e.statut}`);
-    }
-    if (bi) {
-        lines.push(`\nBASCULE_IN: ${bi.dateBascule ?? 'N/A'} | Durée: ${formatDuration(bi.heureDebut, bi.heureFin)}`);
-    }
-
-    return { checkedItems, notes: lines.join('\n') };
-}
-
-// ===================================================================
-// 2.  Vacation report parser
+// 1.  Vacation report parser
 // ===================================================================
 
 const OPERATORS = [

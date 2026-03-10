@@ -21,11 +21,6 @@ type LogPasteDialogProps = {
 };
 
 const DIALOG_CONFIG: Record<string, { title: string; description: string; placeholder: string }> = {
-    automates_report: {
-        title: 'Auto-remplir depuis le log',
-        description: 'Collez le contenu du fichier mgrntlog_global_*.log pour remplir automatiquement la checklist.',
-        placeholder: `Collez le contenu du fichier .log ici...\n\n---------------------------------------------\nDossier        : BASCULE_IN\nDate Bascule   : 24/02/2026 MODE : NORMAL\n...`,
-    },
     vacation: {
         title: 'Auto-remplir depuis le rapport vacation',
         description: "Collez le contenu de l'email [PNM] vacation (rapport envoi/réception) pour remplir automatiquement la checklist.",
@@ -75,7 +70,7 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
 
 function getConfig(eventKey: string) {
     if (eventKey.startsWith('vacation_')) return DIALOG_CONFIG.vacation;
-    return DIALOG_CONFIG[eventKey] ?? DIALOG_CONFIG.automates_report;
+    return DIALOG_CONFIG[eventKey] ?? DIALOG_CONFIG.vacation;
 }
 
 export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: LogPasteDialogProps) {

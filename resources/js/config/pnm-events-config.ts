@@ -190,27 +190,6 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'Aucun fichier .ERR détecté',
         ],
     },
-    // ── 15:25 ──
-    {
-        key: 'automates_report',
-        label: 'Rapport activité automates',
-        description:
-            "Email [PROD] Rapport d'activité automates (supervision@digicelgroup.fr) avec PJ : automates_activity.csv, automates_detail.csv, mgrntlog_global.log. Couvre BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.",
-        scheduledTime: '15:25',
-        icon: 'solar:monitor-smartphone-bold-duotone',
-        category: 'supervision',
-        checkType: 'email',
-        checklist: [
-            'Email rapport activité automates reçu',
-            'Automate BASCULE_IN : SUCCESS',
-            'Durée de bascule raisonnable (< 3h)',
-            'Automate EXPLOIT : SUCCESS',
-            'Automate RATP_OLN : SUCCESS',
-            'Automate TRACE : SUCCESS',
-            'Automate WATCHER : SUCCESS',
-            'Si KO : escalader supervision avec détail',
-        ],
-    },
     // ── 15:35 ──
     {
         key: 'vacation_2',

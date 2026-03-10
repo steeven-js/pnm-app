@@ -58,7 +58,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'improvement', description: 'Différenciation claire EmaExtracter.log (bascule) et EmmExtracter.log (valorisation) avec 14 items de checklist séparés' },
       { type: 'improvement', description: 'Horaires des vacations ajustés selon les heures réelles de réception des mails (11h35, 15h35, 20h35)' },
       { type: 'improvement', description: 'Schéma SQL Playground aligné avec la structure de production PortaDB' },
-      { type: 'improvement', description: 'Fusion des 3 événements bascule en un seul rapport activité automates' },
+      { type: 'improvement', description: 'Fusion des 3 événements bascule en un seul événement consolidé' },
       { type: 'improvement', description: 'Décodeur PNMDATA : 18 codes tickets complets selon la spec officielle (DP, DE, EP, AP, AN, CA, BI, PI, DI, CI, BR, RN, RS, CS, ER…)' },
       { type: 'improvement', description: 'Lecture contextuelle des tickets PNMDATA : colonnes 2/3/5 adaptées aux 3 contextes (portage, portage inverse, restitution) avec badge et labels dynamiques' },
       { type: 'new', description: 'Validation col. 3 vs destinataire fichier : alerte si l\'opérateur destination d\'un ticket ne correspond pas au destinataire déclaré dans l\'entête' },

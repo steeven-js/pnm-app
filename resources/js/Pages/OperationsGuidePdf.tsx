@@ -191,7 +191,6 @@ const DAILY_TIMELINE: TimelineSlot[] = [
   {
     time: '~15:25',
     items: [
-      { type: 'mail', title: '[PROD] Rapport activité automates', detail: 'Vérifier SUCCESS pour BASCULE_IN, EXPLOIT, RATP_OLN, TRACE, WATCHER.', category: 'supervision', from: 'supervision@digicelgroup.fr' },
       { type: 'mail', title: '[PNM] Portabilités prévues DIGICEL-WIZZEE', detail: 'Vérifier IN/OUT DIGICEL + WIZZEE, portabilités internes veille.', category: 'reporting', from: 'porta_pnmv3' },
       { type: 'mail', title: '[PNM] Rapport vacation 2', detail: 'Comparer avec vacation 1 : fichiers manquants réapparus ? ACR OK.', category: 'vacation', from: 'porta_pnmv3' },
     ],
