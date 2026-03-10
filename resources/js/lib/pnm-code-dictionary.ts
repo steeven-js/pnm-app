@@ -294,6 +294,14 @@ const ERROR_CODES: PnmCodeEntry[] = [
         severity: 'error',
         action: "Vérifier le hash via l'outil Vérifier/ID Portage. Doit être exactement 32 caractères [0-9a-f].",
     },
+    {
+        code: 'E610',
+        label: 'Flux non attendu dans la procédure',
+        description: "L'ID portage existe déjà mais un flux (ticket) non attendu a été reçu dans la procédure en cours. Erreur de séquencement dans la machine d'état du portage — un ticket est arrivé dans un état qui ne correspond pas à la transition attendue.",
+        category: 'erreur_technique',
+        severity: 'error',
+        action: "1) Vérifier l'état du portage dans DAPI PortaWs (Supervision → Liste des mandats). 2) Analyser la séquence des tickets reçus/émis pour identifier le flux inattendu. 3) Si le portage est bloqué : envisager la clôture manuelle via PortaWs puis relancer si nécessaire. 4) Contacter l'opérateur émetteur du flux inattendu pour signaler le désordre de séquencement. 5) Si récurrent sur le même opérateur, escalader au GPMAG.",
+    },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════

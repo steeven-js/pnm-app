@@ -1724,3 +1724,284 @@ export function computePortageTimeline(
 
     return steps;
 }
+
+// ─── V7 — Analyseur DAPI PortaWs (vue portage + tickets) ────────────────────
+
+export type DapiPortageInfo = {
+    id: string;
+    type: string;
+    dateCreation: string;
+    datePortage: string;
+    receveur: string;
+    donneur: string;
+    procedure: string;
+    msisdn: string;
+    etat: string;
+};
+
+export type DapiTicketLine = {
+    code: string;
+    codeLabel: string;
+    direction: 'in' | 'out' | 'internal';
+    directionLabel: string;
+    sequence: string;
+    status: string;
+    dateTime: string;
+    filename: string;
+    filenameParsed: FilenameResult | null;
+    errorCode: string;
+    errorDetail: string;
+    raw: string;
+};
+
+export type DapiDiagnosis = {
+    hasError: boolean;
+    errorCodes: string[];
+    currentState: string;
+    expectedNextStep: string;
+    summary: string;
+    solutions: string[];
+};
+
+export type ParsedDapiView = {
+    portage: DapiPortageInfo;
+    tickets: DapiTicketLine[];
+    errors: DapiTicketLine[];
+    diagnosis: DapiDiagnosis;
+};
+
+const DIRECTION_LABELS: Record<string, string> = {
+    in: 'Reçu',
+    out: 'Émis',
+    internal: 'Interne',
+};
+
+// ── Expected ticket flows by procedure ──
+const RESTITUTION_FLOW = ['3400', '3410', '3420', '3430'];
+const PORTAGE_FLOW = ['1110', '1210', '1410', '1430'];
+const PORTAGE_INVERSE_FLOW = ['2400', '2410', '2420', '2430'];
+
+function getExpectedFlow(procedure: string): string[] {
+    const lower = procedure.toLowerCase();
+    if (lower.includes('restitution')) return RESTITUTION_FLOW;
+    if (lower.includes('inverse')) return PORTAGE_INVERSE_FLOW;
+    return PORTAGE_FLOW;
+}
+
+function parseDapiHeader(text: string): DapiPortageInfo | null {
+    const info: DapiPortageInfo = {
+        id: '', type: '', dateCreation: '', datePortage: '',
+        receveur: '', donneur: '', procedure: '', msisdn: '', etat: '',
+    };
+
+    // Match "Dapi portaws #N" or similar
+    const idMatch = text.match(/Dapi\s+portaws?\s*#?\s*(\d+)/i);
+    if (idMatch) info.id = `Dapi portaws #${idMatch[1]}`;
+
+    // Type: "Portabilité etrangere" / "Portabilité simple"
+    const typeMatch = text.match(/portabilit[eé]\s+[eé]trang[eè]re/i)
+        || text.match(/portabilit[eé]\s+\w+/i);
+    if (typeMatch) info.type = typeMatch[0];
+
+    // Date creation: "du DD/MM/YYYY"
+    const dateCreationMatch = text.match(/du\s+(\d{2}\/\d{2}\/\d{4})/);
+    if (dateCreationMatch) info.dateCreation = dateCreationMatch[1];
+
+    // Date portage: "portage le DD/MM/YYYY" or "Portage prévu le DD/MM/YYYY"
+    const datePortageMatch = text.match(/portage\s+(?:pr[eé]vu\s+)?le\s+(\d{2}\/\d{2}\/\d{4})/i);
+    if (datePortageMatch) info.datePortage = datePortageMatch[1];
+
+    // Receveur
+    const receveurMatch = text.match(/receveur\s*:\s*([^-\n]+?)(?:\s*-|$)/im);
+    if (receveurMatch) info.receveur = receveurMatch[1].trim();
+
+    // Donneur
+    const donneurMatch = text.match(/donneur\s*:\s*([^-\n]+?)(?:\s*-|$)/im);
+    if (donneurMatch) info.donneur = donneurMatch[1].trim();
+
+    // Procedure: prefer "Restitution simple" over "Portabilité etrangere"
+    const procRestitution = text.match(/(Restitution\s+\w+)/i);
+    const procPortage = text.match(/(Portage\s+\w+)/i);
+    const procPortabilite = text.match(/(Portabilit[eé]\s+\w+)/i);
+    if (procRestitution) info.procedure = procRestitution[1];
+    else if (procPortage) info.procedure = procPortage[1];
+    else if (procPortabilite) info.procedure = procPortabilite[1];
+
+    // MSISDN: 10 digits in parentheses or after "Msisdn :"
+    const msisdnMatch = text.match(/Msisdn\s*:\s*(\d{10})/i) || text.match(/\((\d{10})\)/);
+    if (msisdnMatch) info.msisdn = msisdnMatch[1];
+
+    // Etat: "Diffusé", "En cours", etc.
+    const etatMatch = text.match(/(?:^|\s|-\s*)(Diffus[eé]|En cours|Termin[eé]|Annul[eé]|Cl[oô]tur[eé])/im);
+    if (etatMatch) info.etat = etatMatch[1];
+
+    // Only consider it valid if we found at least msisdn or portage date
+    if (!info.msisdn && !info.datePortage && !idMatch) return null;
+
+    return info;
+}
+
+function parseDapiTicketLine(line: string): DapiTicketLine | null {
+    // Pattern: CODE - DIRECTION - [SEQ -] STATUS Le DAY NUM MONTH YEAR à HH:MM:SS - REST
+    const re = /^(\d{4})\s+-\s+(in|out|internal)\s+-\s+(?:(\d+)\s+-\s+)?(.+?Le\s+\w+\s+\d{1,2}\s+\w+\s+\d{4}\s+[àa]\s+\d{2}:\d{2}:\d{2})\s+-\s+(.+)$/i;
+    const match = line.trim().match(re);
+    if (!match) return null;
+
+    const code = match[1];
+    const direction = match[2] as 'in' | 'out' | 'internal';
+    const sequence = match[3] ?? '';
+    const statusAndDate = match[4];
+    const rest = match[5];
+
+    // Extract date from status
+    const dateMatch = statusAndDate.match(/Le\s+\w+\s+(\d{1,2})\s+(\w+)\s+(\d{4})\s+[àa]\s+(\d{2}:\d{2}:\d{2})/i);
+    const dateTime = dateMatch
+        ? `${dateMatch[1]} ${dateMatch[2]} ${dateMatch[3]} à ${dateMatch[4]}`
+        : '';
+
+    // Extract status verb
+    const status = statusAndDate.replace(/\s*Le\s+.+$/, '').trim();
+
+    // Parse rest: filename, error code, error detail
+    let filename = '';
+    let errorCode = '';
+    let errorDetail = '';
+    let filenameParsed: FilenameResult | null = null;
+
+    const filenameMatch = rest.match(/(PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3})/);
+    if (filenameMatch) {
+        filename = filenameMatch[1];
+        filenameParsed = decodeFilename(filename);
+    }
+
+    const errorCodeMatch = rest.match(/\b(E\d{3})\b/);
+    if (errorCodeMatch) {
+        errorCode = errorCodeMatch[1];
+    }
+
+    // Error detail in brackets: [E610:...]
+    const detailMatch = rest.match(/\[([^\]]+)\]/);
+    if (detailMatch) {
+        errorDetail = detailMatch[1];
+    }
+
+    return {
+        code,
+        codeLabel: TICKET_TYPE_MAP[code]?.label ?? `Ticket ${code}`,
+        direction,
+        directionLabel: DIRECTION_LABELS[direction] ?? direction,
+        sequence,
+        status,
+        dateTime,
+        filename,
+        filenameParsed,
+        errorCode,
+        errorDetail,
+        raw: line.trim(),
+    };
+}
+
+function diagnoseDapi(portage: DapiPortageInfo, tickets: DapiTicketLine[]): DapiDiagnosis {
+    const errors = tickets.filter((t) => t.code === '7000' || t.errorCode);
+    const errorCodes = [...new Set(errors.map((e) => e.errorCode).filter(Boolean))];
+    const nonErrorTickets = tickets.filter((t) => t.code !== '7000' && !t.errorCode);
+    const ticketCodes = nonErrorTickets.map((t) => t.code);
+
+    const expectedFlow = getExpectedFlow(portage.procedure || '');
+    const lastValidTicket = [...ticketCodes].reverse().find((c) => expectedFlow.includes(c));
+    const lastIdx = lastValidTicket ? expectedFlow.indexOf(lastValidTicket) : -1;
+    const nextExpected = lastIdx >= 0 && lastIdx < expectedFlow.length - 1
+        ? expectedFlow[lastIdx + 1]
+        : null;
+
+    const currentState = lastValidTicket
+        ? `Dernier ticket valide : ${lastValidTicket} (${TICKET_TYPE_MAP[lastValidTicket]?.label ?? lastValidTicket})`
+        : 'Aucun ticket de flux normal identifié';
+
+    const expectedNextStep = nextExpected
+        ? `Prochain ticket attendu : ${nextExpected} (${TICKET_TYPE_MAP[nextExpected]?.label ?? nextExpected})`
+        : lastIdx === expectedFlow.length - 1
+            ? 'Flux terminé — tous les tickets attendus ont été reçus'
+            : 'Impossible de déterminer la prochaine étape';
+
+    const solutions: string[] = [];
+    let summary = '';
+
+    if (errors.length === 0) {
+        summary = 'Aucune erreur détectée dans la séquence de tickets.';
+    } else {
+        summary = `${errors.length} erreur(s) détectée(s) : ${errorCodes.join(', ')}`;
+
+        for (const code of errorCodes) {
+            const errTickets = errors.filter((e) => e.errorCode === code);
+            if (code === 'E610') {
+                solutions.push(
+                    `E610 — Flux non attendu : Le système a reçu un ticket dans un état qui ne correspond pas à la transition attendue. Le portage ID existe déjà avec un état incompatible.`,
+                    `→ Vérifier dans DAPI PortaWs l'historique complet du portage pour le MSISDN ${portage.msisdn}.`,
+                    `→ Vérifier si un portage précédent avec le même ID n'a pas été correctement clôturé.`,
+                    `→ Flux attendu pour ${portage.procedure || 'cette procédure'} : ${expectedFlow.join(' → ')}. Comparer avec la séquence réelle.`,
+                    `→ Si le portage est bloqué, utiliser "Clôturer ce portage" dans PortaWs, puis vérifier si l'opérateur donneur (${portage.donneur || '?'}) doit renvoyer un flux.`,
+                    `→ Si le flux inattendu vient de l'opérateur ${portage.donneur || 'donneur'}, le contacter pour signaler le problème de séquencement.`,
+                );
+                for (const t of errTickets) {
+                    if (t.errorDetail) {
+                        solutions.push(`→ Détail : ${t.errorDetail}`);
+                    }
+                }
+            } else if (code === 'E011') {
+                solutions.push(
+                    `E011 — AR non reçu : Vérifier la connectivité SFTP avec l'opérateur. Revérifier après la prochaine vacation.`,
+                );
+            } else {
+                solutions.push(
+                    `${code} — Consulter le dictionnaire des codes PNM pour les actions recommandées.`,
+                );
+            }
+        }
+    }
+
+    // Add general solutions based on state
+    if (portage.etat?.toLowerCase().includes('diffus')) {
+        solutions.push(
+            `Le portage est à l'état "Diffusé" — les données ont été envoyées aux opérateurs. Attendre les confirmations (${nextExpected ?? 'prochaine étape'}).`,
+        );
+    }
+
+    return {
+        hasError: errors.length > 0,
+        errorCodes,
+        currentState,
+        expectedNextStep,
+        summary,
+        solutions,
+    };
+}
+
+export function parseDapiView(text: string): ParsedDapiView | null {
+    // Normalize
+    const normalized = text
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/[\u2018\u2019\u201A]/g, "'")
+        .replace(/[\u201C\u201D\u201E]/g, '"')
+        .replace(/\u00A0/g, ' ')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+
+    // Try to parse header
+    const portage = parseDapiHeader(normalized);
+    if (!portage) return null;
+
+    // Parse ticket lines
+    const lines = normalized.split('\n');
+    const tickets: DapiTicketLine[] = [];
+    for (const line of lines) {
+        const ticket = parseDapiTicketLine(line);
+        if (ticket) tickets.push(ticket);
+    }
+
+    // If we have no tickets, still return with just header info
+    const errors = tickets.filter((t) => t.code === '7000' || t.errorCode);
+    const diagnosis = diagnoseDapi(portage, tickets);
+
+    return { portage, tickets, errors, diagnosis };
+}

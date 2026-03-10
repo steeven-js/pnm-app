@@ -18,9 +18,9 @@ import { Iconify } from 'src/components/iconify';
 
 import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
-import type { ParsedIncidentEmail, ParsedIncident, FilenameResult, IncidentTicket } from 'src/lib/pnm-utils';
+import type { ParsedIncidentEmail, ParsedIncident, FilenameResult, IncidentTicket, ParsedDapiView, DapiTicketLine } from 'src/lib/pnm-utils';
 
-import { parseIncidentEmail, decodeFilename } from 'src/lib/pnm-utils';
+import { parseIncidentEmail, decodeFilename, parseDapiView, TICKET_TYPE_MAP } from 'src/lib/pnm-utils';
 
 import { lookupCode } from 'src/lib/pnm-code-dictionary';
 
@@ -56,11 +56,14 @@ function getSftpLocation(incident: ParsedIncident): { folder: string; sub: strin
 export default function IncidentsPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<ParsedIncidentEmail | null>(null);
+  const [dapiResult, setDapiResult] = useState<ParsedDapiView | null>(null);
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
+    const dapi = parseDapiView(input);
+    setDapiResult(dapi);
     setResult(parseIncidentEmail(input));
   };
 
@@ -71,6 +74,7 @@ export default function IncidentsPage() {
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       setInput(text);
+      setDapiResult(parseDapiView(text));
       setResult(parseIncidentEmail(text));
     };
     reader.readAsText(file);
@@ -123,7 +127,7 @@ export default function IncidentsPage() {
           Analyseur d&apos;incidents
         </Typography>
         <Typography color="text.secondary" sx={{ mb: 4 }}>
-          Collez le contenu d&apos;un email d&apos;incident DIGICEL.PORTA-V3 pour l&apos;analyser
+          Collez le contenu d&apos;un email d&apos;incident DIGICEL.PORTA-V3 ou d&apos;une vue DAPI PortaWs pour l&apos;analyser
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3 }}>
@@ -166,7 +170,7 @@ export default function IncidentsPage() {
                 <Button
                   variant="outlined"
                   color="warning"
-                  onClick={() => { setInput(''); setResult(null); }}
+                  onClick={() => { setInput(''); setResult(null); setDapiResult(null); }}
                   startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={18} />}
                 >
                   Effacer
@@ -177,17 +181,20 @@ export default function IncidentsPage() {
 
           {/* Results area */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            {!result ? (
+            {!result && !dapiResult ? (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Iconify icon="solar:letter-linear" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
                 <Typography color="text.secondary">
-                  Collez un email et cliquez sur Analyser
+                  Collez un email d&apos;incident ou une vue DAPI PortaWs et cliquez sur Analyser
                 </Typography>
               </Box>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {/* Summary */}
-                <Card variant="outlined">
+                {/* DAPI Analysis */}
+                {dapiResult && <DapiAnalysisCard dapi={dapiResult} />}
+
+                {/* Email Incident Summary */}
+                {result && result.totalCount > 0 && <Card variant="outlined">
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="subtitle1" fontWeight={600}>
@@ -254,10 +261,10 @@ export default function IncidentsPage() {
                       </Box>
                     )}
                   </CardContent>
-                </Card>
+                </Card>}
 
                 {/* Incident cards */}
-                {result.incidents.map((incident, idx) => (
+                {result && result.incidents.map((incident, idx) => (
                   <IncidentCard key={idx} incident={incident} />
                 ))}
               </Box>
@@ -266,6 +273,269 @@ export default function IncidentsPage() {
         </Box>
       </Box>
     </DashboardLayout>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+const DAPI_DIRECTION_COLORS: Record<string, string> = {
+  in: '#3b82f6',
+  out: '#10b981',
+  internal: '#f59e0b',
+};
+
+const DAPI_DIRECTION_ICONS: Record<string, string> = {
+  in: 'solar:inbox-in-bold',
+  out: 'solar:inbox-out-bold',
+  internal: 'solar:settings-bold',
+};
+
+function DapiAnalysisCard({ dapi }: { dapi: ParsedDapiView }) {
+  const { portage, tickets, errors, diagnosis } = dapi;
+
+  return (
+    <Card variant="outlined" sx={{ borderLeft: 4, borderColor: diagnosis.hasError ? '#ef4444' : '#10b981' }}>
+      <CardContent>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Iconify icon="solar:clipboard-text-bold" width={20} sx={{ color: 'primary.main' }} />
+          <Typography variant="subtitle1" fontWeight={700}>
+            Analyse DAPI PortaWs
+          </Typography>
+          {diagnosis.hasError && (
+            <Chip label="Erreur détectée" size="small" sx={{ color: '#ef4444', bgcolor: '#fee2e2' }} />
+          )}
+        </Box>
+
+        {/* Portage info */}
+        <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral', mb: 2 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 1 }}>
+            {portage.msisdn && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">MSISDN</Typography>
+                <Typography variant="body2" fontWeight={700} sx={{ fontFamily: 'monospace' }}>{portage.msisdn}</Typography>
+              </Box>
+            )}
+            {portage.procedure && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">Procédure</Typography>
+                <Typography variant="body2" fontWeight={600}>{portage.procedure}</Typography>
+              </Box>
+            )}
+            {portage.etat && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">État</Typography>
+                <Chip label={portage.etat} size="small" variant="outlined" />
+              </Box>
+            )}
+            {portage.datePortage && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">Date portage</Typography>
+                <Typography variant="body2">{portage.datePortage}</Typography>
+              </Box>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            {portage.receveur && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">Receveur</Typography>
+                <Typography variant="body2">{portage.receveur}</Typography>
+              </Box>
+            )}
+            {portage.donneur && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">Donneur</Typography>
+                <Typography variant="body2">{portage.donneur}</Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Ticket timeline */}
+        {tickets.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+              <Iconify icon="solar:timeline-up-bold" width={16} sx={{ color: 'info.main' }} />
+              <Typography variant="subtitle2" color="info.main">
+                Chronologie des tickets ({tickets.length})
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              {tickets.map((t, i) => (
+                <DapiTicketRow key={i} ticket={t} index={i} isLast={i === tickets.length - 1} />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Diagnosis */}
+        <Divider sx={{ mb: 1.5 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
+          <Iconify icon="solar:stethoscope-bold" width={16} sx={{ color: diagnosis.hasError ? '#ef4444' : '#10b981' }} />
+          <Typography variant="subtitle2" sx={{ color: diagnosis.hasError ? '#ef4444' : '#10b981' }}>
+            Diagnostic
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: 1.25, borderRadius: 1, bgcolor: diagnosis.hasError ? '#fef2f2' : '#f0fdf4', mb: 1.5 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
+            {diagnosis.summary}
+          </Typography>
+          <Typography variant="caption" display="block" color="text.secondary">
+            {diagnosis.currentState}
+          </Typography>
+          <Typography variant="caption" display="block" color="text.secondary">
+            {diagnosis.expectedNextStep}
+          </Typography>
+        </Box>
+
+        {/* Solutions */}
+        {diagnosis.solutions.length > 0 && (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+              <Iconify icon="solar:lightbulb-bolt-bold" width={16} sx={{ color: '#f59e0b' }} />
+              <Typography variant="subtitle2" sx={{ color: '#f59e0b' }}>
+                Solutions potentielles
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              {diagnosis.solutions.map((sol, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    p: 1,
+                    borderRadius: 0.75,
+                    bgcolor: sol.startsWith('→') ? 'background.neutral' : '#fffbeb',
+                    borderLeft: sol.startsWith('→') ? 0 : 3,
+                    borderColor: '#f59e0b',
+                    ml: sol.startsWith('→') ? 2 : 0,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: sol.startsWith('→') ? 400 : 600 }}>
+                    {sol}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Error code dictionary entries */}
+        {diagnosis.errorCodes.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Divider sx={{ mb: 1.5 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+              <Iconify icon="solar:book-bold" width={16} sx={{ color: 'primary.main' }} />
+              <Typography variant="subtitle2" color="primary.main">
+                Référence codes erreur
+              </Typography>
+            </Box>
+            {diagnosis.errorCodes.map((code) => {
+              const entry = lookupCode(code);
+              if (!entry) return (
+                <Box key={code} sx={{ p: 1, borderRadius: 0.75, bgcolor: 'background.neutral', mb: 0.5 }}>
+                  <Typography variant="caption" fontWeight={700}>{code}</Typography>
+                  <Typography variant="caption" display="block" color="text.secondary">
+                    Code non référencé dans le dictionnaire PNM
+                  </Typography>
+                </Box>
+              );
+              const sevColor = SEVERITY_COLORS[entry.severity] ?? '#6b7280';
+              return (
+                <Box key={code} sx={{ p: 1, borderRadius: 0.75, bgcolor: `${sevColor}10`, borderLeft: 3, borderColor: sevColor, mb: 0.5 }}>
+                  <Typography variant="caption" fontWeight={700} sx={{ color: sevColor }}>
+                    {entry.code} — {entry.label}
+                  </Typography>
+                  <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 0.5 }}>
+                    {entry.description}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+                    <Iconify icon="solar:lightbulb-bolt-bold" width={14} sx={{ color: '#f59e0b', mt: 0.25, flexShrink: 0 }} />
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                      {entry.action}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DapiTicketRow({ ticket, index, isLast }: { ticket: DapiTicketLine; index: number; isLast: boolean }) {
+  const color = ticket.code === '7000' || ticket.errorCode
+    ? '#ef4444'
+    : DAPI_DIRECTION_COLORS[ticket.direction] ?? '#6b7280';
+  const icon = ticket.code === '7000'
+    ? 'solar:danger-triangle-bold'
+    : DAPI_DIRECTION_ICONS[ticket.direction] ?? 'solar:document-bold';
+
+  return (
+    <Box sx={{ display: 'flex', gap: 1.5 }}>
+      {/* Timeline dot + line */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.5 }}>
+        <Box
+          sx={{
+            width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0,
+          }}
+        />
+        {!isLast && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', mt: 0.5 }} />}
+      </Box>
+
+      {/* Content */}
+      <Box
+        sx={{
+          flex: 1, p: 1, borderRadius: 1, bgcolor: ticket.code === '7000' ? '#fef2f2' : 'background.neutral',
+          mb: 0.25,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25, flexWrap: 'wrap' }}>
+          <Iconify icon={icon} width={14} sx={{ color }} />
+          <Chip
+            label={`${ticket.code} ${ticket.codeLabel}`}
+            size="small"
+            sx={{ fontSize: '0.65rem', height: 20, color, bgcolor: `${color}15` }}
+          />
+          <Chip
+            label={ticket.directionLabel}
+            size="small"
+            variant="outlined"
+            sx={{ fontSize: '0.65rem', height: 20 }}
+          />
+          {ticket.sequence && (
+            <Typography variant="caption" color="text.secondary">
+              seq. {ticket.sequence}
+            </Typography>
+          )}
+        </Box>
+
+        <Typography variant="caption" color="text.secondary" display="block">
+          {ticket.dateTime}
+        </Typography>
+
+        {ticket.filename && (
+          <Typography variant="caption" display="block" sx={{ fontFamily: 'monospace', fontWeight: 600, mt: 0.25 }}>
+            {ticket.filename}
+          </Typography>
+        )}
+
+        {ticket.errorCode && (
+          <Box sx={{ mt: 0.5, p: 0.75, borderRadius: 0.5, bgcolor: '#fee2e2' }}>
+            <Typography variant="caption" fontWeight={700} sx={{ color: '#ef4444' }}>
+              {ticket.errorCode}
+            </Typography>
+            {ticket.errorDetail && (
+              <Typography variant="caption" display="block" sx={{ mt: 0.25 }}>
+                {ticket.errorDetail}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 }
 
