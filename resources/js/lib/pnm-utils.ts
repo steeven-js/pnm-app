@@ -1309,6 +1309,7 @@ export type IncidentFileError = {
     filenameParsed: FilenameResult;
     errorCount: number;
     refusalCount: number;
+    annulationCount: number;
     tickets: IncidentTicket[];
 };
 
@@ -1338,6 +1339,7 @@ export type ParsedIncidentEmail = {
     summary: {
         fileErrors: number;
         refusals: number;
+        annulations: number;
         arNonRecu: number;
         fileNotAck: number;
     };
@@ -1500,8 +1502,10 @@ function parseIncidentBlock(block: string): ParsedIncident | null {
         const filename = fileErrorMatch[1];
         const errorCountMatch = block.match(/(\d+)\s+erreur\(s\)\s+\(7000\)/);
         const refusalCountMatch = block.match(/(\d+)\s+refu\(s\)\s+\(1210\/1220\)/);
+        const annulationCountMatch = block.match(/(\d+)\s+annulation\(s\)\s+\(1510 ou 1520\)/);
         const errorCount = errorCountMatch ? parseInt(errorCountMatch[1]) : 0;
         const refusalCount = refusalCountMatch ? parseInt(refusalCountMatch[1]) : 0;
+        const annulationCount = annulationCountMatch ? parseInt(annulationCountMatch[1]) : 0;
         const ticketStrings = extractTicketStrings(block);
         const tickets = ticketStrings.map(parseIncidentTicket);
 
@@ -1511,6 +1515,7 @@ function parseIncidentBlock(block: string): ParsedIncident | null {
             filenameParsed: decodeFilename(filename),
             errorCount,
             refusalCount,
+            annulationCount,
             tickets,
         };
     }
@@ -1556,6 +1561,7 @@ export function parseIncidentEmail(text: string): ParsedIncidentEmail {
     // Build summary
     let fileErrors = 0;
     let refusals = 0;
+    let annulations = 0;
     let arNonRecu = 0;
     let fileNotAck = 0;
     const operatorSet = new Set<string>();
@@ -1565,6 +1571,7 @@ export function parseIncidentEmail(text: string): ParsedIncidentEmail {
         if (inc.type === 'file_error') {
             fileErrors += inc.errorCount;
             refusals += inc.refusalCount;
+            annulations += inc.annulationCount;
             if (inc.filenameParsed.valid) {
                 operatorSet.add(inc.filenameParsed.sourceOperatorName);
                 operatorSet.add(inc.filenameParsed.destOperatorName);
@@ -1592,7 +1599,7 @@ export function parseIncidentEmail(text: string): ParsedIncidentEmail {
     return {
         incidents,
         totalCount: incidents.length,
-        summary: { fileErrors, refusals, arNonRecu, fileNotAck },
+        summary: { fileErrors, refusals, annulations, arNonRecu, fileNotAck },
         operatorsInvolved: [...operatorSet].sort(),
         msisdnsConcerned: [...msisdnSet].sort(),
     };

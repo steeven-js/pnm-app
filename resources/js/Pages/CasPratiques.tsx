@@ -817,9 +817,530 @@ PnmDataAckManager.php|2026-03-10T10:00:42-04:00| <span style="color:#ef4444;font
   ),
 };
 
+// ─── Cas #4 — Refus R322 : résiliation effective ─────────────────────────────
+
+const casRefusR322: CasPratique = {
+  id: 'refus-r322-resiliation-effective',
+  title: 'Refus R322 — Résiliation effective hors demande de portabilité',
+  date: '10/03/2026',
+  tags: ['Refus', 'R322', 'Résiliation', 'Free Caraïbes', 'Numéro perdu'],
+  summary:
+    'Un ticket 1220 avec le code R322 (Résiliation effective de la ligne) est reçu de Free Caraïbes (06) pour le MSISDN 0694165585. Le numéro a été résilié par l\'opérateur donneur avant que la portabilité ne soit finalisée.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Ce cas documente un refus de portabilité reçu le <strong>10/03/2026</strong> dans le fichier{' '}
+        <code>PNMDATA.02.06.20260309190056.003</code>. L&apos;opérateur donneur <strong>Free Caraïbes (06)</strong>{' '}
+        a refusé la demande de portabilité pour le MSISDN <strong>0694165585</strong> avec le motif{' '}
+        <strong>R322 — Résiliation effective de la ligne objet de la demande</strong>.
+      </Typography>
+
+      <Alert severity="error" sx={{ mb: 2 }}>
+        <strong>Impact —</strong> Le code R322 signifie que la ligne a été résiliée chez l&apos;opérateur donneur.
+        Le numéro est <strong>définitivement perdu</strong> pour le client. Il ne pourra plus être porté.
+        Le client devra obtenir un nouveau numéro.
+      </Alert>
+
+      {/* ── Étape 1 : Réception du refus ── */}
+      <StepHeader number={1} icon="solar:letter-bold-duotone" title="Réception de l'email d'incident" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        L&apos;email automatique <code>[PNM][INCIDENT]</code> signale 1 refus dans le fichier :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Élément</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Valeur</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Fichier</strong></TableCell>
+              <TableCell><code>PNMDATA.02.06.20260309190056.003</code></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Ticket</strong></TableCell>
+              <TableCell>1220 — Réponse Négative (RN)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>MSISDN</strong></TableCell>
+              <TableCell><strong>0694165585</strong></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Code refus</strong></TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>R322 — Résiliation effective de la ligne</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Opérateur donneur</strong></TableCell>
+              <TableCell>Free Caraïbes (06)</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Étape 2 : Comprendre R322 ── */}
+      <StepHeader number={2} icon="solar:info-circle-bold-duotone" title="Comprendre le motif R322" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Le code <strong>R322</strong> appartient à la famille des refus définitifs (R3xx) :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Code</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Signification</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Conséquence</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>R322</strong></TableCell>
+              <TableCell>Résiliation effective de la ligne objet de la demande de portabilité</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>Numéro perdu — non récupérable</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>R321</TableCell>
+              <TableCell>Demande de résiliation en cours</TableCell>
+              <TableCell sx={{ color: 'warning.main' }}>Potentiellement récupérable si résiliation annulée</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>R502</TableCell>
+              <TableCell>Ligne résiliée (autre formulation)</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>Numéro perdu</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Cas typique —</strong> Le client a résilié sa ligne chez Free Caraïbes (ou Free l&apos;a résiliée
+        pour impayé) <strong>avant</strong> que la demande de portabilité vers Digicel ne soit traitée. La portabilité
+        ne peut aboutir car la ligne n&apos;existe plus chez l&apos;opérateur donneur.
+      </Alert>
+
+      {/* ── Étape 3 : Vérifier sur PortaWs ── */}
+      <StepHeader number={3} icon="solar:magnifer-bold-duotone" title="Vérifier le dossier sur PortaWs" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Sur <strong>PortaWebUI</strong>, rechercher le MSISDN <code>0694165585</code> pour confirmer :
+      </Typography>
+
+      <Box component="ul" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 0.5 } }}>
+        <li>Le mandat doit être passé à l&apos;état <strong>&quot;Refusé&quot;</strong></li>
+        <li>Le ticket 1110 (Demande de Portage) a été émis par Digicel</li>
+        <li>Le ticket 1220 (Réponse Négative) a été reçu de Free avec le code R322</li>
+        <li>Aucune action corrective possible côté Digicel</li>
+      </Box>
+
+      {/* ── Étape 4 : Informer ── */}
+      <StepHeader number={4} icon="solar:user-speak-bold-duotone" title="Informer le commercial et le client" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Le commercial qui a initié la demande de portabilité doit être informé :
+      </Typography>
+
+      <Box sx={{
+        my: 1.5, p: 2, borderRadius: 1, border: '1px solid', borderColor: 'divider',
+        bgcolor: 'background.neutral', fontSize: 13, fontFamily: 'inherit',
+      }}>
+        <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 1 }}>
+          Bonjour,
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          La demande de portabilité pour le <strong>0694165585</strong> a été refusée par Free Caraïbes
+          avec le motif <strong>R322 — Résiliation effective de la ligne</strong>.
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          Le numéro a été résilié chez l&apos;opérateur donneur et ne peut plus être porté.
+          Le client devra souscrire avec un nouveau numéro.
+        </Typography>
+      </Box>
+
+      {/* ── Points de vigilance ── */}
+      <Divider sx={{ my: 3 }} />
+
+      <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Points de vigilance
+        </Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
+          <li>R322 est un refus <strong>définitif</strong> — aucune relance possible</li>
+          <li>Ne pas confondre R322 (résiliation effective) avec R321 (résiliation en cours) qui peut être réversible</li>
+          <li>Vérifier si le client a d&apos;autres lignes en cours de portabilité qui pourraient être impactées</li>
+          <li>Si le client conteste la résiliation, il doit contacter directement Free Caraïbes — Digicel n&apos;a aucun levier</li>
+          <li>Documenter le cas dans le suivi quotidien pour traçabilité</li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
+// ─── Cas #5 — Annulation 1510/C001 ──────────────────────────────────────────
+
+const casAnnulation1510: CasPratique = {
+  id: 'annulation-1510-c001',
+  title: 'Annulation d\'un portage — Tickets 1510/1520 avec code C001',
+  date: '10/03/2026',
+  tags: ['Annulation', 'Ticket 1510', 'C001', 'Orange Caraïbe', 'Free Caraïbes'],
+  summary:
+    'Deux cas d\'annulation de portage : (1) Digicel annule un portage vers Orange Caraïbe pour le 0696001019, (2) Free Caraïbes annule un portage vers Digicel pour le 0696525199. Le code C001 confirme l\'acceptation de l\'annulation.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Ce cas documente deux annulations de portage traitées le <strong>10/03/2026</strong>.
+        Une annulation est signalée par un ticket <strong>1510</strong> (Demande d&apos;Annulation) suivi d&apos;un
+        ticket <strong>1520</strong> (Réponse d&apos;Annulation) avec le code <strong>C001</strong> (Acceptation).
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Contexte —</strong> L&apos;annulation d&apos;un portage peut être initiée par l&apos;OPR (opérateur
+        receveur) ou l&apos;OPD (opérateur donneur) <strong>avant</strong> la date de portage effective. Une fois la
+        date de portage passée, l&apos;annulation n&apos;est plus possible. Le code C001 dans le ticket 1520 confirme
+        que l&apos;annulation est acceptée.
+      </Alert>
+
+      {/* ── Cas A : Digicel annule ── */}
+      <StepHeader number={1} icon="solar:arrow-right-bold-duotone" title="Cas A — Digicel (OPR) annule un portage sortant" />
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Élément</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Valeur</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Fichier</strong></TableCell>
+              <TableCell><code>PNMDATA.02.01.20260309190056.003</code></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Ticket</strong></TableCell>
+              <TableCell>1510 — Demande d&apos;Annulation (DA)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>MSISDN</strong></TableCell>
+              <TableCell><strong>0696001019</strong></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>OPR (receveur)</strong></TableCell>
+              <TableCell>Digicel (02) — initiateur de l&apos;annulation</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>OPD (donneur)</strong></TableCell>
+              <TableCell>Orange Caraïbe (01)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Code réponse</strong></TableCell>
+              <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>C001 — Acceptation de l&apos;annulation</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Scénario —</strong> Digicel a émis une demande de portabilité (1110) pour le 0696001019 depuis
+        Orange Caraïbe, puis a décidé d&apos;annuler (1510) avant la date de portage. Orange a accepté (1520/C001).
+        Le client reste chez Orange Caraïbe.
+      </Alert>
+
+      {/* ── Cas B : Free annule ── */}
+      <StepHeader number={2} icon="solar:arrow-left-bold-duotone" title="Cas B — Free Caraïbes (OPD) annule un portage entrant" />
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Élément</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Valeur</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Fichier</strong></TableCell>
+              <TableCell><code>PNMDATA.06.02.20260309180222.001</code></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Ticket</strong></TableCell>
+              <TableCell>1510 — Demande d&apos;Annulation (DA)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>MSISDN</strong></TableCell>
+              <TableCell><strong>0696525199</strong></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>OPR (receveur)</strong></TableCell>
+              <TableCell>Digicel (02)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>OPD (donneur)</strong></TableCell>
+              <TableCell>Free Caraïbes (06) — initiateur de l&apos;annulation</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Code réponse</strong></TableCell>
+              <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>C001 — Acceptation de l&apos;annulation</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Scénario —</strong> Digicel avait demandé la portabilité (1110) du 0696525199 depuis Free Caraïbes.
+        Free a annulé la demande (1510) avant la date de portage. Le système a automatiquement accepté (1520/C001).
+        Le client reste chez Free Caraïbes. Il faut investiguer la raison auprès de Free.
+      </Alert>
+
+      {/* ── Étape 3 : Investigation ── */}
+      <StepHeader number={3} icon="solar:magnifer-bold-duotone" title="Vérifier sur PortaWs et comprendre" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Pour chaque annulation, vérifier sur <strong>PortaWebUI</strong> :
+      </Typography>
+
+      <Box component="ul" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 0.5 } }}>
+        <li>Le mandat doit être passé à l&apos;état <strong>&quot;Annulé&quot;</strong></li>
+        <li>Identifier qui a initié le 1510 : <strong>OPR</strong> (col.2 = code opérateur émetteur du 1510) ou <strong>OPD</strong></li>
+        <li>Si annulation par <strong>Digicel (OPR)</strong> : le commercial a probablement demandé l&apos;annulation (client a changé d&apos;avis)</li>
+        <li>Si annulation par <strong>l&apos;OPD</strong> : contacter l&apos;opérateur pour connaître le motif (erreur, client a repris contact, etc.)</li>
+      </Box>
+
+      {/* ── Étape 4 : Actions ── */}
+      <StepHeader number={4} icon="solar:user-speak-bold-duotone" title="Actions à mener" />
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Situation</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell>Annulation par Digicel (demandée)</TableCell>
+              <TableCell>Aucune action — annulation normale suite à demande interne</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Annulation par l&apos;OPD (inattendue)</TableCell>
+              <TableCell>Contacter l&apos;OPD par email pour connaître le motif. Si le client souhaite toujours porter, relancer une nouvelle demande 1110</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Client souhaite reporter la portabilité</TableCell>
+              <TableCell>Créer un nouveau mandat avec une nouvelle date de portage</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Points de vigilance ── */}
+      <Divider sx={{ my: 3 }} />
+
+      <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Points de vigilance
+        </Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
+          <li>L&apos;annulation (1510) n&apos;est possible que <strong>avant</strong> la date de portage effective</li>
+          <li>Le code <strong>C001</strong> signifie que l&apos;annulation est acceptée — le mandat est clos</li>
+          <li>Si l&apos;annulation est refusée (code différent de C001), le portage continue normalement</li>
+          <li>Vérifier dans la colonne 2 du ticket 1510 qui est l&apos;émetteur pour identifier l&apos;initiateur</li>
+          <li>Si l&apos;annulation vient de l&apos;OPD et est inattendue, <strong>toujours contacter</strong> pour comprendre</li>
+          <li>Un nouveau 1110 peut être émis après une annulation si le client souhaite toujours porter</li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
+// ─── Cas #6 — Erreur E610 : flux non attendu ────────────────────────────────
+
+const casErreurE610: CasPratique = {
+  id: 'erreur-e610-flux-non-attendu',
+  title: 'Erreur E610 — Flux non attendu dans la procédure de restitution',
+  date: '10/03/2026',
+  tags: ['Erreur', 'E610', 'Restitution', 'Orange Caraïbe', 'Ticket 7000'],
+  summary:
+    'Deux tickets 7000 (erreur) avec le code E610 reçus dans un fichier PNMDATA.02.01 pour les MSISDN 0690688569 et 0696386384. L\'erreur survient lors d\'une procédure de restitution quand un flux (ticket) inattendu est reçu pour un ID portage existant.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Ce cas documente deux erreurs E610 reçues le <strong>10/03/2026</strong> dans le fichier{' '}
+        <code>PNMDATA.02.01.20260309190056.003</code> envoyé par <strong>Orange Caraïbe (01)</strong>.
+        Les tickets 7000 signalent un <strong>flux non attendu dans la procédure</strong> pour deux MSISDN
+        en cours de restitution.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Contexte —</strong> L&apos;erreur E610 survient quand le système reçoit un ticket qui ne correspond
+        pas à la séquence attendue pour un portage en cours. Par exemple, recevoir un 3420 (Réponse de Restitution)
+        alors qu&apos;aucun 3410 (Demande de Restitution) n&apos;a été émis pour cet ID portage, ou un ticket
+        dans une procédure déjà terminée.
+      </Alert>
+
+      {/* ── Étape 1 : Comprendre l'incident ── */}
+      <StepHeader number={1} icon="solar:letter-bold-duotone" title="Réception de l'email d'incident" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        L&apos;email <code>[PNM][INCIDENT]</code> signale 2 erreurs dans le fichier :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>MSISDN</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Ticket</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Erreur</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>0690688569</strong></TableCell>
+              <TableCell>7000 — Signalement d&apos;erreur</TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>E610 — Flux non attendu dans la procédure</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>0696386384</strong></TableCell>
+              <TableCell>7000 — Signalement d&apos;erreur</TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>E610 — Flux non attendu dans la procédure</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Étape 2 : Comprendre E610 ── */}
+      <StepHeader number={2} icon="solar:info-circle-bold-duotone" title="Comprendre l'erreur E610" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        L&apos;E610 appartient à la famille des erreurs de procédure (E6xx) :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Code</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Signification</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold', color: 'error.main' }}>E610</TableCell>
+              <TableCell>L&apos;ID portage existe déjà mais un flux (ticket) non attendu a été reçu dans la procédure en cours</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>E601</TableCell>
+              <TableCell>Date de portabilité non conforme</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>E607</TableCell>
+              <TableCell>ID portage inconnu</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Flux de restitution attendu —</strong> La procédure de restitution suit la séquence :
+        <strong> 3400</strong> (Notification) → <strong>3410</strong> (Demande) → <strong>3420</strong> (Réponse)
+        → <strong>3430</strong> (Confirmation). Si un ticket arrive en dehors de cette séquence, le système
+        génère un 7000/E610.
+      </Alert>
+
+      {/* ── Étape 3 : Investiguer ── */}
+      <StepHeader number={3} icon="solar:magnifer-bold-duotone" title="Investiguer sur PortaWs et DAPI" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Pour chaque MSISDN concerné :
+      </Typography>
+
+      <Box component="ol" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 1 } }}>
+        <li>
+          <strong>PortaWebUI</strong> : Rechercher le MSISDN dans Supervision → Liste des mandats.
+          Vérifier l&apos;état actuel et l&apos;historique des tickets reçus/émis.
+        </li>
+        <li>
+          <strong>DAPI PortaWs</strong> : Dans la vue portage du MSISDN, vérifier la séquence des tickets.
+          L&apos;analyseur d&apos;incidents peut parser la vue DAPI pour identifier le ticket manquant ou en trop.
+        </li>
+        <li>
+          <strong>Logs serveur</strong> : Vérifier dans <code>PnmDataManager.log</code> si des tickets liés
+          à ces MSISDN ont été générés récemment.
+        </li>
+      </Box>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> grep -E "0690688569|0696386384" /home/porta_pnmv3/PortaSync/log/PnmDataManager.log`}
+      </CodeBlock>
+
+      {/* ── Étape 4 : Actions ── */}
+      <StepHeader number={4} icon="solar:settings-bold-duotone" title="Actions selon le diagnostic" />
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Diagnostic</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell>Ticket reçu en double (duplicata)</TableCell>
+              <TableCell>Pas d&apos;action — le système a ignoré le doublon. Surveiller que le portage continue normalement.</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Désynchronisation OPR/OPD</TableCell>
+              <TableCell>Contacter Orange Caraïbe pour resynchroniser les états du portage. Fournir les détails des tickets.</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Portage déjà terminé</TableCell>
+              <TableCell>Si le portage/restitution est déjà finalisé, ignorer l&apos;erreur. Vérifier que le numéro est bien attribué au bon opérateur.</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Problème récurrent</TableCell>
+              <TableCell>Si E610 récurrent avec le même opérateur, escalader au GPMAG avec l&apos;historique.</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Points de vigilance ── */}
+      <Divider sx={{ my: 3 }} />
+
+      <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Points de vigilance
+        </Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
+          <li>E610 est souvent <strong>sans impact fonctionnel</strong> — le portage continue malgré l&apos;erreur</li>
+          <li>Toujours vérifier l&apos;état actuel du mandat sur PortaWs avant d&apos;agir</li>
+          <li>L&apos;analyseur DAPI de PNM App peut aider à visualiser la séquence des tickets et identifier l&apos;anomalie</li>
+          <li>Si plusieurs MSISDN sont impactés dans le même fichier, ils partagent probablement la même cause racine</li>
+          <li>Les erreurs E6xx sont des erreurs de <strong>procédure</strong>, pas des erreurs techniques — elles reflètent un problème de séquencement</li>
+          <li>En cas de doute, escalader au GPMAG : <code>secretariat@gpmag.fr</code></li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Liste de tous les cas pratiques ────────────────────────────────────────
 
-const CAS_PRATIQUES: CasPratique[] = [casArNonRecuInvestigation, casRelancePortabilite, casIncohCol3];
+const CAS_PRATIQUES: CasPratique[] = [
+  casArNonRecuInvestigation,
+  casRefusR322,
+  casAnnulation1510,
+  casErreurE610,
+  casRelancePortabilite,
+  casIncohCol3,
+];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────
 
@@ -839,6 +1360,19 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
   'ACR E000': 'success',
   Archivage: 'warning',
   'SFR / Outremer': 'default',
+  Refus: 'error',
+  R322: 'error',
+  Résiliation: 'error',
+  'Free Caraïbes': 'default',
+  'Numéro perdu': 'error',
+  Annulation: 'warning',
+  'Ticket 1510': 'info',
+  C001: 'success',
+  'Orange Caraïbe': 'default',
+  Erreur: 'error',
+  E610: 'error',
+  Restitution: 'info',
+  'Ticket 7000': 'error',
 };
 
 // ─── Page ───────────────────────────────────────────────────────────────────

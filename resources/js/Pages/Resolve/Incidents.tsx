@@ -88,6 +88,7 @@ export default function IncidentsPage() {
       `Incidents : ${result.totalCount}`,
       `Erreurs fichier : ${result.summary.fileErrors}`,
       `Refus : ${result.summary.refusals}`,
+      `Annulations : ${result.summary.annulations}`,
       `AR non reçus : ${result.summary.arNonRecu}`,
       `Fichiers non acquittés : ${result.summary.fileNotAck}`,
       `Opérateurs : ${result.operatorsInvolved.join(', ')}`,
@@ -233,6 +234,13 @@ export default function IncidentsPage() {
                           label={`${result.summary.refusals} refus`}
                           size="small"
                           sx={{ color: '#dc2626', bgcolor: '#fee2e2' }}
+                        />
+                      )}
+                      {result.summary.annulations > 0 && (
+                        <Chip
+                          label={`${result.summary.annulations} annulation(s)`}
+                          size="small"
+                          sx={{ color: '#8b5cf6', bgcolor: '#ede9fe' }}
                         />
                       )}
                       {result.summary.arNonRecu > 0 && (
@@ -729,6 +737,7 @@ function IncidentCard({ incident }: { incident: ParsedIncident }) {
           <Box sx={{ mt: 1.5 }}>
             <Typography variant="body2">
               {incident.errorCount} erreur(s), {incident.refusalCount} refus
+              {incident.annulationCount > 0 && `, ${incident.annulationCount} annulation(s)`}
             </Typography>
             {incident.tickets.length > 0 && (
               <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -851,6 +860,7 @@ function getInvestigationSteps(type: string, incident: ParsedIncident): Investig
   if (type === 'file_error') {
     const hasRefusal = 'refusalCount' in incident && (incident as any).refusalCount > 0;
     const hasError = 'errorCount' in incident && (incident as any).errorCount > 0;
+    const hasAnnulation = 'annulationCount' in incident && (incident as any).annulationCount > 0;
     const steps: InvestigationStep[] = [];
 
     if (hasRefusal) {
@@ -869,6 +879,26 @@ function getInvestigationSteps(type: string, incident: ParsedIncident): Investig
           icon: 'solar:user-speak-bold',
           label: 'Informer le commercial / client',
           detail: `Selon le motif de refus : résiliation (R322/R502) → numéro perdu, engagement (R202) → attendre fin engagement, RIO (R1xx) → relancer avec bon RIO. Transmettre le motif de refus au commercial.`,
+        },
+      );
+    }
+
+    if (hasAnnulation) {
+      steps.push(
+        {
+          icon: 'solar:magnifer-bold',
+          label: 'Vérifier le mandat dans PortaWs',
+          detail: `Rechercher le(s) MSISDN concerné(s) dans PortaWs (172.24.119.72:8080) → Supervision → Liste des mandats. Vérifier que le mandat est bien passé à l'état "Annulé".`,
+        },
+        {
+          icon: 'solar:document-text-bold',
+          label: 'Identifier l\'initiateur de l\'annulation',
+          detail: `Un ticket 1510 est une Demande d'Annulation, un 1520 est la Réponse d'Annulation (C001 = acceptée). Vérifier si c'est Digicel (OPR) ou l'opérateur donneur (OPD) qui a initié l'annulation. Vérifier le motif dans l'historique du mandat.`,
+        },
+        {
+          icon: 'solar:user-speak-bold',
+          label: 'Informer le commercial / client',
+          detail: `Transmettre l'information d'annulation au commercial concerné. Si l'annulation vient de l'OPD, vérifier le motif (ex: client a changé d'avis, erreur de saisie). Si une nouvelle portabilité est souhaitée, relancer le processus.`,
         },
       );
     }

@@ -753,6 +753,488 @@ function CasArNonRecuLogsPdf() {
   );
 }
 
+// ─── Cas #4 — Refus R322 PDF ─────────────────────────────────────────────────
+
+function CasRefusR322Pdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — Refus R322 : Résiliation effective</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['Refus', 'R322', 'Résiliation', 'Free Caraïbes', 'Numéro perdu'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Refus de portabilité reçu le <Text style={s.bold}>10/03/2026</Text> dans le fichier PNMDATA.02.06.20260309190056.003. L{"'"}opérateur donneur <Text style={s.bold}>Free Caraïbes (06)</Text> a refusé la demande pour le MSISDN <Text style={s.bold}>0694165585</Text> avec le motif R322.
+        </Text>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>Impact</Text>
+          <Text style={s.alertText}>
+            Le code R322 signifie que la ligne a été résiliée chez l{"'"}opérateur donneur. Le numéro est définitivement perdu pour le client.
+          </Text>
+        </View>
+
+        {/* Étape 1 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Réception de l{"'"}email d{"'"}incident</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Élément</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Valeur</Text>
+          </View>
+          {[
+            ['Fichier', 'PNMDATA.02.06.20260309190056.003'],
+            ['Ticket', '1220 — Réponse Négative (RN)'],
+            ['MSISDN', '0694165585'],
+            ['Opérateur donneur', 'Free Caraïbes (06)'],
+          ].map(([label, value]) => (
+            <View key={label} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
+              <Text style={[s.tableCell, { width: '65%' }]}>{value}</Text>
+            </View>
+          ))}
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code refus</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.red, fontWeight: 'bold' }]}>R322 — Résiliation effective</Text>
+          </View>
+        </View>
+
+        {/* Étape 2 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Comprendre le motif R322</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '15%' }]}>Code</Text>
+            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Signification</Text>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Conséquence</Text>
+          </View>
+          {[
+            ['R322', 'Résiliation effective de la ligne', 'Numéro perdu', c.red],
+            ['R321', 'Demande de résiliation en cours', 'Potentiellement récupérable', c.orange],
+            ['R502', 'Ligne résiliée (autre formulation)', 'Numéro perdu', c.red],
+          ].map(([code, sig, cons, color]) => (
+            <View key={code} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '15%', fontWeight: 'bold' }]}>{code}</Text>
+              <Text style={[s.tableCellLight, { width: '50%' }]}>{sig}</Text>
+              <Text style={[s.tableCell, { width: '35%', color: color as string }]}>{cons}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Cas typique</Text>
+          <Text style={s.alertText}>
+            Le client a résilié sa ligne chez Free Caraïbes (ou Free l{"'"}a résiliée pour impayé) avant que la demande de portabilité ne soit traitée.
+          </Text>
+        </View>
+
+        {/* Étape 3 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Vérifier sur PortaWs</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état "Refusé"</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Le ticket 1220 avec code R322 doit apparaître dans l{"'"}historique</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Aucune action corrective possible côté Digicel</Text>
+        </View>
+
+        {/* Étape 4 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Informer le commercial et le client</Text>
+        </View>
+
+        <View style={{ backgroundColor: '#F4F6F8', borderRadius: 3, padding: 8, marginVertical: 6 }}>
+          <Text style={{ fontSize: 8, fontStyle: 'italic', marginBottom: 3 }}>Bonjour,</Text>
+          <Text style={{ fontSize: 8, lineHeight: 1.5 }}>
+            La demande de portabilité pour le 0694165585 a été refusée par Free Caraïbes avec le motif R322 — Résiliation effective de la ligne.{'\n'}
+            Le numéro ne peut plus être porté. Le client devra souscrire avec un nouveau numéro.
+          </Text>
+        </View>
+
+        {/* Points de vigilance */}
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>• R322 est un refus définitif — aucune relance possible</Text>
+          <Text style={s.alertText}>• Ne pas confondre R322 (effective) avec R321 (en cours) qui peut être réversible</Text>
+          <Text style={s.alertText}>• Si le client conteste, il doit contacter directement Free Caraïbes</Text>
+          <Text style={s.alertText}>• Documenter le cas dans le suivi quotidien</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Refus R322</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #5 — Annulation 1510/C001 PDF ───────────────────────────────────────
+
+function CasAnnulation1510Pdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      {/* PAGE 1 */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — Annulation 1510/C001</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['Annulation', 'Ticket 1510', 'C001', 'Orange Caraïbe', 'Free Caraïbes'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Deux cas d{"'"}annulation de portage traités le <Text style={s.bold}>10/03/2026</Text>. Le ticket 1510 (Demande d{"'"}Annulation) suivi du 1520 (Réponse) avec code C001 (Acceptation).
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Contexte</Text>
+          <Text style={s.alertText}>
+            L{"'"}annulation peut être initiée par l{"'"}OPR ou l{"'"}OPD avant la date de portage effective. Le code C001 confirme l{"'"}acceptation.
+          </Text>
+        </View>
+
+        {/* Cas A */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>A</Text></View>
+          <Text style={s.stepTitle}>Digicel (OPR) annule un portage sortant</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Élément</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Valeur</Text>
+          </View>
+          {[
+            ['Fichier', 'PNMDATA.02.01.20260309190056.003'],
+            ['Ticket', '1510 — Demande d\'Annulation'],
+            ['MSISDN', '0696001019'],
+            ['OPR (initiateur)', 'Digicel (02)'],
+            ['OPD', 'Orange Caraïbe (01)'],
+          ].map(([label, value]) => (
+            <View key={label} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
+              <Text style={[s.tableCell, { width: '65%' }]}>{value}</Text>
+            </View>
+          ))}
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code réponse</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation</Text>
+          </View>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Scénario</Text>
+          <Text style={s.alertText}>
+            Digicel a émis un 1110 pour le 0696001019 depuis Orange, puis a annulé (1510) avant la date de portage. Orange a accepté (1520/C001). Le client reste chez Orange.
+          </Text>
+        </View>
+
+        {/* Cas B */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>B</Text></View>
+          <Text style={s.stepTitle}>Free Caraïbes (OPD) annule un portage entrant</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Élément</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Valeur</Text>
+          </View>
+          {[
+            ['Fichier', 'PNMDATA.06.02.20260309180222.001'],
+            ['Ticket', '1510 — Demande d\'Annulation'],
+            ['MSISDN', '0696525199'],
+            ['OPR', 'Digicel (02)'],
+            ['OPD (initiateur)', 'Free Caraïbes (06)'],
+          ].map(([label, value]) => (
+            <View key={label} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
+              <Text style={[s.tableCell, { width: '65%' }]}>{value}</Text>
+            </View>
+          ))}
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code réponse</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation</Text>
+          </View>
+        </View>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Scénario</Text>
+          <Text style={s.alertText}>
+            Digicel avait demandé la portabilité du 0696525199 depuis Free. Free a annulé (1510) avant la date de portage. Le client reste chez Free. Investiguer la raison auprès de Free.
+          </Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Annulation 1510/C001</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 2 — Investigation & Actions */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Investigation & Actions</Text>
+            <Text style={s.headerSub}>Suite de la procédure</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Vérifier sur PortaWs</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état "Annulé"</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Identifier qui a initié le 1510 (col.2 = émetteur)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Annulation par Digicel (OPR) = demande interne (commercial)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Annulation par l{"'"}OPD = contacter pour connaître le motif</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Actions à mener</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Situation</Text>
+            <Text style={[s.tableHeaderCell, { width: '60%' }]}>Action</Text>
+          </View>
+          {[
+            ['Annulation par Digicel', 'Aucune action — annulation normale suite à demande interne'],
+            ['Annulation par l\'OPD', 'Contacter l\'OPD par email. Si le client souhaite toujours porter, relancer un nouveau 1110'],
+            ['Client souhaite reporter', 'Créer un nouveau mandat avec une nouvelle date de portage'],
+          ].map(([situation, action]) => (
+            <View key={situation} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>{situation}</Text>
+              <Text style={[s.tableCellLight, { width: '60%' }]}>{action}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>• L{"'"}annulation (1510) n{"'"}est possible qu{"'"}avant la date de portage effective</Text>
+          <Text style={s.alertText}>• C001 = annulation acceptée — le mandat est clos</Text>
+          <Text style={s.alertText}>• Vérifier col.2 du 1510 pour identifier l{"'"}initiateur</Text>
+          <Text style={s.alertText}>• Si annulation par l{"'"}OPD et inattendue, toujours contacter pour comprendre</Text>
+          <Text style={s.alertText}>• Un nouveau 1110 peut être émis après une annulation</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Annulation 1510/C001</Text>
+          <Text>Page 2 / 2</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #6 — Erreur E610 PDF ────────────────────────────────────────────────
+
+function CasErreurE610Pdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — Erreur E610 : Flux non attendu</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['Erreur', 'E610', 'Restitution', 'Orange Caraïbe', 'Ticket 7000'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Deux tickets 7000 avec code <Text style={s.bold}>E610</Text> reçus le <Text style={s.bold}>10/03/2026</Text> dans PNMDATA.02.01.20260309190056.003 envoyé par <Text style={s.bold}>Orange Caraïbe (01)</Text>. Les MSISDN concernés : 0690688569 et 0696386384.
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Contexte</Text>
+          <Text style={s.alertText}>
+            L{"'"}erreur E610 survient quand le système reçoit un ticket qui ne correspond pas à la séquence attendue pour un portage en cours (ex: 3420 sans 3410 préalable).
+          </Text>
+        </View>
+
+        {/* Étape 1 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Email d{"'"}incident</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>MSISDN</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Ticket</Text>
+            <Text style={[s.tableHeaderCell, { width: '45%' }]}>Erreur</Text>
+          </View>
+          {[
+            ['0690688569', '7000', 'E610 — Flux non attendu'],
+            ['0696386384', '7000', 'E610 — Flux non attendu'],
+          ].map(([msisdn, ticket, erreur]) => (
+            <View key={msisdn} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{msisdn}</Text>
+              <Text style={[s.tableCellLight, { width: '25%' }]}>{ticket}</Text>
+              <Text style={[s.tableCell, { width: '45%', color: c.red }]}>{erreur}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Étape 2 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Comprendre E610</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Flux de restitution attendu</Text>
+          <Text style={s.alertText}>
+            3400 (Notification) → 3410 (Demande) → 3420 (Réponse) → 3430 (Confirmation). Si un ticket arrive en dehors de cette séquence, le système génère un 7000/E610.
+          </Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '15%' }]}>Code</Text>
+            <Text style={[s.tableHeaderCell, { width: '85%' }]}>Signification</Text>
+          </View>
+          {[
+            ['E610', 'ID portage existe mais flux non attendu dans la procédure en cours'],
+            ['E601', 'Date de portabilité non conforme'],
+            ['E607', 'ID portage inconnu'],
+          ].map(([code, sig]) => (
+            <View key={code} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '15%', fontWeight: 'bold', color: code === 'E610' ? c.red : c.dark }]}>{code}</Text>
+              <Text style={[s.tableCellLight, { width: '85%' }]}>{sig}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Étape 3 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Investiguer sur PortaWs et DAPI</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}><Text style={s.bold}>PortaWebUI</Text> : Rechercher le MSISDN, vérifier l{"'"}état et l{"'"}historique des tickets</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}><Text style={s.bold}>DAPI PortaWs</Text> : Vérifier la séquence des tickets avec l{"'"}analyseur DAPI</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}><Text style={s.bold}>Logs serveur</Text> : Vérifier PnmDataManager.log</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ grep -E "0690688569|0696386384" .../PnmDataManager.log</Text>
+        </View>
+
+        {/* Étape 4 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Actions selon le diagnostic</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Diagnostic</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Action</Text>
+          </View>
+          {[
+            ['Ticket en double', 'Pas d\'action — le système a ignoré le doublon'],
+            ['Désynchronisation', 'Contacter Orange pour resynchroniser les états'],
+            ['Portage terminé', 'Ignorer — vérifier que le numéro est bien attribué'],
+            ['Problème récurrent', 'Escalader au GPMAG avec historique'],
+          ].map(([diag, action]) => (
+            <View key={diag} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{diag}</Text>
+              <Text style={[s.tableCellLight, { width: '65%' }]}>{action}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Points de vigilance */}
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>• E610 est souvent sans impact fonctionnel — le portage continue</Text>
+          <Text style={s.alertText}>• Toujours vérifier l{"'"}état actuel du mandat sur PortaWs avant d{"'"}agir</Text>
+          <Text style={s.alertText}>• L{"'"}analyseur DAPI peut visualiser la séquence et identifier l{"'"}anomalie</Text>
+          <Text style={s.alertText}>• Plusieurs MSISDN impactés = même cause racine probable</Text>
+          <Text style={s.alertText}>• E6xx = erreurs de procédure (séquencement), pas erreurs techniques</Text>
+          <Text style={s.alertText}>• En cas de doute, escalader : secretariat@gpmag.fr</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Erreur E610</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -769,6 +1251,18 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'ar-non-recu-investigation-logs': {
       document: <CasArNonRecuLogsPdf />,
       filename: 'Cas-Pratique-AR-Non-Recu-Investigation-Logs',
+    },
+    'refus-r322-resiliation-effective': {
+      document: <CasRefusR322Pdf />,
+      filename: 'Cas-Pratique-Refus-R322-Resiliation',
+    },
+    'annulation-1510-c001': {
+      document: <CasAnnulation1510Pdf />,
+      filename: 'Cas-Pratique-Annulation-1510-C001',
+    },
+    'erreur-e610-flux-non-attendu': {
+      document: <CasErreurE610Pdf />,
+      filename: 'Cas-Pratique-Erreur-E610-Flux-Non-Attendu',
     },
   };
 
