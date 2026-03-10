@@ -47,8 +47,8 @@ const QUERY_CATEGORIES: QueryCategory[] = [
         icon: 'solar:phone-calling-bold-duotone',
         color: 'primary',
         sql: `SELECT m.msisdn, o.nom AS operateur, o.code AS code_operateur
-FROM porta_msisdn m
-JOIN porta_operateur o ON o.code = m.operateur_id_actuel
+FROM MSISDN m
+JOIN OPERATEUR o ON o.code = m.operateur_id_actuel
 WHERE m.msisdn = '0691XXXXXX';`,
       },
       {
@@ -58,8 +58,8 @@ WHERE m.msisdn = '0691XXXXXX';`,
         color: 'info',
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, e.etat_name AS etat,
   p.portage_date_creation
-FROM porta_portage p
-JOIN porta_etat e ON e.id = p.portage_etat
+FROM PORTAGE p
+JOIN ETAT e ON e.id = p.portage_etat
 WHERE p.id = 12345;`,
       },
       {
@@ -68,8 +68,8 @@ WHERE p.id = 12345;`,
         icon: 'solar:hashtag-bold-duotone',
         color: 'secondary',
         sql: `SELECT t.id, t.debut, t.fin, o.nom AS operateur, t.is_active
-FROM porta_tranche t
-JOIN porta_operateur o ON o.code = t.operateur_id
+FROM TRANCHE t
+JOIN OPERATEUR o ON o.code = t.operateur_id
 WHERE '0691XXXXXX' BETWEEN t.debut AND t.fin
 ORDER BY t.debut;`,
       },
@@ -79,7 +79,7 @@ ORDER BY t.debut;`,
         icon: 'solar:history-bold-duotone',
         color: 'info',
         sql: `SELECT mh.id, mh.msisdn, mh.date
-FROM porta_msisdn_historique mh
+FROM MSISDN_HISTORIQUE mh
 WHERE mh.msisdn = '0691XXXXXX'
 ORDER BY mh.date ASC;`,
       },
@@ -89,7 +89,7 @@ ORDER BY mh.date ASC;`,
         icon: 'solar:buildings-bold-duotone',
         color: 'primary',
         sql: `SELECT code, nom, is_active, is_actor, contact, email
-FROM porta_operateur
+FROM OPERATEUR
 WHERE is_active = true
 ORDER BY nom;`,
       },
@@ -107,9 +107,9 @@ ORDER BY nom;`,
         color: 'success',
         sql: `SELECT d.id AS id_dossier, p.portage_msisdn AS msisdn, p.id AS id_portage,
   d.portage_date_creation, d.portage_date_souhaitee, e.etat_name AS etat
-FROM porta_dossier d
-JOIN porta_portage p ON p.dossier_id = d.id
-JOIN porta_etat e ON e.id = d.portage_etat
+FROM DOSSIER d
+JOIN PORTAGE p ON p.dossier_id = d.id
+JOIN ETAT e ON e.id = d.portage_etat
 WHERE p.portage_msisdn = '0691XXXXXX'
 ORDER BY d.portage_date_creation DESC;`,
       },
@@ -119,8 +119,8 @@ ORDER BY d.portage_date_creation DESC;`,
         icon: 'solar:history-bold-duotone',
         color: 'info',
         sql: `SELECT ph.id, p.portage_msisdn AS msisdn, ph.etat, ph.date, ph.commentaire
-FROM porta_portage_historique ph
-JOIN porta_portage p ON p.id = ph.id_portage
+FROM PORTAGE_HISTORIQUE ph
+JOIN PORTAGE p ON p.id = ph.id_portage
 WHERE p.portage_msisdn = '0691XXXXXX'
 ORDER BY ph.date ASC;`,
       },
@@ -132,11 +132,11 @@ ORDER BY ph.date ASC;`,
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, e.etat_name AS etat,
   p.portage_date_souhaitee, p.portage_type_demande,
   o_d.nom AS operateur_donneur, o_r.nom AS operateur_receveur
-FROM porta_portage p
-JOIN porta_etat e ON e.id = p.portage_etat
-JOIN porta_dossier d ON d.id = p.dossier_id
-JOIN porta_operateur o_d ON o_d.code = d.operateur_id_donneur
-JOIN porta_operateur o_r ON o_r.code = d.operateur_id_receveur
+FROM PORTAGE p
+JOIN ETAT e ON e.id = p.portage_etat
+JOIN DOSSIER d ON d.id = p.dossier_id
+JOIN OPERATEUR o_d ON o_d.code = d.operateur_id_donneur
+JOIN OPERATEUR o_r ON o_r.code = d.operateur_id_receveur
 WHERE CAST(p.portage_date_souhaitee AS DATE) = '2026-03-04'  -- ou CURRENT_DATE
 ORDER BY p.portage_date_souhaitee ASC;`,
       },
@@ -149,10 +149,10 @@ ORDER BY p.portage_date_souhaitee ASC;`,
   d.portage_nom, d.portage_prenom, d.portage_type_demande,
   d.portage_date_souhaitee, e.etat_name AS etat,
   o_d.nom AS operateur_donneur, o_r.nom AS operateur_receveur, d.remarque
-FROM porta_dossier d
-JOIN porta_etat e ON e.id = d.portage_etat
-JOIN porta_operateur o_d ON o_d.code = d.operateur_id_donneur
-JOIN porta_operateur o_r ON o_r.code = d.operateur_id_receveur
+FROM DOSSIER d
+JOIN ETAT e ON e.id = d.portage_etat
+JOIN OPERATEUR o_d ON o_d.code = d.operateur_id_donneur
+JOIN OPERATEUR o_r ON o_r.code = d.operateur_id_receveur
 WHERE d.portage_msisdn = '0691XXXXXX'
 ORDER BY d.portage_date_creation DESC;`,
       },
@@ -171,9 +171,9 @@ ORDER BY d.portage_date_creation DESC;`,
         sql: `-- Remplacer le code_ticket par : 1110, 1210, 1430, 3430, etc.
 SELECT pd.id, p.portage_msisdn AS msisdn, pd.code_ticket,
   ct.description AS ticket_desc, pd.date, pd.date_traitement
-FROM porta_portage_data pd
-JOIN porta_portage p ON p.id = pd.id_portage
-JOIN porta_code_ticket ct ON ct.code = pd.code_ticket
+FROM DATA pd
+JOIN PORTAGE p ON p.id = pd.id_portage
+JOIN CODE_TICKET ct ON ct.code = pd.code_ticket
 WHERE p.portage_msisdn = '0691XXXXXX'
   AND pd.code_ticket = 1110
 ORDER BY pd.date DESC;`,
@@ -186,9 +186,9 @@ ORDER BY pd.date DESC;`,
         sql: `SELECT pd.id, pd.code_ticket, ct.description AS ticket_desc,
   pd.code_reponse, cr.description AS reponse_desc,
   pd.date, pd.date_traitement, pd.etat, pd.commentaire
-FROM porta_portage_data pd
-JOIN porta_code_ticket ct ON ct.code = pd.code_ticket
-LEFT JOIN porta_code_reponse cr ON cr.code = pd.code_reponse
+FROM DATA pd
+JOIN CODE_TICKET ct ON ct.code = pd.code_ticket
+LEFT JOIN CODE_REPONSE cr ON cr.code = pd.code_reponse
 WHERE pd.id_portage = 12345
 ORDER BY pd.date ASC;`,
       },
@@ -199,9 +199,9 @@ ORDER BY pd.date ASC;`,
         color: 'secondary',
         sql: `SELECT f.id, f.nom, f.type, f.date_creation, f.date_import,
   f.taille, o_exp.nom AS expediteur, o_dest.nom AS destinataire
-FROM porta_fichier f
-JOIN porta_operateur o_exp ON o_exp.code = f.expediteur
-JOIN porta_operateur o_dest ON o_dest.code = f.destinataire
+FROM FICHIER f
+JOIN OPERATEUR o_exp ON o_exp.code = f.expediteur
+JOIN OPERATEUR o_dest ON o_dest.code = f.destinataire
 WHERE (f.expediteur = 1 OR f.destinataire = 1)  -- code operateur
   AND f.date_creation >= '2026-03-01'
 ORDER BY f.date_creation DESC;`,
@@ -213,9 +213,9 @@ ORDER BY f.date_creation DESC;`,
         color: 'primary',
         sql: `SELECT s.id, s.msisdn, s.date, s.date_portage,
   o.nom AS operateur, ss.statut_name AS statut_sync
-FROM porta_sync s
-JOIN porta_operateur o ON o.code = s.operateur_id
-LEFT JOIN porta_sync_status ss ON ss.id = s.sync_status
+FROM SYNC s
+JOIN OPERATEUR o ON o.code = s.operateur_id
+LEFT JOIN SYNC_STATUS ss ON ss.id = s.sync_status
 WHERE s.operateur_id = 1  -- code operateur
   AND CAST(s.date AS DATE) = '2026-03-04'
 ORDER BY s.date DESC;`,
@@ -226,7 +226,7 @@ ORDER BY s.date DESC;`,
         icon: 'solar:check-read-bold-duotone',
         color: 'success',
         sql: `SELECT a.id, a.file_name, a.type, a.date, a.content
-FROM porta_ack a
+FROM ACK a
 WHERE a.file_name LIKE '%PNMDATA%'  -- ou nom exact du fichier
 ORDER BY a.date DESC;`,
       },
@@ -245,8 +245,8 @@ ORDER BY a.date DESC;`,
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, e.etat_name AS etat,
   p.portage_date_creation, p.portage_date_souhaitee,
   CURRENT_DATE - CAST(p.portage_date_creation AS DATE) AS jours_en_cours
-FROM porta_portage p
-JOIN porta_etat e ON e.id = p.portage_etat
+FROM PORTAGE p
+JOIN ETAT e ON e.id = p.portage_etat
 WHERE CURRENT_DATE - CAST(p.portage_date_creation AS DATE) > 5  -- modifier le seuil
   AND e.etat_name NOT IN ('Termine', 'Annule', 'Refuse')
 ORDER BY p.portage_date_creation ASC;`,
@@ -258,9 +258,9 @@ ORDER BY p.portage_date_creation ASC;`,
         color: 'error',
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, pd.code_ticket,
   cr.code AS code_refus, cr.description AS motif_refus, pd.date
-FROM porta_portage_data pd
-JOIN porta_portage p ON p.id = pd.id_portage
-JOIN porta_code_reponse cr ON cr.code = pd.code_reponse
+FROM DATA pd
+JOIN PORTAGE p ON p.id = pd.id_portage
+JOIN CODE_REPONSE cr ON cr.code = pd.code_reponse
 WHERE pd.code_reponse IS NOT NULL
   AND pd.date >= CURRENT_DATE - INTERVAL '7 days'  -- modifier la periode
 ORDER BY pd.date DESC;`,
@@ -272,9 +272,9 @@ ORDER BY pd.date DESC;`,
         color: 'warning',
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, p.portage_rio,
   cr.description AS motif, pd.date, pd.commentaire
-FROM porta_portage_data pd
-JOIN porta_portage p ON p.id = pd.id_portage
-JOIN porta_code_reponse cr ON cr.code = pd.code_reponse
+FROM DATA pd
+JOIN PORTAGE p ON p.id = pd.id_portage
+JOIN CODE_REPONSE cr ON cr.code = pd.code_reponse
 WHERE cr.description ILIKE '%rio%incorrect%'
   OR cr.description ILIKE '%rio%invalide%'
 ORDER BY pd.date DESC;`,
@@ -286,10 +286,10 @@ ORDER BY pd.date DESC;`,
         color: 'warning',
         sql: `SELECT f.id, f.nom AS nom_fichier, f.type, f.date_creation,
   o_exp.nom AS expediteur, o_dest.nom AS destinataire
-FROM porta_fichier f
-LEFT JOIN porta_ack a ON a.file_name = f.nom
-JOIN porta_operateur o_exp ON o_exp.code = f.expediteur
-JOIN porta_operateur o_dest ON o_dest.code = f.destinataire
+FROM FICHIER f
+LEFT JOIN ACK a ON a.file_name = f.nom
+JOIN OPERATEUR o_exp ON o_exp.code = f.expediteur
+JOIN OPERATEUR o_dest ON o_dest.code = f.destinataire
 WHERE a.id IS NULL
   AND f.date_creation >= CURRENT_DATE - INTERVAL '3 days'
 ORDER BY f.date_creation DESC;`,
@@ -301,9 +301,9 @@ ORDER BY f.date_creation DESC;`,
         color: 'warning',
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, p.portage_date_souhaitee,
   ff.ferryday AS jour_ferie, e.etat_name AS etat
-FROM porta_portage p
-JOIN porta_ferryday ff ON CAST(p.portage_date_souhaitee AS DATE) = ff.ferryday
-JOIN porta_etat e ON e.id = p.portage_etat
+FROM PORTAGE p
+JOIN FERRYDAY ff ON CAST(p.portage_date_souhaitee AS DATE) = ff.ferryday
+JOIN ETAT e ON e.id = p.portage_etat
 WHERE p.portage_date_souhaitee >= CURRENT_DATE
 ORDER BY p.portage_date_souhaitee ASC;`,
       },
@@ -314,9 +314,9 @@ ORDER BY p.portage_date_souhaitee ASC;`,
         color: 'error',
         sql: `SELECT s.msisdn, o.nom AS operateur, s.sync_status,
   ss.statut_name, s.date, s.date_portage
-FROM porta_sync s
-JOIN porta_operateur o ON o.code = s.operateur_id
-LEFT JOIN porta_sync_status ss ON ss.id = s.sync_status
+FROM SYNC s
+JOIN OPERATEUR o ON o.code = s.operateur_id
+LEFT JOIN SYNC_STATUS ss ON ss.id = s.sync_status
 WHERE s.date >= CURRENT_DATE - INTERVAL '7 days'
   AND s.sync_status IS NOT NULL
   AND s.sync_status != 0
@@ -328,8 +328,8 @@ ORDER BY s.date DESC;`,
         icon: 'solar:copy-bold-duotone',
         color: 'error',
         sql: `SELECT p.portage_msisdn AS msisdn, COUNT(*) AS nb_portages_actifs
-FROM porta_portage p
-JOIN porta_etat e ON e.id = p.portage_etat
+FROM PORTAGE p
+JOIN ETAT e ON e.id = p.portage_etat
 WHERE e.etat_name NOT IN ('Termine', 'Annule', 'Refuse')
 GROUP BY p.portage_msisdn
 HAVING COUNT(*) > 1
@@ -342,9 +342,9 @@ ORDER BY nb_portages_actifs DESC;`,
         color: 'secondary',
         sql: `SELECT p.id, p.portage_msisdn AS msisdn, e.etat_name AS etat,
   p.portage_date_creation
-FROM porta_portage p
-JOIN porta_etat e ON e.id = p.portage_etat
-LEFT JOIN porta_portage_historique ph ON ph.id_portage = p.id
+FROM PORTAGE p
+JOIN ETAT e ON e.id = p.portage_etat
+LEFT JOIN PORTAGE_HISTORIQUE ph ON ph.id_portage = p.id
 WHERE e.etat_name = 'Termine'
   AND ph.id IS NULL
 ORDER BY p.portage_date_creation DESC;`,
@@ -365,10 +365,10 @@ ORDER BY p.portage_date_creation DESC;`,
   SUM(CASE WHEN e.etat_name = 'Termine' THEN 1 ELSE 0 END) AS termines,
   SUM(CASE WHEN e.etat_name = 'Refuse' THEN 1 ELSE 0 END) AS refuses,
   SUM(CASE WHEN e.etat_name = 'Annule' THEN 1 ELSE 0 END) AS annules
-FROM porta_dossier d
-JOIN porta_portage p ON p.dossier_id = d.id
-JOIN porta_etat e ON e.id = p.portage_etat
-JOIN porta_operateur o ON o.code = d.operateur_id_donneur
+FROM DOSSIER d
+JOIN PORTAGE p ON p.dossier_id = d.id
+JOIN ETAT e ON e.id = p.portage_etat
+JOIN OPERATEUR o ON o.code = d.operateur_id_donneur
 WHERE d.portage_date_creation BETWEEN '2026-03-01' AND '2026-03-31'
 GROUP BY o.nom
 ORDER BY nb_portages DESC;`,
@@ -380,8 +380,8 @@ ORDER BY nb_portages DESC;`,
         color: 'info',
         sql: `SELECT CAST(pd.date AS DATE) AS jour, pd.code_ticket,
   ct.description AS ticket_desc, COUNT(*) AS nb_tickets
-FROM porta_portage_data pd
-JOIN porta_code_ticket ct ON ct.code = pd.code_ticket
+FROM DATA pd
+JOIN CODE_TICKET ct ON ct.code = pd.code_ticket
 WHERE pd.date >= CURRENT_DATE - INTERVAL '7 days'
 GROUP BY CAST(pd.date AS DATE), pd.code_ticket, ct.description
 ORDER BY jour DESC, pd.code_ticket;`,
@@ -393,7 +393,7 @@ ORDER BY jour DESC, pd.code_ticket;`,
         color: 'warning',
         sql: `SELECT CAST(f.date_creation AS DATE) AS jour, f.type,
   COUNT(*) AS nb_fichiers, SUM(f.taille) AS taille_totale
-FROM porta_fichier f
+FROM FICHIER f
 WHERE f.date_creation >= CURRENT_DATE - INTERVAL '7 days'
 GROUP BY CAST(f.date_creation AS DATE), f.type
 ORDER BY jour DESC, f.type;`,
@@ -404,8 +404,8 @@ ORDER BY jour DESC, f.type;`,
         icon: 'solar:sort-from-top-to-bottom-bold-duotone',
         color: 'error',
         sql: `SELECT cr.code, cr.description AS motif, COUNT(*) AS nb_refus
-FROM porta_portage_data pd
-JOIN porta_code_reponse cr ON cr.code = pd.code_reponse
+FROM DATA pd
+JOIN CODE_REPONSE cr ON cr.code = pd.code_reponse
 WHERE pd.code_reponse IS NOT NULL
   AND pd.date >= CURRENT_DATE - INTERVAL '30 days'
 GROUP BY cr.code, cr.description
@@ -417,7 +417,7 @@ ORDER BY nb_refus DESC;`,
         icon: 'solar:calendar-bold-duotone',
         color: 'primary',
         sql: `SELECT ferryday, is_active
-FROM porta_ferryday
+FROM FERRYDAY
 WHERE ferryday >= CURRENT_DATE
   AND is_active = true
 ORDER BY ferryday ASC;`,
@@ -428,7 +428,7 @@ ORDER BY ferryday ASC;`,
         icon: 'solar:routing-bold-duotone',
         color: 'secondary',
         sql: `SELECT t.code, t.etat_initial, t.etat_final, t.description
-FROM porta_transition t
+FROM TRANSITION t
 ORDER BY t.code;`,
       },
     ],
