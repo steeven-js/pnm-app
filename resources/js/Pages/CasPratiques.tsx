@@ -615,9 +615,211 @@ const casRelancePortabilite: CasPratique = {
   ),
 };
 
+// ─── Cas #3 — AR non reçu : investigation logs serveur ──────────────────────
+
+const casArNonRecuInvestigation: CasPratique = {
+  id: 'ar-non-recu-investigation-logs',
+  title: 'AR non reçu — Investigation par analyse des logs serveur',
+  date: '10/03/2026',
+  tags: ['AR non reçu', 'Logs serveur', 'ACR E000', 'Archivage', 'SFR / Outremer'],
+  summary:
+    'Un fichier PNMDATA.02.03 signalé "non acquitté" par l\'email d\'incident. L\'investigation via les logs PnmDataManager et PnmAckManager révèle que l\'ACR E000 a bien été reçu (réception confirmée) mais le fichier était absent de send/ lors de l\'archivage. Pas d\'impact fonctionnel.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Ce cas documente une investigation menée le <strong>10/03/2026</strong> suite à un email d&apos;incident
+        signalant que le fichier <code>PNMDATA.02.03.20260309190056.003</code> envoyé par{' '}
+        <strong>Digicel (02)</strong> n&apos;a pas été acquitté par <strong>Outremer Telecom / SFR (03)</strong>.
+        L&apos;analyse des logs serveur sur <strong>vmqproportasync01</strong> permet de conclure à un faux positif.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Contexte —</strong> L&apos;email d&apos;incident contient deux alertes : (1) AR non reçu après 60 minutes
+        et (2) fichier non acquitté par l&apos;opérateur 03. Un ticket 0000/E011 a été émis automatiquement.
+        L&apos;investigation consiste à vérifier les logs pour confirmer ou infirmer le problème.
+      </Alert>
+
+      {/* ── Étape 1 : Email d'incident ── */}
+      <StepHeader number={1} icon="solar:letter-bold-duotone" title="Réception de l'email d'incident" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        L&apos;email automatique <code>[PNM][INCIDENT]</code> signale :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Détail</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>AR non reçu</strong></TableCell>
+              <TableCell>PNMDATA.02.03.20260309190056.003 envoyé depuis plus de 60 minutes par 02 (Digicel AFG)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Non acquitté</strong></TableCell>
+              <TableCell>Le fichier n&apos;a pas été acquitté par 03 (Outremer Telecom / SFR)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Ticket émis</strong></TableCell>
+              <TableCell><code>[0000, 02, 03, 20260309201502, E011, 000001, AR non-recu]</code></TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Étape 2 : Vérifier PnmDataManager ── */}
+      <StepHeader number={2} icon="solar:server-bold-duotone" title="Vérifier la génération dans PnmDataManager.log" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Se connecter à <strong>vmqproportasync01</strong> et rechercher le fichier dans les logs de génération :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> grep "PNMDATA.02.03.20260309190056.003" /home/porta_pnmv3/PortaSync/log/PnmDataManager.log`}
+      </CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>Résultat :</Typography>
+
+      <CodeBlock>
+        {`PnmDataManager.php|2026-03-09T19:01:58-04:00| ..........Generation du fichier PNMDATA.02.03.20260309190056.003 (<span style="color:#22c55e;font-weight:bold">#tickets: 70</span>)`}
+      </CodeBlock>
+
+      <Alert severity="success" sx={{ mb: 2 }}>
+        <strong>Constat —</strong> Le fichier a bien été généré le 09/03/2026 à 19:01:58 avec 70 tickets.
+      </Alert>
+
+      {/* ── Étape 3 : Vérifier send/ ── */}
+      <StepHeader number={3} icon="solar:folder-check-bold-duotone" title="Vérifier la présence dans send/" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Vérifier si le fichier est encore dans le répertoire d&apos;envoi :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/send/PNMDATA.02.03.20260309190056.003*`}
+      </CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>Résultat :</Typography>
+
+      <CodeBlock>
+        {`ls: cannot access '/home/porta_pnmv3/PortaSync/pnmdata/03/send/PNMDATA.02.03.20260309190056.003*': <span style="color:#ef4444;font-weight:bold">No such file or directory</span>`}
+      </CodeBlock>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Observation —</strong> Le fichier n&apos;est plus dans <code>send/</code>. Il a été récupéré par
+        l&apos;opérateur 03 ou déplacé. Il faut vérifier les logs d&apos;acquittement pour savoir si un ACR a été reçu.
+      </Alert>
+
+      {/* ── Étape 4 : Vérifier PnmAckManager ── */}
+      <StepHeader number={4} icon="solar:inbox-in-bold-duotone" title="Vérifier l'acquittement dans PnmAckManager.log" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Rechercher l&apos;ACR (accusé de réception) dans les logs d&apos;acquittement :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> grep "PNMDATA.02.03.20260309190056.003" /home/porta_pnmv3/PortaSync/log/PnmAckManager.log`}
+      </CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>Résultat :</Typography>
+
+      <CodeBlock>
+        {`PnmDataAckManager.php|2026-03-10T10:00:42-04:00| .........Accusé reçu PNMDATA.02.03.20260309190056.003.ACR => <span style="color:#22c55e;font-weight:bold">E000</span>:
+PnmDataAckManager.php|2026-03-10T10:00:42-04:00| .........Archivage du fichier PNMDATA.02.03.20260309190056.003 ...
+PnmDataAckManager.php|2026-03-10T10:00:42-04:00| <span style="color:#ef4444;font-weight:bold">NOT FOUND!</span> (pnmdata/03/send/PNMDATA.02.03.20260309190056.003)`}
+      </CodeBlock>
+
+      <Alert severity="success" sx={{ mb: 2 }}>
+        <strong>Découverte clé —</strong> L&apos;ACR a bien été reçu le 10/03 à 10:00:42 avec le code{' '}
+        <strong>E000</strong> (succès). L&apos;opérateur SFR/Outremer a confirmé la bonne réception du fichier.
+        Cependant, au moment de l&apos;archivage, le fichier n&apos;était plus dans <code>send/</code>.
+      </Alert>
+
+      {/* ── Étape 5 : Analyse et conclusion ── */}
+      <StepHeader number={5} icon="solar:stethoscope-bold-duotone" title="Analyse et conclusion" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Synthèse chronologique :
+      </Typography>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Heure</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Événement</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell>09/03 19:01:58</TableCell>
+              <TableCell>PnmDataManager</TableCell>
+              <TableCell sx={{ color: 'success.main' }}>Génération du fichier (70 tickets)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>09/03 ~20:01</TableCell>
+              <TableCell>PortaSync</TableCell>
+              <TableCell sx={{ color: 'warning.main' }}>Timeout AR 60 min → email d&apos;incident</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>10/03 10:00:42</TableCell>
+              <TableCell>PnmAckManager</TableCell>
+              <TableCell sx={{ color: 'success.main' }}>ACR E000 reçu (réception confirmée par SFR)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>10/03 10:00:42</TableCell>
+              <TableCell>PnmAckManager</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>NOT FOUND lors de l&apos;archivage</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Diagnostic —</strong> Le fichier a été généré, envoyé et <strong>reçu avec succès</strong> par SFR
+        (ACR E000). L&apos;email d&apos;incident était un <strong>faux positif</strong> : l&apos;AR est arrivé après le
+        délai de 60 minutes mais avant la prochaine vacation. Le &laquo; NOT FOUND &raquo; concerne uniquement
+        l&apos;archivage local — le fichier a probablement été nettoyé de <code>send/</code> entre-temps.
+      </Alert>
+
+      <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: '#f0fdf4', border: '1px solid', borderColor: '#86efac', mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ color: '#16a34a', mb: 0.5 }}>
+          Conclusion
+        </Typography>
+        <Typography variant="body2">
+          <strong>Pas d&apos;impact fonctionnel.</strong> L&apos;échange avec SFR/Outremer s&apos;est bien déroulé.
+          Impact mineur : le fichier n&apos;est pas archivé dans <code>arch_send/</code> (pas de trace locale).
+        </Typography>
+      </Box>
+
+      {/* ── Points de vigilance ── */}
+      <Divider sx={{ my: 3 }} />
+
+      <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Points de vigilance
+        </Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
+          <li>Un email d&apos;incident <strong>AR non reçu</strong> ne signifie pas toujours un vrai problème — toujours vérifier les logs d&apos;acquittement</li>
+          <li>Le code <strong>ACR E000</strong> confirme la bonne réception du fichier par l&apos;opérateur</li>
+          <li>Le &laquo; NOT FOUND &raquo; lors de l&apos;archivage est un problème mineur de nettoyage, pas un problème d&apos;échange</li>
+          <li>L&apos;ordre d&apos;investigation : <strong>PnmDataManager</strong> (génération) → <strong>ls send/</strong> (présence) → <strong>PnmAckManager</strong> (acquittement)</li>
+          <li>L&apos;analyseur d&apos;incidents de PNM App peut parser directement les sorties de ces commandes</li>
+          <li>Si l&apos;ACR reçu est différent de E000, investiguer plus en détail le code d&apos;erreur</li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Liste de tous les cas pratiques ────────────────────────────────────────
 
-const CAS_PRATIQUES: CasPratique[] = [casRelancePortabilite, casIncohCol3];
+const CAS_PRATIQUES: CasPratique[] = [casArNonRecuInvestigation, casRelancePortabilite, casIncohCol3];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────
 
@@ -632,6 +834,11 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
   'En attente': 'error',
   'Dauphin Télécom': 'default',
   Email: 'primary',
+  'AR non reçu': 'error',
+  'Logs serveur': 'secondary',
+  'ACR E000': 'success',
+  Archivage: 'warning',
+  'SFR / Outremer': 'default',
 };
 
 // ─── Page ───────────────────────────────────────────────────────────────────

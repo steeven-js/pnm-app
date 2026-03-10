@@ -18,9 +18,9 @@ import { Iconify } from 'src/components/iconify';
 
 import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
-import type { ParsedIncidentEmail, ParsedIncident, FilenameResult, IncidentTicket, ParsedDapiView, DapiTicketLine } from 'src/lib/pnm-utils';
+import type { ParsedIncidentEmail, ParsedIncident, FilenameResult, IncidentTicket, ParsedDapiView, DapiTicketLine, LogAnalysis, LogEntry } from 'src/lib/pnm-utils';
 
-import { parseIncidentEmail, decodeFilename, parseDapiView, TICKET_TYPE_MAP } from 'src/lib/pnm-utils';
+import { parseIncidentEmail, decodeFilename, parseDapiView, parseLogOutput, TICKET_TYPE_MAP } from 'src/lib/pnm-utils';
 
 import { lookupCode } from 'src/lib/pnm-code-dictionary';
 
@@ -57,13 +57,14 @@ export default function IncidentsPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<ParsedIncidentEmail | null>(null);
   const [dapiResult, setDapiResult] = useState<ParsedDapiView | null>(null);
+  const [logResult, setLogResult] = useState<LogAnalysis | null>(null);
   const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
-    const dapi = parseDapiView(input);
-    setDapiResult(dapi);
+    setDapiResult(parseDapiView(input));
+    setLogResult(parseLogOutput(input));
     setResult(parseIncidentEmail(input));
   };
 
@@ -75,6 +76,7 @@ export default function IncidentsPage() {
       const text = ev.target?.result as string;
       setInput(text);
       setDapiResult(parseDapiView(text));
+      setLogResult(parseLogOutput(text));
       setResult(parseIncidentEmail(text));
     };
     reader.readAsText(file);
@@ -170,7 +172,7 @@ export default function IncidentsPage() {
                 <Button
                   variant="outlined"
                   color="warning"
-                  onClick={() => { setInput(''); setResult(null); setDapiResult(null); }}
+                  onClick={() => { setInput(''); setResult(null); setDapiResult(null); setLogResult(null); }}
                   startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={18} />}
                 >
                   Effacer
@@ -181,7 +183,7 @@ export default function IncidentsPage() {
 
           {/* Results area */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            {!result && !dapiResult ? (
+            {!result && !dapiResult && !logResult ? (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Iconify icon="solar:letter-linear" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
                 <Typography color="text.secondary">
@@ -192,6 +194,9 @@ export default function IncidentsPage() {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {/* DAPI Analysis */}
                 {dapiResult && <DapiAnalysisCard dapi={dapiResult} />}
+
+                {/* Log Analysis */}
+                {logResult && <LogAnalysisCard log={logResult} />}
 
                 {/* Email Incident Summary */}
                 {result && result.totalCount > 0 && <Card variant="outlined">
@@ -273,6 +278,172 @@ export default function IncidentsPage() {
         </Box>
       </Box>
     </DashboardLayout>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+
+const LOG_IMPACT_CONFIG: Record<string, { color: string; icon: string; label: string }> = {
+  none: { color: '#10b981', icon: 'solar:check-circle-bold', label: 'Aucun impact' },
+  minor: { color: '#f59e0b', icon: 'solar:info-circle-bold', label: 'Impact mineur' },
+  major: { color: '#ef4444', icon: 'solar:danger-triangle-bold', label: 'Impact majeur' },
+  critical: { color: '#dc2626', icon: 'solar:shield-warning-bold', label: 'Impact critique' },
+};
+
+const LOG_ENTRY_CONFIG: Record<string, { color: string; icon: string; label: string }> = {
+  generation: { color: '#10b981', icon: 'solar:file-bold', label: 'Génération' },
+  acr_received: { color: '#3b82f6', icon: 'solar:inbox-in-bold', label: 'ACR reçu' },
+  archival: { color: '#8b5cf6', icon: 'solar:archive-bold', label: 'Archivage' },
+  not_found: { color: '#ef4444', icon: 'solar:close-circle-bold', label: 'NOT FOUND' },
+  ls_not_found: { color: '#ef4444', icon: 'solar:folder-error-bold', label: 'Fichier absent' },
+  ls_found: { color: '#10b981', icon: 'solar:folder-check-bold', label: 'Fichier trouvé' },
+  other: { color: '#6b7280', icon: 'solar:document-bold', label: 'Autre' },
+};
+
+function LogAnalysisCard({ log }: { log: LogAnalysis }) {
+  const impactCfg = LOG_IMPACT_CONFIG[log.diagnosis.impactLevel] ?? LOG_IMPACT_CONFIG.minor;
+
+  return (
+    <Card variant="outlined" sx={{ borderLeft: 4, borderColor: impactCfg.color }}>
+      <CardContent>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Iconify icon="solar:server-bold" width={20} sx={{ color: 'primary.main' }} />
+          <Typography variant="subtitle1" fontWeight={700}>
+            Analyse des logs serveur
+          </Typography>
+          <Chip
+            label={impactCfg.label}
+            size="small"
+            sx={{ color: impactCfg.color, bgcolor: `${impactCfg.color}15` }}
+            icon={<Iconify icon={impactCfg.icon} width={14} sx={{ color: `${impactCfg.color} !important` }} />}
+          />
+        </Box>
+
+        {/* File info */}
+        {log.filename && (
+          <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral', mb: 2 }}>
+            <Typography variant="caption" color="text.secondary">Fichier analysé</Typography>
+            <Typography variant="body2" fontWeight={700} sx={{ fontFamily: 'monospace' }}>{log.filename}</Typography>
+            {log.filenameParsed?.valid && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                <Chip label={log.filenameParsed.sourceOperatorName} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.65rem' }} />
+                <Iconify icon="solar:arrow-right-linear" width={14} sx={{ alignSelf: 'center', color: 'text.disabled' }} />
+                <Chip label={log.filenameParsed.destOperatorName} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.65rem' }} />
+                {log.ticketCount && <Chip label={`${log.ticketCount} tickets`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.65rem' }} />}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Timeline */}
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+            <Iconify icon="solar:timeline-up-bold" width={16} sx={{ color: 'info.main' }} />
+            <Typography variant="subtitle2" color="info.main">
+              Chronologie ({log.entries.length} entrées)
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {log.timeline.map((entry, i) => {
+              const cfg = LOG_ENTRY_CONFIG[entry.type] ?? LOG_ENTRY_CONFIG.other;
+              return (
+                <Box key={i} sx={{ display: 'flex', gap: 1.5 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.5 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: cfg.color, flexShrink: 0 }} />
+                    {i < log.timeline.length - 1 && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', mt: 0.5 }} />}
+                  </Box>
+                  <Box sx={{ flex: 1, p: 1, borderRadius: 1, bgcolor: entry.type === 'not_found' || entry.type === 'ls_not_found' ? '#fef2f2' : 'background.neutral', mb: 0.25 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25, flexWrap: 'wrap' }}>
+                      <Iconify icon={cfg.icon} width={14} sx={{ color: cfg.color }} />
+                      <Chip label={cfg.label} size="small" sx={{ fontSize: '0.65rem', height: 20, color: cfg.color, bgcolor: `${cfg.color}15` }} />
+                      {entry.timestamp && (
+                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                          {entry.timestamp}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Typography variant="caption" display="block" sx={{ fontWeight: 600 }}>
+                      {entry.detail}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+
+        {/* Diagnosis */}
+        <Divider sx={{ mb: 1.5 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
+          <Iconify icon="solar:stethoscope-bold" width={16} sx={{ color: impactCfg.color }} />
+          <Typography variant="subtitle2" sx={{ color: impactCfg.color }}>
+            Diagnostic
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: 1.25, borderRadius: 1, bgcolor: log.diagnosis.impactLevel === 'minor' || log.diagnosis.impactLevel === 'none' ? '#f0fdf4' : '#fef2f2', mb: 1.5 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
+            {log.diagnosis.summary}
+          </Typography>
+          <Typography variant="caption" display="block" color="text.secondary">
+            {log.diagnosis.impact}
+          </Typography>
+        </Box>
+
+        {/* Status indicators */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
+          <Chip
+            icon={<Iconify icon={log.wasGenerated ? 'solar:check-circle-bold' : 'solar:close-circle-bold'} width={14} />}
+            label={log.wasGenerated ? 'Généré' : 'Non généré'}
+            size="small"
+            color={log.wasGenerated ? 'success' : 'error'}
+            variant="outlined"
+            sx={{ height: 24 }}
+          />
+          <Chip
+            icon={<Iconify icon={log.acrReceived ? 'solar:check-circle-bold' : 'solar:close-circle-bold'} width={14} />}
+            label={log.acrReceived ? `ACR ${log.acrCode}` : 'Pas d\'ACR'}
+            size="small"
+            color={log.acrReceived && log.acrCode === 'E000' ? 'success' : log.acrReceived ? 'warning' : 'error'}
+            variant="outlined"
+            sx={{ height: 24 }}
+          />
+          <Chip
+            icon={<Iconify icon={log.archivalFailed ? 'solar:danger-triangle-bold' : 'solar:check-circle-bold'} width={14} />}
+            label={log.archivalFailed ? 'Archivage échoué' : 'Archivé'}
+            size="small"
+            color={log.archivalFailed ? 'warning' : 'success'}
+            variant="outlined"
+            sx={{ height: 24 }}
+          />
+        </Box>
+
+        {/* Actions */}
+        {log.diagnosis.actions.length > 0 && (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+              <Iconify icon="solar:lightbulb-bolt-bold" width={16} sx={{ color: '#f59e0b' }} />
+              <Typography variant="subtitle2" sx={{ color: '#f59e0b' }}>
+                Actions recommandées
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {log.diagnosis.actions.map((action, i) => (
+                <Box key={i} sx={{ p: 1, borderRadius: 0.75, bgcolor: 'background.neutral', display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                  <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: 'primary.main', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, flexShrink: 0, mt: 0.1 }}>
+                    {i + 1}
+                  </Box>
+                  <Typography variant="caption">{action}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

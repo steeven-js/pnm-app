@@ -1977,6 +1977,186 @@ function diagnoseDapi(portage: DapiPortageInfo, tickets: DapiTicketLine[]): Dapi
     };
 }
 
+// ─── V8 — Analyseur de logs serveur (commandes + résultats) ─────────────────
+
+export type LogEntry = {
+    source: 'PnmDataManager' | 'PnmAckManager' | 'PnmDataAckManager' | 'ls' | 'grep' | 'unknown';
+    timestamp: string;
+    type: 'generation' | 'acr_received' | 'archival' | 'not_found' | 'ls_not_found' | 'ls_found' | 'other';
+    filename: string;
+    detail: string;
+    raw: string;
+};
+
+export type LogAnalysis = {
+    entries: LogEntry[];
+    filename: string;
+    filenameParsed: FilenameResult | null;
+    timeline: LogEntry[];
+    wasGenerated: boolean;
+    generationDate: string;
+    ticketCount: string;
+    acrReceived: boolean;
+    acrCode: string;
+    acrDate: string;
+    fileInSend: boolean;
+    fileArchived: boolean;
+    archivalFailed: boolean;
+    diagnosis: {
+        summary: string;
+        impact: string;
+        impactLevel: 'none' | 'minor' | 'major' | 'critical';
+        actions: string[];
+    };
+};
+
+function parseLogLine(line: string): LogEntry | null {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('porta_pnmv3@') || trimmed.startsWith('-bash:') || trimmed.startsWith('$')) return null;
+
+    // PnmDataManager — Generation
+    const genMatch = trimmed.match(/PnmDataManager\.php\|([^|]+)\|\s*\.+Generation du fichier\s+(PNMDATA\.[^\s]+)\s+\(#tickets:\s*(\d+)\)/);
+    if (genMatch) {
+        return {
+            source: 'PnmDataManager', timestamp: genMatch[1], type: 'generation',
+            filename: genMatch[2], detail: `Généré avec ${genMatch[3]} tickets`, raw: trimmed,
+        };
+    }
+
+    // PnmDataAckManager / PnmAckManager — ACR received
+    const acrMatch = trimmed.match(/Pnm(?:Data)?AckManager\.php\|([^|]+)\|\s*\.+Accus[eé] re[cç]u\s+(PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3})\.ACR\s*=>\s*(\w+)/);
+    if (acrMatch) {
+        return {
+            source: 'PnmAckManager', timestamp: acrMatch[1], type: 'acr_received',
+            filename: acrMatch[2], detail: `ACR reçu => ${acrMatch[3]}`, raw: trimmed,
+        };
+    }
+
+    // PnmDataAckManager / PnmAckManager — Archivage
+    const archMatch = trimmed.match(/Pnm(?:Data)?AckManager\.php\|([^|]+)\|\s*\.+Archivage du fichier\s+(PNMDATA\.[^\s]+)/);
+    if (archMatch) {
+        return {
+            source: 'PnmAckManager', timestamp: archMatch[1], type: 'archival',
+            filename: archMatch[2], detail: 'Archivage du fichier', raw: trimmed,
+        };
+    }
+
+    // PnmDataAckManager / PnmAckManager — NOT FOUND
+    const notFoundMatch = trimmed.match(/Pnm(?:Data)?AckManager\.php\|([^|]+)\|\s*NOT FOUND!\s*\(([^)]+)\)/);
+    if (notFoundMatch) {
+        const path = notFoundMatch[2];
+        const fnMatch = path.match(/(PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3})/);
+        return {
+            source: 'PnmAckManager', timestamp: notFoundMatch[1], type: 'not_found',
+            filename: fnMatch ? fnMatch[1] : '', detail: `NOT FOUND: ${path}`, raw: trimmed,
+        };
+    }
+
+    // ls — No such file or directory
+    const lsNotFoundMatch = trimmed.match(/ls:\s*cannot access\s+'?([^']+)'?\s*:\s*No such file or directory/);
+    if (lsNotFoundMatch) {
+        const path = lsNotFoundMatch[1];
+        const fnMatch = path.match(/(PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3})/);
+        return {
+            source: 'ls', timestamp: '', type: 'ls_not_found',
+            filename: fnMatch ? fnMatch[1] : '', detail: `Fichier absent : ${path}`, raw: trimmed,
+        };
+    }
+
+    return null;
+}
+
+export function parseLogOutput(text: string): LogAnalysis | null {
+    const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const lines = normalized.split('\n');
+    const entries: LogEntry[] = [];
+
+    for (const line of lines) {
+        const entry = parseLogLine(line);
+        if (entry) entries.push(entry);
+    }
+
+    if (entries.length === 0) return null;
+
+    // Identify the main filename
+    const filenames = entries.map((e) => e.filename).filter(Boolean);
+    const filename = filenames[0] ?? '';
+    const filenameParsed = filename ? decodeFilename(filename) : null;
+
+    // Build analysis
+    const genEntry = entries.find((e) => e.type === 'generation');
+    const acrEntry = entries.find((e) => e.type === 'acr_received');
+    const archEntry = entries.find((e) => e.type === 'archival');
+    const notFoundEntries = entries.filter((e) => e.type === 'not_found' || e.type === 'ls_not_found');
+
+    const wasGenerated = !!genEntry;
+    const acrReceived = !!acrEntry;
+    const acrCode = acrEntry ? (acrEntry.detail.match(/=>\s*(\w+)/)?.[1] ?? '') : '';
+    const fileArchived = !!archEntry;
+    const archivalFailed = notFoundEntries.length > 0;
+    const fileInSend = !entries.some((e) => e.type === 'ls_not_found');
+    const ticketCount = genEntry ? (genEntry.detail.match(/(\d+)/)?.[1] ?? '') : '';
+
+    const timeline = entries;
+
+    // Diagnosis
+    let summary = '';
+    let impact = '';
+    let impactLevel: 'none' | 'minor' | 'major' | 'critical' = 'none';
+    const actions: string[] = [];
+
+    if (wasGenerated && acrReceived && acrCode === 'E000' && archivalFailed) {
+        summary = `Le fichier ${filename} a été généré (${ticketCount} tickets), envoyé avec succès et l'ACR E000 confirme la bonne réception par l'opérateur destinataire. Cependant, le fichier est absent de send/ au moment de l'archivage.`;
+        impact = "Pas d'impact fonctionnel — l'échange s'est bien déroulé. Impact mineur : le fichier n'est pas archivé dans arch_send/, pas de trace locale.";
+        impactLevel = 'minor';
+        actions.push(
+            `Vérifier si le fichier est dans arch_send/ (peut-être archivé par un autre processus)`,
+            `Si absent partout : problème de nettoyage prématuré du dossier send/ — vérifier les crontabs de purge`,
+            `Aucune action urgente requise — l'échange avec l'opérateur s'est bien passé (ACR E000)`,
+        );
+    } else if (wasGenerated && acrReceived && acrCode !== 'E000') {
+        summary = `Le fichier ${filename} a été généré et envoyé, mais l'ACR reçu indique une erreur : ${acrCode}.`;
+        impact = "L'opérateur destinataire a signalé un problème avec le fichier.";
+        impactLevel = 'major';
+        actions.push(
+            `Analyser le code ACR ${acrCode} pour identifier le problème`,
+            `Vérifier le contenu du fichier via le Décodeur PNMDATA`,
+            `Contacter l'opérateur destinataire si nécessaire`,
+        );
+    } else if (wasGenerated && !acrReceived && archivalFailed) {
+        summary = `Le fichier ${filename} a été généré mais aucun ACR n'a été reçu et le fichier est absent de send/.`;
+        impact = "Le fichier a peut-être été perdu avant d'être récupéré par l'opérateur.";
+        impactLevel = 'critical';
+        actions.push(
+            `Vérifier send/ et arch_send/ pour confirmer l'absence`,
+            `Vérifier les logs SFTP pour confirmer si le fichier a été récupéré`,
+            `Si non récupéré : régénérer le fichier ou contacter l'opérateur`,
+        );
+    } else if (wasGenerated && !acrReceived) {
+        summary = `Le fichier ${filename} a été généré (${ticketCount} tickets) mais aucun ACR n'a encore été reçu.`;
+        impact = "AR non reçu — l'opérateur destinataire n'a pas encore confirmé la réception.";
+        impactLevel = 'major';
+        actions.push(
+            `Vérifier si le fichier est bien dans send/ en attente de récupération`,
+            `Revérifier après la prochaine vacation`,
+            `Si toujours pas d'ACR après 2 vacations : contacter l'opérateur destinataire`,
+        );
+    } else if (!wasGenerated && entries.length > 0) {
+        summary = `Analyse partielle — le fichier ${filename || '(non identifié)'} n'a pas de trace de génération dans les logs fournis.`;
+        impact = 'Informations insuffisantes pour un diagnostic complet.';
+        impactLevel = 'minor';
+        actions.push(`Fournir les logs complets de PnmDataManager et PnmAckManager pour ce fichier`);
+    }
+
+    return {
+        entries, filename, filenameParsed, timeline,
+        wasGenerated, generationDate: genEntry?.timestamp ?? '',
+        ticketCount, acrReceived, acrCode, acrDate: acrEntry?.timestamp ?? '',
+        fileInSend, fileArchived, archivalFailed,
+        diagnosis: { summary, impact, impactLevel, actions },
+    };
+}
+
 export function parseDapiView(text: string): ParsedDapiView | null {
     // Normalize
     const normalized = text

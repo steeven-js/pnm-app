@@ -553,6 +553,206 @@ function CasRelancePortabilitePdf() {
   );
 }
 
+// ─── Cas #3 — AR non reçu : investigation logs serveur ──────────────────────
+
+function CasArNonRecuLogsPdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      {/* PAGE 1 — Incident & Investigation */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — AR non reçu : Investigation logs</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['AR non reçu', 'Logs serveur', 'ACR E000', 'Archivage', 'SFR / Outremer'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Investigation du <Text style={s.bold}>10/03/2026</Text> suite à un email d{"'"}incident signalant que le fichier <Text style={s.bold}>PNMDATA.02.03.20260309190056.003</Text> envoyé par Digicel (02) n{"'"}a pas été acquitté par Outremer Telecom / SFR (03).
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Contexte</Text>
+          <Text style={s.alertText}>
+            L{"'"}email d{"'"}incident contient deux alertes : (1) AR non reçu après 60 minutes et (2) fichier non acquitté par l{"'"}opérateur 03. Un ticket 0000/E011 a été émis automatiquement.
+          </Text>
+        </View>
+
+        {/* Étape 1 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Email d{"'"}incident reçu</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Type</Text>
+            <Text style={[s.tableHeaderCell, { width: '70%' }]}>Détail</Text>
+          </View>
+          {[
+            ['AR non reçu', 'PNMDATA.02.03.20260309190056.003 envoyé depuis plus de 60 min'],
+            ['Non acquitté', 'Fichier non acquitté par 03 (Outremer Telecom / SFR)'],
+            ['Ticket émis', '[0000, 02, 03, 20260309201502, E011, 000001]'],
+          ].map(([type, detail]) => (
+            <View key={type} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{type}</Text>
+              <Text style={[s.tableCellLight, { width: '70%', fontSize: 7.5 }]}>{detail}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Étape 2 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Vérifier la génération (PnmDataManager.log)</Text>
+        </View>
+
+        <Text style={s.body}>Commande :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" .../PnmDataManager.log</Text>
+        </View>
+        <Text style={s.body}>Résultat :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>
+            PnmDataManager.php|2026-03-09T19:01:58-04:00|{'\n'}  ........Generation du fichier PNMDATA.02.03.20260309190056.003{'\n'}  (<Text style={s.codeGreen}>#tickets: 70</Text>)
+          </Text>
+        </View>
+
+        <View style={s.alertSuccess}>
+          <Text style={s.alertTitle}>Constat</Text>
+          <Text style={s.alertText}>Fichier généré le 09/03/2026 à 19:01:58 avec 70 tickets.</Text>
+        </View>
+
+        {/* Étape 3 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Vérifier la présence dans send/</Text>
+        </View>
+
+        <Text style={s.body}>Commande :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ ls -la .../pnmdata/03/send/PNMDATA.02.03.20260309190056.003*</Text>
+        </View>
+        <Text style={s.body}>Résultat :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>ls: cannot access {"'"}...{"'"}: <Text style={s.codeHighlight}>No such file or directory</Text></Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Observation</Text>
+          <Text style={s.alertText}>
+            Le fichier n{"'"}est plus dans send/. Il faut vérifier les logs d{"'"}acquittement.
+          </Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : AR non reçu — Investigation logs</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 2 — Acquittement & Conclusion */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Acquittement & Conclusion</Text>
+            <Text style={s.headerSub}>Suite de l{"'"}investigation</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        {/* Étape 4 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Vérifier l{"'"}acquittement (PnmAckManager.log)</Text>
+        </View>
+
+        <Text style={s.body}>Commande :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" .../PnmAckManager.log</Text>
+        </View>
+        <Text style={s.body}>Résultat :</Text>
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>
+            ...2026-03-10T10:00:42| Accusé reçu ...003.ACR ={">"} <Text style={s.codeGreen}>E000</Text>:{'\n'}
+            ...2026-03-10T10:00:42| Archivage du fichier ...003 ...{'\n'}
+            ...2026-03-10T10:00:42| <Text style={s.codeHighlight}>NOT FOUND!</Text> (pnmdata/03/send/...003)
+          </Text>
+        </View>
+
+        <View style={s.alertSuccess}>
+          <Text style={s.alertTitle}>Découverte clé</Text>
+          <Text style={s.alertText}>
+            L{"'"}ACR E000 confirme la bonne réception par SFR/Outremer. Le NOT FOUND concerne uniquement l{"'"}archivage local.
+          </Text>
+        </View>
+
+        {/* Étape 5 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Synthèse chronologique</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Heure</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Source</Text>
+            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Événement</Text>
+          </View>
+          {[
+            ['09/03 19:01:58', 'DataManager', 'Génération du fichier (70 tickets)', c.green],
+            ['09/03 ~20:01', 'PortaSync', 'Timeout AR 60 min → email incident', c.orange],
+            ['10/03 10:00:42', 'AckManager', 'ACR E000 reçu (réception confirmée)', c.green],
+            ['10/03 10:00:42', 'AckManager', 'NOT FOUND lors de l\'archivage', c.red],
+          ].map(([heure, source, event, color]) => (
+            <View key={heure + event} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '25%', fontFamily: 'Courier', fontSize: 7.5 }]}>{heure}</Text>
+              <Text style={[s.tableCellLight, { width: '25%' }]}>{source}</Text>
+              <Text style={[s.tableCell, { width: '50%', color: color as string }]}>{event}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Conclusion */}
+        <View style={{ backgroundColor: '#E8F5E9', borderLeftWidth: 3, borderLeftColor: c.green, padding: 10, marginVertical: 10, borderRadius: 3 }}>
+          <Text style={[s.alertTitle, { color: c.green }]}>Conclusion</Text>
+          <Text style={[s.alertText, { fontWeight: 'bold' }]}>
+            Pas d{"'"}impact fonctionnel. L{"'"}échange avec SFR/Outremer s{"'"}est bien déroulé (ACR E000). L{"'"}email d{"'"}incident était un faux positif — l{"'"}AR est arrivé après le délai de 60 min mais avant la prochaine vacation.
+          </Text>
+          <Text style={[s.alertText, { marginTop: 3 }]}>
+            Impact mineur : le fichier n{"'"}est pas archivé dans arch_send/ (pas de trace locale).
+          </Text>
+        </View>
+
+        {/* Points de vigilance */}
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>• Un email AR non reçu ne signifie pas toujours un vrai problème — vérifier les logs</Text>
+          <Text style={s.alertText}>• ACR E000 = bonne réception confirmée par l{"'"}opérateur</Text>
+          <Text style={s.alertText}>• NOT FOUND à l{"'"}archivage = problème mineur de nettoyage, pas d{"'"}échange</Text>
+          <Text style={s.alertText}>• Ordre d{"'"}investigation : PnmDataManager → ls send/ → PnmAckManager</Text>
+          <Text style={s.alertText}>• L{"'"}analyseur d{"'"}incidents PNM App parse directement les sorties de commandes</Text>
+          <Text style={s.alertText}>• Si ACR différent de E000, investiguer le code d{"'"}erreur en détail</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : AR non reçu — Investigation logs</Text>
+          <Text>Page 2 / 2</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -565,6 +765,10 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'relance-portabilite-retard': {
       document: <CasRelancePortabilitePdf />,
       filename: 'Cas-Pratique-Relance-Portabilite-Retard',
+    },
+    'ar-non-recu-investigation-logs': {
+      document: <CasArNonRecuLogsPdf />,
+      filename: 'Cas-Pratique-AR-Non-Recu-Investigation-Logs',
     },
   };
 
