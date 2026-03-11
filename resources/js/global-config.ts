@@ -18,7 +18,7 @@ export type ConfigValue = {
 
 export const CONFIG: ConfigValue = {
   appName: import.meta.env.VITE_APP_NAME ?? 'PNM App',
-  appVersion: '2.2.0',
+  appVersion: '2.5.0',
   serverUrl: import.meta.env.VITE_SERVER_URL ?? '',
   assetsDir: import.meta.env.VITE_ASSETS_DIR ?? '',
   auth: {
