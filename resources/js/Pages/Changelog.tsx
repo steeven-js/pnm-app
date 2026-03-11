@@ -37,19 +37,66 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '2.3.0',
+    version: '2.5.0',
+    date: '11 Mars 2026',
+    changes: [
+      { type: 'new', description: 'PDF Architecture des Serveurs PNM (5 pages) : vue d\'ensemble, détail des 6 serveurs, arborescence vmqproportasync01, webservices SOAP, interactions, mRemoteNG, aide-mémoire SSH' },
+      { type: 'new', description: '5 nouveaux cas pratiques enrichis avec données de production : PortaWs inaccessible, HUB en panne, aucun fichier reçu, FNR non transmis, MSISDN provisoire erroné' },
+      { type: 'new', description: 'Analyseur de fichiers .ERR dans le décodeur PNMDATA : détection E011 (AR non reçu), conclusion automatique avec chemins SFTP' },
+      { type: 'new', description: 'Pages d\'investigation interactives pour incidents PNM et vacations' },
+      { type: 'new', description: 'Cas Pratique #7 : Fichier déjà reçu (E008) avec export PDF' },
+      { type: 'new', description: 'Boutons copier sur les commandes dans la section Vérifications quotidiennes du Guide des Opérations' },
+      { type: 'improvement', description: 'Commandes Bascule & Valorisation fusionnées en une seule avec &&' },
+      { type: 'improvement', description: 'CDC = Chargé De Clientèle (correction terminologie)' },
+      { type: 'improvement', description: 'Escalade PNM_SI + flashinfo au lieu de GPMAG/secretariat@gpmag.fr' },
+      { type: 'fix', description: 'Correction du calcul Mi-Carême : Pâques - 24 jours (au lieu de 25)' },
+      { type: 'fix', description: 'Chemin logs Tomcat corrigé : /opt/tomcat9/logs/catalina.out' },
+      { type: 'fix', description: 'Suppression de la commande cat .ERR non fiable dans le workflow vacation (remplacée par find)' },
+    ],
+  },
+  {
+    version: '2.4.0',
     date: '10 Mars 2026',
     changes: [
-      { type: 'new', description: 'Cas Pratique #7 : Fichier déjà reçu (E008) — diagnostic et suppression manuelle via FileZilla quand un opérateur renvoie un PNMDATA déjà archivé' },
       { type: 'new', description: 'Cas Pratique #4 : Refus R322 (résiliation effective) — investigation Free Caraïbes' },
       { type: 'new', description: 'Cas Pratique #5 : Annulation 1510/C001 — deux exemples Digicel→Orange et Free→Digicel' },
       { type: 'new', description: 'Cas Pratique #6 : Erreur E610 (flux non attendu) — investigation restitution Orange Caraïbe' },
+      { type: 'new', description: 'Analyseur DAPI PortaWs avec support E610 dans l\'analyseur d\'incidents' },
+      { type: 'new', description: 'Analyseur de logs serveur et Cas Pratique #3 (investigation AR non reçu)' },
       { type: 'improvement', description: 'Support annulations dans l\'analyseur d\'incidents avec compteur et étapes d\'investigation' },
       { type: 'fix', description: 'Suppression de l\'événement « Rapport activité automates » (timeline, PDF, config, parsers)' },
     ],
   },
   {
+    version: '2.3.0',
+    date: '9 Mars 2026',
+    changes: [
+      { type: 'fix', description: 'Noms de tables MySQL en majuscules pour correspondre au schéma de production PortaDB' },
+      { type: 'fix', description: 'Suppression des pages Validation RIO, Vérificateur MSISDN et SQL Playground de la section Vérifier' },
+      { type: 'fix', description: 'Suppression des Arbres de décision et Diagrammes de la section Résoudre' },
+      { type: 'fix', description: 'Section « Points importants » des PDF ne se coupe plus entre deux pages' },
+    ],
+  },
+  {
+    version: '2.2.1',
+    date: '6 Mars 2026',
+    changes: [
+      { type: 'new', description: 'Page 6 du PDF Guide des Opérations : Scripts PNM & logs associés avec catégories et commandes tail' },
+      { type: 'improvement', description: 'Fusion script + log en cartes unifiées dans le PDF' },
+    ],
+  },
+  {
     version: '2.2.0',
+    date: '5 Mars 2026',
+    changes: [
+      { type: 'new', description: 'Pages Scripts PNM, Requêtes SQL PNM et Cas Pratiques' },
+      { type: 'new', description: 'Bloc détail structuré après auto-remplissage des incidents avec explications pour débutants' },
+      { type: 'fix', description: 'Désactivation de l\'autocomplétion navigateur sur les zones de texte de collage de logs' },
+      { type: 'fix', description: 'Correction erreur TypeScript dans CasPratiquesPdf' },
+    ],
+  },
+  {
+    version: '2.1.1',
     date: '27 Février 2026',
     changes: [
       { type: 'new', description: 'Navigation par date sur le dashboard monitoring : boutons jour précédent/suivant, sélecteur de date et bouton « Aujourd\'hui » pour revenir au mode live' },
