@@ -345,7 +345,7 @@ function ArchitectureServersPdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Architecture des Serveurs</Text>
-          <Text>Page 1 / 5</Text>
+          <Text>Page 1 / 6</Text>
         </View>
       </Page>
 
@@ -368,7 +368,7 @@ function ArchitectureServersPdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Architecture des Serveurs</Text>
-          <Text>Page 2 / 5</Text>
+          <Text>Page 2 / 6</Text>
         </View>
       </Page>
 
@@ -432,7 +432,7 @@ function ArchitectureServersPdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Architecture des Serveurs</Text>
-          <Text>Page 3 / 5</Text>
+          <Text>Page 3 / 6</Text>
         </View>
       </Page>
 
@@ -498,7 +498,7 @@ function ArchitectureServersPdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Architecture des Serveurs</Text>
-          <Text>Page 4 / 5</Text>
+          <Text>Page 4 / 6</Text>
         </View>
       </Page>
 
@@ -530,27 +530,39 @@ function ArchitectureServersPdfDocument() {
         <Text style={s.sectionTitle}>Arborescence mRemoteNG — Section PORTA</Text>
         <Text style={s.sectionSub}>Structure des connexions dans mRemoteNG (outil de gestion des sessions SSH/RDP)</Text>
 
-        <View style={{ backgroundColor: '#1E293B', borderRadius: 4, padding: 10, marginBottom: 10 }}>
+        <View wrap={false} style={{ backgroundColor: '#1E293B', borderRadius: 4, padding: 10, marginBottom: 10 }}>
           {[
-            '📁 PORTA',
-            '  ├── 🖥 digimqema01           — OLD EMA (ancien serveur EMA)',
-            '  ├── 🖥 EMA15-Digicel         — EMA (routage FNR, 172.24.119.140)',
-            '  ├── 🖥 vmqproportasync01     — SYNC (synchronisation, 172.24.119.69)',
-            '  ├── 🖥 vmqproportawebdb01    — Base de données (MySQL, 172.24.119.68)',
-            '  ├── 🖥 vmqproportaweb01      — WebUi (portail CDC, 172.24.119.71)',
-            '  ├── 🖥 vmqportapresync01     — Intégration : synchro',
-            '  ├── 🖥 vmqportaprewebdb01    — Intégration : DB + portails',
-            '  ├── 🖥 vmqproportaws01       — Ws (admin + webservices, 172.24.119.72)',
-            '  └── 🖥 BTCTF                 — Hub transfert fichiers (172.24.119.70)',
+            'PORTA',
+            '  digimqema01           — OLD EMA (ancien serveur EMA)',
+            '  EMA15-Digicel         — EMA (routage FNR, 172.24.119.140)',
+            '  vmqproportasync01     — SYNC (synchronisation, 172.24.119.69)',
+            '  vmqproportawebdb01    — Base de données (MySQL, 172.24.119.68)',
+            '  vmqproportaweb01      — WebUi (portail CDC, 172.24.119.71)',
+            '  vmqportapresync01     — Intégration : synchro',
+            '  vmqportaprewebdb01    — Intégration : DB + portails',
+            '  vmqproportaws01       — Ws (admin + webservices, 172.24.119.72)',
+            '  BTCTF                 — Hub transfert fichiers (172.24.119.70)',
           ].map((line, i) => (
             <Text key={i} style={{ fontSize: 7.5, fontFamily: 'Courier', color: line.startsWith('  ') ? '#CBD5E1' : '#22D3EE', lineHeight: 1.6 }}>{line}</Text>
           ))}
         </View>
 
-        {/* Aide-mémoire connexions */}
+        <View style={s.footer}>
+          <Text>PNM App — Architecture des Serveurs</Text>
+          <Text>Page 5 / 6</Text>
+        </View>
+      </Page>
+
+      {/* ── PAGE 6 : Aide-mémoire SSH + Ressources ── */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <Text style={s.headerTitle}>Aide-mémoire & Ressources</Text>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
         <Text style={s.sectionTitle}>Aide-mémoire — Connexions SSH rapides</Text>
 
-        <View style={{ backgroundColor: '#1E293B', borderRadius: 4, padding: 10, marginBottom: 10 }}>
+        <View wrap={false} style={{ backgroundColor: '#1E293B', borderRadius: 4, padding: 10, marginBottom: 10 }}>
           {[
             '# Synchronisation (logs, fichiers, scripts vacation)',
             'ssh porta_pnmv3@172.24.119.69',
@@ -574,7 +586,7 @@ function ArchitectureServersPdfDocument() {
           ))}
         </View>
 
-        <View style={[s.infoBox, { backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
+        <View wrap={false} style={[s.infoBox, { backgroundColor: '#FFF3E0', borderLeftColor: c.orange }]}>
           <Text style={[s.infoText, { fontWeight: 'bold', marginBottom: 3 }]}>Ressources complémentaires</Text>
           <Text style={s.infoText}>• Partage réseau : \\mqfiles002.digicelgroup.local\Services\DRSI\DSI\APPLICATION\Domaines\Portabilité</Text>
           <Text style={s.infoText}>• SharePoint incidents : https://digicelja.sharepoint.com/.../Gestion des incidents/Portails DAPI indisponibles.aspx</Text>
@@ -583,7 +595,7 @@ function ArchitectureServersPdfDocument() {
 
         <View style={s.footer}>
           <Text>PNM App — Architecture des Serveurs</Text>
-          <Text>Page 5 / 5</Text>
+          <Text>Page 6 / 6</Text>
         </View>
       </Page>
     </Document>
