@@ -1382,6 +1382,581 @@ function CasFichierDejaRecuPdf() {
   );
 }
 
+// ─── Cas #8 — PortaWs Inaccessible PDF ──────────────────────────────────────
+
+function CasPortaWsInaccessiblePdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : PortaWs inaccessible</Text>
+            <Text style={s.headerSub}>Diagnostic et resolution — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['PortaWs', 'Portail', 'Incident', 'Tomcat', 'Infrastructure'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Le portail PortaWs (http://172.24.119.72:8080/PortaWs/) ne s{"'"}affiche plus. Aucune visibilite sur les portabilites en cours. Les CDC ne peuvent plus saisir ni suivre les demandes. Les portabilites deja en cours continuent en fond.</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Verifier l{"'"}accessibilite du portail</Text>
+        </View>
+
+        <Text style={s.body}>Tester dans le navigateur : <Text style={s.bold}>http://172.24.119.72:8080/PortaWs/</Text></Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>{"curl -s -o /dev/null -w \"%{http_code}\" http://172.24.119.72:8080/PortaWs/"}</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Verifier Tomcat sur vmqproportaws01</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>systemctl status tomcat</Text>
+          <Text style={s.codeText}># Si arrete :</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>systemctl restart tomcat</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Verifier les logs</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>tail -n 50 /opt/tomcat9/logs/catalina.out</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Diagnostic selon le constat</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Constat</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause probable</Text>
+            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Resolution</Text>
+          </View>
+          {[
+            ['Page blanche / timeout', 'Tomcat arrete', 'systemctl restart tomcat'],
+            ['Erreur 500', 'Erreur applicative', 'Verifier catalina.out'],
+            ['Erreur 404', 'Webapp non deployee', 'Verifier /opt/tomcat9/webapps/'],
+            ['Page lente', 'Charge serveur', 'Verifier CPU/RAM avec top'],
+          ].map(([constat, cause, resolution]) => (
+            <View key={constat} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{constat}</Text>
+              <Text style={[s.tableCell, { width: '30%', color: c.red }]}>{cause}</Text>
+              <Text style={[s.tableCellLight, { width: '40%' }]}>{resolution}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Escalade</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>SYSTEM</Text> si non resolu</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Communiquer a l{"'"}equipe <Text style={s.bold}>PNM_SI</Text> et creer un flashinfo</Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} PortaWs = portail de consultation, pas le moteur de portabilite</Text>
+          <Text style={s.alertText}>{"•"} Les portabilites continuent meme si PortaWs est down</Text>
+          <Text style={s.alertText}>{"•"} Apres restart Tomcat, attendre 1-2 min avant de retester</Text>
+          <Text style={s.alertText}>{"•"} Logs : /opt/tomcat9/logs/catalina.out</Text>
+          <Text style={s.alertText}>{"•"} Identifiants Secret Server : https://vmqpropass01</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : PortaWs inaccessible</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #9 — HUB Portabilites Echec PDF ─────────────────────────────────────
+
+function CasHubPortabilitesEchecPdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Portabilites HUB en echec</Text>
+            <Text style={s.headerSub}>Les portabilites depuis le HUB ne fonctionnent plus — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['HUB', 'PortaWs', 'SOAP', 'Incident', 'Infrastructure'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Les demandes de portabilite saisies par les CDC via le HUB retournent une erreur. Aucun mandat n{"'"}apparait sur PortaWebUI. Les portabilites deja en cours continuent normalement. Seules les nouvelles demandes sont bloquees.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Chaine de webservices</Text>
+          <Text style={s.alertText}>HUB {"→"} PortaUiWs4Esb (vmqproportaweb01 : http://172.24.119.71:8080/PortaWebUi/DigicelFwiPortaUiWs4Esb?wsdl)</Text>
+          <Text style={s.alertText}>{"→"} PortaWs4Esb (vmqproportaws01 : http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb?wsdl)</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Qualifier le probleme</Text>
+        </View>
+
+        <Text style={s.body}>Recueillir : message d{"'"}erreur exact, MSISDN, un seul CDC ou tous, depuis quand.</Text>
+        <Text style={s.body}>Un seul CDC = probleme de donnees. Tous les CDC = probleme d{"'"}infrastructure.</Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Diagnostic selon le message d{"'"}erreur</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Message</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause</Text>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Action</Text>
+          </View>
+          {[
+            ['Connection refused / Timeout', 'PortaWs est down', 'Verifier Tomcat'],
+            ['SOAP Fault / Erreur 500', 'Erreur applicative', 'Verifier les logs'],
+            ['401 Unauthorized', 'Credentials HUB expires', 'Verifier config HUB'],
+            ['Pas de trace dans PortaWebUI', 'Requete n\'arrive pas au WS', 'Verifier connectivite'],
+          ].map(([msg, cause, action]) => (
+            <View key={msg} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{msg}</Text>
+              <Text style={[s.tableCell, { width: '30%', color: c.red }]}>{cause}</Text>
+              <Text style={[s.tableCellLight, { width: '35%' }]}>{action}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Tester les webservices</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Tester PortaUiWs4Esb (premier appele par le HUB)</Text>
+          <Text style={s.codeText}>curl -s http://172.24.119.71:8080/PortaWebUi/DigicelFwiPortaUiWs4Esb?wsdl | head -5</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># Tester PortaWs4Esb</Text>
+          <Text style={s.codeText}>curl -s http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb?wsdl | head -5</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Si XML avec &lt;definitions&gt; = WS OK</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}># Si timeout = Tomcat down → systemctl restart tomcat</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># Verifier les logs</Text>
+          <Text style={s.codeText}>tail -n 50 /opt/tomcat9/logs/catalina.out</Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} Toujours demander le message d{"'"}erreur exact au CDC</Text>
+          <Text style={s.alertText}>{"•"} Un seul CDC concerne ≠ probleme d{"'"}infrastructure</Text>
+          <Text style={s.alertText}>{"•"} Les portabilites deja en cours ne sont PAS impactees</Text>
+          <Text style={s.alertText}>{"•"} Apres resolution, le CDC doit RE-SAISIR la portabilite</Text>
+          <Text style={s.alertText}>{"•"} Escalader a PNM_SI + flashinfo si indisponibilite dure</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Portabilites HUB en echec</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #10 — Aucun fichier recu operateurs PDF ────────────────────────────
+
+function CasAucunFichierRecuPdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Aucun fichier recu des operateurs</Text>
+            <Text style={s.headerSub}>vmqproportasync01 — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['SFTP', 'vmqproportasync01', 'Fichiers', 'Incident', 'Cron'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Aucun fichier PNMDATA n{"'"}a ete depose dans les repertoires recv/. Le rapport de vacation indique 0 fichiers recus. Les portabilites en cours ne peuvent pas avancer.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Architecture des echanges</Text>
+          <Text style={s.alertText}>BTCTF (172.24.119.70) = hub de transfert SFTP. vmqproportasync01 (172.24.119.69) recupere les fichiers depuis BTCTF.</Text>
+          <Text style={s.alertText}>Flux : Operateur {"→"} BTCTF (SFTP) {"→"} vmqproportasync01 (recv/ {"→"} arch_recv/)</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Diagnostic rapide — c{"'"}est nous ou eux ?</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>for op in 01 03 04 05 06; do</Text>
+          <Text style={s.codeText}>  echo "=== Operateur $op ==="</Text>
+          <Text style={s.codeText}>  ls -lt /home/porta_pnmv3/PortaSync/pnmdata/$op/arch_recv/ | head -n 3</Text>
+          <Text style={s.codeText}>done</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Constat</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Signification</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Action</Text>
+          </View>
+          {[
+            ['AUCUN operateur n\'a depose', 'Probleme cote notre serveur', 'Verifier serveur (etape 2)'],
+            ['UN SEUL operateur manquant', 'Probleme cote cet operateur', 'Contacter l\'operateur'],
+          ].map(([constat, sig, action]) => (
+            <View key={constat} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>{constat}</Text>
+              <Text style={[s.tableCell, { width: '30%' }]}>{sig}</Text>
+              <Text style={[s.tableCellLight, { width: '30%' }]}>{action}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Verifier vmqproportasync01</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>df -h                          <Text style={{ color: '#22c55e' }}># Espace disque (ref: / ~61%, /home ~67%)</Text></Text>
+          <Text style={s.codeText}>systemctl status sshd          <Text style={{ color: '#22c55e' }}># Service SFTP actif ?</Text></Text>
+          <Text style={s.codeText}>crontab -l | grep -i "porta"   <Text style={{ color: '#22c55e' }}># Crons OK ?</Text></Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Verifier BTCTF + fichiers .tmp</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>ping 172.24.119.70             <Text style={{ color: '#22c55e' }}># BTCTF accessible ?</Text></Text>
+          <Text style={s.codeText}>find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.tmp" -ls</Text>
+        </View>
+
+        <Text style={s.body}>Si fichier en .tmp {"→"} supprimer l{"'"}extension .tmp du fichier.</Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Relancer les vacations manquantes</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>cd ~/PortaSync/</Text>
+          <Text style={s.codeText}>./PnmDataManager_oc.sh -v     <Text style={{ color: '#22c55e' }}># Orange Caraibe (01)</Text></Text>
+          <Text style={s.codeText}>./PnmDataManager_sfrc.sh -v   <Text style={{ color: '#22c55e' }}># SFR Caraibe (03)</Text></Text>
+          <Text style={s.codeText}>./PnmDataManager_dt.sh -v     <Text style={{ color: '#22c55e' }}># Dauphin Telecom (04)</Text></Text>
+          <Text style={s.codeText}>./PnmDataManager_uts.sh -v    <Text style={{ color: '#22c55e' }}># UTS Caraibe (05)</Text></Text>
+          <Text style={s.codeText}>./PnmDataManager_freec.sh -v  <Text style={{ color: '#22c55e' }}># Free Caraibes (06)</Text></Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 8 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} Disque plein = cause n°1 de panne silencieuse sur les serveurs SFTP</Text>
+          <Text style={s.alertText}>{"•"} TOUS les operateurs = probleme chez nous / UN SEUL = probleme chez eux</Text>
+          <Text style={s.alertText}>{"•"} L{"'"}ancien PnmSyncManager.sh global est commente — ne pas le decommenter</Text>
+          <Text style={s.alertText}>{"•"} porta_pnmv3 n{"'"}a pas acces aux logs systeme — besoin de root</Text>
+          <Text style={s.alertText}>{"•"} Escalader PNM_SI + flashinfo si l{"'"}incident dure</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Aucun fichier recu des operateurs</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #11 — FNR non transmis EMA PDF ──────────────────────────────────────
+
+function CasFnrNonTransmisEmaPdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA</Text>
+            <Text style={s.headerSub}>Alerte batchhandler — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['FNR', 'EMA', 'Bascule', 'Alerte', 'batchhandler'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Le fichier FNR met a jour la base de routage des appels sur EMA. Sans lui, les appels vers les numeros portes sont mal routes (envoyes a l{"'"}ancien operateur). Incident critique a traiter en priorite.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Flux normal</Text>
+          <Text style={s.alertText}>Bascule (EmaExtracter, 09h) {"→"} Generation fichier FNR {"→"} Envoi a EMA via batchhandler {"→"} Controle automatique</Text>
+          <Text style={s.alertText}>Serveurs : vmqproportasync01 (172.24.119.69), EMA15-Digicel (172.24.119.140)</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Verifier la bascule sur vmqproportasync01</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>tail -n 30 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log</Text>
+          <Text style={s.codeText}># Si erreur :</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>./EmaExtracter.sh -v</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Verifier le traitement FNR sur EMA (a partir de 10h)</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>ssh batchuser@172.24.119.140</Text>
+          <Text style={s.codeText}>cd ~/LogFiles/</Text>
+          <Text style={s.codeText}>ls -lt *fnr_action_v3* | head -3</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Constat</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause</Text>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Resolution</Text>
+          </View>
+          {[
+            ['Log FNR n\'existe PAS', 'Script non execute', 'Executer manuellement (etape 3)'],
+            ['commands failed > 0', 'Commandes FNR echouees', 'Corriger MSISDN (etape 4)'],
+            ['Bascule OK mais pas de log', 'Echec transfert vers EMA', 'Verifier connectivite'],
+          ].map(([constat, cause, resolution]) => (
+            <View key={constat} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{constat}</Text>
+              <Text style={[s.tableCell, { width: '30%', color: c.red }]}>{cause}</Text>
+              <Text style={[s.tableCellLight, { width: '35%' }]}>{resolution}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Executer le FNR manuellement sur EMA</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Depuis EMA15-Digicel (172.24.119.140) avec batchuser :</Text>
+          <Text style={s.codeText}>(echo "LOGIN:batchuser:123batchuser;";sleep 5;</Text>
+          <Text style={s.codeText}> echo "SET:BATCHJOB:FILE,DEF,fnr_action_v3.bh;";</Text>
+          <Text style={s.codeText}> sleep 5; echo "LOGOUT;";sleep 5)| telnet 0 3333</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Commandes FNR unitaires</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '20%' }]}>Action</Text>
+            <Text style={[s.tableHeaderCell, { width: '45%' }]}>Commande</Text>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Usage</Text>
+          </View>
+          {[
+            ['GET', 'GET:NPSUB:MSISDN,590XXXXXXXXX;', 'Verifier un MSISDN'],
+            ['CREATE', 'CREATE:NPSUB:MSISDN,590XXXXXXXXX;', 'Ajouter au FNR'],
+            ['SET', 'SET:NPSUB:MSISDN,590XXXXXXXXX;', 'Modifier le reseau'],
+            ['DELETE', 'DELETE:NPSUB:MSISDN,590XXXXXXXXX;', 'Retirer du FNR'],
+          ].map(([action, cmd, usage]) => (
+            <View key={action} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '20%', fontWeight: 'bold' }]}>{action}</Text>
+              <Text style={[s.tableCell, { width: '45%', fontFamily: 'Courier', fontSize: 7 }]}>{cmd}</Text>
+              <Text style={[s.tableCellLight, { width: '35%' }]}>{usage}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 6 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} FNR CRITIQUE — appels mal routes sans mise a jour</Text>
+          <Text style={s.alertText}>{"•"} Verification a partir de 10h (apres bascule de 9h)</Text>
+          <Text style={s.alertText}>{"•"} EMA15-Digicel : 172.24.119.140, user batchuser</Text>
+          <Text style={s.alertText}>{"•"} MSISDN en format international (590...)</Text>
+          <Text style={s.alertText}>{"•"} Escalader PNM_SI + flashinfo si incident dure</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── Cas #12 — MSISDN provisoire erreur PDF ─────────────────────────────────
+
+function CasMsisdnProvisoireErreurPdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : MSISDN provisoire errone</Text>
+            <Text style={s.headerSub}>Correction apres saisie CDC — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['MSISDN provisoire', 'CDC', 'Saisie', 'Correction', 'Annulation'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Impact</Text>
+          <Text style={s.alertText}>Un CDC a saisi un mauvais MSISDN provisoire. Le client peut ne pas etre joignable sur son numero temporaire Digicel. Le portage lui-meme n{"'"}est pas impacte.</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Identifier l{"'"}etat du mandat sur PortaWs</Text>
+        </View>
+
+        <Text style={s.body}>Rechercher sur <Text style={s.bold}>http://172.24.119.72:8080/PortaWs/</Text> par le MSISDN du client (le numero a porter, pas le provisoire). Noter l{"'"}etat et la date de portabilite.</Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Solutions selon l{"'"}etat du mandat</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Etat du mandat</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Solution</Text>
+            <Text style={[s.tableHeaderCell, { width: '45%' }]}>Procedure</Text>
+          </View>
+          {[
+            ['Demande envoyee (1110)', 'Annuler + re-saisir', '1. Annulation 1510/C001\n2. Attendre confirmation\n3. Re-saisir avec bon MSISDN'],
+            ['Accord recu (1210)', 'Annuler si delai OK', 'Verifier J+3 minimum.\nSi oui: annuler puis re-saisir\nSi non: correction manuelle'],
+            ['Bascule imminente', 'Correction manuelle', 'Corriger dans BSS/OSS.\nContacter equipe technique.'],
+          ].map(([etat, solution, procedure]) => (
+            <View key={etat} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{etat}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: c.orange }]}>{solution}</Text>
+              <Text style={[s.tableCellLight, { width: '45%' }]}>{procedure}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Procedure d{"'"}annulation (cas le plus courant)</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Envoyer annulation via le HUB {"→"} ticket <Text style={s.bold}>1510</Text>, motif <Text style={s.bold}>C001</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Attendre la confirmation {"→"} operateur donneur envoie un <Text style={s.bold}>1530</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Re-saisir la portabilite avec le <Text style={s.bold}>bon MSISDN provisoire</Text> {"→"} nouveau 1110</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Informer le client du nouveau delai (<Text style={s.bold}>J+7 repart</Text>)</Text>
+        </View>
+
+        <View style={[s.alertWarning, { marginTop: 8 }]}>
+          <Text style={s.alertTitle}>Attention</Text>
+          <Text style={s.alertText}>L{"'"}annulation fait repartir le compteur. La nouvelle portabilite sera a J+7 minimum a partir de la re-saisie.</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Correction manuelle (si annulation impossible)</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Le portage n{"'"}est <Text style={s.bold}>PAS impacte</Text> — le MSISDN provisoire est une donnee interne Digicel</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>BSS/provisioning</Text> pour corriger</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Verifier la joignabilite du client apres bascule</Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} MSISDN provisoire = donnee interne Digicel (pas dans les echanges PNM)</Text>
+          <Text style={s.alertText}>{"•"} Annulation + re-saisie = solution propre mais delai J+7</Text>
+          <Text style={s.alertText}>{"•"} Bascule imminente {"→"} correction manuelle preferable</Text>
+          <Text style={s.alertText}>{"•"} Toujours informer le client du delai supplementaire</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : MSISDN provisoire errone</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -1414,6 +1989,26 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'fichier-deja-recu-e008': {
       document: <CasFichierDejaRecuPdf />,
       filename: 'Cas-Pratique-Fichier-Deja-Recu-E008',
+    },
+    'portaws-inaccessible': {
+      document: <CasPortaWsInaccessiblePdf />,
+      filename: 'Cas-Pratique-PortaWs-Inaccessible',
+    },
+    'hub-portabilites-echec': {
+      document: <CasHubPortabilitesEchecPdf />,
+      filename: 'Cas-Pratique-HUB-Portabilites-Echec',
+    },
+    'aucun-fichier-recu-operateurs': {
+      document: <CasAucunFichierRecuPdf />,
+      filename: 'Cas-Pratique-Aucun-Fichier-Recu-Operateurs',
+    },
+    'fnr-non-transmis-ema': {
+      document: <CasFnrNonTransmisEmaPdf />,
+      filename: 'Cas-Pratique-FNR-Non-Transmis-EMA',
+    },
+    'msisdn-provisoire-erreur': {
+      document: <CasMsisdnProvisoireErreurPdf />,
+      filename: 'Cas-Pratique-MSISDN-Provisoire-Erreur',
     },
   };
 
