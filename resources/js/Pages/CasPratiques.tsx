@@ -1,16 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
+import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,6 +21,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import { Iconify } from 'src/components/iconify';
@@ -25,13 +32,31 @@ import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+type Severity = 'critique' | 'majeur' | 'mineur';
+type Category = 'infrastructure' | 'fichiers' | 'tickets' | 'saisie';
+
 type CasPratique = {
   id: string;
   title: string;
   date: string;
   tags: string[];
   summary: string;
+  severity: Severity;
+  category: Category;
   content: React.ReactNode;
+};
+
+const SEVERITY_CONFIG: Record<Severity, { label: string; color: string; icon: string; bg: string }> = {
+  critique: { label: 'Critique', color: '#d32f2f', icon: 'solar:danger-triangle-bold-duotone', bg: '#fdecea' },
+  majeur: { label: 'Majeur', color: '#ed6c02', icon: 'solar:shield-warning-bold-duotone', bg: '#fff4e5' },
+  mineur: { label: 'Mineur', color: '#0288d1', icon: 'solar:info-circle-bold-duotone', bg: '#e5f6fd' },
+};
+
+const CATEGORY_CONFIG: Record<Category, { label: string; icon: string }> = {
+  infrastructure: { label: 'Infrastructure', icon: 'solar:server-bold-duotone' },
+  fichiers: { label: 'Fichiers & Echanges', icon: 'solar:document-bold-duotone' },
+  tickets: { label: 'Tickets & Portabilite', icon: 'solar:ticket-bold-duotone' },
+  saisie: { label: 'Saisie & Donnees', icon: 'solar:pen-bold-duotone' },
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -119,6 +144,8 @@ const casIncohCol3: CasPratique = {
   id: 'incoherence-col3-pnmdata',
   title: 'Correction d\'une incohérence col.3 dans un fichier PNMDATA',
   date: '04/03/2026',
+  severity: 'mineur',
+  category: 'fichiers',
   tags: ['Fichier', 'Incohérence', 'Correction manuelle', 'PNMDATA', 'col.3'],
   summary:
     'Un ticket dans PNMDATA.04.02 pointe vers Free Caraïbe (06) au lieu de Digicel (02). Procédure de remplacement de la ligne incohérente par le dernier ticket du fichier.',
@@ -362,6 +389,8 @@ const casRelancePortabilite: CasPratique = {
   id: 'relance-portabilite-retard',
   title: 'Relance opérateur donneur pour portabilité en retard',
   date: '04/03/2026',
+  severity: 'majeur',
+  category: 'tickets',
   tags: ['Relance', 'Ticket 1110', 'En attente', 'Dauphin Télécom', 'Email'],
   summary:
     'Deux portabilités entrantes (0690221675, 0690221360) bloquées "En cours" depuis 5 jours sans réponse 1210 de Dauphin Télécom. Procédure de diagnostic et relance par email.',
@@ -621,6 +650,8 @@ const casArNonRecuInvestigation: CasPratique = {
   id: 'ar-non-recu-investigation-logs',
   title: 'AR non reçu — Investigation par analyse des logs serveur',
   date: '10/03/2026',
+  severity: 'majeur',
+  category: 'fichiers',
   tags: ['AR non reçu', 'Logs serveur', 'ACR E000', 'Archivage', 'SFR / Outremer'],
   summary:
     'Un fichier PNMDATA.02.03 signalé "non acquitté" par l\'email d\'incident. L\'investigation via les logs PnmDataManager et PnmAckManager révèle que l\'ACR E000 a bien été reçu (réception confirmée) mais le fichier était absent de send/ lors de l\'archivage. Pas d\'impact fonctionnel.',
@@ -823,6 +854,8 @@ const casRefusR322: CasPratique = {
   id: 'refus-r322-resiliation-effective',
   title: 'Refus R322 — Résiliation effective hors demande de portabilité',
   date: '10/03/2026',
+  severity: 'majeur',
+  category: 'tickets',
   tags: ['Refus', 'R322', 'Résiliation', 'Free Caraïbes', 'Numéro perdu'],
   summary:
     'Un ticket 1220 avec le code R322 (Résiliation effective de la ligne) est reçu de Free Caraïbes (06) pour le MSISDN 0694165585. Le numéro a été résilié par l\'opérateur donneur avant que la portabilité ne soit finalisée.',
@@ -986,6 +1019,8 @@ const casAnnulation1510: CasPratique = {
   id: 'annulation-1510-c001',
   title: 'Annulation d\'un portage — Tickets 1510/1520 avec code C001',
   date: '10/03/2026',
+  severity: 'mineur',
+  category: 'tickets',
   tags: ['Annulation', 'Ticket 1510', 'C001', 'Orange Caraïbe', 'Free Caraïbes'],
   summary:
     'Deux cas d\'annulation de portage : (1) Digicel annule un portage vers Orange Caraïbe pour le 0696001019, (2) Free Caraïbes annule un portage vers Digicel pour le 0696525199. Le code C001 confirme l\'acceptation de l\'annulation.',
@@ -1164,6 +1199,8 @@ const casErreurE610: CasPratique = {
   id: 'erreur-e610-flux-non-attendu',
   title: 'Erreur E610 — Flux non attendu dans la procédure de restitution',
   date: '10/03/2026',
+  severity: 'majeur',
+  category: 'tickets',
   tags: ['Erreur', 'E610', 'Restitution', 'Orange Caraïbe', 'Ticket 7000'],
   summary:
     'Deux tickets 7000 (erreur) avec le code E610 reçus dans un fichier PNMDATA.02.01 pour les MSISDN 0690688569 et 0696386384. L\'erreur survient lors d\'une procédure de restitution quand un flux (ticket) inattendu est reçu pour un ID portage existant.',
@@ -1337,6 +1374,8 @@ const casFichierDejaRecu: CasPratique = {
   id: 'fichier-deja-recu-e008',
   title: 'Fichier déjà reçu (E008) — Suppression manuelle depuis FileZilla',
   date: '10/03/2026',
+  severity: 'mineur',
+  category: 'fichiers',
   tags: ['E008', 'Fichier doublon', 'FileZilla', 'SFR / Outremer', 'Suppression manuelle'],
   summary:
     'L\'opérateur SFR/Outremer (03) a renvoyé le fichier PNMDATA.03.02.20260309161154.001 déjà présent dans arch_recv/. Le PnmDataAckManager retourne une erreur E008 "Fichier déjà reçu". Le fichier doit être supprimé manuellement de recv/ via FileZilla.',
@@ -1510,6 +1549,8 @@ const casPortaWsInaccessible: CasPratique = {
   id: 'portaws-inaccessible',
   title: 'Le portail PortaWs ne s\'affiche plus — Diagnostic et résolution',
   date: '11/03/2026',
+  severity: 'critique',
+  category: 'infrastructure',
   tags: ['PortaWs', 'Portail', 'Incident', 'Tomcat', 'Infrastructure'],
   summary:
     'Le portail PortaWebUI est inaccessible (page blanche, timeout, erreur 502/503). Plusieurs causes possibles : Tomcat arrêté, base de données PortaDB injoignable, problème réseau ou certificat expiré.',
@@ -1674,6 +1715,8 @@ const casHubEnPanne: CasPratique = {
   id: 'hub-portabilites-echec',
   title: 'Les portabilités depuis le HUB ne fonctionnent plus',
   date: '11/03/2026',
+  severity: 'critique',
+  category: 'infrastructure',
   tags: ['HUB', 'PortaWs', 'SOAP', 'Incident', 'Infrastructure'],
   summary:
     'Les demandes de portabilité saisies via le HUB échouent avec un message d\'erreur. Aucune trace n\'apparaît sur le portail PortaWebUI. Causes possibles : webservice SOAP PortaWs injoignable, problème de connectivité HUB→PortaWs, ou quota dépassé.',
@@ -1826,6 +1869,8 @@ const casAucunFichierRecu: CasPratique = {
   id: 'aucun-fichier-recu-operateurs',
   title: 'On ne reçoit plus aucun fichier des opérateurs sur vmqproportasync01',
   date: '11/03/2026',
+  severity: 'critique',
+  category: 'infrastructure',
   tags: ['SFTP', 'vmqproportasync01', 'Fichiers', 'Incident', 'Infrastructure', 'Cron'],
   summary:
     'Aucun fichier PNMDATA n\'est reçu dans les répertoires recv/ des opérateurs sur le serveur vmqproportasync01. Les vacations précédentes n\'ont rien déposé. Causes possibles : service SFTP down, cron PortaSync arrêté, espace disque saturé, ou problème réseau/firewall.',
@@ -2035,6 +2080,8 @@ const casFnrNonTransmis: CasPratique = {
   id: 'fnr-non-transmis-ema',
   title: 'Le fichier FNR n\'a pas été transmis à EMA — Alerte batchhandler',
   date: '11/03/2026',
+  severity: 'critique',
+  category: 'infrastructure',
   tags: ['FNR', 'EMA', 'Bascule', 'Alerte', 'batchhandler'],
   summary:
     'On a reçu le mail d\'alerte « [PNM] Controle fichier batchhandler FNR_V3 sur EMA » indiquant que le fichier de mise à jour du FNR n\'a pas été transmis correctement à EMA (Ericsson Mobile Application). Ce fichier est critique car il met à jour la base FNR qui route les appels vers le bon opérateur.',
@@ -2249,6 +2296,8 @@ const casMsisdnProvisoireErreur: CasPratique = {
   id: 'msisdn-provisoire-erreur',
   title: 'Le CDC s\'est trompé de MSISDN provisoire — Comment le corriger ?',
   date: '11/03/2026',
+  severity: 'mineur',
+  category: 'saisie',
   tags: ['MSISDN provisoire', 'CDC', 'Saisie', 'Correction', 'PortaWs', 'Annulation'],
   summary:
     'Un Chargé De Clientèle (CDC) a saisi un mauvais MSISDN provisoire lors de la demande de portabilité entrante. Selon l\'état d\'avancement du mandat, plusieurs solutions sont possibles : modification directe, annulation/re-saisie, ou intervention manuelle.',
@@ -2467,12 +2516,41 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function CasPratiques() {
-  const [expanded, setExpanded] = useState<string | false>(CAS_PRATIQUES[0]?.id ?? false);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
+  const [selectedSeverity, setSelectedSeverity] = useState<Severity | 'all'>('all');
+  const [openCas, setOpenCas] = useState<CasPratique | null>(null);
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
-  const handleChange = (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpanded(isExpanded ? panel : false);
-  };
+  const filtered = useMemo(() => {
+    let result = CAS_PRATIQUES;
+    if (selectedCategory !== 'all') {
+      result = result.filter((c) => c.category === selectedCategory);
+    }
+    if (selectedSeverity !== 'all') {
+      result = result.filter((c) => c.severity === selectedSeverity);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.title.toLowerCase().includes(q) ||
+          c.summary.toLowerCase().includes(q) ||
+          c.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [search, selectedCategory, selectedSeverity]);
+
+  const counts = useMemo(() => {
+    const bySeverity: Record<Severity, number> = { critique: 0, majeur: 0, mineur: 0 };
+    const byCategory: Record<Category, number> = { infrastructure: 0, fichiers: 0, tickets: 0, saisie: 0 };
+    CAS_PRATIQUES.forEach((c) => {
+      bySeverity[c.severity]++;
+      byCategory[c.category]++;
+    });
+    return { bySeverity, byCategory };
+  }, []);
 
   const handleDownloadPdf = async (casId: string) => {
     setPdfLoading(casId);
@@ -2488,91 +2566,324 @@ export default function CasPratiques() {
     <DashboardLayout>
       <Head title="Cas Pratiques" />
 
-      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 960, mx: 'auto' }}>
+      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
         {/* Header */}
-        <Stack spacing={1} sx={{ mb: 4 }}>
+        <Stack spacing={1} sx={{ mb: 3 }}>
           <Typography variant="h4">Cas Pratiques PNM</Typography>
           <Typography variant="body2" color="text.secondary">
-            Procédures documentées issues de cas réels rencontrés en exploitation. Chaque cas détaille le
-            contexte, les étapes de résolution et les points de vigilance.
+            {CAS_PRATIQUES.length} procedures documentees issues de cas reels. Filtrez par gravite ou categorie.
           </Typography>
         </Stack>
 
-        {/* Accordion list */}
-        <Stack spacing={2}>
-          {CAS_PRATIQUES.map((cas) => (
-            <Accordion
-              key={cas.id}
-              expanded={expanded === cas.id}
-              onChange={handleChange(cas.id)}
-              sx={{
-                borderRadius: '12px !important',
-                '&:before': { display: 'none' },
-                boxShadow: (theme) => theme.shadows[expanded === cas.id ? 4 : 1],
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<Iconify icon="solar:alt-arrow-down-bold-duotone" width={20} />}
-                sx={{ px: 3, py: 1 }}
+        {/* Severity stats */}
+        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          {(Object.entries(SEVERITY_CONFIG) as [Severity, typeof SEVERITY_CONFIG.critique][]).map(
+            ([sev, cfg]) => (
+              <Card
+                key={sev}
+                onClick={() => setSelectedSeverity(selectedSeverity === sev ? 'all' : sev)}
+                sx={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  border: 2,
+                  borderColor: selectedSeverity === sev ? cfg.color : 'transparent',
+                  bgcolor: selectedSeverity === sev ? cfg.bg : 'background.paper',
+                  transition: 'all 0.2s',
+                  '&:hover': { borderColor: cfg.color, bgcolor: cfg.bg },
+                }}
               >
-                <Stack spacing={1} sx={{ flex: 1, mr: 2 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {cas.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
-                      {cas.date}
-                    </Typography>
+                <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Iconify icon={cfg.icon} width={28} sx={{ color: cfg.color }} />
+                    <Box>
+                      <Typography variant="h5" sx={{ color: cfg.color, lineHeight: 1 }}>
+                        {counts.bySeverity[sev]}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {cfg.label}
+                      </Typography>
+                    </Box>
                   </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    {cas.summary}
-                  </Typography>
-                  <Stack direction="row" flexWrap="wrap" gap={0.75}>
-                    {cas.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        color={TAG_COLORS[tag] ?? 'default'}
-                        variant="outlined"
-                      />
-                    ))}
-                  </Stack>
-                </Stack>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 3, pb: 3 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-                  <Divider sx={{ flex: 1 }} />
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Iconify icon="solar:file-download-bold-duotone" width={18} />}
-                    onClick={() => handleDownloadPdf(cas.id)}
-                    disabled={pdfLoading === cas.id}
-                    sx={{ ml: 2, flexShrink: 0 }}
-                  >
-                    {pdfLoading === cas.id ? 'Génération...' : 'Télécharger PDF'}
-                  </Button>
-                </Stack>
-                {cas.content}
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                </CardContent>
+              </Card>
+            )
+          )}
         </Stack>
 
-        {CAS_PRATIQUES.length === 0 && (
+        {/* Search + Category filter */}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 3 }}>
+          <TextField
+            size="small"
+            placeholder="Rechercher un cas pratique..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ flex: 1, minWidth: 200 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="solar:magnifer-bold-duotone" width={20} sx={{ color: 'text.disabled' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: search ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearch('')}>
+                      <Iconify icon="solar:close-circle-bold" width={18} />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              },
+            }}
+          />
+          <ToggleButtonGroup
+            size="small"
+            value={selectedCategory}
+            exclusive
+            onChange={(_, val) => val !== null && setSelectedCategory(val)}
+          >
+            <ToggleButton value="all">
+              <Tooltip title="Tous">
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <Iconify icon="solar:widget-bold-duotone" width={18} />
+                  <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
+                    Tous ({CAS_PRATIQUES.length})
+                  </Typography>
+                </Stack>
+              </Tooltip>
+            </ToggleButton>
+            {(Object.entries(CATEGORY_CONFIG) as [Category, typeof CATEGORY_CONFIG.infrastructure][]).map(
+              ([cat, cfg]) => (
+                <ToggleButton key={cat} value={cat}>
+                  <Tooltip title={cfg.label}>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <Iconify icon={cfg.icon} width={18} />
+                      <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
+                        {cfg.label} ({counts.byCategory[cat]})
+                      </Typography>
+                    </Stack>
+                  </Tooltip>
+                </ToggleButton>
+              )
+            )}
+          </ToggleButtonGroup>
+        </Stack>
+
+        {/* Cards grid */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' },
+            gap: 2,
+          }}
+        >
+          {filtered.map((cas) => {
+            const sevCfg = SEVERITY_CONFIG[cas.severity];
+            const catCfg = CATEGORY_CONFIG[cas.category];
+            return (
+              <Card
+                key={cas.id}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 2,
+                  borderLeft: 4,
+                  borderColor: sevCfg.color,
+                  transition: 'box-shadow 0.2s',
+                  '&:hover': { boxShadow: (theme) => theme.shadows[8] },
+                }}
+              >
+                <CardActionArea
+                  onClick={() => setOpenCas(cas)}
+                  sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                >
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
+                    {/* Top row: severity + category + date */}
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Chip
+                          label={sevCfg.label}
+                          size="small"
+                          icon={<Iconify icon={sevCfg.icon} width={14} />}
+                          sx={{
+                            bgcolor: sevCfg.bg,
+                            color: sevCfg.color,
+                            fontWeight: 700,
+                            fontSize: 11,
+                            height: 24,
+                            '& .MuiChip-icon': { color: sevCfg.color },
+                          }}
+                        />
+                        <Chip
+                          label={catCfg.label}
+                          size="small"
+                          variant="outlined"
+                          icon={<Iconify icon={catCfg.icon} width={14} />}
+                          sx={{ fontSize: 11, height: 24 }}
+                        />
+                      </Stack>
+                      <Typography variant="caption" color="text.disabled">
+                        {cas.date}
+                      </Typography>
+                    </Stack>
+
+                    {/* Title */}
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        mb: 1,
+                        fontWeight: 700,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {cas.title}
+                    </Typography>
+
+                    {/* Summary */}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 1.5,
+                        flex: 1,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {cas.summary}
+                    </Typography>
+
+                    {/* Tags */}
+                    <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                      {cas.tags.slice(0, 4).map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          color={TAG_COLORS[tag] ?? 'default'}
+                          variant="outlined"
+                          sx={{ fontSize: 11, height: 22 }}
+                        />
+                      ))}
+                      {cas.tags.length > 4 && (
+                        <Chip label={`+${cas.tags.length - 4}`} size="small" sx={{ fontSize: 11, height: 22 }} />
+                      )}
+                    </Stack>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            );
+          })}
+        </Box>
+
+        {/* Empty state */}
+        {filtered.length === 0 && (
           <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
-            <Iconify icon="solar:case-round-bold-duotone" width={48} sx={{ opacity: 0.3, mb: 2 }} />
+            <Iconify icon="solar:magnifer-bold-duotone" width={48} sx={{ opacity: 0.3, mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
-              Aucun cas pratique pour le moment
+              Aucun cas pratique trouve
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Les cas documentés apparaîtront ici.
+              Essayez de modifier vos filtres ou votre recherche.
             </Typography>
+            <Button
+              variant="text"
+              size="small"
+              sx={{ mt: 1 }}
+              onClick={() => {
+                setSearch('');
+                setSelectedCategory('all');
+                setSelectedSeverity('all');
+              }}
+            >
+              Reinitialiser les filtres
+            </Button>
           </Stack>
         )}
       </Box>
+
+      {/* Detail dialog */}
+      <Dialog
+        open={!!openCas}
+        onClose={() => setOpenCas(null)}
+        maxWidth="md"
+        fullWidth
+        scroll="paper"
+        PaperProps={{ sx: { borderRadius: 3, maxHeight: '90vh' } }}
+      >
+        {openCas && (
+          <>
+            <DialogTitle sx={{ pb: 1 }}>
+              <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
+                <Box sx={{ flex: 1 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                    <Chip
+                      label={SEVERITY_CONFIG[openCas.severity].label}
+                      size="small"
+                      icon={<Iconify icon={SEVERITY_CONFIG[openCas.severity].icon} width={14} />}
+                      sx={{
+                        bgcolor: SEVERITY_CONFIG[openCas.severity].bg,
+                        color: SEVERITY_CONFIG[openCas.severity].color,
+                        fontWeight: 700,
+                        fontSize: 11,
+                        '& .MuiChip-icon': { color: SEVERITY_CONFIG[openCas.severity].color },
+                      }}
+                    />
+                    <Chip
+                      label={CATEGORY_CONFIG[openCas.category].label}
+                      size="small"
+                      variant="outlined"
+                      icon={<Iconify icon={CATEGORY_CONFIG[openCas.category].icon} width={14} />}
+                      sx={{ fontSize: 11 }}
+                    />
+                    <Typography variant="caption" color="text.disabled">
+                      {openCas.date}
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h6" sx={{ lineHeight: 1.3 }}>
+                    {openCas.title}
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                  <Tooltip title="Telecharger PDF">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDownloadPdf(openCas.id)}
+                      disabled={pdfLoading === openCas.id}
+                    >
+                      <Iconify icon="solar:file-download-bold-duotone" width={22} />
+                    </IconButton>
+                  </Tooltip>
+                  <IconButton size="small" onClick={() => setOpenCas(null)}>
+                    <Iconify icon="solar:close-circle-bold" width={22} />
+                  </IconButton>
+                </Stack>
+              </Stack>
+              <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 1 }}>
+                {openCas.tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    color={TAG_COLORS[tag] ?? 'default'}
+                    variant="outlined"
+                    sx={{ fontSize: 11 }}
+                  />
+                ))}
+              </Stack>
+            </DialogTitle>
+            <Divider />
+            <DialogContent sx={{ pt: 2 }}>{openCas.content}</DialogContent>
+          </>
+        )}
+      </Dialog>
     </DashboardLayout>
   );
 }
