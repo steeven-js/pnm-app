@@ -899,6 +899,21 @@ function CasRefusR322Pdf() {
           ))}
         </View>
 
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Refus R322</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — Refus R322 : Résiliation effective (suite)</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Cas typique</Text>
           <Text style={s.alertText}>
@@ -964,7 +979,7 @@ function CasRefusR322Pdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : Refus R322</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>
@@ -1557,6 +1572,21 @@ function CasPortaWsInaccessiblePdf() {
           <Text style={s.codeText}>ping 172.24.119.72    # vmqproportaws01 (PortaWs)</Text>
         </View>
 
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
+          <Text>Page 1 / 3</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
           <Text style={s.stepTitle}>Arbre de décision</Text>
@@ -1601,6 +1631,21 @@ function CasPortaWsInaccessiblePdf() {
           </View>
         </View>
 
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
+          <Text>Page 2 / 3</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
           <Text style={s.stepTitle}>Vérifications sur le serveur</Text>
@@ -1634,21 +1679,6 @@ function CasPortaWsInaccessiblePdf() {
           <Text style={s.codeText}> </Text>
           <Text style={s.codeText}># === PortaWebUi (vmqproportaweb01 — 172.24.119.71) ===</Text>
           <Text style={s.codeText}># Même procédure mais sur vmqproportaweb01</Text>
-        </View>
-
-        <View style={s.footer}>
-          <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
-          <Text>Page 1 / 2</Text>
-        </View>
-      </Page>
-
-      <Page size="A4" style={s.page}>
-        <View style={s.header}>
-          <View>
-            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
-            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
-          </View>
-          <Text style={s.headerSub}>{today}</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -1695,7 +1725,7 @@ function CasPortaWsInaccessiblePdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
-          <Text>Page 2 / 2</Text>
+          <Text>Page 3 / 3</Text>
         </View>
       </Page>
     </Document>
@@ -1978,6 +2008,21 @@ function CasAucunFichierRecuPdf() {
           <Text style={s.codeText}>done</Text>
         </View>
 
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Aucun fichier recu des operateurs</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Aucun fichier recu des operateurs (suite)</Text>
+            <Text style={s.headerSub}>On ne recoit plus aucun fichier des operateurs sur vmqproportasync01 — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
           <Text style={s.stepTitle}>Relancer les vacations manquantes</Text>
@@ -2041,7 +2086,7 @@ function CasAucunFichierRecuPdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : Aucun fichier recu des operateurs</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>
@@ -2144,6 +2189,21 @@ function CasFnrNonTransmisEmaPdf() {
               <Text style={[s.tableCellLight, { width: '35%' }]}>{resolution}</Text>
             </View>
           ))}
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
+            <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -2258,7 +2318,7 @@ function CasFnrNonTransmisEmaPdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
-          <Text>Page 1 / 2</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>
