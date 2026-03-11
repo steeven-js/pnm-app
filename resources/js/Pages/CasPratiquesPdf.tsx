@@ -2166,6 +2166,21 @@ function CasFnrNonTransmisEmaPdf() {
           <Text style={{ ...s.codeText, color: '#22c55e' }}># Totally 0 commands failed.</Text>
         </View>
 
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
+          <Text>Page 1 / 3</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
+            <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
           <Text style={s.stepTitle}>Diagnostic et resolution selon le cas</Text>
@@ -2189,21 +2204,6 @@ function CasFnrNonTransmisEmaPdf() {
               <Text style={[s.tableCellLight, { width: '35%' }]}>{resolution}</Text>
             </View>
           ))}
-        </View>
-
-        <View style={s.footer}>
-          <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
-          <Text>Page 1 / 2</Text>
-        </View>
-      </Page>
-
-      <Page size="A4" style={s.page}>
-        <View style={s.header}>
-          <View>
-            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
-            <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
-          </View>
-          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -2245,7 +2245,22 @@ function CasFnrNonTransmisEmaPdf() {
           ))}
         </View>
 
-        <Text style={[s.body, { marginTop: 8 }]}><Text style={s.bold}>Alternative — Commandes FNR unitaires en CLI</Text> (depuis EMA15-Digicel, si les pages web ne sont pas accessibles) :</Text>
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
+          <Text>Page 2 / 3</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
+            <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <Text style={[s.body, { marginTop: 4 }]}><Text style={s.bold}>Alternative — Commandes FNR unitaires en CLI</Text> (depuis EMA15-Digicel, si les pages web ne sont pas accessibles) :</Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -2318,7 +2333,7 @@ function CasFnrNonTransmisEmaPdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
-          <Text>Page 2 / 2</Text>
+          <Text>Page 3 / 3</Text>
         </View>
       </Page>
     </Document>
