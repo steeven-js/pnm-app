@@ -1235,6 +1235,153 @@ function CasErreurE610Pdf() {
   );
 }
 
+// ─── Cas 7 : Fichier déjà reçu E008 ─────────────────────────────────────────
+
+function CasFichierDejaRecuPdf() {
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Fichier déjà reçu (E008)</Text>
+            <Text style={s.headerSub}>Suppression manuelle depuis FileZilla — 10/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['E008', 'Fichier doublon', 'FileZilla', 'SFR / Outremer', 'Suppression manuelle'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Le fichier <Text style={s.bold}>PNMDATA.03.02.20260309161154.001</Text> envoyé par <Text style={s.bold}>SFR / Outremer Telecom (03)</Text> a été déposé une seconde fois dans <Text style={s.bold}>recv/</Text> alors qu{"'"}il était déjà traité et archivé dans <Text style={s.bold}>arch_recv/</Text>. Le script PnmDataAckManager retourne l{"'"}erreur <Text style={{ ...s.bold, color: c.red }}>E008 — Fichier déjà reçu</Text>.
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Impact</Text>
+          <Text style={s.alertText}>
+            Tant que le fichier doublon reste dans recv/, le script PnmDataAckManager tente de le traiter à chaque exécution et échoue avec l{"'"}erreur E008. Le log est pollué par les enveloppes SOAP XML du fichier.
+          </Text>
+        </View>
+
+        {/* Étape 1 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Détection dans les logs PnmAckManager</Text>
+        </View>
+
+        <Text style={s.body}>Lors de l{"'"}exécution de <Text style={s.bold}>tail -f PnmAckManager.log</Text> ou <Text style={s.bold}>./PnmDataAckManager.sh -v</Text> :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>PnmDataAckManager.php|...| Initialisation</Text>
+          <Text style={s.codeText}>..Verification operateur Orange Caraibe : Check success</Text>
+          <Text style={s.codeText}>..Verification operateur Digicel AFG : Check success</Text>
+          <Text style={s.codeText}>..Verification operateur Outremer Telecom / SFR : Check success</Text>
+          <Text style={s.codeText}>...</Text>
+          <Text style={s.codeText}>(enveloppe SOAP XML complète du fichier PNMDATA)</Text>
+          <Text style={{ ...s.codeText, color: c.red }}>Error Message : Exception during service.registerFichier(...)</Text>
+          <Text style={{ ...s.codeText, color: c.red }}>  porta.exception._E0XX.PnmExceptionE008:</Text>
+          <Text style={{ ...s.codeText, color: c.red }}>  [E008:0] Fichier déja reçus : PNMDATA.03.02.20260309161154.001</Text>
+        </View>
+
+        {/* Étape 2 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Vérifier la présence du fichier</Text>
+        </View>
+
+        <Text style={s.body}>Confirmer que le fichier est dans recv/ (doublon) et dans arch_recv/ (original) :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ ls -la .../pnmdata/03/recv/PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}>$ ls -la .../pnmdata/03/arch_recv/PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Répertoire</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Présent ?</Text>
+            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Signification</Text>
+          </View>
+          {[
+            ['recv/', 'Oui (doublon)', 'Renvoyé par l\'opérateur — à supprimer'],
+            ['arch_recv/', 'Oui (original)', 'Déjà traité et archivé'],
+          ].map(([rep, present, sig]) => (
+            <View key={rep} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold' }]}>{rep}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: rep === 'recv/' ? c.red : c.green }]}>{present}</Text>
+              <Text style={[s.tableCellLight, { width: '50%' }]}>{sig}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Étape 3 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Supprimer le fichier doublon via FileZilla</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Se connecter à <Text style={s.bold}>vmqproportasync01</Text> via FileZilla (SFTP)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Naviguer vers <Text style={s.bold}>/home/porta_pnmv3/PortaSync/pnmdata/03/recv/</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Sélectionner <Text style={s.bold}>PNMDATA.03.02.20260309161154.001</Text> et le supprimer</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Vérifier que le fichier n{"'"}est plus dans recv/</Text>
+        </View>
+
+        {/* Étape 4 */}
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Vérifier le bon fonctionnement</Text>
+        </View>
+
+        <Text style={s.body}>Relancer le script pour confirmer que l{"'"}erreur a disparu :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>$ ./PnmDataAckManager.sh -v</Text>
+          <Text style={s.codeText}>PnmDataAckManager.php|...| Initialisation</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Orange Caraibe : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Digicel AFG : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Outremer Telecom / SFR : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Dauphin Telecom : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur UTS Caraibe : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Free Caraibes : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>Fin de Traitement 0.01secondes.</Text>
+        </View>
+
+        {/* Points de vigilance */}
+        <View style={[s.alertSuccess, { marginTop: 10 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>• Toujours vérifier que le fichier existe dans arch_recv/ AVANT de supprimer celui de recv/</Text>
+          <Text style={s.alertText}>• Ne JAMAIS supprimer le fichier de arch_recv/ — c{"'"}est la trace du traitement original</Text>
+          <Text style={s.alertText}>• L{"'"}erreur E008 est sans impact fonctionnel — le fichier a déjà été traité</Text>
+          <Text style={s.alertText}>• Si un opérateur renvoie régulièrement des fichiers en double, le signaler par email</Text>
+          <Text style={s.alertText}>• Après suppression, toujours relancer ./PnmDataAckManager.sh -v pour confirmer</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Fichier déjà reçu E008</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -1263,6 +1410,10 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'erreur-e610-flux-non-attendu': {
       document: <CasErreurE610Pdf />,
       filename: 'Cas-Pratique-Erreur-E610-Flux-Non-Attendu',
+    },
+    'fichier-deja-recu-e008': {
+      document: <CasFichierDejaRecuPdf />,
+      filename: 'Cas-Pratique-Fichier-Deja-Recu-E008',
     },
   };
 

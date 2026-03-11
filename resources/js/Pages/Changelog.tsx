@@ -37,6 +37,18 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.3.0',
+    date: '10 Mars 2026',
+    changes: [
+      { type: 'new', description: 'Cas Pratique #7 : Fichier déjà reçu (E008) — diagnostic et suppression manuelle via FileZilla quand un opérateur renvoie un PNMDATA déjà archivé' },
+      { type: 'new', description: 'Cas Pratique #4 : Refus R322 (résiliation effective) — investigation Free Caraïbes' },
+      { type: 'new', description: 'Cas Pratique #5 : Annulation 1510/C001 — deux exemples Digicel→Orange et Free→Digicel' },
+      { type: 'new', description: 'Cas Pratique #6 : Erreur E610 (flux non attendu) — investigation restitution Orange Caraïbe' },
+      { type: 'improvement', description: 'Support annulations dans l\'analyseur d\'incidents avec compteur et étapes d\'investigation' },
+      { type: 'fix', description: 'Suppression de l\'événement « Rapport activité automates » (timeline, PDF, config, parsers)' },
+    ],
+  },
+  {
     version: '2.2.0',
     date: '27 Février 2026',
     changes: [

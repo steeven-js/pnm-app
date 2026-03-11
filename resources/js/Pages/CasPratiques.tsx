@@ -1331,10 +1331,184 @@ const casErreurE610: CasPratique = {
   ),
 };
 
+// ─── Cas #7 — Fichier déjà reçu (E008) : suppression manuelle ───────────────
+
+const casFichierDejaRecu: CasPratique = {
+  id: 'fichier-deja-recu-e008',
+  title: 'Fichier déjà reçu (E008) — Suppression manuelle depuis FileZilla',
+  date: '10/03/2026',
+  tags: ['E008', 'Fichier doublon', 'FileZilla', 'SFR / Outremer', 'Suppression manuelle'],
+  summary:
+    'L\'opérateur SFR/Outremer (03) a renvoyé le fichier PNMDATA.03.02.20260309161154.001 déjà présent dans arch_recv/. Le PnmDataAckManager retourne une erreur E008 "Fichier déjà reçu". Le fichier doit être supprimé manuellement de recv/ via FileZilla.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Ce cas documente un incident rencontré le <strong>10/03/2026</strong> : le fichier{' '}
+        <code>PNMDATA.03.02.20260309161154.001</code> envoyé par <strong>SFR / Outremer Telecom (03)</strong>{' '}
+        a été déposé une seconde fois dans le répertoire <code>recv/</code> alors qu&apos;il avait déjà été traité
+        et archivé dans <code>arch_recv/</code>. Le script <code>PnmDataAckManager</code> retourne l&apos;erreur{' '}
+        <strong>E008 — Fichier déjà reçu</strong>.
+      </Typography>
+
+      <Alert severity="error" sx={{ mb: 2 }}>
+        <strong>Impact —</strong> Tant que le fichier doublon reste dans <code>recv/</code>, le script{' '}
+        <code>PnmDataAckManager</code> tente de le traiter à chaque exécution et échoue avec l&apos;erreur E008.
+        Le log est pollué par les enveloppes SOAP XML du fichier et le message d&apos;erreur. Le fichier doit
+        être supprimé manuellement.
+      </Alert>
+
+      {/* ── Étape 1 : Détection ── */}
+      <StepHeader number={1} icon="solar:bug-bold-duotone" title="Détection dans les logs PnmAckManager" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        En exécutant <code>tail -f PnmAckManager.log</code> ou <code>./PnmDataAckManager.sh -v</code>,
+        on observe les messages suivants :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">PnmDataAckManager.php|2026-03-10T15:50:01-04:00|</span> Initialisation
+<span style="color:#22c55e">..Verification operateur Orange Caraibe : Check success</span>
+<span style="color:#22c55e">..Verification operateur Digicel AFG : Check success</span>
+<span style="color:#22c55e">..Verification operateur Outremer Telecom / SFR : Check success</span>
+<span style="color:#22c55e">..Verification operateur Dauphin Telecom : Check success</span>
+<span style="color:#22c55e">..Verification operateur UTS Caraibe : Check success</span>
+<span style="color:#22c55e">..Verification operateur Free Caraibes : Check success</span>
+Fin Initialisation
+
+<span style="color:#94a3b8">&lt;?xml version="1.0" ...&gt; &lt;SOAP-ENV:Envelope ...&gt;</span>
+<span style="color:#94a3b8">(enveloppe SOAP XML complète du fichier PNMDATA — 169 tickets)</span>
+
+<span style="color:#ef4444;font-weight:bold">Error Message : Exception during service.registerFichier(...)
+  porta.exception._E0XX.PnmExceptionE008:
+  [E008:0] Fichier déja reçus : PNMDATA.03.02.20260309161154.001</span>
+
+<span style="color:#ef4444">..........ERREUR : Echec de notification pour fichier reçu
+  PNMDATA.03.02.20260309161154.001 : l'appel au WS a retourné une erreur!</span>
+Fin de Traitement 0.04secondes.`}
+      </CodeBlock>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Observation clé —</strong> L&apos;erreur <code>PnmExceptionE008</code> indique que le fichier
+        est déjà enregistré dans le système (présent dans <code>arch_recv/</code>). Le script affiche l&apos;intégralité
+        de l&apos;enveloppe SOAP XML du fichier dans le log, ce qui le rend difficilement lisible.
+      </Alert>
+
+      {/* ── Étape 2 : Vérification ── */}
+      <StepHeader number={2} icon="solar:folder-check-bold-duotone" title="Vérifier la présence du fichier" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Confirmer que le fichier est bien dans <code>recv/</code> (doublon) et dans <code>arch_recv/</code> (original) :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/recv/PNMDATA.03.02.20260309161154.001
+<span style="color:#22c55e">-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</span>
+
+<span style="color:#94a3b8">$</span> ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/arch_recv/PNMDATA.03.02.20260309161154.001
+<span style="color:#22c55e">-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</span>`}
+      </CodeBlock>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Répertoire</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Fichier présent ?</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Signification</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><code>recv/</code></TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>Oui (doublon)</TableCell>
+              <TableCell>Fichier renvoyé par l&apos;opérateur — à supprimer</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>arch_recv/</code></TableCell>
+              <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>Oui (original)</TableCell>
+              <TableCell>Fichier déjà traité et archivé — preuve que le traitement initial a fonctionné</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* ── Étape 3 : Suppression ── */}
+      <StepHeader number={3} icon="solar:trash-bin-trash-bold-duotone" title="Supprimer le fichier doublon de recv/" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Supprimer le fichier doublon via <strong>FileZilla</strong> (connexion SFTP vers vmqproportasync01) :
+      </Typography>
+
+      <Box component="ol" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 1 } }}>
+        <li>
+          Se connecter à <strong>vmqproportasync01</strong> via FileZilla
+        </li>
+        <li>
+          Naviguer vers le répertoire de l&apos;opérateur concerné :
+          <CodeBlock>{`/home/porta_pnmv3/PortaSync/pnmdata/03/recv/`}</CodeBlock>
+        </li>
+        <li>
+          Sélectionner le fichier <code>PNMDATA.03.02.20260309161154.001</code> et le <strong>supprimer</strong>
+        </li>
+        <li>
+          Vérifier que le fichier n&apos;est plus dans <code>recv/</code> :
+          <CodeBlock>
+            {`<span style="color:#94a3b8">$</span> ls /home/porta_pnmv3/PortaSync/pnmdata/03/recv/PNMDATA.03.02.20260309161154.001
+ls: cannot access '...': <span style="color:#ef4444">No such file or directory</span>`}
+          </CodeBlock>
+        </li>
+      </Box>
+
+      {/* ── Étape 4 : Vérification post-suppression ── */}
+      <StepHeader number={4} icon="solar:check-circle-bold-duotone" title="Vérifier le bon fonctionnement" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Relancer le script pour confirmer que l&apos;erreur a disparu :
+      </Typography>
+
+      <CodeBlock>
+        {`<span style="color:#94a3b8">$</span> ./PnmDataAckManager.sh -v
+PnmDataAckManager.php|2026-03-10T16:38:58-04:00| Initialisation
+<span style="color:#22c55e">..Verification operateur Orange Caraibe : Check success</span>
+<span style="color:#22c55e">..Verification operateur Digicel AFG : Check success</span>
+<span style="color:#22c55e">..Verification operateur Outremer Telecom / SFR : Check success</span>
+<span style="color:#22c55e">..Verification operateur Dauphin Telecom : Check success</span>
+<span style="color:#22c55e">..Verification operateur UTS Caraibe : Check success</span>
+<span style="color:#22c55e">..Verification operateur Free Caraibes : Check success</span>
+Fin Initialisation
+<span style="color:#22c55e;font-weight:bold">Fin de Traitement 0.01secondes.</span>`}
+      </CodeBlock>
+
+      <Alert severity="success" sx={{ mb: 2 }}>
+        <strong>Résultat —</strong> Le script s&apos;exécute sans erreur. Aucun fichier à traiter, fin de traitement
+        immédiate (0.01s vs 0.04s avec le fichier doublon). Le problème est résolu.
+      </Alert>
+
+      {/* ── Points de vigilance ── */}
+      <Divider sx={{ my: 3 }} />
+
+      <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Points de vigilance
+        </Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
+          <li>Toujours vérifier que le fichier existe dans <code>arch_recv/</code> <strong>avant</strong> de supprimer celui de <code>recv/</code></li>
+          <li>Ne <strong>jamais</strong> supprimer le fichier de <code>arch_recv/</code> — c&apos;est la trace du traitement original</li>
+          <li>L&apos;erreur E008 est <strong>sans impact fonctionnel</strong> sur les portabilités — le fichier a déjà été traité</li>
+          <li>Si le même opérateur renvoie régulièrement des fichiers en double, signaler le problème par email</li>
+          <li>Le log SOAP XML dans <code>PnmAckManager.log</code> peut être très volumineux — ne pas s&apos;alarmer de la taille</li>
+          <li>Après suppression, toujours relancer <code>./PnmDataAckManager.sh -v</code> pour confirmer la résolution</li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Liste de tous les cas pratiques ────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
   casArNonRecuInvestigation,
+  casFichierDejaRecu,
   casRefusR322,
   casAnnulation1510,
   casErreurE610,
@@ -1373,6 +1547,10 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
   E610: 'error',
   Restitution: 'info',
   'Ticket 7000': 'error',
+  E008: 'error',
+  'Fichier doublon': 'warning',
+  FileZilla: 'info',
+  'Suppression manuelle': 'error',
 };
 
 // ─── Page ───────────────────────────────────────────────────────────────────
