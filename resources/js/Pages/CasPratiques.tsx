@@ -2349,10 +2349,10 @@ const casMsisdnProvisoireErreur: CasPratique = {
         chez Digicel en attendant que la portabilité soit effective.
       </Typography>
 
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        <strong>Impact —</strong> Si le MSISDN provisoire est faux, le client peut ne pas être joignable sur son
-        numéro temporaire Digicel. Cela n&apos;empêche pas le portage de se faire, mais pose un problème de service
-        pendant la période transitoire.
+      <Alert severity="error" sx={{ mb: 2 }}>
+        <strong>Impact —</strong> Si le MSISDN provisoire est faux, la bascule va se faire sur un <strong>mauvais
+        numéro</strong> (donc sur un autre client), ou <strong>pas du tout</strong> (si le numéro n&apos;existe pas ou plus).
+        Le MSISDN provisoire dans la porta ne sert qu&apos;à faire le <strong>changement de MSISDN le jour de la bascule</strong>.
       </Alert>
 
       {/* ── Étape 1 : Identifier l'état du mandat ── */}
@@ -2382,84 +2382,82 @@ const casMsisdnProvisoireErreur: CasPratique = {
           </TableHead>
           <TableBody>
             <TableRow sx={{ bgcolor: 'success.lighter' }}>
-              <TableCell><strong>Demande envoyée (1110)</strong><br />Pas encore de réponse</TableCell>
-              <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>Annuler et re-saisir</TableCell>
+              <TableCell><strong>Pas encore basculée</strong><br />(1110 envoyé, ou 1210 reçu)</TableCell>
+              <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>Modifier le numéro dans la base de données</TableCell>
               <TableCell>
-                1. Envoyer une annulation (ticket 1510/C001)<br />
-                2. Attendre la confirmation d&apos;annulation<br />
-                3. Re-saisir la portabilité avec le bon MSISDN provisoire
+                Solution la plus simple : corriger le MSISDN provisoire directement dans la base de données
+                PortaDB tant que la portabilité n&apos;est pas encore basculée
               </TableCell>
             </TableRow>
             <TableRow sx={{ bgcolor: 'warning.lighter' }}>
-              <TableCell><strong>Accord reçu (1210/A001)</strong><br />Portabilité acceptée</TableCell>
-              <TableCell sx={{ color: 'warning.main', fontWeight: 'bold' }}>Annuler et re-saisir (si délai suffisant)</TableCell>
+              <TableCell><strong>Pas encore basculée</strong><br />(alternative si modification BDD impossible)</TableCell>
+              <TableCell sx={{ color: 'warning.main', fontWeight: 'bold' }}>Annuler et re-saisir</TableCell>
               <TableCell>
-                1. Vérifier que la date de portabilité est encore à J+3 minimum<br />
-                2. Si oui : annuler (1510) puis re-saisir<br />
-                3. Si non : correction manuelle (voir ci-dessous)
+                1. Envoyer une annulation (ticket 1510/C001)<br />
+                2. Attendre la confirmation d&apos;annulation (1530)<br />
+                3. Re-saisir la portabilité avec le bon MSISDN provisoire
               </TableCell>
             </TableRow>
             <TableRow sx={{ bgcolor: 'error.lighter' }}>
-              <TableCell><strong>Bascule imminente / effectuée</strong><br />Trop tard pour annuler</TableCell>
-              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>Correction manuelle dans les SI</TableCell>
+              <TableCell><strong>Déjà basculée</strong><br />Trop tard</TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>Changement de numéro par le CDC</TableCell>
               <TableCell>
-                1. Le portage va se faire (ou est fait) normalement<br />
-                2. Corriger le MSISDN provisoire dans les systèmes Digicel (BSS/OSS)<br />
-                3. Contacter l&apos;équipe technique pour la correction
+                1. Il est trop tard pour corriger dans le système PNM<br />
+                2. Le CDC devra faire un <strong>changement de numéro</strong> pour le client<br />
+                3. S&apos;assurer que le MSISDN est disponible en <strong>réaffectation</strong>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* ── Étape 3 : Procédure d'annulation ── */}
-      <StepHeader number={3} icon="solar:restart-bold-duotone" title="Procédure d'annulation et re-saisie (cas le plus courant)" />
+      {/* ── Étape 3 : Correction en BDD (cas le plus simple) ── */}
+      <StepHeader number={3} icon="solar:database-bold-duotone" title="Modifier le numéro dans la base de données (cas le plus simple)" />
 
       <Typography variant="body2" sx={{ mb: 1 }}>
-        Si le mandat est encore à un stade qui permet l&apos;annulation :
+        Si la portabilité <strong>n&apos;est pas encore basculée</strong>, la solution la plus simple est de corriger
+        le MSISDN provisoire directement dans la base de données :
       </Typography>
 
       <Box component="ol" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 1 } }}>
         <li>
-          <strong>Envoyer l&apos;annulation</strong> via le HUB : le système génère un ticket <code>1510</code> avec
-          motif <code>C001</code> (annulation à l&apos;initiative de l&apos;opérateur receveur)
+          Se connecter à la base <strong>PortaDB</strong> sur <code>vmqproportawebdb01</code> (172.24.119.68)
         </li>
         <li>
-          <strong>Attendre la confirmation</strong> : l&apos;opérateur donneur envoie un <code>1530</code> confirmant
-          l&apos;annulation
+          Identifier le mandat concerné par le MSISDN à porter
         </li>
         <li>
-          <strong>Re-saisir la portabilité</strong> avec le <strong>bon MSISDN provisoire</strong> — la nouvelle
-          demande génère un nouveau ticket <code>1110</code>
+          <strong>Modifier le MSISDN provisoire</strong> par la bonne valeur
         </li>
         <li>
-          <strong>Informer le client</strong> de la nouvelle date de portabilité (le délai J+7 repart)
+          Vérifier sur <strong>PortaWs</strong> que le mandat affiche désormais le bon MSISDN provisoire
         </li>
       </Box>
 
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        <strong>Attention —</strong> L&apos;annulation fait repartir le compteur. La nouvelle portabilité sera à
-        <strong> J+7 minimum</strong> à partir de la re-saisie. Informer le client du nouveau délai.
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Alternative — Annulation et re-saisie :</strong> si la modification en BDD n&apos;est pas possible,
+        envoyer une annulation (<code>1510</code> / <code>C001</code>), attendre la confirmation (<code>1530</code>),
+        puis re-saisir avec le bon MSISDN provisoire. <strong>Attention :</strong> le délai J+7 repart à zéro.
+        Informer le client du nouveau délai.
       </Alert>
 
-      {/* ── Étape 4 : Correction manuelle ── */}
-      <StepHeader number={4} icon="solar:pen-bold-duotone" title="Correction manuelle (si annulation impossible)" />
+      {/* ── Étape 4 : Si déjà basculée ── */}
+      <StepHeader number={4} icon="solar:danger-triangle-bold-duotone" title="Si la portabilité est déjà basculée — trop tard" />
 
-      <Typography variant="body2" sx={{ mb: 1 }}>
-        Si la bascule est imminente ou déjà effectuée, l&apos;annulation n&apos;est plus possible. Il faut corriger
-        dans les systèmes internes :
-      </Typography>
+      <Alert severity="error" sx={{ mb: 2 }}>
+        Si la portabilité est déjà basculée, il est <strong>trop tard</strong> pour corriger dans le système PNM.
+        La bascule s&apos;est faite sur un mauvais numéro (un autre client) ou pas du tout.
+      </Alert>
 
       <Box component="ol" sx={{ pl: 2, mb: 2, '& li': { fontSize: 14, mb: 1 } }}>
         <li>
-          Le portage lui-même n&apos;est <strong>pas impacté</strong> — le MSISDN provisoire est une donnée interne Digicel
+          Le CDC devra faire un <strong>changement de numéro</strong> pour le client
         </li>
         <li>
-          Contacter l&apos;équipe <strong>BSS/provisioning</strong> pour corriger le MSISDN provisoire dans les systèmes
+          S&apos;assurer que le MSISDN est <strong>disponible en réaffectation</strong>
         </li>
         <li>
-          Vérifier que le client est bien joignable sur son numéro (le numéro porté, pas le provisoire)
-          une fois la bascule effectuée
+          Vérifier que le client est bien joignable sur son numéro porté une fois la correction effectuée
         </li>
       </Box>
 
@@ -2468,9 +2466,10 @@ const casMsisdnProvisoireErreur: CasPratique = {
       <Alert severity="success" icon={<Iconify icon="solar:check-circle-bold-duotone" width={22} />}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>Points de vigilance</Typography>
         <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 13, mb: 0.5 } }}>
-          <li>Le MSISDN provisoire est une <strong>donnée interne Digicel</strong> — il n&apos;apparaît pas dans les échanges PNM avec les autres opérateurs</li>
-          <li>L&apos;annulation + re-saisie est la solution la plus <strong>propre</strong> mais fait repartir le délai</li>
-          <li>Si le portage est imminent, la correction manuelle est préférable pour ne pas retarder le client</li>
+          <li>Un mauvais MSISDN provisoire fait basculer sur un <strong>autre client</strong> ou <strong>pas du tout</strong></li>
+          <li>La <strong>modification en base de données</strong> est la solution la plus simple si la porta n&apos;est pas encore basculée</li>
+          <li>L&apos;annulation + re-saisie est une alternative mais fait repartir le délai <strong>J+7</strong></li>
+          <li>Si déjà basculée : <strong>trop tard</strong> — le CDC doit faire un changement de numéro + vérifier disponibilité en réaffectation</li>
           <li>Toujours <strong>informer le client</strong> du délai supplémentaire en cas d&apos;annulation</li>
           <li>Demander au CDC de <strong>vérifier systématiquement</strong> le MSISDN provisoire avant validation</li>
         </Box>

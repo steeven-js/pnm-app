@@ -2287,9 +2287,9 @@ function CasMsisdnProvisoireErreurPdf() {
 
         <Text style={s.body}>Un CDC signale qu{"'"}il s{"'"}est trompe en saisissant le <Text style={s.bold}>MSISDN provisoire</Text> (numero temporaire attribue au client en attendant le portage). Le MSISDN provisoire est celui sur lequel le client est joignable chez Digicel en attendant que la portabilite soit effective.</Text>
 
-        <View style={s.alertWarning}>
+        <View style={s.alertError}>
           <Text style={s.alertTitle}>Impact</Text>
-          <Text style={s.alertText}>Si le MSISDN provisoire est faux, le client peut ne pas etre joignable sur son numero temporaire Digicel. Cela n{"'"}empeche pas le portage de se faire, mais pose un probleme de service pendant la periode transitoire.</Text>
+          <Text style={s.alertText}>Si le MSISDN provisoire est faux, la bascule va se faire sur un <Text style={{ fontWeight: 'bold' }}>mauvais numero</Text> (donc sur un autre client), ou <Text style={{ fontWeight: 'bold' }}>pas du tout</Text> (si le numero n{"'"}existe pas ou plus). Le MSISDN provisoire dans la porta ne sert qu{"'"}a faire le <Text style={{ fontWeight: 'bold' }}>changement de MSISDN le jour de la bascule</Text>.</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -2324,76 +2324,79 @@ function CasMsisdnProvisoireErreurPdf() {
             <Text style={[s.tableHeaderCell, { width: '45%' }]}>Procedure</Text>
           </View>
           <View style={[s.tableRow, { backgroundColor: '#f0fdf4' }]}>
-            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Demande envoyee (1110){'\n'}Pas encore de reponse</Text>
-            <Text style={[s.tableCell, { width: '25%', color: '#16a34a', fontWeight: 'bold' }]}>Annuler et re-saisir</Text>
-            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Envoyer une annulation (ticket 1510/C001){'\n'}2. Attendre la confirmation d{"'"}annulation{'\n'}3. Re-saisir la portabilite avec le bon MSISDN provisoire</Text>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Pas encore basculee{'\n'}(1110 envoye, ou 1210 recu)</Text>
+            <Text style={[s.tableCell, { width: '25%', color: '#16a34a', fontWeight: 'bold' }]}>Modifier le numero dans la base de donnees</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>Solution la plus simple : corriger le MSISDN provisoire directement dans la base de donnees PortaDB tant que la portabilite n{"'"}est pas encore basculee</Text>
           </View>
           <View style={[s.tableRow, { backgroundColor: '#fffbeb' }]}>
-            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Accord recu (1210/A001){'\n'}Portabilite acceptee</Text>
-            <Text style={[s.tableCell, { width: '25%', color: c.orange, fontWeight: 'bold' }]}>Annuler et re-saisir (si delai suffisant)</Text>
-            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Verifier que la date de portabilite est encore a J+3 minimum{'\n'}2. Si oui : annuler (1510) puis re-saisir{'\n'}3. Si non : correction manuelle (voir ci-dessous)</Text>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Pas encore basculee{'\n'}(alternative si modif BDD impossible)</Text>
+            <Text style={[s.tableCell, { width: '25%', color: c.orange, fontWeight: 'bold' }]}>Annuler et re-saisir</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Envoyer une annulation (ticket 1510/C001){'\n'}2. Attendre la confirmation d{"'"}annulation (1530){'\n'}3. Re-saisir la portabilite avec le bon MSISDN provisoire</Text>
           </View>
           <View style={[s.tableRow, { backgroundColor: '#fef2f2' }]}>
-            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Bascule imminente / effectuee{'\n'}Trop tard pour annuler</Text>
-            <Text style={[s.tableCell, { width: '25%', color: c.red, fontWeight: 'bold' }]}>Correction manuelle dans les SI</Text>
-            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Le portage va se faire (ou est fait) normalement{'\n'}2. Corriger le MSISDN provisoire dans les systemes Digicel (BSS/OSS){'\n'}3. Contacter l{"'"}equipe technique pour la correction</Text>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Deja basculee{'\n'}Trop tard</Text>
+            <Text style={[s.tableCell, { width: '25%', color: c.red, fontWeight: 'bold' }]}>Changement de numero par le CDC</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Il est trop tard pour corriger dans le systeme PNM{'\n'}2. Le CDC devra faire un changement de numero pour le client{'\n'}3. S{"'"}assurer que le MSISDN est disponible en reaffectation</Text>
           </View>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Procedure d{"'"}annulation et re-saisie (cas le plus courant)</Text>
+          <Text style={s.stepTitle}>Modifier le numero dans la base de donnees (cas le plus simple)</Text>
         </View>
 
-        <Text style={s.body}>Si le mandat est encore a un stade qui permet l{"'"}annulation :</Text>
+        <Text style={s.body}>Si la portabilite <Text style={s.bold}>n{"'"}est pas encore basculee</Text>, la solution la plus simple est de corriger le MSISDN provisoire directement dans la base de donnees :</Text>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Envoyer l{"'"}annulation</Text> via le HUB : le systeme genere un ticket <Text style={s.bold}>1510</Text> avec motif <Text style={s.bold}>C001</Text> (annulation a l{"'"}initiative de l{"'"}operateur receveur)</Text>
+          <Text style={s.listText}>Se connecter a la base <Text style={s.bold}>PortaDB</Text> sur <Text style={{ fontFamily: 'Courier', fontSize: 7 }}>vmqproportawebdb01</Text> (172.24.119.68)</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Attendre la confirmation</Text> : l{"'"}operateur donneur envoie un <Text style={s.bold}>1530</Text> confirmant l{"'"}annulation</Text>
+          <Text style={s.listText}>Identifier le mandat concerne par le MSISDN a porter</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Re-saisir la portabilite</Text> avec le <Text style={s.bold}>bon MSISDN provisoire</Text> — la nouvelle demande genere un nouveau ticket <Text style={s.bold}>1110</Text></Text>
+          <Text style={s.listText}><Text style={s.bold}>Modifier le MSISDN provisoire</Text> par la bonne valeur</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>4.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Informer le client</Text> de la nouvelle date de portabilite (le delai J+7 repart)</Text>
+          <Text style={s.listText}>Verifier sur <Text style={s.bold}>PortaWs</Text> que le mandat affiche desormais le bon MSISDN provisoire</Text>
         </View>
 
-        <View style={[s.alertWarning, { marginTop: 8 }]}>
-          <Text style={s.alertTitle}>Attention</Text>
-          <Text style={s.alertText}>L{"'"}annulation fait repartir le compteur. La nouvelle portabilite sera a <Text style={{ fontWeight: 'bold' }}>J+7 minimum</Text> a partir de la re-saisie. <Text style={{ fontWeight: 'bold' }}>Informer le client du nouveau delai.</Text></Text>
+        <View style={[s.alertInfo, { marginTop: 8 }]}>
+          <Text style={s.alertTitle}>Alternative — Annulation et re-saisie</Text>
+          <Text style={s.alertText}>Si la modification en BDD n{"'"}est pas possible, envoyer une annulation (1510 / C001), attendre la confirmation (1530), puis re-saisir avec le bon MSISDN provisoire. <Text style={{ fontWeight: 'bold' }}>Attention :</Text> le delai J+7 repart a zero. Informer le client du nouveau delai.</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
-          <Text style={s.stepTitle}>Correction manuelle (si annulation impossible)</Text>
+          <Text style={s.stepTitle}>Si la portabilite est deja basculee — trop tard</Text>
         </View>
 
-        <Text style={s.body}>Si la bascule est imminente ou deja effectuee, l{"'"}annulation n{"'"}est plus possible. Il faut corriger dans les systemes internes :</Text>
+        <View style={s.alertError}>
+          <Text style={s.alertText}>Si la portabilite est deja basculee, il est <Text style={{ fontWeight: 'bold' }}>trop tard</Text> pour corriger dans le systeme PNM. La bascule s{"'"}est faite sur un mauvais numero (un autre client) ou pas du tout.</Text>
+        </View>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}>Le portage lui-meme n{"'"}est <Text style={s.bold}>pas impacte</Text> — le MSISDN provisoire est une donnee interne Digicel</Text>
+          <Text style={s.listText}>Le CDC devra faire un <Text style={s.bold}>changement de numero</Text> pour le client</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>BSS/provisioning</Text> pour corriger le MSISDN provisoire dans les systemes</Text>
+          <Text style={s.listText}>S{"'"}assurer que le MSISDN est <Text style={s.bold}>disponible en reaffectation</Text></Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}>Verifier que le client est bien joignable sur son numero (le numero porte, pas le provisoire) une fois la bascule effectuee</Text>
+          <Text style={s.listText}>Verifier que le client est bien joignable sur son numero porte une fois la correction effectuee</Text>
         </View>
 
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} Le MSISDN provisoire est une <Text style={{ fontWeight: 'bold' }}>donnee interne Digicel</Text> — il n{"'"}apparait pas dans les echanges PNM avec les autres operateurs</Text>
-          <Text style={s.alertText}>{"•"} L{"'"}annulation + re-saisie est la solution la plus <Text style={{ fontWeight: 'bold' }}>propre</Text> mais fait repartir le delai</Text>
-          <Text style={s.alertText}>{"•"} Si le portage est imminent, la correction manuelle est preferable pour ne pas retarder le client</Text>
+          <Text style={s.alertText}>{"•"} Un mauvais MSISDN provisoire fait basculer sur un <Text style={{ fontWeight: 'bold' }}>autre client</Text> ou <Text style={{ fontWeight: 'bold' }}>pas du tout</Text></Text>
+          <Text style={s.alertText}>{"•"} La <Text style={{ fontWeight: 'bold' }}>modification en base de donnees</Text> est la solution la plus simple si la porta n{"'"}est pas encore basculee</Text>
+          <Text style={s.alertText}>{"•"} L{"'"}annulation + re-saisie est une alternative mais fait repartir le delai <Text style={{ fontWeight: 'bold' }}>J+7</Text></Text>
+          <Text style={s.alertText}>{"•"} Si deja basculee : <Text style={{ fontWeight: 'bold' }}>trop tard</Text> — le CDC doit faire un changement de numero + verifier disponibilite en reaffectation</Text>
           <Text style={s.alertText}>{"•"} Toujours <Text style={{ fontWeight: 'bold' }}>informer le client</Text> du delai supplementaire en cas d{"'"}annulation</Text>
           <Text style={s.alertText}>{"•"} Demander au CDC de <Text style={{ fontWeight: 'bold' }}>verifier systematiquement</Text> le MSISDN provisoire avant validation</Text>
         </View>
