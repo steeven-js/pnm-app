@@ -338,13 +338,7 @@ export const vacationWorkflow: WorkflowDefinition = {
       commands: [
         {
           type: 'ssh',
-          label: 'Lire le contenu du fichier .ERR',
-          server: 'vmqproportasync01',
-          template: 'cat /home/porta_pnmv3/PortaSync/pnmdata/{{op_expediteur}}/arch_send/*.ERR 2>/dev/null | head -n 20',
-        },
-        {
-          type: 'ssh',
-          label: 'Chercher tous les .ERR du jour',
+          label: 'Chercher les .ERR récents (dernières 24h)',
           server: 'vmqproportasync01',
           template: 'find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.ERR" -mtime -1 -exec echo "--- {} ---" \\; -exec head -n 5 {} \\;',
         },
