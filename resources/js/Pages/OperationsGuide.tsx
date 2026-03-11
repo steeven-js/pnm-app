@@ -966,6 +966,7 @@ function CopyCommandButton({ commands }: { commands: string[] }) {
 export default function OperationsGuide() {
   const [tab, setTab] = useState('overview');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [archPdfLoading, setArchPdfLoading] = useState(false);
 
   const handleDownloadPdf = async () => {
     setPdfLoading(true);
@@ -974,6 +975,16 @@ export default function OperationsGuide() {
       await generateOperationsGuidePdf();
     } finally {
       setPdfLoading(false);
+    }
+  };
+
+  const handleDownloadArchPdf = async () => {
+    setArchPdfLoading(true);
+    try {
+      const { generateArchitectureServersPdf } = await import('./ArchitectureServersPdf');
+      await generateArchitectureServersPdf();
+    } finally {
+      setArchPdfLoading(false);
     }
   };
 
@@ -989,16 +1000,26 @@ export default function OperationsGuide() {
               Documentation complète : architecture, vérifications quotidiennes, infrastructure, contacts
             </Typography>
           </Box>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<Iconify icon="solar:file-download-bold-duotone" width={20} />}
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            sx={{ flexShrink: 0 }}
-          >
-            {pdfLoading ? 'Génération...' : 'Télécharger PDF'}
-          </Button>
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<Iconify icon="solar:file-download-bold-duotone" width={20} />}
+              onClick={handleDownloadPdf}
+              disabled={pdfLoading}
+            >
+              {pdfLoading ? 'Génération...' : 'Guide PDF'}
+            </Button>
+            <Button
+              variant="outlined"
+              color="info"
+              startIcon={<Iconify icon="solar:server-square-bold-duotone" width={20} />}
+              onClick={handleDownloadArchPdf}
+              disabled={archPdfLoading}
+            >
+              {archPdfLoading ? 'Génération...' : 'Architecture PDF'}
+            </Button>
+          </Stack>
         </Box>
 
         <Tabs

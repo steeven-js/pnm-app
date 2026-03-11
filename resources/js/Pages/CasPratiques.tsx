@@ -585,7 +585,7 @@ const casRelancePortabilite: CasPratique = {
             </TableRow>
             <TableRow>
               <TableCell sx={{ color: 'error.main' }}>&gt; 48h</TableCell>
-              <TableCell>Escalader au <strong>GPMAG</strong> (secretariat@gpmag.fr) avec historique des relances</TableCell>
+              <TableCell>Escalader à l&apos;équipe <strong>PNM_SI</strong> avec historique des relances et créer un flashinfo</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -1324,7 +1324,7 @@ const casErreurE610: CasPratique = {
           <li>L&apos;analyseur DAPI de PNM App peut aider à visualiser la séquence des tickets et identifier l&apos;anomalie</li>
           <li>Si plusieurs MSISDN sont impactés dans le même fichier, ils partagent probablement la même cause racine</li>
           <li>Les erreurs E6xx sont des erreurs de <strong>procédure</strong>, pas des erreurs techniques — elles reflètent un problème de séquencement</li>
-          <li>En cas de doute, escalader au GPMAG : <code>secretariat@gpmag.fr</code></li>
+          <li>En cas de doute, escalader à l&apos;équipe <strong>PNM_SI</strong> et créer un flashinfo si l&apos;incident dure</li>
         </Box>
       </Alert>
     </>
@@ -1628,7 +1628,7 @@ systemctl restart tomcat
 # http://172.24.119.72:8080/manager/html
 
 # 5. Vérifier les logs
-tail -n 50 /var/log/tomcat/catalina.out
+tail -n 50 /opt/tomcat9/logs/catalina.out
 
 # 6. Vérifier l'espace disque
 df -h
@@ -1648,7 +1648,7 @@ df -h
         <li>Vérifier la sonde <strong>Nagios</strong> pour le serveur concerné</li>
         <li>Suivre la procédure d&apos;incident « Portails DAPI indisponibles » sur le SharePoint Astreinte</li>
         <li>Si le portail n&apos;est toujours pas disponible → <strong>Escalader à l&apos;équipe SYSTEM</strong></li>
-        <li>Notifier le GPMAG si l&apos;indisponibilité dure plus de 30 minutes : <strong>secretariat@gpmag.fr</strong></li>
+        <li>Communiquer à l&apos;équipe <strong>PNM_SI</strong> si l&apos;indisponibilité dure et créer un flashinfo</li>
         <li>Les portabilités continuent en arrière-plan — seule la consultation est impactée</li>
         <li>Identifiants/mots de passe disponibles sur le <strong>Secret Server</strong> : <code>https://vmqpropass01</code></li>
       </Box>
@@ -1680,7 +1680,7 @@ const casHubEnPanne: CasPratique = {
   content: (
     <>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Les demandes de portabilité saisies par les CDC (Centres De Contacts) via le <strong>HUB</strong> (ou WebStore / Wizzee) retournent
+        Les demandes de portabilité saisies par les CDC (Chargés De Clientèle) via le <strong>HUB</strong> (ou WebStore / Wizzee) retournent
         un message d&apos;erreur. Aucun mandat n&apos;apparaît sur <strong>PortaWebUI</strong>, ce qui signifie que la
         requête n&apos;atteint pas le webservice SOAP.
       </Typography>
@@ -1778,7 +1778,7 @@ systemctl status tomcat
 systemctl status tomcat
 
 # 4. Vérifier les logs pour des erreurs SOAP
-tail -n 100 /var/log/tomcat/catalina.out | grep -i "error\\|exception\\|fault"`}
+tail -n 100 /opt/tomcat9/logs/catalina.out | grep -i "error\\|exception\\|fault"`}
       </CodeBlock>
 
       <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
@@ -1802,7 +1802,7 @@ tail -n 100 /var/log/tomcat/catalina.out | grep -i "error\\|exception\\|fault"`}
         <li>Contacter l&apos;équipe <strong>infrastructure</strong> avec le message d&apos;erreur exact et les logs</li>
         <li>Si PortaWs est down : priorité haute, redémarrer Tomcat en urgence</li>
         <li>Informer les CDC que les saisies seront possibles après résolution</li>
-        <li>Notifier le GPMAG si l&apos;indisponibilité dure : <strong>secretariat@gpmag.fr</strong></li>
+        <li>Communiquer à l&apos;équipe <strong>PNM_SI</strong> si l&apos;indisponibilité dure et créer un flashinfo</li>
       </Box>
 
       <Divider sx={{ my: 3 }} />
@@ -2005,7 +2005,7 @@ ls -la pnmdata/01/arch_send/ pnmdata/01/send/
           À la fin de chaque vacation, transmettre un mail à l&apos;opérateur qui n&apos;a pas déposé son fichier
         </li>
         <li>
-          <strong>Notifier le GPMAG</strong> si le problème dure plus d&apos;une vacation : <strong>secretariat@gpmag.fr</strong>
+          Communiquer à l&apos;équipe <strong>PNM_SI</strong> si le problème dure plus d&apos;une vacation et créer un flashinfo
         </li>
         <li>
           <strong>Documenter</strong> l&apos;incident dans le rapport de vacation avec l&apos;heure de détection et les actions prises
@@ -2222,7 +2222,7 @@ tail -f <dernier_fichier_log>
         <li>Si le FNR ne s&apos;est pas exécuté : l&apos;exécuter manuellement (étape 4)</li>
         <li>Si des commandes ont échoué : corriger les MSISDN un par un avec les commandes GET/CREATE/SET/DELETE</li>
         <li>Si le problème est réseau : contacter l&apos;équipe <strong>SYSTEM</strong></li>
-        <li>Notifier le GPMAG : <strong>secretariat@gpmag.fr</strong></li>
+        <li>Communiquer à l&apos;équipe <strong>PNM_SI</strong> et créer un flashinfo si l&apos;incident dure</li>
         <li>Après correction, vérifier avec un GET sur les MSISDN concernés</li>
       </Box>
 
@@ -2251,7 +2251,7 @@ const casMsisdnProvisoireErreur: CasPratique = {
   date: '11/03/2026',
   tags: ['MSISDN provisoire', 'CDC', 'Saisie', 'Correction', 'PortaWs', 'Annulation'],
   summary:
-    'Un Centre De Contacts (CDC) a saisi un mauvais MSISDN provisoire lors de la demande de portabilité entrante. Selon l\'état d\'avancement du mandat, plusieurs solutions sont possibles : modification directe, annulation/re-saisie, ou intervention manuelle.',
+    'Un Chargé De Clientèle (CDC) a saisi un mauvais MSISDN provisoire lors de la demande de portabilité entrante. Selon l\'état d\'avancement du mandat, plusieurs solutions sont possibles : modification directe, annulation/re-saisie, ou intervention manuelle.',
   content: (
     <>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

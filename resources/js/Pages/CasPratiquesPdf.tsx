@@ -524,7 +524,7 @@ function CasRelancePortabilitePdf() {
           {[
             ['< 24h', 'Attendre la réponse de l\'opérateur', c.green],
             ['24h — 48h', 'Relancer une seconde fois avec mise en copie du responsable', c.orange],
-            ['> 48h', 'Escalader au GPMAG (secretariat@gpmag.fr) avec historique des relances', c.red],
+            ['> 48h', 'Escalader à l\'équipe PNM_SI avec historique des relances et créer un flashinfo', c.red],
           ].map(([delai, action, color]) => (
             <View key={delai} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '30%', color: color as string, fontWeight: 'bold' }]}>{delai}</Text>
@@ -1223,7 +1223,7 @@ function CasErreurE610Pdf() {
           <Text style={s.alertText}>• L{"'"}analyseur DAPI peut visualiser la séquence et identifier l{"'"}anomalie</Text>
           <Text style={s.alertText}>• Plusieurs MSISDN impactés = même cause racine probable</Text>
           <Text style={s.alertText}>• E6xx = erreurs de procédure (séquencement), pas erreurs techniques</Text>
-          <Text style={s.alertText}>• En cas de doute, escalader : secretariat@gpmag.fr</Text>
+          <Text style={s.alertText}>• En cas de doute, escalader à l{"'"}équipe PNM_SI et créer un flashinfo si nécessaire</Text>
         </View>
 
         <View style={s.footer}>
