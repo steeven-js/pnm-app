@@ -139,7 +139,7 @@ function CasIncohCol3Pdf() {
             <Text style={[s.tableCell, { width: '60%', color: c.orange, fontWeight: 'bold' }]}>06 — Free Caraïbe</Text>
           </View>
           <View style={s.tableRow}>
-            <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>Destinataire attendu</Text>
+            <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>Destinataire attendu (entête)</Text>
             <Text style={[s.tableCell, { width: '60%', color: c.green, fontWeight: 'bold' }]}>02 — Digicel</Text>
           </View>
         </View>
@@ -176,9 +176,9 @@ function CasIncohCol3Pdf() {
           </View>
           {[
             ['Ligne à supprimer', 'Ligne 12 (séquence 0011)'],
-            ['Dernier ticket', 'Ligne 66 (séquence 0065, ticket 3410 RN, MSISDN 0690660689)'],
-            ['Tickets avant correction', '65 tickets (67 lignes avec entête + pied)'],
-            ['Tickets après correction', '64 tickets (66 lignes avec entête + pied)'],
+            ['Dernier ticket du fichier', 'Ligne 66 (séquence 0065, ticket 3410 RN pour MSISDN 0690660689)'],
+            ['Nombre total de tickets avant', '65 tickets (67 lignes avec entête + pied de page)'],
+            ['Nombre total de tickets après', '64 tickets (66 lignes avec entête + pied de page)'],
           ].map(([label, value]) => (
             <View key={label} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '45%', fontWeight: 'bold' }]}>{label}</Text>
@@ -252,19 +252,19 @@ function CasIncohCol3Pdf() {
         </View>
 
         <Text style={s.body}>
-          Le fichier corrigé ne peut pas garder le même nom (rejet "fichier déjà reçu"). Mettre à jour :
+          Le fichier corrigé ne peut pas garder le même nom, sinon il sera rejeté ("fichier déjà reçu"). Il faut générer un <Text style={s.bold}>nouvel horodatage</Text> et un nouveau <Text style={s.bold}>numéro de séquence</Text> :
         </Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: '20%' }]}>Élément</Text>
             <Text style={[s.tableHeaderCell, { width: '40%' }]}>Avant</Text>
-            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Après</Text>
+            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Après (exemple)</Text>
           </View>
           {[
-            ['Nom fichier', 'PNMDATA.04.02.\n20260303123443.002', 'PNMDATA.04.02.\n20260304143000.005'],
-            ['Entête (L1)', '0123456789|...20260303\n123443.002|04|20260303123443', '0123456789|...20260304\n143000.005|04|20260304143000'],
-            ['Pied (dernière)', '9876543210|04|\n20260303123443|000067', '9876543210|04|\n20260304143000|000066'],
+            ['Nom du fichier', 'PNMDATA.04.02.\n20260303123443.002', 'PNMDATA.04.02.\n20260304143000.005'],
+            ['Ligne 1 (entête)', '0123456789|PNMDATA.04.02.\n20260303123443.002|04|\n20260303123443', '0123456789|PNMDATA.04.02.\n20260304143000.005|04|\n20260304143000'],
+            ['Dernière ligne\n(pied)', '9876543210|04|\n20260303123443|000067', '9876543210|04|\n20260304143000|000066'],
           ].map(([label, before, after]) => (
             <View key={label} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '20%', fontWeight: 'bold' }]}>{label}</Text>
@@ -274,6 +274,7 @@ function CasIncohCol3Pdf() {
           ))}
         </View>
 
+        <Text style={s.body}>Les 3 éléments à mettre à jour :</Text>
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
           <Text style={s.listText}><Text style={s.bold}>Nom du fichier</Text> : nouvel horodatage + nouveau numéro de séquence</Text>
@@ -284,7 +285,7 @@ function CasIncohCol3Pdf() {
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Pied de page</Text> : même horodatage + compteur total (64 + 2 = 000066)</Text>
+          <Text style={s.listText}><Text style={s.bold}>Pied de page (dernière ligne)</Text> : même horodatage + compteur de lignes totales (entête + tickets + pied de page = 64 + 2 = 000066)</Text>
         </View>
 
         {/* Étape 6 */}
@@ -295,7 +296,7 @@ function CasIncohCol3Pdf() {
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}>Transférer via <Text style={s.bold}>FileZilla</Text> dans recv/ sur vmqproportasync01 :</Text>
+          <Text style={s.listText}>Transférer le fichier corrigé via <Text style={s.bold}>FileZilla</Text> dans le répertoire recv/ sur le serveur <Text style={s.bold}>vmqproportasync01</Text> :</Text>
         </View>
         <View style={s.codeBlock}>
           <Text style={s.codeText}>/home/porta_pnmv3/PortaSync/pnmdata/04/recv/</Text>
@@ -359,7 +360,7 @@ function CasRelancePortabilitePdf() {
         </View>
 
         <Text style={s.body}>
-          Deux portabilités entrantes vers Digicel, avec <Text style={s.bold}>Dauphin Télécom (04)</Text> comme opérateur donneur, restent bloquées au statut "En cours" depuis le 27/02/2026 sans réponse. La date de portage prévue est dépassée.
+          Ce cas documente une situation rencontrée le <Text style={s.bold}>04/03/2026</Text> : deux portabilités entrantes vers Digicel, avec Dauphin Télécom (04) comme opérateur donneur, restent bloquées au statut <Text style={s.bold}>"En cours"</Text> depuis le 27/02/2026 sans réponse de l{"'"}opérateur donneur.
         </Text>
 
         <View style={s.alertWarning}>
@@ -376,8 +377,25 @@ function CasRelancePortabilitePdf() {
         </View>
 
         <Text style={s.body}>
-          Sur PortaWebUI, filtrer : Opérateur = 4-Dauphin Telecom, État = 3-entrante-En cours, case "En cours" cochée.
+          Sur <Text style={s.bold}>PortaWebUI</Text> (http://172.24.119.72:8080/PortaWs/index.jsp), filtrer les mandats avec les critères suivants :
         </Text>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Critère</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Valeur</Text>
+          </View>
+          {[
+            ['Opérateur', '4 — Dauphin Telecom'],
+            ['État', '3 — entrante-En cours'],
+            ['En cours ?', 'Coché'],
+          ].map(([label, value]) => (
+            <View key={label} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
+              <Text style={[s.tableCell, { width: '65%' }]}>{value}</Text>
+            </View>
+          ))}
+        </View>
 
         {/* Screenshots PortaWebUI */}
         <Image
@@ -392,26 +410,28 @@ function CasRelancePortabilitePdf() {
           Captures PortaWebUI — Filtre : En cours coché, État 3-entrante-En cours, Opérateur 4-Dauphin Telecom
         </Text>
 
-        <Text style={s.body}>Les mandats bloqués :</Text>
+        <Text style={s.body}>Les mandats bloqués apparaissent :</Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
-            <Text style={[s.tableHeaderCell, { width: '20%' }]}>MSISDN</Text>
-            <Text style={[s.tableHeaderCell, { width: '20%' }]}>Création</Text>
-            <Text style={[s.tableHeaderCell, { width: '20%' }]}>Portage prévu</Text>
-            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Dernier ticket</Text>
+            <Text style={[s.tableHeaderCell, { width: '5%' }]}>#</Text>
+            <Text style={[s.tableHeaderCell, { width: '18%' }]}>MSISDN</Text>
+            <Text style={[s.tableHeaderCell, { width: '17%' }]}>Date création</Text>
+            <Text style={[s.tableHeaderCell, { width: '17%' }]}>Date portage prévue</Text>
+            <Text style={[s.tableHeaderCell, { width: '28%' }]}>Dernier ticket émis</Text>
             <Text style={[s.tableHeaderCell, { width: '15%' }]}>Statut</Text>
           </View>
           {[
-            ['0690221675', '27/02/2026', '03/03/2026', '1110 émis 27/02', 'En cours'],
-            ['0690221360', '27/02/2026', '04/03/2026', '1110 émis 27/02', 'En cours'],
-          ].map(([msisdn, creation, portage, ticket, statut]) => (
+            ['1', '0690221675', '27/02/2026', '03/03/2026', '1110 émis le 27/02 à 14:01:36', 'En cours'],
+            ['2', '0690221360', '27/02/2026', '04/03/2026', '1110 émis le 27/02 à 14:01:36', 'En cours'],
+          ].map(([num, msisdn, creation, portage, ticket, statut]) => (
             <View key={msisdn} style={s.tableRow}>
-              <Text style={[s.tableCell, { width: '20%', fontWeight: 'bold' }]}>{msisdn}</Text>
-              <Text style={[s.tableCellLight, { width: '20%' }]}>{creation}</Text>
-              <Text style={[s.tableCell, { width: '20%', color: c.red }]}>{portage}</Text>
-              <Text style={[s.tableCellLight, { width: '25%' }]}>{ticket}</Text>
-              <Text style={[s.tableCell, { width: '15%', color: c.orange }]}>{statut}</Text>
+              <Text style={[s.tableCell, { width: '5%' }]}>{num}</Text>
+              <Text style={[s.tableCell, { width: '18%', fontWeight: 'bold' }]}>{msisdn}</Text>
+              <Text style={[s.tableCellLight, { width: '17%' }]}>{creation}</Text>
+              <Text style={[s.tableCell, { width: '17%', color: c.red, fontWeight: 'bold' }]}>{portage}</Text>
+              <Text style={[s.tableCellLight, { width: '28%' }]}>{ticket}</Text>
+              <Text style={[s.tableCell, { width: '15%', color: c.orange, fontWeight: 'bold' }]}>{statut}</Text>
             </View>
           ))}
         </View>
@@ -419,7 +439,7 @@ function CasRelancePortabilitePdf() {
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Observation clé</Text>
           <Text style={s.alertText}>
-            Les deux tickets 1110 ont été envoyés dans le fichier PNMDATA.02.04.20260227140112.002. Aucune réponse (1210 ou 1220) reçue de Dauphin Télécom depuis 5 jours. Date de portage dépassée.
+            Les deux tickets 1110 ont été envoyés dans le même fichier PNMDATA.02.04.20260227140112.002. Aucune réponse (1210 ou 1220) n{"'"}a été reçue de Dauphin Télécom depuis <Text style={s.alertTitle}>5 jours</Text>. La date de portage prévue est déjà dépassée.
           </Text>
         </View>
 
@@ -441,17 +461,17 @@ function CasRelancePortabilitePdf() {
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Aucun ticket 1210 (acceptation) ou 1220 (refus) reçu dans les fichiers de Dauphin</Text>
+          <Text style={s.listText}>Aucun ticket 1210 (acceptation) ou 1220 (refus) n{"'"}est apparu dans les fichiers reçus de Dauphin</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>La date de portage prévue est dépassée</Text>
+          <Text style={s.listText}>La date de portage prévue est <Text style={s.bold}>dépassée</Text> (03/03 et 04/03 vs aujourd{"'"}hui 04/03)</Text>
         </View>
 
         <View style={s.alertError}>
           <Text style={s.alertTitle}>Constat</Text>
           <Text style={s.alertText}>
-            Retard anormal. L'opérateur donneur n'a pas répondu dans le délai réglementaire. Relance par email nécessaire.
+            Il y a un retard anormal. L{"'"}opérateur donneur (Dauphin Télécom) n{"'"}a pas répondu dans le délai réglementaire. Il faut le relancer par email.
           </Text>
         </View>
 
@@ -474,8 +494,12 @@ function CasRelancePortabilitePdf() {
         {/* Étape 3 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Rédiger et envoyer l'email de relance</Text>
+          <Text style={s.stepTitle}>Rédiger et envoyer l{"'"}email de relance</Text>
         </View>
+
+        <Text style={s.body}>
+          Envoyer un email au correspondant PNM de l{"'"}opérateur donneur avec les informations nécessaires :
+        </Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -483,7 +507,7 @@ function CasRelancePortabilitePdf() {
             <Text style={[s.tableHeaderCell, { width: '85%' }]}>Valeur</Text>
           </View>
           {[
-            ['À', 'Correspondant PNM Dauphin Télécom'],
+            ['À', 'Correspondant PNM Dauphin Télécom (ex: latifa.annachachibi@dauphin-telecom.com)'],
             ['Cc', 'FWI_PNM_SI@digicelgroup.fr ; correspondant technique Dauphin'],
             ['Objet', '[PNM] En attente de la réponse pour la portabilité du 0690221675 vers Digicel'],
           ].map(([label, value]) => (
@@ -494,11 +518,13 @@ function CasRelancePortabilitePdf() {
           ))}
         </View>
 
+        <Text style={s.body}>Contenu de l{"'"}email — éléments à inclure :</Text>
+
         <View style={{ backgroundColor: '#F4F6F8', borderRadius: 3, padding: 8, marginVertical: 6 }}>
           <Text style={{ fontSize: 8, fontStyle: 'italic', marginBottom: 3 }}>Bonjour [Prénom],</Text>
           <Text style={{ fontSize: 8, lineHeight: 1.5 }}>
-            Nous attendons la réponse pour la portabilité du 0690221675 vers Digicel.{'\n'}
-            Le ticket 1110 est dans le fichier PNMDATA.02.04.20260227140112.002.{'\n'}
+            Nous attendons la réponse pour la portabilité du <Text style={s.bold}>0690221675</Text> vers Digicel.{'\n'}
+            Le ticket 1110 est dans le fichier <Text style={s.bold}>PNMDATA.02.04.20260227140112.002</Text>.{'\n'}
             Peux-tu débloquer la situation stp ?
           </Text>
         </View>
@@ -506,7 +532,7 @@ function CasRelancePortabilitePdf() {
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Astuce</Text>
           <Text style={s.alertText}>
-            Si plusieurs MSISDN sont concernés pour le même opérateur, les regrouper dans un seul email en listant tous les numéros et en précisant le fichier PNMDATA commun.
+            Si plusieurs MSISDN sont concernés pour le même opérateur, les regrouper dans un seul email en listant tous les numéros et en précisant le fichier PNMDATA commun. Exemple du 04/03 : relance pour les 2 numéros (0690221360 et 0690221675).
           </Text>
         </View>
 
@@ -516,6 +542,8 @@ function CasRelancePortabilitePdf() {
           <Text style={s.stepTitle}>Suivre et escalader si nécessaire</Text>
         </View>
 
+        <Text style={s.body}>Règles de suivi après relance :</Text>
+
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: '30%' }]}>Délai depuis relance</Text>
@@ -523,7 +551,7 @@ function CasRelancePortabilitePdf() {
           </View>
           {[
             ['< 24h', 'Attendre la réponse de l\'opérateur', c.green],
-            ['24h — 48h', 'Relancer une seconde fois avec mise en copie du responsable', c.orange],
+            ['24h — 48h', 'Relancer une seconde fois par email avec mise en copie du responsable', c.orange],
             ['> 48h', 'Escalader à l\'équipe PNM_SI avec historique des relances et créer un flashinfo', c.red],
           ].map(([delai, action, color]) => (
             <View key={delai} style={s.tableRow}>
@@ -533,15 +561,19 @@ function CasRelancePortabilitePdf() {
           ))}
         </View>
 
+        <Text style={s.body}>
+          À chaque vacation, vérifier sur PortaWebUI si un ticket 1210 a été reçu pour les MSISDN concernés.
+        </Text>
+
         {/* Points de vigilance */}
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>• Vérifier que le 1110 a bien été émis (statut "out") avant de relancer</Text>
-          <Text style={s.alertText}>• Indiquer le nom exact du fichier PNMDATA dans l'email</Text>
-          <Text style={s.alertText}>• Mettre FWI_PNM_SI en copie de tous les emails de relance</Text>
-          <Text style={s.alertText}>• Garder un historique : 1ère relance, 2ème relance, escalade GPMAG</Text>
-          <Text style={s.alertText}>• Délai réglementaire de réponse à un 1110 = 1 jour ouvré</Text>
-          <Text style={s.alertText}>• Si portage trop ancien ({'>'} 10j), envisager clôture + nouvelle demande</Text>
+          <Text style={s.alertText}>• Toujours vérifier sur PortaWebUI que le 1110 a bien été émis (statut "out") avant de relancer</Text>
+          <Text style={s.alertText}>• Indiquer le nom exact du fichier PNMDATA dans l{"'"}email pour que l{"'"}opérateur puisse retrouver le ticket</Text>
+          <Text style={s.alertText}>• Mettre FWI_PNM_SI en copie de tous les emails de relance pour traçabilité</Text>
+          <Text style={s.alertText}>• Garder un historique des relances : 1ère relance, 2ème relance, escalade GPMAG</Text>
+          <Text style={s.alertText}>• Le délai réglementaire de réponse à un 1110 est de 1 jour ouvré</Text>
+          <Text style={s.alertText}>• Si le portage est trop ancien ({'>'} 10 jours), envisager la clôture du mandat et la recréation d{"'"}une nouvelle demande</Text>
         </View>
 
         <View style={s.footer}>
@@ -577,21 +609,25 @@ function CasArNonRecuLogsPdf() {
         </View>
 
         <Text style={s.body}>
-          Investigation du <Text style={s.bold}>10/03/2026</Text> suite à un email d{"'"}incident signalant que le fichier <Text style={s.bold}>PNMDATA.02.03.20260309190056.003</Text> envoyé par Digicel (02) n{"'"}a pas été acquitté par Outremer Telecom / SFR (03).
+          Ce cas documente une investigation menée le <Text style={s.bold}>10/03/2026</Text> suite à un email d{"'"}incident signalant que le fichier PNMDATA.02.03.20260309190056.003 envoyé par <Text style={s.bold}>Digicel (02)</Text> n{"'"}a pas été acquitté par <Text style={s.bold}>Outremer Telecom / SFR (03)</Text>. L{"'"}analyse des logs serveur sur <Text style={s.bold}>vmqproportasync01</Text> permet de conclure à un faux positif.
         </Text>
 
         <View style={s.alertWarning}>
           <Text style={s.alertTitle}>Contexte</Text>
           <Text style={s.alertText}>
-            L{"'"}email d{"'"}incident contient deux alertes : (1) AR non reçu après 60 minutes et (2) fichier non acquitté par l{"'"}opérateur 03. Un ticket 0000/E011 a été émis automatiquement.
+            L{"'"}email d{"'"}incident contient deux alertes : (1) AR non reçu après 60 minutes et (2) fichier non acquitté par l{"'"}opérateur 03. Un ticket 0000/E011 a été émis automatiquement. L{"'"}investigation consiste à vérifier les logs pour confirmer ou infirmer le problème.
           </Text>
         </View>
 
         {/* Étape 1 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
-          <Text style={s.stepTitle}>Email d{"'"}incident reçu</Text>
+          <Text style={s.stepTitle}>Réception de l{"'"}email d{"'"}incident</Text>
         </View>
+
+        <Text style={s.body}>
+          L{"'"}email automatique [PNM][INCIDENT] signale :
+        </Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -599,9 +635,9 @@ function CasArNonRecuLogsPdf() {
             <Text style={[s.tableHeaderCell, { width: '70%' }]}>Détail</Text>
           </View>
           {[
-            ['AR non reçu', 'PNMDATA.02.03.20260309190056.003 envoyé depuis plus de 60 min'],
-            ['Non acquitté', 'Fichier non acquitté par 03 (Outremer Telecom / SFR)'],
-            ['Ticket émis', '[0000, 02, 03, 20260309201502, E011, 000001]'],
+            ['AR non reçu', 'PNMDATA.02.03.20260309190056.003 envoyé depuis plus de 60 minutes par 02 (Digicel AFG)'],
+            ['Non acquitté', 'Le fichier n\'a pas été acquitté par 03 (Outremer Telecom / SFR)'],
+            ['Ticket émis', '[0000, 02, 03, 20260309201502, E011, 000001, AR non-recu]'],
           ].map(([type, detail]) => (
             <View key={type} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{type}</Text>
@@ -613,23 +649,25 @@ function CasArNonRecuLogsPdf() {
         {/* Étape 2 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Vérifier la génération (PnmDataManager.log)</Text>
+          <Text style={s.stepTitle}>Vérifier la génération dans PnmDataManager.log</Text>
         </View>
 
-        <Text style={s.body}>Commande :</Text>
+        <Text style={s.body}>
+          Se connecter à <Text style={s.bold}>vmqproportasync01</Text> et rechercher le fichier dans les logs de génération :
+        </Text>
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" .../PnmDataManager.log</Text>
+          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" /home/porta_pnmv3/PortaSync/log/PnmDataManager.log</Text>
         </View>
         <Text style={s.body}>Résultat :</Text>
         <View style={s.codeBlock}>
           <Text style={s.codeText}>
-            PnmDataManager.php|2026-03-09T19:01:58-04:00|{'\n'}  ........Generation du fichier PNMDATA.02.03.20260309190056.003{'\n'}  (<Text style={s.codeGreen}>#tickets: 70</Text>)
+            PnmDataManager.php|2026-03-09T19:01:58-04:00| ..........Generation du fichier PNMDATA.02.03.20260309190056.003 (<Text style={s.codeGreen}>#tickets: 70</Text>)
           </Text>
         </View>
 
         <View style={s.alertSuccess}>
           <Text style={s.alertTitle}>Constat</Text>
-          <Text style={s.alertText}>Fichier généré le 09/03/2026 à 19:01:58 avec 70 tickets.</Text>
+          <Text style={s.alertText}>Le fichier a bien été généré le 09/03/2026 à 19:01:58 avec 70 tickets.</Text>
         </View>
 
         {/* Étape 3 */}
@@ -638,9 +676,11 @@ function CasArNonRecuLogsPdf() {
           <Text style={s.stepTitle}>Vérifier la présence dans send/</Text>
         </View>
 
-        <Text style={s.body}>Commande :</Text>
+        <Text style={s.body}>
+          Vérifier si le fichier est encore dans le répertoire d{"'"}envoi :
+        </Text>
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>$ ls -la .../pnmdata/03/send/PNMDATA.02.03.20260309190056.003*</Text>
+          <Text style={s.codeText}>$ ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/send/PNMDATA.02.03.20260309190056.003*</Text>
         </View>
         <Text style={s.body}>Résultat :</Text>
         <View style={s.codeBlock}>
@@ -650,7 +690,7 @@ function CasArNonRecuLogsPdf() {
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Observation</Text>
           <Text style={s.alertText}>
-            Le fichier n{"'"}est plus dans send/. Il faut vérifier les logs d{"'"}acquittement.
+            Le fichier n{"'"}est plus dans send/. Il a été récupéré par l{"'"}opérateur 03 ou déplacé. Il faut vérifier les logs d{"'"}acquittement pour savoir si un ACR a été reçu.
           </Text>
         </View>
 
@@ -673,34 +713,38 @@ function CasArNonRecuLogsPdf() {
         {/* Étape 4 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
-          <Text style={s.stepTitle}>Vérifier l{"'"}acquittement (PnmAckManager.log)</Text>
+          <Text style={s.stepTitle}>Vérifier l{"'"}acquittement dans PnmAckManager.log</Text>
         </View>
 
-        <Text style={s.body}>Commande :</Text>
+        <Text style={s.body}>
+          Rechercher l{"'"}ACR (accusé de réception) dans les logs d{"'"}acquittement :
+        </Text>
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" .../PnmAckManager.log</Text>
+          <Text style={s.codeText}>$ grep "PNMDATA.02.03.20260309190056.003" /home/porta_pnmv3/PortaSync/log/PnmAckManager.log</Text>
         </View>
         <Text style={s.body}>Résultat :</Text>
         <View style={s.codeBlock}>
           <Text style={s.codeText}>
-            ...2026-03-10T10:00:42| Accusé reçu ...003.ACR ={">"} <Text style={s.codeGreen}>E000</Text>:{'\n'}
-            ...2026-03-10T10:00:42| Archivage du fichier ...003 ...{'\n'}
-            ...2026-03-10T10:00:42| <Text style={s.codeHighlight}>NOT FOUND!</Text> (pnmdata/03/send/...003)
+            PnmDataAckManager.php|2026-03-10T10:00:42-04:00| .........Accusé reçu PNMDATA.02.03.20260309190056.003.ACR ={">"} <Text style={s.codeGreen}>E000</Text>:{'\n'}
+            PnmDataAckManager.php|2026-03-10T10:00:42-04:00| .........Archivage du fichier PNMDATA.02.03.20260309190056.003 ...{'\n'}
+            PnmDataAckManager.php|2026-03-10T10:00:42-04:00| <Text style={s.codeHighlight}>NOT FOUND!</Text> (pnmdata/03/send/PNMDATA.02.03.20260309190056.003)
           </Text>
         </View>
 
         <View style={s.alertSuccess}>
           <Text style={s.alertTitle}>Découverte clé</Text>
           <Text style={s.alertText}>
-            L{"'"}ACR E000 confirme la bonne réception par SFR/Outremer. Le NOT FOUND concerne uniquement l{"'"}archivage local.
+            L{"'"}ACR a bien été reçu le 10/03 à 10:00:42 avec le code E000 (succès). L{"'"}opérateur SFR/Outremer a confirmé la bonne réception du fichier. Cependant, au moment de l{"'"}archivage, le fichier n{"'"}était plus dans send/.
           </Text>
         </View>
 
         {/* Étape 5 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
-          <Text style={s.stepTitle}>Synthèse chronologique</Text>
+          <Text style={s.stepTitle}>Analyse et conclusion</Text>
         </View>
+
+        <Text style={s.body}>Synthèse chronologique :</Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -709,10 +753,10 @@ function CasArNonRecuLogsPdf() {
             <Text style={[s.tableHeaderCell, { width: '50%' }]}>Événement</Text>
           </View>
           {[
-            ['09/03 19:01:58', 'DataManager', 'Génération du fichier (70 tickets)', c.green],
-            ['09/03 ~20:01', 'PortaSync', 'Timeout AR 60 min → email incident', c.orange],
-            ['10/03 10:00:42', 'AckManager', 'ACR E000 reçu (réception confirmée)', c.green],
-            ['10/03 10:00:42', 'AckManager', 'NOT FOUND lors de l\'archivage', c.red],
+            ['09/03 19:01:58', 'PnmDataManager', 'Génération du fichier (70 tickets)', c.green],
+            ['09/03 ~20:01', 'PortaSync', 'Timeout AR 60 min → email d\'incident', c.orange],
+            ['10/03 10:00:42', 'PnmAckManager', 'ACR E000 reçu (réception confirmée par SFR)', c.green],
+            ['10/03 10:00:42', 'PnmAckManager', 'NOT FOUND lors de l\'archivage', c.red],
           ].map(([heure, source, event, color]) => (
             <View key={heure + event} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '25%', fontFamily: 'Courier', fontSize: 7.5 }]}>{heure}</Text>
@@ -722,11 +766,19 @@ function CasArNonRecuLogsPdf() {
           ))}
         </View>
 
+        {/* Diagnostic */}
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Diagnostic</Text>
+          <Text style={s.alertText}>
+            Le fichier a été généré, envoyé et <Text style={[s.alertText, { fontWeight: 'bold' }]}>reçu avec succès</Text> par SFR (ACR E000). L{"'"}email d{"'"}incident était un <Text style={[s.alertText, { fontWeight: 'bold' }]}>faux positif</Text> : l{"'"}AR est arrivé après le délai de 60 minutes mais avant la prochaine vacation. Le « NOT FOUND » concerne uniquement l{"'"}archivage local — le fichier a probablement été nettoyé de send/ entre-temps.
+          </Text>
+        </View>
+
         {/* Conclusion */}
         <View style={{ backgroundColor: '#E8F5E9', borderLeftWidth: 3, borderLeftColor: c.green, padding: 10, marginVertical: 10, borderRadius: 3 }}>
           <Text style={[s.alertTitle, { color: c.green }]}>Conclusion</Text>
           <Text style={[s.alertText, { fontWeight: 'bold' }]}>
-            Pas d{"'"}impact fonctionnel. L{"'"}échange avec SFR/Outremer s{"'"}est bien déroulé (ACR E000). L{"'"}email d{"'"}incident était un faux positif — l{"'"}AR est arrivé après le délai de 60 min mais avant la prochaine vacation.
+            Pas d{"'"}impact fonctionnel. L{"'"}échange avec SFR/Outremer s{"'"}est bien déroulé.
           </Text>
           <Text style={[s.alertText, { marginTop: 3 }]}>
             Impact mineur : le fichier n{"'"}est pas archivé dans arch_send/ (pas de trace locale).
@@ -736,12 +788,12 @@ function CasArNonRecuLogsPdf() {
         {/* Points de vigilance */}
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>• Un email AR non reçu ne signifie pas toujours un vrai problème — vérifier les logs</Text>
-          <Text style={s.alertText}>• ACR E000 = bonne réception confirmée par l{"'"}opérateur</Text>
-          <Text style={s.alertText}>• NOT FOUND à l{"'"}archivage = problème mineur de nettoyage, pas d{"'"}échange</Text>
-          <Text style={s.alertText}>• Ordre d{"'"}investigation : PnmDataManager → ls send/ → PnmAckManager</Text>
-          <Text style={s.alertText}>• L{"'"}analyseur d{"'"}incidents PNM App parse directement les sorties de commandes</Text>
-          <Text style={s.alertText}>• Si ACR différent de E000, investiguer le code d{"'"}erreur en détail</Text>
+          <Text style={s.alertText}>• Un email d{"'"}incident AR non reçu ne signifie pas toujours un vrai problème — toujours vérifier les logs d{"'"}acquittement</Text>
+          <Text style={s.alertText}>• Le code ACR E000 confirme la bonne réception du fichier par l{"'"}opérateur</Text>
+          <Text style={s.alertText}>• Le « NOT FOUND » lors de l{"'"}archivage est un problème mineur de nettoyage, pas un problème d{"'"}échange</Text>
+          <Text style={s.alertText}>• L{"'"}ordre d{"'"}investigation : PnmDataManager (génération) → ls send/ (présence) → PnmAckManager (acquittement)</Text>
+          <Text style={s.alertText}>• L{"'"}analyseur d{"'"}incidents de PNM App peut parser directement les sorties de ces commandes</Text>
+          <Text style={s.alertText}>• Si l{"'"}ACR reçu est différent de E000, investiguer plus en détail le code d{"'"}erreur</Text>
         </View>
 
         <View style={s.footer}>
@@ -776,13 +828,13 @@ function CasRefusR322Pdf() {
         </View>
 
         <Text style={s.body}>
-          Refus de portabilité reçu le <Text style={s.bold}>10/03/2026</Text> dans le fichier PNMDATA.02.06.20260309190056.003. L{"'"}opérateur donneur <Text style={s.bold}>Free Caraïbes (06)</Text> a refusé la demande pour le MSISDN <Text style={s.bold}>0694165585</Text> avec le motif R322.
+          Ce cas documente un refus de portabilité reçu le <Text style={s.bold}>10/03/2026</Text> dans le fichier PNMDATA.02.06.20260309190056.003. L{"'"}opérateur donneur <Text style={s.bold}>Free Caraïbes (06)</Text> a refusé la demande de portabilité pour le MSISDN <Text style={s.bold}>0694165585</Text> avec le motif <Text style={s.bold}>R322 — Résiliation effective de la ligne objet de la demande</Text>.
         </Text>
 
         <View style={s.alertError}>
           <Text style={s.alertTitle}>Impact</Text>
           <Text style={s.alertText}>
-            Le code R322 signifie que la ligne a été résiliée chez l{"'"}opérateur donneur. Le numéro est définitivement perdu pour le client.
+            Le code R322 signifie que la ligne a été résiliée chez l{"'"}opérateur donneur. Le numéro est définitivement perdu pour le client. Il ne pourra plus être porté. Le client devra obtenir un nouveau numéro.
           </Text>
         </View>
 
@@ -791,6 +843,10 @@ function CasRefusR322Pdf() {
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
           <Text style={s.stepTitle}>Réception de l{"'"}email d{"'"}incident</Text>
         </View>
+
+        <Text style={s.body}>
+          L{"'"}email automatique [PNM][INCIDENT] signale 1 refus dans le fichier :
+        </Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -810,7 +866,7 @@ function CasRefusR322Pdf() {
           ))}
           <View style={s.tableRow}>
             <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code refus</Text>
-            <Text style={[s.tableCell, { width: '65%', color: c.red, fontWeight: 'bold' }]}>R322 — Résiliation effective</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.red, fontWeight: 'bold' }]}>R322 — Résiliation effective de la ligne</Text>
           </View>
         </View>
 
@@ -820,6 +876,10 @@ function CasRefusR322Pdf() {
           <Text style={s.stepTitle}>Comprendre le motif R322</Text>
         </View>
 
+        <Text style={s.body}>
+          Le code <Text style={s.bold}>R322</Text> appartient à la famille des refus définitifs (R3xx) :
+        </Text>
+
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: '15%' }]}>Code</Text>
@@ -827,8 +887,8 @@ function CasRefusR322Pdf() {
             <Text style={[s.tableHeaderCell, { width: '35%' }]}>Conséquence</Text>
           </View>
           {[
-            ['R322', 'Résiliation effective de la ligne', 'Numéro perdu', c.red],
-            ['R321', 'Demande de résiliation en cours', 'Potentiellement récupérable', c.orange],
+            ['R322', 'Résiliation effective de la ligne objet de la demande de portabilité', 'Numéro perdu — non récupérable', c.red],
+            ['R321', 'Demande de résiliation en cours', 'Potentiellement récupérable si résiliation annulée', c.orange],
             ['R502', 'Ligne résiliée (autre formulation)', 'Numéro perdu', c.red],
           ].map(([code, sig, cons, color]) => (
             <View key={code} style={s.tableRow}>
@@ -842,23 +902,31 @@ function CasRefusR322Pdf() {
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Cas typique</Text>
           <Text style={s.alertText}>
-            Le client a résilié sa ligne chez Free Caraïbes (ou Free l{"'"}a résiliée pour impayé) avant que la demande de portabilité ne soit traitée.
+            Le client a résilié sa ligne chez Free Caraïbes (ou Free l{"'"}a résiliée pour impayé) avant que la demande de portabilité vers Digicel ne soit traitée. La portabilité ne peut aboutir car la ligne n{"'"}existe plus chez l{"'"}opérateur donneur.
           </Text>
         </View>
 
         {/* Étape 3 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Vérifier sur PortaWs</Text>
+          <Text style={s.stepTitle}>Vérifier le dossier sur PortaWs</Text>
         </View>
+
+        <Text style={s.body}>
+          Sur <Text style={s.bold}>PortaWebUI</Text>, rechercher le MSISDN 0694165585 pour confirmer :
+        </Text>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état "Refusé"</Text>
+          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état <Text style={s.bold}>"Refusé"</Text></Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Le ticket 1220 avec code R322 doit apparaître dans l{"'"}historique</Text>
+          <Text style={s.listText}>Le ticket 1110 (Demande de Portage) a été émis par Digicel</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>•</Text>
+          <Text style={s.listText}>Le ticket 1220 (Réponse Négative) a été reçu de Free avec le code R322</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
@@ -871,11 +939,16 @@ function CasRefusR322Pdf() {
           <Text style={s.stepTitle}>Informer le commercial et le client</Text>
         </View>
 
+        <Text style={s.body}>
+          Le commercial qui a initié la demande de portabilité doit être informé :
+        </Text>
+
         <View style={{ backgroundColor: '#F4F6F8', borderRadius: 3, padding: 8, marginVertical: 6 }}>
           <Text style={{ fontSize: 8, fontStyle: 'italic', marginBottom: 3 }}>Bonjour,</Text>
           <Text style={{ fontSize: 8, lineHeight: 1.5 }}>
-            La demande de portabilité pour le 0694165585 a été refusée par Free Caraïbes avec le motif R322 — Résiliation effective de la ligne.{'\n'}
-            Le numéro ne peut plus être porté. Le client devra souscrire avec un nouveau numéro.
+            La demande de portabilité pour le <Text style={s.bold}>0694165585</Text> a été refusée par Free Caraïbes avec le motif <Text style={s.bold}>R322 — Résiliation effective de la ligne</Text>.{'\n'}
+            Le numéro a été résilié chez l{"'"}opérateur donneur et ne peut plus être porté.{'\n'}
+            Le client devra souscrire avec un nouveau numéro.
           </Text>
         </View>
 
@@ -883,9 +956,10 @@ function CasRefusR322Pdf() {
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
           <Text style={s.alertText}>• R322 est un refus définitif — aucune relance possible</Text>
-          <Text style={s.alertText}>• Ne pas confondre R322 (effective) avec R321 (en cours) qui peut être réversible</Text>
-          <Text style={s.alertText}>• Si le client conteste, il doit contacter directement Free Caraïbes</Text>
-          <Text style={s.alertText}>• Documenter le cas dans le suivi quotidien</Text>
+          <Text style={s.alertText}>• Ne pas confondre R322 (résiliation effective) avec R321 (résiliation en cours) qui peut être réversible</Text>
+          <Text style={s.alertText}>• Vérifier si le client a d{"'"}autres lignes en cours de portabilité qui pourraient être impactées</Text>
+          <Text style={s.alertText}>• Si le client conteste la résiliation, il doit contacter directement Free Caraïbes — Digicel n{"'"}a aucun levier</Text>
+          <Text style={s.alertText}>• Documenter le cas dans le suivi quotidien pour traçabilité</Text>
         </View>
 
         <View style={s.footer}>
@@ -921,13 +995,13 @@ function CasAnnulation1510Pdf() {
         </View>
 
         <Text style={s.body}>
-          Deux cas d{"'"}annulation de portage traités le <Text style={s.bold}>10/03/2026</Text>. Le ticket 1510 (Demande d{"'"}Annulation) suivi du 1520 (Réponse) avec code C001 (Acceptation).
+          Ce cas documente deux annulations de portage traitées le <Text style={s.bold}>10/03/2026</Text>. Une annulation est signalée par un ticket <Text style={s.bold}>1510</Text> (Demande d{"'"}Annulation) suivi d{"'"}un ticket <Text style={s.bold}>1520</Text> (Réponse d{"'"}Annulation) avec le code <Text style={s.bold}>C001</Text> (Acceptation).
         </Text>
 
         <View style={s.alertWarning}>
           <Text style={s.alertTitle}>Contexte</Text>
           <Text style={s.alertText}>
-            L{"'"}annulation peut être initiée par l{"'"}OPR ou l{"'"}OPD avant la date de portage effective. Le code C001 confirme l{"'"}acceptation.
+            L{"'"}annulation d{"'"}un portage peut être initiée par l{"'"}OPR (opérateur receveur) ou l{"'"}OPD (opérateur donneur) <Text style={s.bold}>avant</Text> la date de portage effective. Une fois la date de portage passée, l{"'"}annulation n{"'"}est plus possible. Le code C001 dans le ticket 1520 confirme que l{"'"}annulation est acceptée.
           </Text>
         </View>
 
@@ -944,10 +1018,10 @@ function CasAnnulation1510Pdf() {
           </View>
           {[
             ['Fichier', 'PNMDATA.02.01.20260309190056.003'],
-            ['Ticket', '1510 — Demande d\'Annulation'],
+            ['Ticket', '1510 — Demande d\'Annulation (DA)'],
             ['MSISDN', '0696001019'],
-            ['OPR (initiateur)', 'Digicel (02)'],
-            ['OPD', 'Orange Caraïbe (01)'],
+            ['OPR (receveur)', 'Digicel (02) — initiateur de l\'annulation'],
+            ['OPD (donneur)', 'Orange Caraïbe (01)'],
           ].map(([label, value]) => (
             <View key={label} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
@@ -956,14 +1030,14 @@ function CasAnnulation1510Pdf() {
           ))}
           <View style={s.tableRow}>
             <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code réponse</Text>
-            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation de l{"'"}annulation</Text>
           </View>
         </View>
 
         <View style={s.alertInfo}>
           <Text style={s.alertTitle}>Scénario</Text>
           <Text style={s.alertText}>
-            Digicel a émis un 1110 pour le 0696001019 depuis Orange, puis a annulé (1510) avant la date de portage. Orange a accepté (1520/C001). Le client reste chez Orange.
+            Digicel a émis une demande de portabilité (1110) pour le 0696001019 depuis Orange Caraïbe, puis a décidé d{"'"}annuler (1510) avant la date de portage. Orange a accepté (1520/C001). Le client reste chez Orange Caraïbe.
           </Text>
         </View>
 
@@ -980,10 +1054,10 @@ function CasAnnulation1510Pdf() {
           </View>
           {[
             ['Fichier', 'PNMDATA.06.02.20260309180222.001'],
-            ['Ticket', '1510 — Demande d\'Annulation'],
+            ['Ticket', '1510 — Demande d\'Annulation (DA)'],
             ['MSISDN', '0696525199'],
-            ['OPR', 'Digicel (02)'],
-            ['OPD (initiateur)', 'Free Caraïbes (06)'],
+            ['OPR (receveur)', 'Digicel (02)'],
+            ['OPD (donneur)', 'Free Caraïbes (06) — initiateur de l\'annulation'],
           ].map(([label, value]) => (
             <View key={label} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
@@ -992,14 +1066,14 @@ function CasAnnulation1510Pdf() {
           ))}
           <View style={s.tableRow}>
             <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>Code réponse</Text>
-            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation</Text>
+            <Text style={[s.tableCell, { width: '65%', color: c.green, fontWeight: 'bold' }]}>C001 — Acceptation de l{"'"}annulation</Text>
           </View>
         </View>
 
         <View style={s.alertWarning}>
           <Text style={s.alertTitle}>Scénario</Text>
           <Text style={s.alertText}>
-            Digicel avait demandé la portabilité du 0696525199 depuis Free. Free a annulé (1510) avant la date de portage. Le client reste chez Free. Investiguer la raison auprès de Free.
+            Digicel avait demandé la portabilité (1110) du 0696525199 depuis Free Caraïbes. Free a annulé la demande (1510) avant la date de portage. Le système a automatiquement accepté (1520/C001). Le client reste chez Free Caraïbes. Il faut investiguer la raison auprès de Free.
           </Text>
         </View>
 
@@ -1021,24 +1095,26 @@ function CasAnnulation1510Pdf() {
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Vérifier sur PortaWs</Text>
+          <Text style={s.stepTitle}>Vérifier sur PortaWs et comprendre</Text>
         </View>
+
+        <Text style={s.body}>Pour chaque annulation, vérifier sur <Text style={s.bold}>PortaWebUI</Text> :</Text>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état "Annulé"</Text>
+          <Text style={s.listText}>Le mandat doit être passé à l{"'"}état <Text style={s.bold}>"Annulé"</Text></Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Identifier qui a initié le 1510 (col.2 = émetteur)</Text>
+          <Text style={s.listText}>Identifier qui a initié le 1510 : <Text style={s.bold}>OPR</Text> (col.2 = code opérateur émetteur du 1510) ou <Text style={s.bold}>OPD</Text></Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Annulation par Digicel (OPR) = demande interne (commercial)</Text>
+          <Text style={s.listText}>Si annulation par <Text style={s.bold}>Digicel (OPR)</Text> : le commercial a probablement demandé l{"'"}annulation (client a changé d{"'"}avis)</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>•</Text>
-          <Text style={s.listText}>Annulation par l{"'"}OPD = contacter pour connaître le motif</Text>
+          <Text style={s.listText}>Si annulation par <Text style={s.bold}>l{"'"}OPD</Text> : contacter l{"'"}opérateur pour connaître le motif (erreur, client a repris contact, etc.)</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -1052,9 +1128,9 @@ function CasAnnulation1510Pdf() {
             <Text style={[s.tableHeaderCell, { width: '60%' }]}>Action</Text>
           </View>
           {[
-            ['Annulation par Digicel', 'Aucune action — annulation normale suite à demande interne'],
-            ['Annulation par l\'OPD', 'Contacter l\'OPD par email. Si le client souhaite toujours porter, relancer un nouveau 1110'],
-            ['Client souhaite reporter', 'Créer un nouveau mandat avec une nouvelle date de portage'],
+            ['Annulation par Digicel (demandée)', 'Aucune action — annulation normale suite à demande interne'],
+            ['Annulation par l\'OPD (inattendue)', 'Contacter l\'OPD par email pour connaître le motif. Si le client souhaite toujours porter, relancer une nouvelle demande 1110'],
+            ['Client souhaite reporter la portabilité', 'Créer un nouveau mandat avec une nouvelle date de portage'],
           ].map(([situation, action]) => (
             <View key={situation} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>{situation}</Text>
@@ -1065,11 +1141,12 @@ function CasAnnulation1510Pdf() {
 
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>• L{"'"}annulation (1510) n{"'"}est possible qu{"'"}avant la date de portage effective</Text>
-          <Text style={s.alertText}>• C001 = annulation acceptée — le mandat est clos</Text>
-          <Text style={s.alertText}>• Vérifier col.2 du 1510 pour identifier l{"'"}initiateur</Text>
-          <Text style={s.alertText}>• Si annulation par l{"'"}OPD et inattendue, toujours contacter pour comprendre</Text>
-          <Text style={s.alertText}>• Un nouveau 1110 peut être émis après une annulation</Text>
+          <Text style={s.alertText}>• L{"'"}annulation (1510) n{"'"}est possible que <Text style={s.bold}>avant</Text> la date de portage effective</Text>
+          <Text style={s.alertText}>• Le code <Text style={s.bold}>C001</Text> signifie que l{"'"}annulation est acceptée — le mandat est clos</Text>
+          <Text style={s.alertText}>• Si l{"'"}annulation est refusée (code différent de C001), le portage continue normalement</Text>
+          <Text style={s.alertText}>• Vérifier dans la colonne 2 du ticket 1510 qui est l{"'"}émetteur pour identifier l{"'"}initiateur</Text>
+          <Text style={s.alertText}>• Si l{"'"}annulation vient de l{"'"}OPD et est inattendue, <Text style={s.bold}>toujours contacter</Text> pour comprendre</Text>
+          <Text style={s.alertText}>• Un nouveau 1110 peut être émis après une annulation si le client souhaite toujours porter</Text>
         </View>
 
         <View style={s.footer}>
@@ -1104,21 +1181,23 @@ function CasErreurE610Pdf() {
         </View>
 
         <Text style={s.body}>
-          Deux tickets 7000 avec code <Text style={s.bold}>E610</Text> reçus le <Text style={s.bold}>10/03/2026</Text> dans PNMDATA.02.01.20260309190056.003 envoyé par <Text style={s.bold}>Orange Caraïbe (01)</Text>. Les MSISDN concernés : 0690688569 et 0696386384.
+          Ce cas documente deux erreurs E610 reçues le <Text style={s.bold}>10/03/2026</Text> dans le fichier <Text style={s.code}>PNMDATA.02.01.20260309190056.003</Text> envoyé par <Text style={s.bold}>Orange Caraïbe (01)</Text>. Les tickets 7000 signalent un <Text style={s.bold}>flux non attendu dans la procédure</Text> pour deux MSISDN en cours de restitution.
         </Text>
 
         <View style={s.alertWarning}>
           <Text style={s.alertTitle}>Contexte</Text>
           <Text style={s.alertText}>
-            L{"'"}erreur E610 survient quand le système reçoit un ticket qui ne correspond pas à la séquence attendue pour un portage en cours (ex: 3420 sans 3410 préalable).
+            L{"'"}erreur E610 survient quand le système reçoit un ticket qui ne correspond pas à la séquence attendue pour un portage en cours. Par exemple, recevoir un 3420 (Réponse de Restitution) alors qu{"'"}aucun 3410 (Demande de Restitution) n{"'"}a été émis pour cet ID portage, ou un ticket dans une procédure déjà terminée.
           </Text>
         </View>
 
         {/* Étape 1 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
-          <Text style={s.stepTitle}>Email d{"'"}incident</Text>
+          <Text style={s.stepTitle}>Réception de l{"'"}email d{"'"}incident</Text>
         </View>
+
+        <Text style={s.body}>L{"'"}email <Text style={s.code}>[PNM][INCIDENT]</Text> signale 2 erreurs dans le fichier :</Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -1127,13 +1206,13 @@ function CasErreurE610Pdf() {
             <Text style={[s.tableHeaderCell, { width: '45%' }]}>Erreur</Text>
           </View>
           {[
-            ['0690688569', '7000', 'E610 — Flux non attendu'],
-            ['0696386384', '7000', 'E610 — Flux non attendu'],
+            ['0690688569', '7000 — Signalement d\'erreur', 'E610 — Flux non attendu dans la procédure'],
+            ['0696386384', '7000 — Signalement d\'erreur', 'E610 — Flux non attendu dans la procédure'],
           ].map(([msisdn, ticket, erreur]) => (
             <View key={msisdn} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{msisdn}</Text>
               <Text style={[s.tableCellLight, { width: '25%' }]}>{ticket}</Text>
-              <Text style={[s.tableCell, { width: '45%', color: c.red }]}>{erreur}</Text>
+              <Text style={[s.tableCell, { width: '45%', color: c.red, fontWeight: 'bold' }]}>{erreur}</Text>
             </View>
           ))}
         </View>
@@ -1141,15 +1220,10 @@ function CasErreurE610Pdf() {
         {/* Étape 2 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Comprendre E610</Text>
+          <Text style={s.stepTitle}>Comprendre l{"'"}erreur E610</Text>
         </View>
 
-        <View style={s.alertInfo}>
-          <Text style={s.alertTitle}>Flux de restitution attendu</Text>
-          <Text style={s.alertText}>
-            3400 (Notification) → 3410 (Demande) → 3420 (Réponse) → 3430 (Confirmation). Si un ticket arrive en dehors de cette séquence, le système génère un 7000/E610.
-          </Text>
-        </View>
+        <Text style={s.body}>L{"'"}E610 appartient à la famille des erreurs de procédure (E6xx) :</Text>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
@@ -1157,7 +1231,7 @@ function CasErreurE610Pdf() {
             <Text style={[s.tableHeaderCell, { width: '85%' }]}>Signification</Text>
           </View>
           {[
-            ['E610', 'ID portage existe mais flux non attendu dans la procédure en cours'],
+            ['E610', 'L\'ID portage existe déjà mais un flux (ticket) non attendu a été reçu dans la procédure en cours'],
             ['E601', 'Date de portabilité non conforme'],
             ['E607', 'ID portage inconnu'],
           ].map(([code, sig]) => (
@@ -1168,27 +1242,36 @@ function CasErreurE610Pdf() {
           ))}
         </View>
 
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Flux de restitution attendu</Text>
+          <Text style={s.alertText}>
+            La procédure de restitution suit la séquence : <Text style={s.alertTitle}>3400</Text> (Notification) → <Text style={s.alertTitle}>3410</Text> (Demande) → <Text style={s.alertTitle}>3420</Text> (Réponse) → <Text style={s.alertTitle}>3430</Text> (Confirmation). Si un ticket arrive en dehors de cette séquence, le système génère un 7000/E610.
+          </Text>
+        </View>
+
         {/* Étape 3 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
           <Text style={s.stepTitle}>Investiguer sur PortaWs et DAPI</Text>
         </View>
 
+        <Text style={s.body}>Pour chaque MSISDN concerné :</Text>
+
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}><Text style={s.bold}>PortaWebUI</Text> : Rechercher le MSISDN, vérifier l{"'"}état et l{"'"}historique des tickets</Text>
+          <Text style={s.listText}><Text style={s.bold}>PortaWebUI</Text> : Rechercher le MSISDN dans Supervision → Liste des mandats. Vérifier l{"'"}état actuel et l{"'"}historique des tickets reçus/émis.</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}><Text style={s.bold}>DAPI PortaWs</Text> : Vérifier la séquence des tickets avec l{"'"}analyseur DAPI</Text>
+          <Text style={s.listText}><Text style={s.bold}>DAPI PortaWs</Text> : Dans la vue portage du MSISDN, vérifier la séquence des tickets. L{"'"}analyseur d{"'"}incidents peut parser la vue DAPI pour identifier le ticket manquant ou en trop.</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}><Text style={s.bold}>Logs serveur</Text> : Vérifier PnmDataManager.log</Text>
+          <Text style={s.listText}><Text style={s.bold}>Logs serveur</Text> : Vérifier dans <Text style={s.code}>PnmDataManager.log</Text> si des tickets liés à ces MSISDN ont été générés récemment.</Text>
         </View>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>$ grep -E "0690688569|0696386384" .../PnmDataManager.log</Text>
+          <Text style={s.codeText}>$ grep -E "0690688569|0696386384" /home/porta_pnmv3/PortaSync/log/PnmDataManager.log</Text>
         </View>
 
         {/* Étape 4 */}
@@ -1203,10 +1286,10 @@ function CasErreurE610Pdf() {
             <Text style={[s.tableHeaderCell, { width: '65%' }]}>Action</Text>
           </View>
           {[
-            ['Ticket en double', 'Pas d\'action — le système a ignoré le doublon'],
-            ['Désynchronisation', 'Contacter Orange pour resynchroniser les états'],
-            ['Portage terminé', 'Ignorer — vérifier que le numéro est bien attribué'],
-            ['Problème récurrent', 'Escalader au GPMAG avec historique'],
+            ['Ticket reçu en double (duplicata)', 'Pas d\'action — le système a ignoré le doublon. Surveiller que le portage continue normalement.'],
+            ['Désynchronisation OPR/OPD', 'Contacter Orange Caraïbe pour resynchroniser les états du portage. Fournir les détails des tickets.'],
+            ['Portage déjà terminé', 'Si le portage/restitution est déjà finalisé, ignorer l\'erreur. Vérifier que le numéro est bien attribué au bon opérateur.'],
+            ['Problème récurrent', 'Si E610 récurrent avec le même opérateur, escalader au GPMAG avec l\'historique.'],
           ].map(([diag, action]) => (
             <View key={diag} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{diag}</Text>
@@ -1218,12 +1301,12 @@ function CasErreurE610Pdf() {
         {/* Points de vigilance */}
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>• E610 est souvent sans impact fonctionnel — le portage continue</Text>
+          <Text style={s.alertText}>• E610 est souvent <Text style={s.bold}>sans impact fonctionnel</Text> — le portage continue malgré l{"'"}erreur</Text>
           <Text style={s.alertText}>• Toujours vérifier l{"'"}état actuel du mandat sur PortaWs avant d{"'"}agir</Text>
-          <Text style={s.alertText}>• L{"'"}analyseur DAPI peut visualiser la séquence et identifier l{"'"}anomalie</Text>
-          <Text style={s.alertText}>• Plusieurs MSISDN impactés = même cause racine probable</Text>
-          <Text style={s.alertText}>• E6xx = erreurs de procédure (séquencement), pas erreurs techniques</Text>
-          <Text style={s.alertText}>• En cas de doute, escalader à l{"'"}équipe PNM_SI et créer un flashinfo si nécessaire</Text>
+          <Text style={s.alertText}>• L{"'"}analyseur DAPI de PNM App peut aider à visualiser la séquence des tickets et identifier l{"'"}anomalie</Text>
+          <Text style={s.alertText}>• Si plusieurs MSISDN sont impactés dans le même fichier, ils partagent probablement la même cause racine</Text>
+          <Text style={s.alertText}>• Les erreurs E6xx sont des erreurs de <Text style={s.bold}>procédure</Text>, pas des erreurs techniques — elles reflètent un problème de séquencement</Text>
+          <Text style={s.alertText}>• En cas de doute, escalader à l{"'"}équipe <Text style={s.bold}>PNM_SI</Text> et créer un flashinfo si l{"'"}incident dure</Text>
         </View>
 
         <View style={s.footer}>
@@ -1238,15 +1321,17 @@ function CasErreurE610Pdf() {
 // ─── Cas 7 : Fichier déjà reçu E008 ─────────────────────────────────────────
 
 function CasFichierDejaRecuPdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
   return (
     <Document>
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Fichier déjà reçu (E008)</Text>
-            <Text style={s.headerSub}>Suppression manuelle depuis FileZilla — 10/03/2026</Text>
+            <Text style={s.headerTitle}>Cas Pratique — Fichier déjà reçu (E008)</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
-          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+          <Text style={s.headerSub}>{today}</Text>
         </View>
 
         <View style={s.tagRow}>
@@ -1256,13 +1341,13 @@ function CasFichierDejaRecuPdf() {
         </View>
 
         <Text style={s.body}>
-          Le fichier <Text style={s.bold}>PNMDATA.03.02.20260309161154.001</Text> envoyé par <Text style={s.bold}>SFR / Outremer Telecom (03)</Text> a été déposé une seconde fois dans <Text style={s.bold}>recv/</Text> alors qu{"'"}il était déjà traité et archivé dans <Text style={s.bold}>arch_recv/</Text>. Le script PnmDataAckManager retourne l{"'"}erreur <Text style={{ ...s.bold, color: c.red }}>E008 — Fichier déjà reçu</Text>.
+          Ce cas documente un incident rencontré le <Text style={s.bold}>10/03/2026</Text> : le fichier <Text style={s.code}>PNMDATA.03.02.20260309161154.001</Text> envoyé par <Text style={s.bold}>SFR / Outremer Telecom (03)</Text> a été déposé une seconde fois dans le répertoire <Text style={s.code}>recv/</Text> alors qu{"'"}il avait déjà été traité et archivé dans <Text style={s.code}>arch_recv/</Text>. Le script <Text style={s.code}>PnmDataAckManager</Text> retourne l{"'"}erreur <Text style={{ ...s.bold, color: c.red }}>E008 — Fichier déjà reçu</Text>.
         </Text>
 
-        <View style={s.alertWarning}>
+        <View style={s.alertError}>
           <Text style={s.alertTitle}>Impact</Text>
           <Text style={s.alertText}>
-            Tant que le fichier doublon reste dans recv/, le script PnmDataAckManager tente de le traiter à chaque exécution et échoue avec l{"'"}erreur E008. Le log est pollué par les enveloppes SOAP XML du fichier.
+            Tant que le fichier doublon reste dans <Text style={s.alertTitle}>recv/</Text>, le script <Text style={s.alertTitle}>PnmDataAckManager</Text> tente de le traiter à chaque exécution et échoue avec l{"'"}erreur E008. Le log est pollué par les enveloppes SOAP XML du fichier et le message d{"'"}erreur. Le fichier doit être supprimé manuellement.
           </Text>
         </View>
 
@@ -1272,18 +1357,33 @@ function CasFichierDejaRecuPdf() {
           <Text style={s.stepTitle}>Détection dans les logs PnmAckManager</Text>
         </View>
 
-        <Text style={s.body}>Lors de l{"'"}exécution de <Text style={s.bold}>tail -f PnmAckManager.log</Text> ou <Text style={s.bold}>./PnmDataAckManager.sh -v</Text> :</Text>
+        <Text style={s.body}>En exécutant <Text style={s.bold}>tail -f PnmAckManager.log</Text> ou <Text style={s.bold}>./PnmDataAckManager.sh -v</Text>, on observe les messages suivants :</Text>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>PnmDataAckManager.php|...| Initialisation</Text>
-          <Text style={s.codeText}>..Verification operateur Orange Caraibe : Check success</Text>
-          <Text style={s.codeText}>..Verification operateur Digicel AFG : Check success</Text>
-          <Text style={s.codeText}>..Verification operateur Outremer Telecom / SFR : Check success</Text>
-          <Text style={s.codeText}>...</Text>
-          <Text style={s.codeText}>(enveloppe SOAP XML complète du fichier PNMDATA)</Text>
+          <Text style={s.codeText}>PnmDataAckManager.php|2026-03-10T15:50:01-04:00| Initialisation</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Orange Caraibe : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Digicel AFG : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Outremer Telecom / SFR : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Dauphin Telecom : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur UTS Caraibe : Check success</Text>
+          <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Free Caraibes : Check success</Text>
+          <Text style={s.codeText}>Fin Initialisation</Text>
+          <Text style={s.codeText}>(enveloppe SOAP XML complète du fichier PNMDATA — 169 tickets)</Text>
+          <Text style={s.codeText}> </Text>
           <Text style={{ ...s.codeText, color: c.red }}>Error Message : Exception during service.registerFichier(...)</Text>
           <Text style={{ ...s.codeText, color: c.red }}>  porta.exception._E0XX.PnmExceptionE008:</Text>
           <Text style={{ ...s.codeText, color: c.red }}>  [E008:0] Fichier déja reçus : PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: c.red }}>..........ERREUR : Echec de notification pour fichier reçu</Text>
+          <Text style={{ ...s.codeText, color: c.red }}>  PNMDATA.03.02.20260309161154.001 : l{"'"}appel au WS a retourné une erreur!</Text>
+          <Text style={s.codeText}>Fin de Traitement 0.04secondes.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Observation clé</Text>
+          <Text style={s.alertText}>
+            L{"'"}erreur <Text style={s.alertTitle}>PnmExceptionE008</Text> indique que le fichier est déjà enregistré dans le système (présent dans <Text style={s.alertTitle}>arch_recv/</Text>). Le script affiche l{"'"}intégralité de l{"'"}enveloppe SOAP XML du fichier dans le log, ce qui le rend difficilement lisible.
+          </Text>
         </View>
 
         {/* Étape 2 */}
@@ -1292,29 +1392,29 @@ function CasFichierDejaRecuPdf() {
           <Text style={s.stepTitle}>Vérifier la présence du fichier</Text>
         </View>
 
-        <Text style={s.body}>Confirmer que le fichier est dans recv/ (doublon) et dans arch_recv/ (original) :</Text>
+        <Text style={s.body}>Confirmer que le fichier est bien dans <Text style={s.code}>recv/</Text> (doublon) et dans <Text style={s.code}>arch_recv/</Text> (original) :</Text>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>$ ls -la .../pnmdata/03/recv/PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={s.codeText}>$ ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/recv/PNMDATA.03.02.20260309161154.001</Text>
           <Text style={{ ...s.codeText, color: c.green }}>-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</Text>
           <Text style={s.codeText}> </Text>
-          <Text style={s.codeText}>$ ls -la .../pnmdata/03/arch_recv/PNMDATA.03.02.20260309161154.001</Text>
+          <Text style={s.codeText}>$ ls -la /home/porta_pnmv3/PortaSync/pnmdata/03/arch_recv/PNMDATA.03.02.20260309161154.001</Text>
           <Text style={{ ...s.codeText, color: c.green }}>-rw-r--r-- 1 porta_pnmv3 ... PNMDATA.03.02.20260309161154.001</Text>
         </View>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: '25%' }]}>Répertoire</Text>
-            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Présent ?</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Fichier présent ?</Text>
             <Text style={[s.tableHeaderCell, { width: '50%' }]}>Signification</Text>
           </View>
           {[
-            ['recv/', 'Oui (doublon)', 'Renvoyé par l\'opérateur — à supprimer'],
-            ['arch_recv/', 'Oui (original)', 'Déjà traité et archivé'],
+            ['recv/', 'Oui (doublon)', 'Fichier renvoyé par l\'opérateur — à supprimer'],
+            ['arch_recv/', 'Oui (original)', 'Fichier déjà traité et archivé — preuve que le traitement initial a fonctionné'],
           ].map(([rep, present, sig]) => (
             <View key={rep} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold' }]}>{rep}</Text>
-              <Text style={[s.tableCell, { width: '25%', color: rep === 'recv/' ? c.red : c.green }]}>{present}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: rep === 'recv/' ? c.red : c.green, fontWeight: 'bold' }]}>{present}</Text>
               <Text style={[s.tableCellLight, { width: '50%' }]}>{sig}</Text>
             </View>
           ))}
@@ -1323,7 +1423,7 @@ function CasFichierDejaRecuPdf() {
         {/* Étape 3 */}
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Supprimer le fichier doublon via FileZilla</Text>
+          <Text style={s.stepTitle}>Supprimer le fichier doublon de recv/</Text>
         </View>
 
         <View style={s.listItem}>
@@ -1353,14 +1453,22 @@ function CasFichierDejaRecuPdf() {
 
         <View style={s.codeBlock}>
           <Text style={s.codeText}>$ ./PnmDataAckManager.sh -v</Text>
-          <Text style={s.codeText}>PnmDataAckManager.php|...| Initialisation</Text>
+          <Text style={s.codeText}>PnmDataAckManager.php|2026-03-10T16:38:58-04:00| Initialisation</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Orange Caraibe : Check success</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Digicel AFG : Check success</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Outremer Telecom / SFR : Check success</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Dauphin Telecom : Check success</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur UTS Caraibe : Check success</Text>
           <Text style={{ ...s.codeText, color: c.green }}>..Verification operateur Free Caraibes : Check success</Text>
-          <Text style={{ ...s.codeText, color: c.green }}>Fin de Traitement 0.01secondes.</Text>
+          <Text style={s.codeText}>Fin Initialisation</Text>
+          <Text style={{ ...s.codeText, color: c.green, fontWeight: 'bold' }}>Fin de Traitement 0.01secondes.</Text>
+        </View>
+
+        <View style={s.alertSuccess}>
+          <Text style={s.alertTitle}>Résultat</Text>
+          <Text style={s.alertText}>
+            Le script s{"'"}exécute sans erreur. Aucun fichier à traiter, fin de traitement immédiate (0.01s vs 0.04s avec le fichier doublon). Le problème est résolu.
+          </Text>
         </View>
 
         {/* Points de vigilance */}
@@ -1369,8 +1477,9 @@ function CasFichierDejaRecuPdf() {
           <Text style={s.alertText}>• Toujours vérifier que le fichier existe dans arch_recv/ AVANT de supprimer celui de recv/</Text>
           <Text style={s.alertText}>• Ne JAMAIS supprimer le fichier de arch_recv/ — c{"'"}est la trace du traitement original</Text>
           <Text style={s.alertText}>• L{"'"}erreur E008 est sans impact fonctionnel — le fichier a déjà été traité</Text>
-          <Text style={s.alertText}>• Si un opérateur renvoie régulièrement des fichiers en double, le signaler par email</Text>
-          <Text style={s.alertText}>• Après suppression, toujours relancer ./PnmDataAckManager.sh -v pour confirmer</Text>
+          <Text style={s.alertText}>• Si le même opérateur renvoie régulièrement des fichiers en double, signaler le problème par email</Text>
+          <Text style={s.alertText}>• Le log SOAP XML dans PnmAckManager.log peut être très volumineux — ne pas s{"'"}alarmer de la taille</Text>
+          <Text style={s.alertText}>• Après suppression, toujours relancer <Text style={s.code}>./PnmDataAckManager.sh -v</Text> pour confirmer la résolution</Text>
         </View>
 
         <View style={s.footer}>
@@ -1385,15 +1494,17 @@ function CasFichierDejaRecuPdf() {
 // ─── Cas #8 — PortaWs Inaccessible PDF ──────────────────────────────────────
 
 function CasPortaWsInaccessiblePdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
   return (
     <Document>
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : PortaWs inaccessible</Text>
-            <Text style={s.headerSub}>Diagnostic et resolution — 11/03/2026</Text>
+            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
-          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+          <Text style={s.headerSub}>{today}</Text>
         </View>
 
         <View style={s.tagRow}>
@@ -1402,93 +1513,189 @@ function CasPortaWsInaccessiblePdf() {
           ))}
         </View>
 
+        <Text style={s.body}>
+          Le portail <Text style={s.bold}>PortaWebUI</Text> ne répond plus. L{"'"}accès par le navigateur retourne une page blanche, un timeout ou une erreur HTTP (502, 503). Ce cas couvre les différentes causes possibles et la démarche de diagnostic.
+        </Text>
+
         <View style={s.alertError}>
-          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
-          <Text style={s.alertText}>Le portail PortaWs (http://172.24.119.72:8080/PortaWs/) ne s{"'"}affiche plus. Aucune visibilite sur les portabilites en cours. Les CDC ne peuvent plus saisir ni suivre les demandes. Les portabilites deja en cours continuent en fond.</Text>
+          <Text style={s.alertTitle}>Impact</Text>
+          <Text style={s.alertText}>Sans PortaWs, impossible de consulter les mandats, vérifier les états de portabilité ou utiliser le DAPI. Les opérations de portabilité continuent en arrière-plan mais la visibilité est perdue.</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
-          <Text style={s.stepTitle}>Verifier l{"'"}accessibilite du portail</Text>
+          <Text style={s.stepTitle}>Diagnostic initial</Text>
         </View>
 
-        <Text style={s.body}>Tester dans le navigateur : <Text style={s.bold}>http://172.24.119.72:8080/PortaWs/</Text></Text>
+        <Text style={s.body}>Vérifier d{"'"}abord si le problème est local ou général :</Text>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Tester l{"'"}accès depuis un autre navigateur / poste</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Vérifier que le VPN est connecté (si accès distant)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Tester un <Text style={s.code}>ping</Text> vers le serveur PortaWs</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Serveurs et URLs de production</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>PortaWebUi</Text> (CDC) : http://172.24.119.71:8080/PortaWebUi/ — serveur <Text style={{ fontWeight: 'bold' }}>vmqproportaweb01</Text></Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>PortaWs</Text> (Admin) : http://172.24.119.72:8080/PortaWs/ — serveur <Text style={{ fontWeight: 'bold' }}>vmqproportaws01</Text></Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Base de données</Text> : vmqproportawebdb01 — MySQL :3306 (PortaDB + PortaWebDB)</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Nagios PortaWebUi</Text> : http://digimqmon05/nagios/cgi-bin/extinfo.cgi?type=1&amp;host=vmqproportaweb01</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Nagios PortaWs</Text> : http://digimqmon05/nagios/cgi-bin/extinfo.cgi?type=1&amp;host=vmqproportaws01</Text>
+        </View>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>{"curl -s -o /dev/null -w \"%{http_code}\" http://172.24.119.72:8080/PortaWs/"}</Text>
+          <Text style={s.codeText}># Vérifier les portails</Text>
+          <Text style={s.codeText}>ping 172.24.119.71    # vmqproportaweb01 (PortaWebUi)</Text>
+          <Text style={s.codeText}>ping 172.24.119.72    # vmqproportaws01 (PortaWs)</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Verifier Tomcat sur vmqproportaws01</Text>
-        </View>
-
-        <View style={s.codeBlock}>
-          <Text style={s.codeText}>systemctl status tomcat</Text>
-          <Text style={s.codeText}># Si arrete :</Text>
-          <Text style={{ ...s.codeText, color: '#fbbf24' }}>systemctl restart tomcat</Text>
-        </View>
-
-        <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Verifier les logs</Text>
-        </View>
-
-        <View style={s.codeBlock}>
-          <Text style={s.codeText}>tail -n 50 /opt/tomcat9/logs/catalina.out</Text>
-        </View>
-
-        <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
-          <Text style={s.stepTitle}>Diagnostic selon le constat</Text>
+          <Text style={s.stepTitle}>Arbre de décision</Text>
         </View>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
-            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Constat</Text>
-            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause probable</Text>
-            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Resolution</Text>
+            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Symptôme</Text>
+            <Text style={[s.tableHeaderCell, { width: '22%' }]}>Cause probable</Text>
+            <Text style={[s.tableHeaderCell, { width: '28%' }]}>Vérification</Text>
+            <Text style={[s.tableHeaderCell, { width: '28%' }]}>Résolution</Text>
           </View>
-          {[
-            ['Page blanche / timeout', 'Tomcat arrete', 'systemctl restart tomcat'],
-            ['Erreur 500', 'Erreur applicative', 'Verifier catalina.out'],
-            ['Erreur 404', 'Webapp non deployee', 'Verifier /opt/tomcat9/webapps/'],
-            ['Page lente', 'Charge serveur', 'Verifier CPU/RAM avec top'],
-          ].map(([constat, cause, resolution]) => (
-            <View key={constat} style={s.tableRow}>
-              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{constat}</Text>
-              <Text style={[s.tableCell, { width: '30%', color: c.red }]}>{cause}</Text>
-              <Text style={[s.tableCellLight, { width: '40%' }]}>{resolution}</Text>
-            </View>
-          ))}
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '22%', fontWeight: 'bold' }]}>Timeout / connexion refusée</Text>
+            <Text style={[s.tableCell, { width: '22%', color: c.red }]}>Tomcat arrêté</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Nagios : systemctl status tomcat</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Recharger via http://172.24.119.72:8080/manager/html ou systemctl restart tomcat</Text>
+          </View>
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '22%', fontWeight: 'bold' }]}>Erreur 502 / 503</Text>
+            <Text style={[s.tableCell, { width: '22%', color: c.red }]}>Application non déployée ou crash</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Logs Tomcat : catalina.out</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Si Tomcat bloqué : kill -9 sur le PID Java puis systemctl restart tomcat</Text>
+          </View>
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '22%', fontWeight: 'bold' }]}>Page blanche / erreur DB</Text>
+            <Text style={[s.tableCell, { width: '22%', color: c.orange }]}>Base PortaDB injoignable</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Tester MySQL :3306 sur vmqproportawebdb01</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Vérifier le service MySQL, espace disque sur vmqproportawebdb01 (172.24.119.68)</Text>
+          </View>
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '22%', fontWeight: 'bold' }]}>Erreur certificat / HTTPS</Text>
+            <Text style={[s.tableCell, { width: '22%', color: c.orange }]}>Certificat SSL expiré</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Vérifier la date d{"'"}expiration du certificat</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Renouveler le certificat, redémarrer Tomcat</Text>
+          </View>
+          <View style={s.tableRow}>
+            <Text style={[s.tableCell, { width: '22%', fontWeight: 'bold' }]}>Ping OK mais HTTP timeout</Text>
+            <Text style={[s.tableCell, { width: '22%', color: c.blue }]}>Pare-feu / port bloqué</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>telnet &lt;adresse&gt; 8443</Text>
+            <Text style={[s.tableCellLight, { width: '28%' }]}>Contacter l{"'"}équipe réseau pour ouvrir le port</Text>
+          </View>
         </View>
 
         <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
-          <Text style={s.stepTitle}>Escalade</Text>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Vérifications sur le serveur</Text>
+        </View>
+
+        <Text style={s.body}>Se connecter en SSH et vérifier selon le portail concerné :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># === PortaWs (vmqproportaws01 — 172.24.119.72) ===</Text>
+          <Text style={s.codeText}># Se connecter en root sur vmqproportaws01</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 1. Vérifier Tomcat</Text>
+          <Text style={s.codeText}>systemctl status tomcat</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 2. Si Tomcat est down → le relancer</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>systemctl restart tomcat</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 3. Si Tomcat est bloqué (refuse de redémarrer) → kill -9 puis relancer</Text>
+          <Text style={s.codeText}>ps aux | grep java   # trouver le PID</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>kill -9 &lt;PID_JAVA&gt;</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>systemctl restart tomcat</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 4. Alternative : recharger l{"'"}app via l{"'"}interface Tomcat Manager</Text>
+          <Text style={s.codeText}># http://172.24.119.72:8080/manager/html</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 5. Vérifier les logs</Text>
+          <Text style={s.codeText}>tail -n 50 /opt/tomcat9/logs/catalina.out</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 6. Vérifier l{"'"}espace disque</Text>
+          <Text style={s.codeText}>df -h</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># === PortaWebUi (vmqproportaweb01 — 172.24.119.71) ===</Text>
+          <Text style={s.codeText}># Même procédure mais sur vmqproportaweb01</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
+            <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Escalade si non résolu</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertText}>Si le problème persiste après les vérifications :</Text>
         </View>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>SYSTEM</Text> si non resolu</Text>
+          <Text style={s.listText}>Vérifier la sonde <Text style={s.bold}>Nagios</Text> pour le serveur concerné</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}>Communiquer a l{"'"}equipe <Text style={s.bold}>PNM_SI</Text> et creer un flashinfo</Text>
+          <Text style={s.listText}>Suivre la procédure d{"'"}incident « Portails DAPI indisponibles » sur le SharePoint Astreinte</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Si le portail n{"'"}est toujours pas disponible → <Text style={s.bold}>Escalader à l{"'"}équipe SYSTEM</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Communiquer à l{"'"}équipe <Text style={s.bold}>PNM_SI</Text> si l{"'"}indisponibilité dure et créer un flashinfo</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>5.</Text>
+          <Text style={s.listText}>Les portabilités continuent en arrière-plan — seule la consultation est impactée</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>6.</Text>
+          <Text style={s.listText}>Identifiants/mots de passe disponibles sur le <Text style={s.bold}>Secret Server</Text> : <Text style={s.code}>https://vmqpropass01</Text></Text>
         </View>
 
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} PortaWs = portail de consultation, pas le moteur de portabilite</Text>
-          <Text style={s.alertText}>{"•"} Les portabilites continuent meme si PortaWs est down</Text>
-          <Text style={s.alertText}>{"•"} Apres restart Tomcat, attendre 1-2 min avant de retester</Text>
-          <Text style={s.alertText}>{"•"} Logs : /opt/tomcat9/logs/catalina.out</Text>
-          <Text style={s.alertText}>{"•"} Identifiants Secret Server : https://vmqpropass01</Text>
+          <Text style={s.alertText}>{"•"} Un <Text style={{ fontWeight: 'bold' }}>redémarrage Tomcat</Text> suffit dans la majorité des cas</Text>
+          <Text style={s.alertText}>{"•"} Un <Text style={{ fontWeight: 'bold' }}>disque plein</Text> est une cause fréquente de crash silencieux</Text>
+          <Text style={s.alertText}>{"•"} Les portabilités continuent même si le portail est down — seule la visibilité est perdue</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Documenter</Text> l{"'"}incident dans le rapport de vacation</Text>
         </View>
 
         <View style={s.footer}>
-          <Text>PNM App — Cas Pratique : PortaWs inaccessible</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>PNM App — Cas Pratique — PortaWs inaccessible</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>
@@ -1515,15 +1722,19 @@ function CasHubPortabilitesEchecPdf() {
           ))}
         </View>
 
-        <View style={s.alertError}>
-          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
-          <Text style={s.alertText}>Les demandes de portabilite saisies par les CDC via le HUB retournent une erreur. Aucun mandat n{"'"}apparait sur PortaWebUI. Les portabilites deja en cours continuent normalement. Seules les nouvelles demandes sont bloquees.</Text>
-        </View>
+        <Text style={s.body}>Les demandes de portabilite saisies par les CDC (Charges De Clientele) via le <Text style={s.bold}>HUB</Text> (ou WebStore / Wizzee) retournent un message d{"'"}erreur. Aucun mandat n{"'"}apparait sur <Text style={s.bold}>PortaWebUI</Text>, ce qui signifie que la requete n{"'"}atteint pas le webservice SOAP.</Text>
 
         <View style={s.alertInfo}>
-          <Text style={s.alertTitle}>Chaine de webservices</Text>
-          <Text style={s.alertText}>HUB {"→"} PortaUiWs4Esb (vmqproportaweb01 : http://172.24.119.71:8080/PortaWebUi/DigicelFwiPortaUiWs4Esb?wsdl)</Text>
-          <Text style={s.alertText}>{"→"} PortaWs4Esb (vmqproportaws01 : http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb?wsdl)</Text>
+          <Text style={s.alertTitle}>Chaine de webservices impliques</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>HUB / WebStore / Wizzee</Text> {"→"} PortaUiWs4Esb sur vmqproportaweb01 : http://172.24.119.71:8080/PortaWebUi/DigicelFwiPortaUiWs4Esb?wsdl</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>PortaWebUi</Text> {"→"} PortaWs4Esb sur vmqproportaws01 : http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb?wsdl</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>DAPI</Text> {"→"} ESB DataProxy {"→"} DigicelFwiEsbWs4Porta : http://172.24.116.76:8000/.../DigicelFwiEsbWs4Porta.wsdl</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Traitement interne</Text> {"→"} PortaWs4PortaSync : http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4PortaSync?wsdl</Text>
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Aucune nouvelle portabilite ne peut etre saisie. Les portabilites deja en cours continuent leur cycle normalement. Seules les <Text style={{ fontWeight: 'bold' }}>nouvelles demandes</Text> sont bloquees.</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -1531,65 +1742,141 @@ function CasHubPortabilitesEchecPdf() {
           <Text style={s.stepTitle}>Qualifier le probleme</Text>
         </View>
 
-        <Text style={s.body}>Recueillir : message d{"'"}erreur exact, MSISDN, un seul CDC ou tous, depuis quand.</Text>
-        <Text style={s.body}>Un seul CDC = probleme de donnees. Tous les CDC = probleme d{"'"}infrastructure.</Text>
+        <Text style={s.body}>Recueillir les informations aupres du CDC :</Text>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}><Text style={s.bold}>Message d{"'"}erreur exact</Text> affiche sur le HUB (capture d{"'"}ecran si possible)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}><Text style={s.bold}>MSISDN</Text> de la portabilite tentee</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Le probleme touche-t-il <Text style={s.bold}>un seul CDC</Text> ou <Text style={s.bold}>tous les CDC</Text> ?</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Depuis <Text style={s.bold}>quand</Text> le probleme est apparu ?</Text>
+        </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Diagnostic selon le message d{"'"}erreur</Text>
+          <Text style={s.stepTitle}>Arbre de decision selon le message d{"'"}erreur</Text>
         </View>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
-            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Message</Text>
-            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause</Text>
-            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Action</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Message d{"'"}erreur / Symptome</Text>
+            <Text style={[s.tableHeaderCell, { width: '30%' }]}>Cause probable</Text>
+            <Text style={[s.tableHeaderCell, { width: '40%' }]}>Resolution</Text>
           </View>
           {[
-            ['Connection refused / Timeout', 'PortaWs est down', 'Verifier Tomcat'],
-            ['SOAP Fault / Erreur 500', 'Erreur applicative', 'Verifier les logs'],
-            ['401 Unauthorized', 'Credentials HUB expires', 'Verifier config HUB'],
-            ['Pas de trace dans PortaWebUI', 'Requete n\'arrive pas au WS', 'Verifier connectivite'],
+            ['Connection refused / Timeout', 'PortaWs est down ou injoignable', 'Verifier PortaWs (cf. Cas Pratique "PortaWs inaccessible")'],
+            ['SOAP Fault / Internal Server Error (500)', 'Erreur applicative cote PortaWs', 'Verifier les logs Tomcat (catalina.out), possible bug ou donnees invalides'],
+            ['Erreur d\'authentification / 401 Unauthorized', 'Credentials HUB→PortaWs expires', 'Verifier la config du HUB, renouveler les credentials si besoin'],
+            ['Pas de trace dans PortaWebUI', 'La requete ne parvient pas au WS', 'Verifier connectivite reseau HUB→PortaWs, pare-feu, proxy'],
+            ['Erreur sur un seul MSISDN', 'Donnees de portabilite invalides (RIO, dates)', 'Verifier le RIO, la date de portabilite, le MSISDN via les outils Verifier'],
           ].map(([msg, cause, action]) => (
             <View key={msg} style={s.tableRow}>
-              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{msg}</Text>
+              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{msg}</Text>
               <Text style={[s.tableCell, { width: '30%', color: c.red }]}>{cause}</Text>
-              <Text style={[s.tableCellLight, { width: '35%' }]}>{action}</Text>
+              <Text style={[s.tableCellLight, { width: '40%' }]}>{action}</Text>
             </View>
           ))}
         </View>
 
-        <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Tester les webservices</Text>
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Portabilites HUB en echec</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Portabilites HUB en echec (suite)</Text>
+            <Text style={s.headerSub}>Les portabilites depuis le HUB ne fonctionnent plus — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Verifications techniques</Text>
+        </View>
+
+        <Text style={s.body}>Si le probleme touche <Text style={s.bold}>tous les CDC</Text>, c{"'"}est un probleme d{"'"}infrastructure :</Text>
+
         <View style={s.codeBlock}>
-          <Text style={s.codeText}># Tester PortaUiWs4Esb (premier appele par le HUB)</Text>
+          <Text style={s.codeText}># 1. Verifier que le WS PortaUiWs4Esb repond (appele par le HUB)</Text>
           <Text style={s.codeText}>curl -s http://172.24.119.71:8080/PortaWebUi/DigicelFwiPortaUiWs4Esb?wsdl | head -5</Text>
           <Text style={s.codeText}> </Text>
-          <Text style={s.codeText}># Tester PortaWs4Esb</Text>
+          <Text style={s.codeText}># 2. Verifier que le WS PortaWs4Esb repond (appele par PortaWebUi)</Text>
           <Text style={s.codeText}>curl -s http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb?wsdl | head -5</Text>
           <Text style={s.codeText}> </Text>
-          <Text style={{ ...s.codeText, color: '#22c55e' }}># Si XML avec &lt;definitions&gt; = WS OK</Text>
-          <Text style={{ ...s.codeText, color: '#fbbf24' }}># Si timeout = Tomcat down → systemctl restart tomcat</Text>
+          <Text style={s.codeText}># 3. Si timeout {"→"} Tomcat est down sur le serveur concerne</Text>
+          <Text style={s.codeText}># Sur vmqproportaweb01 (PortaWebUi) :</Text>
+          <Text style={s.codeText}>systemctl status tomcat</Text>
           <Text style={s.codeText}> </Text>
-          <Text style={s.codeText}># Verifier les logs</Text>
-          <Text style={s.codeText}>tail -n 50 /opt/tomcat9/logs/catalina.out</Text>
+          <Text style={s.codeText}># Sur vmqproportaws01 (PortaWs) :</Text>
+          <Text style={s.codeText}>systemctl status tomcat</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 4. Verifier les logs pour des erreurs SOAP</Text>
+          <Text style={s.codeText}>tail -n 100 /opt/tomcat9/logs/catalina.out | grep -i "error\|exception\|fault"</Text>
+        </View>
+
+        <Text style={{ ...s.body, marginTop: 8 }}>Si le probleme touche <Text style={s.bold}>un seul CDC</Text>, c{"'"}est un probleme de donnees :</Text>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Verifier le <Text style={s.bold}>RIO</Text> avec l{"'"}outil Verifier {"→"} RIO Validator</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Verifier que le <Text style={s.bold}>MSISDN</Text> n{"'"}a pas deja un portage en cours sur PortaWebUI</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Verifier que la <Text style={s.bold}>date de portabilite</Text> est dans le futur (J+7 minimum)</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Escalade</Text>
+        </View>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertText}>Si le probleme est general et persiste :</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>infrastructure</Text> avec le message d{"'"}erreur exact et les logs</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Si PortaWs est down : priorite haute, redemarrer Tomcat en urgence</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Informer les CDC que les saisies seront possibles apres resolution</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Communiquer a l{"'"}equipe <Text style={s.bold}>PNM_SI</Text> si l{"'"}indisponibilite dure et creer un flashinfo</Text>
         </View>
 
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} Toujours demander le message d{"'"}erreur exact au CDC</Text>
-          <Text style={s.alertText}>{"•"} Un seul CDC concerne ≠ probleme d{"'"}infrastructure</Text>
-          <Text style={s.alertText}>{"•"} Les portabilites deja en cours ne sont PAS impactees</Text>
-          <Text style={s.alertText}>{"•"} Apres resolution, le CDC doit RE-SAISIR la portabilite</Text>
-          <Text style={s.alertText}>{"•"} Escalader a PNM_SI + flashinfo si indisponibilite dure</Text>
+          <Text style={s.alertText}>{"•"} Toujours demander le <Text style={{ fontWeight: 'bold' }}>message d{"'"}erreur exact</Text> au CDC avant de diagnostiquer</Text>
+          <Text style={s.alertText}>{"•"} Un probleme sur un seul CDC ≠ un probleme d{"'"}infrastructure</Text>
+          <Text style={s.alertText}>{"•"} Les portabilites deja en cours ne sont <Text style={{ fontWeight: 'bold' }}>pas impactees</Text> — seules les nouvelles saisies sont bloquees</Text>
+          <Text style={s.alertText}>{"•"} Apres resolution, demander au CDC de <Text style={{ fontWeight: 'bold' }}>re-saisir</Text> la portabilite (elle n{"'"}a pas ete enregistree)</Text>
         </View>
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : Portabilites HUB en echec</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>
@@ -1605,31 +1892,32 @@ function CasAucunFichierRecuPdf() {
         <View style={s.header}>
           <View>
             <Text style={s.headerTitle}>Cas Pratique : Aucun fichier recu des operateurs</Text>
-            <Text style={s.headerSub}>vmqproportasync01 — 11/03/2026</Text>
+            <Text style={s.headerSub}>On ne recoit plus aucun fichier des operateurs sur vmqproportasync01 — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
         <View style={s.tagRow}>
-          {['SFTP', 'vmqproportasync01', 'Fichiers', 'Incident', 'Cron'].map((tag) => (
+          {['SFTP', 'vmqproportasync01', 'Fichiers', 'Incident', 'Infrastructure', 'Cron'].map((tag) => (
             <Text key={tag} style={s.tag}>{tag}</Text>
           ))}
         </View>
 
         <View style={s.alertError}>
           <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
-          <Text style={s.alertText}>Aucun fichier PNMDATA n{"'"}a ete depose dans les repertoires recv/. Le rapport de vacation indique 0 fichiers recus. Les portabilites en cours ne peuvent pas avancer.</Text>
+          <Text style={s.alertText}>Aucun fichier PNMDATA n{"'"}a ete depose dans les repertoires recv/. Le rapport de vacation indique 0 fichiers recus. Les tickets (1210, 1430, etc.) des autres operateurs ne sont pas traites. Incident critique a resoudre rapidement.</Text>
         </View>
 
         <View style={s.alertInfo}>
-          <Text style={s.alertTitle}>Architecture des echanges</Text>
-          <Text style={s.alertText}>BTCTF (172.24.119.70) = hub de transfert SFTP. vmqproportasync01 (172.24.119.69) recupere les fichiers depuis BTCTF.</Text>
-          <Text style={s.alertText}>Flux : Operateur {"→"} BTCTF (SFTP) {"→"} vmqproportasync01 (recv/ {"→"} arch_recv/)</Text>
+          <Text style={s.alertTitle}>Architecture des echanges de fichiers</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>BTCTF</Text> (172.24.119.70) : serveur d{"'"}echange de fichiers (Bouygues Telecom Caraibe Transfert File). Les operateurs y deposent leurs fichiers via SFTP</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>vmqproportasync01</Text> (172.24.119.69) : recupere les fichiers depuis BTCTF, les acquitte, et les archive dans arch_recv/</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Vacations</Text> : 10h-11h, 14h-15h, 19h-20h + synchro dimanche 22h-24h</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
-          <Text style={s.stepTitle}>Diagnostic rapide — c{"'"}est nous ou eux ?</Text>
+          <Text style={s.stepTitle}>Diagnostic rapide — est-ce nous ou eux ?</Text>
         </View>
 
         <View style={s.codeBlock}>
@@ -1646,8 +1934,8 @@ function CasAucunFichierRecuPdf() {
             <Text style={[s.tableHeaderCell, { width: '30%' }]}>Action</Text>
           </View>
           {[
-            ['AUCUN operateur n\'a depose', 'Probleme cote notre serveur', 'Verifier serveur (etape 2)'],
-            ['UN SEUL operateur manquant', 'Probleme cote cet operateur', 'Contacter l\'operateur'],
+            ['AUCUN operateur n\'a depose', 'Probleme cote notre serveur (SFTP, cron, disque)', 'Passer a l\'etape 2'],
+            ['UN SEUL operateur manquant', 'Probleme cote cet operateur', 'Contacter l\'operateur concerne, puis passer a l\'etape 4'],
           ].map(([constat, sig, action]) => (
             <View key={constat} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '40%', fontWeight: 'bold' }]}>{constat}</Text>
@@ -1659,34 +1947,54 @@ function CasAucunFichierRecuPdf() {
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Verifier vmqproportasync01</Text>
+          <Text style={s.stepTitle}>Verifier le serveur vmqproportasync01</Text>
         </View>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>df -h                          <Text style={{ color: '#22c55e' }}># Espace disque (ref: / ~61%, /home ~67%)</Text></Text>
-          <Text style={s.codeText}>systemctl status sshd          <Text style={{ color: '#22c55e' }}># Service SFTP actif ?</Text></Text>
-          <Text style={s.codeText}>crontab -l | grep -i "porta"   <Text style={{ color: '#22c55e' }}># Crons OK ?</Text></Text>
+          <Text style={s.codeText}># 1. Espace disque — un disque plein bloque les ecritures SFTP</Text>
+          <Text style={s.codeText}>df -h</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 2. Service SFTP — doit etre actif pour que les operateurs deposent</Text>
+          <Text style={s.codeText}>systemctl status sshd</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 3. Cron PortaSync — verifier que les crons de recuperation tournent</Text>
+          <Text style={s.codeText}>crontab -l | grep -i "porta\|pnm\|sync"</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 4. Logs systeme — erreurs recentes</Text>
+          <Text style={s.codeText}>tail -n 50 /var/log/messages | grep -i "error\|fail\|denied"</Text>
+          <Text style={s.codeText}>tail -n 50 /var/log/secure | grep -i "sftp\|porta"</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Verifier BTCTF + fichiers .tmp</Text>
+          <Text style={s.stepTitle}>Verifier les repertoires et permissions</Text>
         </View>
 
         <View style={s.codeBlock}>
-          <Text style={s.codeText}>ping 172.24.119.70             <Text style={{ color: '#22c55e' }}># BTCTF accessible ?</Text></Text>
-          <Text style={s.codeText}>find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.tmp" -ls</Text>
+          <Text style={s.codeText}># Verifier que les repertoires recv/ existent et sont accessibles</Text>
+          <Text style={s.codeText}>for op in 01 03 04 05 06; do</Text>
+          <Text style={s.codeText}>  echo "=== Operateur $op ==="</Text>
+          <Text style={s.codeText}>  ls -ld /home/porta_pnmv3/PortaSync/pnmdata/$op/recv/</Text>
+          <Text style={s.codeText}>done</Text>
         </View>
-
-        <Text style={s.body}>Si fichier en .tmp {"→"} supprimer l{"'"}extension .tmp du fichier.</Text>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
           <Text style={s.stepTitle}>Relancer les vacations manquantes</Text>
         </View>
 
+        <Text style={s.body}>Si le probleme est resolu et que des vacations n{"'"}ont pas ete generees, les relancer par operateur (se connecter sur <Text style={s.bold}>vmqproportasync01</Text> avec porta_pnmv3) :</Text>
+
         <View style={s.codeBlock}>
           <Text style={s.codeText}>cd ~/PortaSync/</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 1. Verifier quelles vacations ont ete generees</Text>
+          <Text style={s.codeText}>tail -n 30 log/PnmDataManager.log</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 2. Verifier les fichiers deja presents ou en .tmp</Text>
+          <Text style={s.codeText}>ls -la pnmdata/01/arch_send/ pnmdata/01/send/</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># 3. Relancer la vacation par operateur :</Text>
           <Text style={s.codeText}>./PnmDataManager_oc.sh -v     <Text style={{ color: '#22c55e' }}># Orange Caraibe (01)</Text></Text>
           <Text style={s.codeText}>./PnmDataManager_sfrc.sh -v   <Text style={{ color: '#22c55e' }}># SFR Caraibe (03)</Text></Text>
           <Text style={s.codeText}>./PnmDataManager_dt.sh -v     <Text style={{ color: '#22c55e' }}># Dauphin Telecom (04)</Text></Text>
@@ -1694,13 +2002,41 @@ function CasAucunFichierRecuPdf() {
           <Text style={s.codeText}>./PnmDataManager_freec.sh -v  <Text style={{ color: '#22c55e' }}># Free Caraibes (06)</Text></Text>
         </View>
 
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Procedure de relance</Text>
+          <Text style={s.alertText}>A effectuer tous les lundis matin apres 10h et avant 10h30, au cas par cas. Ne relancer que pour les operateurs qui n{"'"}ont pas eu de fichier genere.</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Escalade et communication</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}><Text style={s.bold}>Probleme cote notre serveur :</Text> Escalader a l{"'"}equipe <Text style={s.bold}>SYSTEM</Text> en urgence avec les elements collectes (espace disque, etat sshd, erreurs logs)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}><Text style={s.bold}>Probleme cote un operateur :</Text> Contacter l{"'"}operateur concerne par email (voir Guide des Operations {"→"} Contacts). A la fin de chaque vacation, transmettre un mail a l{"'"}operateur qui n{"'"}a pas depose son fichier</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Communiquer a l{"'"}equipe <Text style={s.bold}>PNM_SI</Text> si le probleme dure plus d{"'"}une vacation et creer un flashinfo</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}><Text style={s.bold}>Documenter</Text> l{"'"}incident dans le rapport de vacation avec l{"'"}heure de detection et les actions prises</Text>
+        </View>
+
         <View style={[s.alertSuccess, { marginTop: 8 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} Disque plein = cause n°1 de panne silencieuse sur les serveurs SFTP</Text>
-          <Text style={s.alertText}>{"•"} TOUS les operateurs = probleme chez nous / UN SEUL = probleme chez eux</Text>
-          <Text style={s.alertText}>{"•"} L{"'"}ancien PnmSyncManager.sh global est commente — ne pas le decommenter</Text>
-          <Text style={s.alertText}>{"•"} porta_pnmv3 n{"'"}a pas acces aux logs systeme — besoin de root</Text>
-          <Text style={s.alertText}>{"•"} Escalader PNM_SI + flashinfo si l{"'"}incident dure</Text>
+          <Text style={s.alertText}>{"•"} Un disque plein est la cause n°1 de panne silencieuse sur les serveurs SFTP</Text>
+          <Text style={s.alertText}>{"•"} Si <Text style={{ fontWeight: 'bold' }}>tous</Text> les operateurs sont concernes = probleme chez nous. Si <Text style={{ fontWeight: 'bold' }}>un seul</Text> = probleme chez eux</Text>
+          <Text style={s.alertText}>{"•"} Verifier les .ERR dans arch_send/ — des E011 massifs confirment l{"'"}absence de communication</Text>
+          <Text style={s.alertText}>{"•"} Apres resolution, les fichiers en retard arrivent generalement a la vacation suivante</Text>
+          <Text style={s.alertText}>{"•"} Les fichiers transitent via <Text style={{ fontWeight: 'bold' }}>BTCTF</Text> (172.24.119.70) — si BTCTF est down, tous les operateurs sont impactes</Text>
+          <Text style={s.alertText}>{"•"} Identifiants sur le <Text style={{ fontWeight: 'bold' }}>Secret Server</Text> : https://vmqpropass01</Text>
         </View>
 
         <View style={s.footer}>
@@ -1721,7 +2057,7 @@ function CasFnrNonTransmisEmaPdf() {
         <View style={s.header}>
           <View>
             <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA</Text>
-            <Text style={s.headerSub}>Alerte batchhandler — 11/03/2026</Text>
+            <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
@@ -1732,37 +2068,62 @@ function CasFnrNonTransmisEmaPdf() {
           ))}
         </View>
 
-        <View style={s.alertError}>
-          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
-          <Text style={s.alertText}>Le fichier FNR met a jour la base de routage des appels sur EMA. Sans lui, les appels vers les numeros portes sont mal routes (envoyes a l{"'"}ancien operateur). Incident critique a traiter en priorite.</Text>
-        </View>
+        <Text style={s.body}>Le systeme a envoye l{"'"}alerte <Text style={s.bold}>[PNM] Controle fichier batchhandler FNR_V3 sur EMA</Text>. Cela signifie que le fichier de bascule FNR (Flexible Number Register) n{"'"}a pas ete correctement transmis ou traite par EMA. Ce fichier est <Text style={s.bold}>critique</Text> : sans lui, les appels vers les numeros portes ne sont pas routes correctement.</Text>
 
-        <View style={s.alertInfo}>
-          <Text style={s.alertTitle}>Flux normal</Text>
-          <Text style={s.alertText}>Bascule (EmaExtracter, 09h) {"→"} Generation fichier FNR {"→"} Envoi a EMA via batchhandler {"→"} Controle automatique</Text>
-          <Text style={s.alertText}>Serveurs : vmqproportasync01 (172.24.119.69), EMA15-Digicel (172.24.119.140)</Text>
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>Impact</Text>
+          <Text style={s.alertText}>Les numeros portes lors de la derniere bascule ne sont pas mis a jour dans le FNR. Les appels vers ces numeros peuvent etre mal routes (envoyes a l{"'"}ancien operateur au lieu du nouveau). <Text style={{ fontWeight: 'bold' }}>Incident critique a traiter en priorite.</Text></Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
-          <Text style={s.stepTitle}>Verifier la bascule sur vmqproportasync01</Text>
+          <Text style={s.stepTitle}>Comprendre le flux FNR</Text>
         </View>
 
-        <View style={s.codeBlock}>
-          <Text style={s.codeText}>tail -n 30 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log</Text>
-          <Text style={s.codeText}># Si erreur :</Text>
-          <Text style={{ ...s.codeText, color: '#fbbf24' }}>./EmaExtracter.sh -v</Text>
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Flux normal</Text>
+          <Text style={s.alertText}>Apres la bascule (EmaExtracter), le systeme genere un fichier FNR contenant la liste des numeros a basculer. Ce fichier est envoye a EMA via le batchhandler. EMA l{"'"}integre pour mettre a jour le routage des appels. Un controle automatique verifie ensuite que le fichier a bien ete traite.</Text>
+          <Text style={s.alertText}> </Text>
+          <Text style={s.alertText}>Bascule (EmaExtracter) {"→"} Generation fichier FNR {"→"} Envoi a EMA (batchhandler) {"→"} Controle automatique</Text>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
-          <Text style={s.stepTitle}>Verifier le traitement FNR sur EMA (a partir de 10h)</Text>
+          <Text style={s.stepTitle}>Verifier la bascule et le log FNR sur EMA</Text>
         </View>
+
+        <Text style={s.body}><Text style={s.bold}>1.</Text> Verifier que la bascule a eu lieu sur <Text style={s.bold}>vmqproportasync01</Text> (user <Text style={{ fontFamily: 'Courier', fontSize: 7 }}>porta_pnmv3</Text>) :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Verifier le log de bascule (la bascule a lieu a 9h)</Text>
+          <Text style={s.codeText}>tail -n 30 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Verifier l{"'"}etat des dossiers de portabilite du jour sur PortaWs</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Si statut "Bascule" ou "Cloture" → ne rien faire</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Si autre statut → relancer le script :</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>./EmaExtracter.sh -v</Text>
+        </View>
+
+        <Text style={[s.body, { marginTop: 8 }]}><Text style={s.bold}>2.</Text> A partir de <Text style={s.bold}>10h</Text>, verifier le traitement du FNR sur <Text style={s.bold}>EMA15-Digicel</Text> (172.24.119.140) :</Text>
 
         <View style={s.codeBlock}>
           <Text style={s.codeText}>ssh batchuser@172.24.119.140</Text>
           <Text style={s.codeText}>cd ~/LogFiles/</Text>
           <Text style={s.codeText}>ls -lt *fnr_action_v3* | head -3</Text>
+          <Text style={s.codeText}>tail -f {"<"}dernier_fichier_log{">"}</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Exemple de log normal :</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># DELETE:NPSUB:MSISDN,590690675667;</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># RESP:0;</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># BatchJob started at: 2026-03-11 09:15:06;</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># BatchJob finished at: 2026-03-11 09:15:10.</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Totally 104 commands are successful.</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Totally 0 commands failed.</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Diagnostic et resolution selon le cas</Text>
         </View>
 
         <View style={{ marginVertical: 6 }}>
@@ -1772,9 +2133,10 @@ function CasFnrNonTransmisEmaPdf() {
             <Text style={[s.tableHeaderCell, { width: '35%' }]}>Resolution</Text>
           </View>
           {[
-            ['Log FNR n\'existe PAS', 'Script non execute', 'Executer manuellement (etape 3)'],
-            ['commands failed > 0', 'Commandes FNR echouees', 'Corriger MSISDN (etape 4)'],
-            ['Bascule OK mais pas de log', 'Echec transfert vers EMA', 'Verifier connectivite'],
+            ['Le fichier log FNR n\'existe pas sur EMA', 'Le script fnr_action_v3.bh ne s\'est pas execute', 'Executer manuellement depuis EMA15-Digicel (voir etape 4)'],
+            ['Log existe mais commands failed > 0', 'Certaines commandes FNR ont echoue', 'Le mail contient le log d\'erreur. Corriger les MSISDN un par un (GET/CREATE/SET/DELETE)'],
+            ['La bascule n\'a pas eu lieu (EmaExtracter.log en erreur)', 'Pas de fichier FNR genere', 'Relancer ./EmaExtracter.sh -v sur vmqproportasync01 puis attendre le FNR'],
+            ['Bascule OK mais pas de log FNR', 'Echec de transfert vers EMA', 'Verifier la connectivite vmqproportasync01 → EMA15 (172.24.119.140)'],
           ].map(([constat, cause, resolution]) => (
             <View key={constat} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{constat}</Text>
@@ -1785,33 +2147,57 @@ function CasFnrNonTransmisEmaPdf() {
         </View>
 
         <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
           <Text style={s.stepTitle}>Executer le FNR manuellement sur EMA</Text>
         </View>
 
+        <Text style={s.body}>Si le fichier log FNR n{"'"}existe pas, executer le script <Text style={s.bold}>fnr_action_v3.bh</Text> manuellement :</Text>
+
         <View style={s.codeBlock}>
-          <Text style={s.codeText}># Depuis EMA15-Digicel (172.24.119.140) avec batchuser :</Text>
+          <Text style={s.codeText}># Depuis EMA15-Digicel (172.24.119.140) avec l{"'"}user batchuser :</Text>
           <Text style={s.codeText}>(echo "LOGIN:batchuser:123batchuser;";sleep 5;</Text>
           <Text style={s.codeText}> echo "SET:BATCHJOB:FILE,DEF,fnr_action_v3.bh;";</Text>
           <Text style={s.codeText}> sleep 5; echo "LOGOUT;";sleep 5)| telnet 0 3333</Text>
         </View>
 
-        <View style={s.stepRow}>
-          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
-          <Text style={s.stepTitle}>Commandes FNR unitaires</Text>
+        <View style={[s.alertInfo, { marginTop: 8 }]}>
+          <Text style={s.alertTitle}>Methode recommandee — Pages web FNR</Text>
+          <Text style={s.alertText}>Pour intervenir sur des MSISDN individuellement, utiliser les pages dediees FNR sur 172.24.2.21 plutot que la ligne de commande EMA. Ces pages sont documentees dans la procedure OneNote sur le SharePoint (onglet Production {"&"} Astreinte).</Text>
         </View>
 
         <View style={{ marginVertical: 6 }}>
           <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '18%' }]}>Action</Text>
+            <Text style={[s.tableHeaderCell, { width: '50%' }]}>Page web FNR</Text>
+            <Text style={[s.tableHeaderCell, { width: '32%' }]}>Usage</Text>
+          </View>
+          {[
+            ['Verifier', 'http://172.24.2.21/apis/porta/fnr-get-info.html', 'Verifier si un MSISDN est dans le FNR'],
+            ['Creer', 'http://172.24.2.21/apis/porta/fnr-create.php', 'Ajouter un MSISDN (selectionner operateur)'],
+            ['Modifier', 'http://172.24.2.21/apis/porta/fnr-update.php', 'Changer le reseau (selectionner operateur)'],
+            ['Supprimer', 'http://172.24.2.21/apis/porta/fnr-delete.html', 'Retirer un MSISDN du FNR'],
+          ].map(([action, url, usage]) => (
+            <View key={action} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '18%', fontWeight: 'bold' }]}>{action}</Text>
+              <Text style={[s.tableCell, { width: '50%', fontFamily: 'Courier', fontSize: 6.5 }]}>{url}</Text>
+              <Text style={[s.tableCellLight, { width: '32%' }]}>{usage}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Text style={[s.body, { marginTop: 8 }]}><Text style={s.bold}>Alternative — Commandes FNR unitaires en CLI</Text> (depuis EMA15-Digicel, si les pages web ne sont pas accessibles) :</Text>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: '20%' }]}>Action</Text>
-            <Text style={[s.tableHeaderCell, { width: '45%' }]}>Commande</Text>
+            <Text style={[s.tableHeaderCell, { width: '45%' }]}>Commande FNR</Text>
             <Text style={[s.tableHeaderCell, { width: '35%' }]}>Usage</Text>
           </View>
           {[
-            ['GET', 'GET:NPSUB:MSISDN,590XXXXXXXXX;', 'Verifier un MSISDN'],
-            ['CREATE', 'CREATE:NPSUB:MSISDN,590XXXXXXXXX;', 'Ajouter au FNR'],
-            ['SET', 'SET:NPSUB:MSISDN,590XXXXXXXXX;', 'Modifier le reseau'],
-            ['DELETE', 'DELETE:NPSUB:MSISDN,590XXXXXXXXX;', 'Retirer du FNR'],
+            ['Verifier (GET)', 'GET:NPSUB:MSISDN,590XXXXXXXXX;', 'Verifier si un MSISDN est dans le FNR'],
+            ['Creer (CREATE)', 'CREATE:NPSUB:MSISDN,590XXXXXXXXX;', 'Ajouter un MSISDN au FNR'],
+            ['Modifier (SET)', 'SET:NPSUB:MSISDN,590XXXXXXXXX;', 'Changer le reseau d\'un MSISDN'],
+            ['Supprimer (DELETE)', 'DELETE:NPSUB:MSISDN,590XXXXXXXXX;', 'Retirer un MSISDN du FNR'],
           ].map(([action, cmd, usage]) => (
             <View key={action} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '20%', fontWeight: 'bold' }]}>{action}</Text>
@@ -1821,18 +2207,58 @@ function CasFnrNonTransmisEmaPdf() {
           ))}
         </View>
 
-        <View style={[s.alertSuccess, { marginTop: 6 }]}>
+        <Text style={[s.body, { marginTop: 8 }]}><Text style={s.bold}>Verification en masse</Text> dans le FNR (preparer un fichier <Text style={s.bold}>check_msisdn_fnr.txt</Text> avec 1 MSISDN par ligne au format international) :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Depuis EMA15-Digicel :</Text>
+          <Text style={s.codeText}>(echo -e {"'"}LOGIN:sogadm:sogadm;\n{"'"} ; for i in `cat check_msisdn_fnr.txt`;</Text>
+          <Text style={s.codeText}>do echo -e {"'"}GET:NPSUB:MSISDN,{"'"}$i{"'"};\n{"'"}; sleep 1; done )</Text>
+          <Text style={s.codeText}>| telnet 172.24.119.140 3300 {">"} resultat_check_msisdn_fnr.txt</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Escalade — incident critique</Text>
+        </View>
+
+        <View style={s.alertError}>
+          <Text style={s.alertText}>Un fichier FNR non transmis est un <Text style={s.bold}>incident critique</Text>. Les appels vers les numeros portes sont mal routes tant que le FNR n{"'"}est pas mis a jour.</Text>
+        </View>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Si le FNR ne s{"'"}est pas execute : l{"'"}executer manuellement (etape 4)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Si des commandes ont echoue : corriger les MSISDN un par un avec les commandes GET/CREATE/SET/DELETE</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Si le probleme est reseau : contacter l{"'"}equipe <Text style={s.bold}>SYSTEM</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>4.</Text>
+          <Text style={s.listText}>Communiquer a l{"'"}equipe <Text style={s.bold}>PNM_SI</Text> et creer un flashinfo si l{"'"}incident dure</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>5.</Text>
+          <Text style={s.listText}>Apres correction, verifier avec un GET sur les MSISDN concernes</Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 8 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} FNR CRITIQUE — appels mal routes sans mise a jour</Text>
-          <Text style={s.alertText}>{"•"} Verification a partir de 10h (apres bascule de 9h)</Text>
-          <Text style={s.alertText}>{"•"} EMA15-Digicel : 172.24.119.140, user batchuser</Text>
-          <Text style={s.alertText}>{"•"} MSISDN en format international (590...)</Text>
-          <Text style={s.alertText}>{"•"} Escalader PNM_SI + flashinfo si incident dure</Text>
+          <Text style={s.alertText}>{"•"} Le FNR est <Text style={{ fontWeight: 'bold' }}>critique</Text> — sans lui, les appels sont mal routes (impact utilisateur final)</Text>
+          <Text style={s.alertText}>{"•"} La verification FNR doit se faire <Text style={{ fontWeight: 'bold' }}>a partir de 10h</Text> (apres la bascule de 9h)</Text>
+          <Text style={s.alertText}>{"•"} Serveur EMA : <Text style={{ fontWeight: 'bold' }}>EMA15-Digicel</Text> (172.24.119.140), user <Text style={{ fontFamily: 'Courier', fontSize: 7 }}>batchuser</Text></Text>
+          <Text style={s.alertText}>{"•"} Le mail d{"'"}alerte <Text style={{ fontWeight: 'bold' }}>[PNM] Controle fichier batchhandler FNR_V3 sur EMA</Text> contient le detail des erreurs</Text>
+          <Text style={s.alertText}>{"•"} Les MSISDN dans le FNR sont au <Text style={{ fontWeight: 'bold' }}>format international</Text> (590...)</Text>
+          <Text style={s.alertText}>{"•"} Documenter l{"'"}incident — le GPMAG peut demander un rapport</Text>
         </View>
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : FNR non transmis a EMA</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>Page 1 / 2</Text>
         </View>
       </Page>
     </Document>
@@ -1847,21 +2273,23 @@ function CasMsisdnProvisoireErreurPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : MSISDN provisoire errone</Text>
-            <Text style={s.headerSub}>Correction apres saisie CDC — 11/03/2026</Text>
+            <Text style={s.headerTitle}>Cas Pratique : Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
+            <Text style={s.headerSub}>Le CDC s{"'"}est trompe de MSISDN provisoire — Comment le corriger ? — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
         <View style={s.tagRow}>
-          {['MSISDN provisoire', 'CDC', 'Saisie', 'Correction', 'Annulation'].map((tag) => (
+          {['MSISDN provisoire', 'CDC', 'Saisie', 'Correction', 'PortaWs', 'Annulation'].map((tag) => (
             <Text key={tag} style={s.tag}>{tag}</Text>
           ))}
         </View>
 
+        <Text style={s.body}>Un CDC signale qu{"'"}il s{"'"}est trompe en saisissant le <Text style={s.bold}>MSISDN provisoire</Text> (numero temporaire attribue au client en attendant le portage). Le MSISDN provisoire est celui sur lequel le client est joignable chez Digicel en attendant que la portabilite soit effective.</Text>
+
         <View style={s.alertWarning}>
           <Text style={s.alertTitle}>Impact</Text>
-          <Text style={s.alertText}>Un CDC a saisi un mauvais MSISDN provisoire. Le client peut ne pas etre joignable sur son numero temporaire Digicel. Le portage lui-meme n{"'"}est pas impacte.</Text>
+          <Text style={s.alertText}>Si le MSISDN provisoire est faux, le client peut ne pas etre joignable sur son numero temporaire Digicel. Cela n{"'"}empeche pas le portage de se faire, mais pose un probleme de service pendant la periode transitoire.</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -1869,7 +2297,20 @@ function CasMsisdnProvisoireErreurPdf() {
           <Text style={s.stepTitle}>Identifier l{"'"}etat du mandat sur PortaWs</Text>
         </View>
 
-        <Text style={s.body}>Rechercher sur <Text style={s.bold}>http://172.24.119.72:8080/PortaWs/</Text> par le MSISDN du client (le numero a porter, pas le provisoire). Noter l{"'"}etat et la date de portabilite.</Text>
+        <Text style={s.body}>Rechercher le mandat sur <Text style={s.bold}>PortaWebUI</Text> avec le MSISDN a porter (pas le provisoire) :</Text>
+
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>1.</Text>
+          <Text style={s.listText}>Se connecter a <Text style={s.bold}>PortaWs</Text> : <Text style={{ fontFamily: 'Courier', fontSize: 7 }}>http://172.24.119.72:8080/PortaWs/</Text></Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>2.</Text>
+          <Text style={s.listText}>Rechercher par le <Text style={s.bold}>MSISDN du client</Text> (numero a porter)</Text>
+        </View>
+        <View style={s.listItem}>
+          <Text style={s.listBullet}>3.</Text>
+          <Text style={s.listText}>Noter l{"'"}<Text style={s.bold}>etat du mandat</Text> et la <Text style={s.bold}>date de portabilite prevue</Text></Text>
+        </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
@@ -1882,44 +2323,50 @@ function CasMsisdnProvisoireErreurPdf() {
             <Text style={[s.tableHeaderCell, { width: '25%' }]}>Solution</Text>
             <Text style={[s.tableHeaderCell, { width: '45%' }]}>Procedure</Text>
           </View>
-          {[
-            ['Demande envoyee (1110)', 'Annuler + re-saisir', '1. Annulation 1510/C001\n2. Attendre confirmation\n3. Re-saisir avec bon MSISDN'],
-            ['Accord recu (1210)', 'Annuler si delai OK', 'Verifier J+3 minimum.\nSi oui: annuler puis re-saisir\nSi non: correction manuelle'],
-            ['Bascule imminente', 'Correction manuelle', 'Corriger dans BSS/OSS.\nContacter equipe technique.'],
-          ].map(([etat, solution, procedure]) => (
-            <View key={etat} style={s.tableRow}>
-              <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>{etat}</Text>
-              <Text style={[s.tableCell, { width: '25%', color: c.orange }]}>{solution}</Text>
-              <Text style={[s.tableCellLight, { width: '45%' }]}>{procedure}</Text>
-            </View>
-          ))}
+          <View style={[s.tableRow, { backgroundColor: '#f0fdf4' }]}>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Demande envoyee (1110){'\n'}Pas encore de reponse</Text>
+            <Text style={[s.tableCell, { width: '25%', color: '#16a34a', fontWeight: 'bold' }]}>Annuler et re-saisir</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Envoyer une annulation (ticket 1510/C001){'\n'}2. Attendre la confirmation d{"'"}annulation{'\n'}3. Re-saisir la portabilite avec le bon MSISDN provisoire</Text>
+          </View>
+          <View style={[s.tableRow, { backgroundColor: '#fffbeb' }]}>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Accord recu (1210/A001){'\n'}Portabilite acceptee</Text>
+            <Text style={[s.tableCell, { width: '25%', color: c.orange, fontWeight: 'bold' }]}>Annuler et re-saisir (si delai suffisant)</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Verifier que la date de portabilite est encore a J+3 minimum{'\n'}2. Si oui : annuler (1510) puis re-saisir{'\n'}3. Si non : correction manuelle (voir ci-dessous)</Text>
+          </View>
+          <View style={[s.tableRow, { backgroundColor: '#fef2f2' }]}>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Bascule imminente / effectuee{'\n'}Trop tard pour annuler</Text>
+            <Text style={[s.tableCell, { width: '25%', color: c.red, fontWeight: 'bold' }]}>Correction manuelle dans les SI</Text>
+            <Text style={[s.tableCellLight, { width: '45%' }]}>1. Le portage va se faire (ou est fait) normalement{'\n'}2. Corriger le MSISDN provisoire dans les systemes Digicel (BSS/OSS){'\n'}3. Contacter l{"'"}equipe technique pour la correction</Text>
+          </View>
         </View>
 
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
-          <Text style={s.stepTitle}>Procedure d{"'"}annulation (cas le plus courant)</Text>
+          <Text style={s.stepTitle}>Procedure d{"'"}annulation et re-saisie (cas le plus courant)</Text>
         </View>
+
+        <Text style={s.body}>Si le mandat est encore a un stade qui permet l{"'"}annulation :</Text>
 
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}>Envoyer annulation via le HUB {"→"} ticket <Text style={s.bold}>1510</Text>, motif <Text style={s.bold}>C001</Text></Text>
+          <Text style={s.listText}><Text style={s.bold}>Envoyer l{"'"}annulation</Text> via le HUB : le systeme genere un ticket <Text style={s.bold}>1510</Text> avec motif <Text style={s.bold}>C001</Text> (annulation a l{"'"}initiative de l{"'"}operateur receveur)</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}>Attendre la confirmation {"→"} operateur donneur envoie un <Text style={s.bold}>1530</Text></Text>
+          <Text style={s.listText}><Text style={s.bold}>Attendre la confirmation</Text> : l{"'"}operateur donneur envoie un <Text style={s.bold}>1530</Text> confirmant l{"'"}annulation</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}>Re-saisir la portabilite avec le <Text style={s.bold}>bon MSISDN provisoire</Text> {"→"} nouveau 1110</Text>
+          <Text style={s.listText}><Text style={s.bold}>Re-saisir la portabilite</Text> avec le <Text style={s.bold}>bon MSISDN provisoire</Text> — la nouvelle demande genere un nouveau ticket <Text style={s.bold}>1110</Text></Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>4.</Text>
-          <Text style={s.listText}>Informer le client du nouveau delai (<Text style={s.bold}>J+7 repart</Text>)</Text>
+          <Text style={s.listText}><Text style={s.bold}>Informer le client</Text> de la nouvelle date de portabilite (le delai J+7 repart)</Text>
         </View>
 
         <View style={[s.alertWarning, { marginTop: 8 }]}>
           <Text style={s.alertTitle}>Attention</Text>
-          <Text style={s.alertText}>L{"'"}annulation fait repartir le compteur. La nouvelle portabilite sera a J+7 minimum a partir de la re-saisie.</Text>
+          <Text style={s.alertText}>L{"'"}annulation fait repartir le compteur. La nouvelle portabilite sera a <Text style={{ fontWeight: 'bold' }}>J+7 minimum</Text> a partir de la re-saisie. <Text style={{ fontWeight: 'bold' }}>Informer le client du nouveau delai.</Text></Text>
         </View>
 
         <View style={s.stepRow}>
@@ -1927,25 +2374,28 @@ function CasMsisdnProvisoireErreurPdf() {
           <Text style={s.stepTitle}>Correction manuelle (si annulation impossible)</Text>
         </View>
 
+        <Text style={s.body}>Si la bascule est imminente ou deja effectuee, l{"'"}annulation n{"'"}est plus possible. Il faut corriger dans les systemes internes :</Text>
+
         <View style={s.listItem}>
           <Text style={s.listBullet}>1.</Text>
-          <Text style={s.listText}>Le portage n{"'"}est <Text style={s.bold}>PAS impacte</Text> — le MSISDN provisoire est une donnee interne Digicel</Text>
+          <Text style={s.listText}>Le portage lui-meme n{"'"}est <Text style={s.bold}>pas impacte</Text> — le MSISDN provisoire est une donnee interne Digicel</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>2.</Text>
-          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>BSS/provisioning</Text> pour corriger</Text>
+          <Text style={s.listText}>Contacter l{"'"}equipe <Text style={s.bold}>BSS/provisioning</Text> pour corriger le MSISDN provisoire dans les systemes</Text>
         </View>
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
-          <Text style={s.listText}>Verifier la joignabilite du client apres bascule</Text>
+          <Text style={s.listText}>Verifier que le client est bien joignable sur son numero (le numero porte, pas le provisoire) une fois la bascule effectuee</Text>
         </View>
 
         <View style={[s.alertSuccess, { marginTop: 10 }]}>
           <Text style={s.alertTitle}>Points de vigilance</Text>
-          <Text style={s.alertText}>{"•"} MSISDN provisoire = donnee interne Digicel (pas dans les echanges PNM)</Text>
-          <Text style={s.alertText}>{"•"} Annulation + re-saisie = solution propre mais delai J+7</Text>
-          <Text style={s.alertText}>{"•"} Bascule imminente {"→"} correction manuelle preferable</Text>
-          <Text style={s.alertText}>{"•"} Toujours informer le client du delai supplementaire</Text>
+          <Text style={s.alertText}>{"•"} Le MSISDN provisoire est une <Text style={{ fontWeight: 'bold' }}>donnee interne Digicel</Text> — il n{"'"}apparait pas dans les echanges PNM avec les autres operateurs</Text>
+          <Text style={s.alertText}>{"•"} L{"'"}annulation + re-saisie est la solution la plus <Text style={{ fontWeight: 'bold' }}>propre</Text> mais fait repartir le delai</Text>
+          <Text style={s.alertText}>{"•"} Si le portage est imminent, la correction manuelle est preferable pour ne pas retarder le client</Text>
+          <Text style={s.alertText}>{"•"} Toujours <Text style={{ fontWeight: 'bold' }}>informer le client</Text> du delai supplementaire en cas d{"'"}annulation</Text>
+          <Text style={s.alertText}>{"•"} Demander au CDC de <Text style={{ fontWeight: 'bold' }}>verifier systematiquement</Text> le MSISDN provisoire avant validation</Text>
         </View>
 
         <View style={s.footer}>

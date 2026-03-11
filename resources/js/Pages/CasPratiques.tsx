@@ -2089,7 +2089,7 @@ const casFnrNonTransmis: CasPratique = {
     <>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Le système a envoyé l&apos;alerte <strong>[PNM] Controle fichier batchhandler FNR_V3 sur EMA</strong>.
-        Cela signifie que le fichier de bascule FNR (Fichier Numéros Routés) n&apos;a pas été correctement transmis
+        Cela signifie que le fichier de bascule FNR (Flexible Number Register) n&apos;a pas été correctement transmis
         ou traité par EMA. Ce fichier est <strong>critique</strong> : sans lui, les appels vers les numéros portés
         ne sont pas routés correctement.
       </Typography>
@@ -2210,8 +2210,48 @@ tail -f <dernier_fichier_log>
 (echo "LOGIN:batchuser:123batchuser;";sleep 5;echo "SET:BATCHJOB:FILE,DEF,fnr_action_v3.bh;"; sleep 5; echo "LOGOUT;";sleep 5)| telnet 0 3333`}
       </CodeBlock>
 
+      <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
+        <strong>Méthode recommandée — Pages web FNR</strong> : pour intervenir sur des MSISDN individuellement,
+        utiliser les pages dédiées FNR sur <code>172.24.2.21</code> plutôt que la ligne de commande EMA.
+        Ces pages sont documentées dans la procédure OneNote sur le SharePoint (onglet <strong>Production &amp; Astreinte</strong>).
+      </Alert>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Page web FNR</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Usage</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Vérifier</strong></TableCell>
+              <TableCell><code>http://172.24.2.21/apis/porta/fnr-get-info.html</code></TableCell>
+              <TableCell>Vérifier si un MSISDN est dans le FNR</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Créer</strong></TableCell>
+              <TableCell><code>http://172.24.2.21/apis/porta/fnr-create.php</code></TableCell>
+              <TableCell>Ajouter un MSISDN au FNR (sélectionner l&apos;opérateur)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Modifier</strong></TableCell>
+              <TableCell><code>http://172.24.2.21/apis/porta/fnr-update.php</code></TableCell>
+              <TableCell>Changer le réseau d&apos;un MSISDN (sélectionner l&apos;opérateur)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Supprimer</strong></TableCell>
+              <TableCell><code>http://172.24.2.21/apis/porta/fnr-delete.html</code></TableCell>
+              <TableCell>Retirer un MSISDN du FNR</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
       <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-        <strong>Commandes FNR unitaires</strong> pour corriger des MSISDN individuellement (depuis EMA) :
+        <strong>Alternative — Commandes FNR unitaires en CLI</strong> (depuis EMA15-Digicel, uniquement si les pages web ne sont pas accessibles) :
       </Typography>
 
       <TableContainer sx={{ mb: 2 }}>
