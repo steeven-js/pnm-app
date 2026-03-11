@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 
 import Alert from '@mui/material/Alert';
@@ -26,22 +26,6 @@ import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Server = {
-  name: string;
-  hostname: string;
-  ip: string;
-  role: string;
-  icon: string;
-  color: string;
-};
-
-type Script = {
-  server: string;
-  name: string;
-  actions: string;
-  schedule: string;
-};
-
 type UsefulLink = {
   label: string;
   url: string;
@@ -50,157 +34,6 @@ type UsefulLink = {
 };
 
 // ─── Data ───────────────────────────────────────────────────────────────────
-
-const SERVERS: Server[] = [
-  {
-    name: 'vmqproportasync01',
-    hostname: 'DigimqPortaSync01',
-    ip: '172.24.119.69',
-    role: 'Synchronisation fichiers inter-opérateurs. Contrôle, acquitte, archive les fichiers BTCTF. Demande l\'intégration et la génération des tickets dans PortaDB.',
-    icon: 'solar:server-bold-duotone',
-    color: '#2563eb',
-  },
-  {
-    name: 'vmqproportawebdb01',
-    hostname: 'DigimqPortaWebdb',
-    ip: '172.24.119.68',
-    role: 'Base de données PortaDB + PortaWebDB (MySQL :3306). Serveur central de la portabilité. Héberge les scripts de restitution et d\'export.',
-    icon: 'solar:database-bold-duotone',
-    color: '#d97706',
-  },
-  {
-    name: 'btctf',
-    hostname: 'BTCTF',
-    ip: '172.24.119.70',
-    role: 'Bouygue Telecom Caraïbe Transfer File. Hub de transfert SFTP des fichiers PNMDATA/PNMSYNC avec les 5 opérateurs. Transmet et envoie les fichiers via SCP.',
-    icon: 'solar:transfer-horizontal-bold-duotone',
-    color: '#16a34a',
-  },
-  {
-    name: 'vmqproportaweb01',
-    hostname: 'PortaWebUI / PortaWs',
-    ip: '172.24.119.71 / .72',
-    role: 'Portails web Tomcat & Glassfish. PortaWebUI (:8080) pour la gestion des dossiers. PortaWs (:4848) pour les web services SOAP.',
-    icon: 'solar:monitor-bold-duotone',
-    color: '#7c3aed',
-  },
-  {
-    name: 'vmqpromsbox01/02',
-    hostname: 'Micro services',
-    ip: 'VIP: 172.24.119.36',
-    role: 'Micro services de portabilité. Traitements métier : bascule, valorisation, notifications. VIP load-balanced.',
-    icon: 'solar:widget-bold-duotone',
-    color: '#0891b2',
-  },
-  {
-    name: 'ESB DataPower',
-    hostname: 'vmqprotopapi01/02',
-    ip: 'VIP: f5-vip-kong',
-    role: 'Proxy ESB DataPower. Passerelle XML/SOAP entre Porta et MOBI. Communication bidirectionnelle avec le SI facturation.',
-    icon: 'solar:routing-bold-duotone',
-    color: '#dc2626',
-  },
-  {
-    name: 'HUB',
-    hostname: 'hub.fwi.digicelgroup.local',
-    ip: '—',
-    role: 'Hub central Digicel FWI. Point d\'entrée réseau pour les serveurs inter-opérateurs et le BTCTF.',
-    icon: 'solar:global-bold-duotone',
-    color: '#6b7280',
-  },
-  {
-    name: 'EMA / EMM',
-    hostname: 'ema15-digicel',
-    ip: '—',
-    role: 'Serveur EMA (bascule) et EMM (valorisation). Reçoit les fichiers générés par EmaExtracteur/EmmExtracteur pour mise à jour MOBI.',
-    icon: 'solar:file-send-bold-duotone',
-    color: '#ea580c',
-  },
-];
-
-const SCRIPTS: Script[] = [
-  // BTCTF
-  {
-    server: 'btctf',
-    name: 'synchro-pnmv3.sh',
-    actions: 'Intégration : copie les fichiers reçus dans /PortaSync/pnmdata/0X/recv/ et exécute PnmAckManager.sh. Envoi et archivage des fichiers générés depuis /send/ vers /arch_send/.',
-    schedule: 'Lun-Ven toutes les 10 min [10h-12h] [14h-16h] [19h-21h] + Dimanche [22h-24h]',
-  },
-  // vmqproportasync01
-  {
-    server: 'vmqproportasync01',
-    name: 'PnmAckManager.sh',
-    actions: 'Contrôle, intégration, acquittement et archivage des fichiers reçus PNMDATA.0X.02 (de recv/ vers arch_recv/).',
-    schedule: 'Déclenché par synchro-pnmv3.sh',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'PnmDataManager.sh',
-    actions: 'Génération des fichiers PNMDATA.02.0X à envoyer dans /PortaSync/pnmdata/0X/send/ pour chaque opérateur.',
-    schedule: 'Lun-Ven à 10h, 14h, 19h',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'PnmSyncManager.sh',
-    actions: 'Génération des fichiers de synchronisation PNMSYNC.02.0X dans /PortaSync/pnmdata/0X/send/.',
-    schedule: 'Dimanche à 23h',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'TraitementBascule.sh',
-    actions: 'Exécute EmaExtracteur.sh, dépose le fichier EMA généré sur le serveur EMA, puis archive.',
-    schedule: 'Lun-Ven à 9h00',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'TraitementValorisation.sh',
-    actions: 'Exécute EmmExtracteur.sh, dépose le fichier EMM généré sur le serveur EMM, puis archive.',
-    schedule: 'Lun-Ven à 9h00',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'EmaExtracteur.sh',
-    actions: 'Génération du fichier EMA et mise à jour de MOBI (via ESB) pour la bascule des portages entrants.',
-    schedule: 'Appelé par TraitementBascule.sh',
-  },
-  {
-    server: 'vmqproportasync01',
-    name: 'EmmExtracteur.sh',
-    actions: 'Génération du fichier EMM et mise à jour de MOBI (via ESB) pour la valorisation.',
-    schedule: 'Appelé par TraitementValorisation.sh',
-  },
-  // vmqproportawebdb01
-  {
-    server: 'vmqproportawebdb01',
-    name: 'PortaDB-export-csv.sh',
-    actions: 'Exporte les tables de PortaDB en CSV, copie sur EMM, supprime les fichiers temporaires (besoins MIS).',
-    schedule: 'Tous les jours à 00h00',
-  },
-  {
-    server: 'vmqproportawebdb01',
-    name: 'Pnm-Verif-Bascule-MOBI',
-    actions: 'Valide la mise à jour des changements MSISDN et résiliations dans MOBI vs bascules PortaDB.',
-    schedule: 'Après la bascule',
-  },
-  {
-    server: 'vmqproportawebdb01',
-    name: 'Pnm-Restitutions-Sortantes-Tickets.sh',
-    actions: 'Extract des résiliations hors tranche dans MOBI et création des tickets 3400 (restitution) dans PortaDB.',
-    schedule: 'Jeudis à 10h45',
-  },
-  {
-    server: 'vmqproportawebdb01',
-    name: 'Pnm-Restitutions-Sortantes-Bascule.sh',
-    actions: 'Extract des restitutions sortantes basculées de PortaDB et mise à jour MOBI (msisdn_status).',
-    schedule: 'Jeudis à 11h00',
-  },
-  {
-    server: 'vmqproportawebdb01',
-    name: 'Pnm-Restitutions-Entrantes-Bascule',
-    actions: 'Extract des restitutions entrantes basculées de PortaDB et mise à jour MOBI (msisdn_status).',
-    schedule: 'Lun-Ven à 21h25',
-  },
-];
 
 // Timeline unifiée : serveur + mails regroupés par créneau horaire (ordre asc)
 type TimelineSlotItem = {
@@ -287,7 +120,7 @@ const VACATION_SCHEDULE = [
   { name: 'Vacation 1', time: '10h → 11h', mailTime: '~11h35', description: 'Premier échange de fichiers PNMDATA avec les 5 opérateurs' },
   { name: 'Vacation 2', time: '14h → 15h', mailTime: '~15h35', description: 'Deuxième échange. Comparer avec vacation 1' },
   { name: 'Vacation 3', time: '19h → 20h', mailTime: '~20h35', description: 'Troisième et dernier échange. Clôture journée' },
-  { name: 'Synchro dimanche', time: '22h → 00h', mailTime: '—', description: 'Synchronisation hebdomadaire (PNMSYNC)' },
+  { name: 'Synchro dimanche', time: '21h → 21h50', mailTime: '—', description: 'Synchronisation hebdomadaire par opérateur (PNMSYNC)' },
 ];
 
 const FLUX_STEPS = [
@@ -314,23 +147,6 @@ function SectionTitle({ icon, title, subtitle }: { icon: string; title: string; 
         </Typography>
       )}
     </Box>
-  );
-}
-
-function ServerCard({ server }: { server: Server }) {
-  return (
-    <Card sx={{ borderLeft: 4, borderColor: server.color }}>
-      <CardContent>
-        <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-          <Iconify icon={server.icon} width={28} sx={{ color: server.color, mt: 0.25 }} />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle1" fontWeight={700}>{server.name}</Typography>
-            <Typography variant="caption" color="text.disabled">{server.hostname} — {server.ip}</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>{server.role}</Typography>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -791,50 +607,6 @@ function TabDailyChecks() {
   );
 }
 
-function TabInfrastructure() {
-  return (
-    <Box>
-      <SectionTitle icon="solar:server-square-bold-duotone" title="Serveurs" subtitle="Infrastructure de la portabilité PNM" />
-
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 4 }}>
-        {SERVERS.map((server) => (
-          <ServerCard key={server.name} server={server} />
-        ))}
-      </Box>
-
-      <Divider sx={{ my: 4 }} />
-
-      <SectionTitle icon="solar:code-square-bold-duotone" title="Scripts & Planification" subtitle="Ensemble des scripts automatisés et leur ordonnancement" />
-
-      <TableContainer component={Card}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Serveur</TableCell>
-              <TableCell>Script</TableCell>
-              <TableCell>Actions</TableCell>
-              <TableCell width={200}>Planification</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {SCRIPTS.map((script, i) => (
-              <TableRow key={i} hover>
-                <TableCell>
-                  <Typography variant="caption" fontFamily="monospace" sx={{ bgcolor: 'action.hover', px: 0.75, py: 0.25, borderRadius: 0.5 }}>
-                    {script.server}
-                  </Typography>
-                </TableCell>
-                <TableCell><Typography variant="body2" fontWeight={600} fontFamily="monospace">{script.name}</Typography></TableCell>
-                <TableCell><Typography variant="body2" color="text.secondary">{script.actions}</Typography></TableCell>
-                <TableCell><Chip label={script.schedule} size="small" variant="soft" color="info" sx={{ whiteSpace: 'normal', height: 'auto', '& .MuiChip-label': { whiteSpace: 'normal' } }} /></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
-}
 
 function TabLinksContacts() {
   return (
@@ -931,12 +703,311 @@ function TabLinksContacts() {
   );
 }
 
+// ─── Scripts PortaSync (ex-page ScriptsPnm) ─────────────────────────────────
+
+type PortaSyncScript = {
+  name: string;
+  description: string;
+  server: string;
+  disabled?: boolean;
+};
+
+const PORTASYNC_SCRIPTS: PortaSyncScript[] = [
+  { name: 'EmaExtracter.sh', description: 'Traitement bascule + generation fichier routage + envoi EMA pour MAJ FNR', server: 'vmqproportasync01' },
+  { name: 'EmmExtracter.sh', description: 'Generation et envoi fichier MSISDN portes vers l\'EMM', server: 'vmqproportasync01' },
+  { name: 'PnmDataManager.sh', description: 'Generation des fichiers de vacation PNMDATA', server: 'vmqproportasync01' },
+  { name: 'PnmDataAckManager.sh', description: 'Integration des fichiers PNMDATA + generation acquittements', server: 'vmqproportasync01' },
+  { name: 'PnmDataAckGenerator.sh', description: 'Verification acquittements + generation fichiers d\'erreur', server: 'vmqproportasync01' },
+  { name: 'PnmSyncManager.sh', description: 'Generation des fichiers de synchronisation PNMSYNC (remplace par scripts unitaires par operateur)', server: 'vmqproportasync01' },
+  { name: 'PnmSyncAckManager.sh', description: 'Integration PNMSYNC + generation acquittements', server: 'vmqproportasync01' },
+  { name: 'TraitementBascule.sh', description: 'Execute EmaExtracteur.sh, depose le fichier EMA genere sur EMA, puis archive', server: 'vmqproportasync01' },
+  { name: 'TraitementValorisation.sh', description: 'Execute EmmExtracteur.sh, depose le fichier EMM genere sur EMM, puis archive', server: 'vmqproportasync01' },
+  { name: 'check_envoi_vacation.sh', description: 'Verification des envois de fichiers de vacation', server: 'vmqproportasync01' },
+  { name: 'porta_check.sh', description: 'Check global de vacation (verification complete)', server: 'vmqproportasync01' },
+  { name: 'synchro-pnmv3.sh', description: 'Copie fichiers recus dans recv/, execute PnmAckManager.sh, envoi et archivage depuis send/', server: 'btctf' },
+  { name: 'PnmMerger.sh', description: 'Merge de fichier', server: 'vmqproportasync01', disabled: true },
+  { name: 'PnmSpliter.sh', description: 'Split de fichier', server: 'vmqproportasync01', disabled: true },
+];
+
+// ─── Crontab (ex-page CrontabScripts) ────────────────────────────────────────
+
+type CronJob = {
+  id: number;
+  script: string;
+  cron: string;
+  schedule: string;
+  user: string;
+  log: string;
+  description: string;
+  category: 'vacation' | 'bascule' | 'synchro' | 'export' | 'restitution' | 'facturation' | 'ticket' | 'controle' | 'purge';
+  days: string;
+  server: string;
+};
+
+const CRON_CATEGORY_CONFIG: Record<string, { label: string; color: 'primary' | 'success' | 'info' | 'warning' | 'error' | 'secondary' | 'default' }> = {
+  vacation: { label: 'Vacation', color: 'success' },
+  bascule: { label: 'Bascule', color: 'primary' },
+  synchro: { label: 'Synchro', color: 'info' },
+  export: { label: 'Export', color: 'info' },
+  restitution: { label: 'Restitution', color: 'success' },
+  facturation: { label: 'Facturation', color: 'warning' },
+  ticket: { label: 'Ticket', color: 'secondary' },
+  controle: { label: 'Controle', color: 'error' },
+  purge: { label: 'Purge', color: 'default' },
+};
+
+const CRON_JOBS: CronJob[] = [
+  // ── vmqproportasync01 (porta_pnmv3) ──
+  { id: 1, script: 'TraitementBascule.sh', cron: '00 09 * * 1-5', schedule: 'Lun-Ven a 09h00', user: 'porta_pnmv3', log: 'EmaExtracter.log', description: 'Bascule quotidienne (execute EmaExtracteur.sh)', category: 'bascule', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 2, script: 'TraitementValorisation.sh', cron: '01 09 * * 1-5', schedule: 'Lun-Ven a 09h01', user: 'porta_pnmv3', log: 'EmmExtracter.log', description: 'Valorisation (juste apres bascule, execute EmmExtracteur.sh)', category: 'bascule', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 3, script: 'PnmDataManager.sh -v', cron: '00 10,14,19 * * 1-5', schedule: 'Lun-Ven a 10h, 14h, 19h', user: 'porta_pnmv3', log: 'PnmDataManager.log', description: 'Generation des fichiers de vacation PNMDATA pour les 5 operateurs', category: 'vacation', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 4, script: 'check_envoi_vacation.sh -v', cron: '35 10,14,19 * * 1-5', schedule: 'Lun-Ven a 10h35, 14h35, 19h35', user: 'porta_pnmv3', log: 'check_envoi_vacation.log', description: 'Verification des envois de fichiers de vacation', category: 'vacation', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 5, script: 'PnmDataAckGenerator.sh -v', cron: '15 11,15,20 * * 1-5', schedule: 'Lun-Ven a 11h15, 15h15, 20h15', user: 'porta_pnmv3', log: 'PnmDataAckGenerator.log', description: 'Verification ACR/ERR pour chaque vacation', category: 'vacation', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 6, script: 'porta_check.sh', cron: '35 11,15,20 * * 1-5', schedule: 'Lun-Ven a 11h35, 15h35, 20h35', user: 'porta_pnmv3', log: '—', description: 'Check global de vacation', category: 'vacation', days: 'Lun-Ven', server: 'vmqproportasync01' },
+  { id: 7, script: 'PnmSyncManager_oc.sh -v', cron: '00 21 * * 0', schedule: 'Dimanche a 21h00', user: 'porta_pnmv3', log: 'PnmSyncManager.log', description: 'Synchronisation Orange Caraibe', category: 'synchro', days: 'Dim', server: 'vmqproportasync01' },
+  { id: 8, script: 'PnmSyncManager_sfrc.sh -v', cron: '20 21 * * 0', schedule: 'Dimanche a 21h20', user: 'porta_pnmv3', log: 'PnmSyncManager.log', description: 'Synchronisation SFR Caraibe', category: 'synchro', days: 'Dim', server: 'vmqproportasync01' },
+  { id: 9, script: 'PnmSyncManager_dt.sh -v', cron: '30 21 * * 0', schedule: 'Dimanche a 21h30', user: 'porta_pnmv3', log: 'PnmSyncManager.log', description: 'Synchronisation Dauphin Telecom', category: 'synchro', days: 'Dim', server: 'vmqproportasync01' },
+  { id: 10, script: 'PnmSyncManager_uts.sh -v', cron: '40 21 * * 0', schedule: 'Dimanche a 21h40', user: 'porta_pnmv3', log: 'PnmSyncManager.log', description: 'Synchronisation UTS Caraibe', category: 'synchro', days: 'Dim', server: 'vmqproportasync01' },
+  { id: 11, script: 'PnmSyncManager_freec.sh -v', cron: '50 21 * * 0', schedule: 'Dimanche a 21h50', user: 'porta_pnmv3', log: 'PnmSyncManager.log', description: 'Synchronisation Free Caraibes', category: 'synchro', days: 'Dim', server: 'vmqproportasync01' },
+  { id: 12, script: 'find ... -mtime +30 -exec rm', cron: '00 03 * * 2', schedule: 'Mardi a 03h00', user: 'porta_pnmv3', log: '—', description: 'Purge extracts > 30 jours', category: 'purge', days: 'Mar', server: 'vmqproportasync01' },
+  // ── vmqproportawebdb01 ──
+  { id: 13, script: 'PortaDB-export-csv.sh', cron: '00 00 * * 1-7', schedule: 'Tous les jours a 00h00', user: 'porta_pnmv3', log: 'PortaDB-export-csv.log', description: 'Export des tables de PortaDB au format CSV sur le serveur EMM pour alimentation du systeme MIS.', category: 'export', days: 'Lun-Dim', server: 'vmqproportawebdb01' },
+  { id: 14, script: 'Pnm-Verif-Bascule-MOBI.sh', cron: '55 09 * * 1', schedule: 'Lundi a 09h55', user: 'root', log: 'Pnm-Verif-Bascule-MOBI.sh.log', description: 'Verification des bascules du week-end.', category: 'bascule', days: 'Lun', server: 'vmqproportawebdb01' },
+  { id: 15, script: 'Pnm-Verif-Bascule-MOBI.sh', cron: '15 09 * * 2-5', schedule: 'Mar-Ven a 09h15', user: 'root', log: 'Pnm-Verif-Bascule-MOBI.sh.log', description: 'Premiere verification quotidienne des bascules du matin.', category: 'bascule', days: 'Mar-Ven', server: 'vmqproportawebdb01' },
+  { id: 16, script: 'Pnm-Verif-Bascule-MOBI.sh', cron: '54 10 * * 2-5', schedule: 'Mar-Ven a 10h54', user: 'root', log: 'Pnm-Verif-Bascule-MOBI.sh.log', description: 'Seconde verification quotidienne. Detecte les bascules traitees apres la premiere.', category: 'bascule', days: 'Mar-Ven', server: 'vmqproportawebdb01' },
+  { id: 17, script: 'Pnm-Restitutions-Sortantes-Bascule.sh', cron: '30 12 * * 1-5', schedule: 'Lun-Ven a 12h30', user: 'porta_pnmv3', log: 'Pnm-Restitutions-Sortantes-Bascule.sh.log', description: 'Bascule des restitutions sortantes (Saisi vers Dossier de restitution initie).', category: 'restitution', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 18, script: 'Pnm-Restitutions-Entrantes-Bascule.sh', cron: '25 21 * * 1-5', schedule: 'Lun-Ven a 21h25', user: 'porta_pnmv3', log: 'Pnm-Restitutions-Entrantes-Bascule.sh.log', description: 'Bascule des restitutions entrantes. Execution en soiree pour integration nocturne.', category: 'restitution', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 19, script: 'Pnm-Restitutions-Sortantes-Tickets.sh', cron: '15 11 * * 1-5', schedule: 'Lun-Ven a 11h15', user: 'porta_pnmv3', log: 'Pnm-Restitutions-Sortantes-Tickets.sh.log', description: 'Generation des tickets de restitution sortante pour les dossiers en cours.', category: 'ticket', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 20, script: 'Pnm_Facturation_Mensuelle_PEN.sh', cron: '05 00 1 * *', schedule: '1er de chaque mois a 00h05', user: 'porta_pnmv3', log: '—', description: 'Facturation mensuelle pour les portages entrants (PEN) inter-operateurs.', category: 'facturation', days: '1er du mois', server: 'vmqproportawebdb01' },
+  { id: 21, script: 'Pnm_Facturation_Mensuelle_PSO.sh', cron: '10 00 1 * *', schedule: '1er de chaque mois a 00h10', user: 'porta_pnmv3', log: '—', description: 'Facturation mensuelle pour les portages sortants (PSO) inter-operateurs.', category: 'facturation', days: '1er du mois', server: 'vmqproportawebdb01' },
+  { id: 22, script: 'Pnm_1210_awaiting.sh', cron: '30 11 * * 2-5', schedule: 'Mar-Ven a 11h30', user: 'porta_pnmv3', log: 'Pnm_1210_awaiting.log', description: 'Verification des tickets 1210 recus pour les portages prevus a J+1.', category: 'controle', days: 'Mar-Ven', server: 'vmqproportawebdb01' },
+  { id: 23, script: 'Pnm_tickets_awaiting.sh', cron: '30 11 * * 1', schedule: 'Lundi a 11h30', user: 'porta_pnmv3', log: 'Pnm_tickets_awaiting.log', description: 'Verification elargie du lundi : tickets 1210/1430/3430 + rattrapage week-end.', category: 'controle', days: 'Lun', server: 'vmqproportawebdb01' },
+  { id: 24, script: 'Pnm_1110_DC_vers_UTS.sh', cron: '30 11,15,20 * * 1-5', schedule: 'Lun-Ven a 11h30, 15h30, 20h30', user: 'porta_pnmv3', log: 'Pnm_1110_DC_vers_UTS.log', description: 'Verification tickets 1110 transmis a UTS. Detecte les cas necessitant un 1210 en mode degrade.', category: 'controle', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 25, script: 'refus_porta_free_b2b.sh', cron: '30 09,11,15,20 * * 1-5', schedule: 'Lun-Ven a 09h30, 11h30, 15h30, 20h30', user: 'porta_pnmv3', log: 'refus_porta_free_b2b.log', description: 'Gestion des portabilites B2B vers Free Caraibe. 4 executions quotidiennes.', category: 'controle', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 26, script: 'check_refus_porta_rio_incorrect.sh', cron: '00 09 * * 1-5', schedule: 'Lun-Ven a 09h00', user: 'porta_pnmv3', log: 'check_refus_porta_rio_incorrect.log', description: 'Rapport sur les refus de portabilite avec motif RIO incorrect.', category: 'controle', days: 'Lun-Ven', server: 'vmqproportawebdb01' },
+  { id: 27, script: 'Pnm_Facturation_Annuelle_PEN.sh', cron: '@yearly', schedule: '1er janvier de chaque annee', user: 'porta_pnmv3', log: '—', description: 'Facturation annuelle pour les portages entrants (PEN).', category: 'facturation', days: '1er janvier', server: 'vmqproportawebdb01' },
+];
+
+type DisabledCronJob = {
+  script: string;
+  oldSchedule: string;
+  description: string;
+  reason: string;
+  server: string;
+};
+
+const DISABLED_CRON_JOBS: DisabledCronJob[] = [
+  { script: 'PnmSyncManager.sh', oldSchedule: 'Dimanche 21h', description: 'Synchro globale tous operateurs', reason: 'Remplace par scripts unitaires par operateur (_oc, _sfrc, _dt, _uts, _freec)', server: 'vmqproportasync01' },
+  { script: 'PortaDB-export-csv.sh', oldSchedule: '12h00, tous les jours', description: 'Second export CSV quotidien', reason: 'Doublon — un seul export a minuit suffit', server: 'vmqproportawebdb01' },
+  { script: 'Pnm-Verif-Bascule-MOBI_CCA.sh', oldSchedule: '10h30, lun-ven', description: 'Verification bascule — envoi CCARE', reason: 'Fonctionnalite transferee ou obsolete', server: 'vmqproportawebdb01' },
+  { script: 'Pnm-Restitutions-Sortantes-Tickets-ratp.sh', oldSchedule: '12h00, lun-ven', description: 'Tickets restitutions sortantes RATP en masse', reason: 'Traitement ponctuel (RT#254708) termine', server: 'vmqproportawebdb01' },
+  { script: 'Pnm_Stats_Bascule_ESB.sh', oldSchedule: '09h55, lun-ven', description: 'Rapports statistiques ESB du jour', reason: 'Reporting ESB desactive', server: 'vmqproportawebdb01' },
+];
+
+// ─── Tab Scripts & Crontab ──────────────────────────────────────────────────
+
+function TabScriptsCrontab() {
+  const [cronTab, setCronTab] = useState(0);
+  const [serverFilter, setServerFilter] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  const filteredJobs = useMemo(() => {
+    let jobs = CRON_JOBS;
+    if (serverFilter) jobs = jobs.filter((j) => j.server === serverFilter);
+    if (categoryFilter) jobs = jobs.filter((j) => j.category === categoryFilter);
+    return jobs;
+  }, [serverFilter, categoryFilter]);
+
+  return (
+    <Box>
+      {/* ── Section 1: Scripts PortaSync ── */}
+      <SectionTitle icon="solar:code-square-bold-duotone" title="Scripts PortaSync" subtitle="Scripts de synchronisation et traitement des fichiers PNM" />
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
+        <Card variant="outlined" sx={{ flex: 1 }}>
+          <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="solar:server-bold-duotone" width={20} sx={{ color: 'primary.main' }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary">vmqproportasync01</Typography>
+                <Typography variant="caption" display="block" fontFamily="monospace" color="text.disabled">/home/porta_pnmv3/PortaSync/</Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+        <Card variant="outlined" sx={{ flex: 1 }}>
+          <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Iconify icon="solar:folder-bold-duotone" width={20} sx={{ color: 'warning.main' }} />
+              <Box>
+                <Typography variant="caption" color="text.secondary">Logs</Typography>
+                <Typography variant="caption" display="block" fontFamily="monospace" color="text.disabled">/home/porta_pnmv3/PortaSync/log/</Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      <TableContainer component={Card} sx={{ mb: 4 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Script</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Serveur</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {PORTASYNC_SCRIPTS.map((script) => (
+              <TableRow key={script.name} hover sx={{ opacity: script.disabled ? 0.5 : 1 }}>
+                <TableCell>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="body2" fontWeight={600} fontFamily="monospace">{script.name}</Typography>
+                    {script.disabled && <Chip label="non utilise" size="small" variant="outlined" sx={{ height: 20, fontSize: 10 }} />}
+                  </Stack>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption" fontFamily="monospace" sx={{ bgcolor: 'action.hover', px: 0.75, py: 0.25, borderRadius: 0.5 }}>
+                    {script.server}
+                  </Typography>
+                </TableCell>
+                <TableCell><Typography variant="body2" color="text.secondary">{script.description}</Typography></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* ── Section 2: Tâches Crontab ── */}
+      <SectionTitle icon="solar:clock-circle-bold-duotone" title="Taches Crontab" subtitle="Taches planifiees sur vmqproportasync01 et vmqproportawebdb01" />
+
+      <Tabs value={cronTab} onChange={(_, v) => setCronTab(v)} sx={{ mb: 2 }}>
+        <Tab label="Taches actives" icon={<Iconify icon="solar:play-circle-bold-duotone" width={18} />} iconPosition="start" sx={{ minHeight: 42 }} />
+        <Tab label="Taches desactivees" icon={<Iconify icon="solar:close-circle-bold-duotone" width={18} />} iconPosition="start" sx={{ minHeight: 42 }} />
+      </Tabs>
+
+      {cronTab === 0 && (
+        <Box>
+          {/* Filters */}
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+            <Chip label="Tous serveurs" size="small" variant={serverFilter === null ? 'filled' : 'outlined'} onClick={() => setServerFilter(null)} />
+            <Chip label="vmqproportasync01" size="small" variant={serverFilter === 'vmqproportasync01' ? 'filled' : 'outlined'} color="primary" onClick={() => setServerFilter(serverFilter === 'vmqproportasync01' ? null : 'vmqproportasync01')} />
+            <Chip label="vmqproportawebdb01" size="small" variant={serverFilter === 'vmqproportawebdb01' ? 'filled' : 'outlined'} color="warning" onClick={() => setServerFilter(serverFilter === 'vmqproportawebdb01' ? null : 'vmqproportawebdb01')} />
+            <Divider orientation="vertical" flexItem />
+            {Object.entries(CRON_CATEGORY_CONFIG).map(([key, cfg]) => (
+              <Chip key={key} label={cfg.label} size="small" variant={categoryFilter === key ? 'filled' : 'outlined'} color={cfg.color} onClick={() => setCategoryFilter(categoryFilter === key ? null : key)} />
+            ))}
+          </Stack>
+
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+            {filteredJobs.length} tache{filteredJobs.length > 1 ? 's' : ''} affichee{filteredJobs.length > 1 ? 's' : ''}
+          </Typography>
+
+          <TableContainer component={Card}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Script</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Serveur</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Planification</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Cat.</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredJobs.map((job) => {
+                  const cat = CRON_CATEGORY_CONFIG[job.category];
+                  return (
+                    <TableRow key={job.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={600} fontFamily="monospace" sx={{ fontSize: 12 }}>{job.script}</Typography>
+                        {job.user === 'root' && <Chip label="root" size="small" color="error" variant="outlined" sx={{ height: 18, fontSize: 10, mt: 0.5 }} />}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" fontFamily="monospace" sx={{ bgcolor: job.server === 'vmqproportasync01' ? 'primary.lighter' : 'warning.lighter', px: 0.75, py: 0.25, borderRadius: 0.5, fontSize: 10 }}>
+                          {job.server}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary">{job.schedule}</Typography>
+                        <Typography variant="caption" display="block" fontFamily="monospace" color="text.disabled" sx={{ fontSize: 10 }}>{job.cron}</Typography>
+                      </TableCell>
+                      <TableCell><Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>{job.description}</Typography></TableCell>
+                      <TableCell><Chip label={cat?.label} size="small" color={cat?.color} variant="soft" sx={{ height: 22, fontSize: 10 }} /></TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
+
+      {cronTab === 1 && (
+        <Box>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Ces taches sont commentees dans le crontab et ne sont plus executees.
+          </Alert>
+          <TableContainer component={Card}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Script</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Serveur</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Ancienne planification</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Raison</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {DISABLED_CRON_JOBS.map((job) => (
+                  <TableRow key={job.script} hover>
+                    <TableCell><Typography variant="body2" fontFamily="monospace" sx={{ fontSize: 12 }}>{job.script}</Typography></TableCell>
+                    <TableCell>
+                      <Typography variant="caption" fontFamily="monospace" sx={{ bgcolor: 'action.hover', px: 0.75, py: 0.25, borderRadius: 0.5, fontSize: 10 }}>
+                        {job.server}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{job.oldSchedule}</TableCell>
+                    <TableCell><Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', fontSize: 12 }}>{job.reason}</Typography></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
+
+      {/* Notes */}
+      <Box sx={{ mt: 4 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Notes operationnelles</Typography>
+        <Stack spacing={1}>
+          {[
+            'L\'ancien PnmSyncManager.sh global est commente dans le crontab, remplace par les scripts unitaires par operateur (_oc, _sfrc, _dt, _uts, _freec)',
+            'porta_pnmv3 n\'a pas acces aux logs systeme (/var/log/messages, /var/log/secure) — besoin de root',
+            'Les scripts de verification de bascule tournent sous root sur vmqproportawebdb01',
+            'Synchro dimanche : scripts echelonnes toutes les 10 min de 21h00 a 21h50',
+            'Identifiants sur le Secret Server : https://vmqpropass01',
+          ].map((note, i) => (
+            <Stack key={i} direction="row" alignItems="flex-start" spacing={1}>
+              <Iconify icon="solar:info-circle-bold-duotone" width={16} sx={{ color: 'info.main', mt: 0.25, flexShrink: 0 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>{note}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Box>
+    </Box>
+  );
+}
+
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 const TABS = [
   { value: 'overview', label: 'Vue d\'ensemble', icon: 'solar:map-bold-duotone' },
-  { value: 'daily', label: 'Vérifications', icon: 'solar:checklist-minimalistic-bold-duotone' },
-  { value: 'infra', label: 'Infrastructure', icon: 'solar:server-square-bold-duotone' },
+  { value: 'daily', label: 'Verifications', icon: 'solar:checklist-minimalistic-bold-duotone' },
+  { value: 'scripts', label: 'Scripts & Crontab', icon: 'solar:code-square-bold-duotone' },
   { value: 'contacts', label: 'Mails & Contacts', icon: 'solar:letter-bold-duotone' },
 ];
 
@@ -1040,7 +1111,7 @@ export default function OperationsGuide() {
 
         {tab === 'overview' && <TabOverview />}
         {tab === 'daily' && <TabDailyChecks />}
-        {tab === 'infra' && <TabInfrastructure />}
+        {tab === 'scripts' && <TabScriptsCrontab />}
         {tab === 'contacts' && <TabLinksContacts />}
       </Box>
     </DashboardLayout>

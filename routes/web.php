@@ -47,17 +47,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Operations Guide
     Route::get('/operations-guide', fn () => Inertia::render('OperationsGuide'))->name('operations-guide');
 
-    // Crontab Scripts
-    Route::get('/crontab-scripts', fn () => Inertia::render('CrontabScripts'))->name('crontab-scripts');
-
     // Investigations
     Route::get('/investigations', fn () => Inertia::render('Investigations/Index'))->name('investigations');
 
     // Cas Pratiques
     Route::get('/cas-pratiques', fn () => Inertia::render('CasPratiques'))->name('cas-pratiques');
-
-    // Scripts PNM
-    Route::get('/scripts-pnm', fn () => Inertia::render('ScriptsPnm'))->name('scripts-pnm');
 
     // Requetes PNM
     Route::get('/requetes-pnm', fn () => Inertia::render('RequetesPnm'))->name('requetes-pnm');

@@ -82,10 +82,6 @@ export const paths = {
   },
   // OPERATIONS GUIDE
   operationsGuide: '/operations-guide',
-  // CRONTAB SCRIPTS
-  crontabScripts: '/crontab-scripts',
-  // SCRIPTS PNM
-  scriptsPnm: '/scripts-pnm',
   // REQUETES PNM
   requetesPnm: '/requetes-pnm',
   // INVESTIGATIONS
