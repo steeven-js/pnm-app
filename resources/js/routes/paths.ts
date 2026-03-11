@@ -88,6 +88,8 @@ export const paths = {
   scriptsPnm: '/scripts-pnm',
   // REQUETES PNM
   requetesPnm: '/requetes-pnm',
+  // INVESTIGATIONS
+  investigations: '/investigations',
   // CAS PRATIQUES
   casPratiques: '/cas-pratiques',
   // GLOSSARY

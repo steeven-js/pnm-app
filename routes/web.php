@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Crontab Scripts
     Route::get('/crontab-scripts', fn () => Inertia::render('CrontabScripts'))->name('crontab-scripts');
 
+    // Investigations
+    Route::get('/investigations', fn () => Inertia::render('Investigations/Index'))->name('investigations');
+
     // Cas Pratiques
     Route::get('/cas-pratiques', fn () => Inertia::render('CasPratiques'))->name('cas-pratiques');
 

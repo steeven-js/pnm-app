@@ -56,6 +56,11 @@ export const navData: NavSectionProps['data'] = [
         ],
       },
       {
+        title: 'Investigations',
+        path: paths.investigations,
+        icon: <Iconify icon="solar:magnifer-zoom-in-bold-duotone" width={24} />,
+      },
+      {
         title: 'Guide Opérations',
         path: paths.operationsGuide,
         icon: <Iconify icon="solar:clipboard-check-bold-duotone" width={24} />,
