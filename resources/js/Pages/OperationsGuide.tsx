@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Head } from '@inertiajs/react';
 
 import Alert from '@mui/material/Alert';
@@ -8,6 +8,8 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -223,7 +225,7 @@ const DAILY_TIMELINE: TimelineSlot[] = [
   {
     time: '~09:00',
     items: [
-      { type: 'server', title: 'Bascule & Valorisation', detail: 'Tous les opérateurs "Check success" + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log', 'tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log'], check: 'Tous les opérateurs "Check success" + "Fin de Traitement"' },
+      { type: 'server', title: 'Bascule & Valorisation', detail: 'Tous les opérateurs "Check success" + "Fin de Traitement"', server: 'vmqproportasync01', commands: ['tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log && tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log'], check: 'Tous les opérateurs "Check success" + "Fin de Traitement"' },
       { type: 'mail', title: '[PNM] Reporting RIO incorrect', detail: 'Vérifier le nombre de refus entrante/sortante pour RIO incorrect. Si > 0, investiguer.', category: 'reporting', from: 'porta_pnmv3' },
       { type: 'mail', title: '[PNM][INCIDENT] Incidents détectés', detail: 'Analyser chaque incident : refus 1210/1220, erreurs 7000, AR non-reçus, conflits.', category: 'incident', from: 'porta_pnmv3' },
     ],
@@ -757,10 +759,13 @@ function TabDailyChecks() {
                       </Stack>
 
                       {item.commands && (
-                        <Box sx={{ bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1, my: 0.5, fontFamily: 'monospace', fontSize: '0.7rem' }}>
-                          {item.commands.map((cmd, j) => (
-                            <Box key={j}>$ {cmd}</Box>
-                          ))}
+                        <Box sx={{ position: 'relative', my: 0.5 }}>
+                          <Box sx={{ bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1, pr: 4, fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                            {item.commands.map((cmd, j) => (
+                              <Box key={j}>$ {cmd}</Box>
+                            ))}
+                          </Box>
+                          <CopyCommandButton commands={item.commands} />
                         </Box>
                       )}
 
@@ -934,6 +939,29 @@ const TABS = [
   { value: 'infra', label: 'Infrastructure', icon: 'solar:server-square-bold-duotone' },
   { value: 'contacts', label: 'Mails & Contacts', icon: 'solar:letter-bold-duotone' },
 ];
+
+function CopyCommandButton({ commands }: { commands: string[] }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(commands.join('\n')).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [commands]);
+
+  return (
+    <Tooltip title={copied ? 'Copié !' : 'Copier'}>
+      <IconButton
+        size="small"
+        onClick={handleCopy}
+        sx={{ position: 'absolute', top: 4, right: 4, color: 'grey.400', '&:hover': { color: 'grey.100' } }}
+      >
+        <Iconify icon={copied ? 'solar:check-circle-bold' : 'solar:copy-bold'} width={16} />
+      </IconButton>
+    </Tooltip>
+  );
+}
 
 export default function OperationsGuide() {
   const [tab, setTab] = useState('overview');
