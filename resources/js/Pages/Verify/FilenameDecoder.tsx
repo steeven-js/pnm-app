@@ -24,6 +24,7 @@ import { DashboardLayout } from 'src/layouts/dashboard/layout';
 import Tooltip from '@mui/material/Tooltip';
 
 import type {
+  ErrEntry,
   FileAnalysisResult,
   FilenameResult,
   ParsedTicket,
@@ -31,6 +32,8 @@ import type {
 } from 'src/lib/pnm-utils';
 
 import { analyzeFileContent, decodeFilename, getTicketReadableSentence } from 'src/lib/pnm-utils';
+
+import { lookupCode } from 'src/lib/pnm-code-dictionary';
 
 // ----------------------------------------------------------------------
 
@@ -286,8 +289,67 @@ export default function FilenameDecoder() {
             </>
           )}
 
+          {/* ERR file analysis */}
+          {mode === 'file' && fileResult && fileResult.isErrFile && (
+            <>
+              {/* ERR Header */}
+              <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' } }}>
+                <Card sx={{ borderLeft: 3, borderColor: '#dc2626' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Iconify icon="solar:danger-triangle-bold" width={20} sx={{ color: '#dc2626' }} />
+                      <Typography variant="subtitle2" color="error">Fichier .ERR détecté</Typography>
+                    </Box>
+                    {fileResult.header ? (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+                          {fileResult.header.filename}
+                        </Typography>
+                        <Typography variant="body2">
+                          Émetteur : <strong>{fileResult.header.operatorName}</strong> ({fileResult.header.operatorCode})
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">{fileResult.header.formattedDate}</Typography>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="error">En-tête non détecté</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ borderLeft: 3, borderColor: '#f59e0b' }}>
+                  <CardContent>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>Résumé</Typography>
+                    <Typography variant="body2">
+                      <strong>{fileResult.errEntries.length}</strong> erreur{fileResult.errEntries.length > 1 ? 's' : ''} détectée{fileResult.errEntries.length > 1 ? 's' : ''}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                      {[...new Set(fileResult.errEntries.map((e) => e.errorCode))].map((code) => {
+                        const codeInfo = lookupCode(code);
+                        return (
+                          <Chip key={code} label={`${code} — ${codeInfo?.label ?? 'Inconnu'}`} size="small" color="error" variant="soft" />
+                        );
+                      })}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+
+              {/* ERR entries detail */}
+              {fileResult.errEntries.map((err, i) => (
+                <ErrEntryCard key={i} entry={err} />
+              ))}
+
+              {/* Conclusion / Issues */}
+              {fileResult.issues.filter((i) => i.type === 'err_file').map((issue, i) => (
+                <Alert key={i} severity="warning" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
+                  <Typography variant="body2">{issue.message}</Typography>
+                </Alert>
+              ))}
+            </>
+          )}
+
           {/* Full file analysis */}
-          {mode === 'file' && fileResult && (
+          {mode === 'file' && fileResult && !fileResult.isErrFile && (
             <>
               {/* Summary cards */}
               <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
@@ -462,6 +524,97 @@ function LabelValue({ label, value, mono }: { label: string; value: string; mono
       <Typography variant="body2" color="text.secondary">{label}</Typography>
       <Typography variant="body2" fontWeight={600} sx={mono ? { fontFamily: 'monospace' } : undefined}>{value}</Typography>
     </>
+  );
+}
+
+function CopyableCode({ children }: { children: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Box sx={{ position: 'relative', my: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, bgcolor: '#1e293b', borderRadius: 1 }}>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 11, color: '#e2e8f0', flex: 1, wordBreak: 'break-all' }}>
+          {children}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => { navigator.clipboard.writeText(children); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+          sx={{ color: '#94a3b8', '&:hover': { color: '#e2e8f0' } }}
+        >
+          <Iconify icon={copied ? 'solar:check-circle-bold' : 'solar:copy-bold'} width={16} />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+}
+
+function ErrEntryCard({ entry }: { entry: ErrEntry }) {
+  const codeInfo = lookupCode(entry.errorCode);
+  return (
+    <Card sx={{ borderLeft: 3, borderColor: '#dc2626' }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <Iconify icon="solar:close-circle-bold" width={20} sx={{ color: '#dc2626' }} />
+          <Typography variant="subtitle2" color="error">
+            {entry.errorCode} — {codeInfo?.label ?? 'Erreur'}
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, mb: 1.5 }}>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Émetteur (source)</Typography>
+            <Typography variant="body2" fontWeight={600}>{entry.sourceOperatorName} ({entry.sourceOperator})</Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Destinataire</Typography>
+            <Typography variant="body2" fontWeight={600}>{entry.destOperatorName} ({entry.destOperator})</Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Date</Typography>
+            <Typography variant="body2">{entry.formattedDate}</Typography>
+          </Box>
+          {entry.referencedFilename && (
+            <Box>
+              <Typography variant="caption" color="text.secondary">Fichier référencé</Typography>
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>{entry.referencedFilename}</Typography>
+            </Box>
+          )}
+        </Box>
+
+        <Alert severity="error" variant="outlined" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
+          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+            {entry.errorMessage}
+          </Typography>
+        </Alert>
+
+        {codeInfo && (
+          <Box sx={{ mt: 1.5, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Description du code {entry.errorCode}</Typography>
+            <Typography variant="body2">{codeInfo.description}</Typography>
+            {codeInfo.action && (
+              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                <strong>Action recommandée :</strong> {codeInfo.action}
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* SFTP location */}
+        {entry.referencedFilename && (
+          <Box sx={{ mt: 1.5, p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+              <Iconify icon="solar:server-bold-duotone" width={18} sx={{ color: '#06b6d4' }} />
+              <Typography variant="subtitle2">Localisation SFTP (vmqproportasync01)</Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Fichier .ERR</Typography>
+            <CopyableCode>{entry.errFilePath}</CopyableCode>
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }} gutterBottom>Fichier PNMDATA original envoyé</Typography>
+            <CopyableCode>{entry.originalFilePath}</CopyableCode>
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }} gutterBottom>Rechercher tous les .ERR récents (7 jours)</Typography>
+            <CopyableCode>{entry.findCommand}</CopyableCode>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -438,7 +438,8 @@ export type ValidationIssue = {
     lineNumber?: number;
     /** Short machine-readable type for UI styling */
     type?: 'col3_mismatch' | 'unknown_code' | 'count_mismatch' | 'bad_header' | 'bad_footer' | 'format'
-        | 'filename_mismatch' | 'timestamp_order' | 'bad_hash' | 'duplicate_sequence' | 'duplicate_ticket';
+        | 'filename_mismatch' | 'timestamp_order' | 'bad_hash' | 'duplicate_sequence' | 'duplicate_ticket'
+        | 'err_file' | 'err_entry';
     /** Extra structured details for rich UI display */
     details?: Record<string, string>;
 };
@@ -450,6 +451,25 @@ export type TicketSummary = {
     count: number;
 };
 
+export type ErrEntry = {
+    sourceOperator: string;
+    sourceOperatorName: string;
+    destOperator: string;
+    destOperatorName: string;
+    timestamp: string;
+    formattedDate: string;
+    errorCode: string;
+    errorCount: string;
+    errorMessage: string;
+    referencedFilename: string;
+    /** Deduced SFTP path where the .ERR file resides */
+    errFilePath: string;
+    /** Deduced SFTP path of the original PNMDATA file */
+    originalFilePath: string;
+    /** Shell command to find related .ERR files */
+    findCommand: string;
+};
+
 export type FileAnalysisResult = {
     header: ParsedHeader | null;
     footer: ParsedFooter | null;
@@ -458,6 +478,10 @@ export type FileAnalysisResult = {
     uniqueMsisdns: string[];
     operatorsInvolved: string[];
     issues: ValidationIssue[];
+    /** Parsed error entries from .ERR files (lines starting with 0000|) */
+    errEntries: ErrEntry[];
+    /** True when the file is detected as a .ERR file (error report, not a PNMDATA with tickets) */
+    isErrFile: boolean;
 };
 
 // ── Helpers ──
@@ -649,7 +673,7 @@ export function analyzeFileContent(content: string, importedFilename?: string): 
 
     if (lines.length === 0) {
         issues.push({ severity: 'error', message: 'Le contenu est vide.' });
-        return { header: null, footer: null, tickets: [], ticketSummary: [], uniqueMsisdns: [], operatorsInvolved: [], issues };
+        return { header: null, footer: null, tickets: [], ticketSummary: [], uniqueMsisdns: [], operatorsInvolved: [], issues, errEntries: [], isErrFile: false };
     }
 
     // Parse header (first line)
@@ -696,6 +720,114 @@ export function analyzeFileContent(content: string, importedFilename?: string): 
                 },
             });
         }
+    }
+
+    // ── Detect .ERR file format (lines starting with 0000|) ──
+    const dataLines = lines.slice(header ? 1 : 0, footer ? lines.length - 1 : lines.length);
+    const errLines = dataLines.filter((l) => l.startsWith('0000|'));
+
+    if (errLines.length > 0 && errLines.length === dataLines.length) {
+        // This is a .ERR file — all data lines are error entries
+        const errEntries: ErrEntry[] = [];
+        for (const errLine of errLines) {
+            const parts = errLine.split('|');
+            // Format: 0000|sourceOp|destOp|timestamp|errorCode|count|message
+            if (parts.length >= 7) {
+                const sourceOp = parts[1];
+                const destOp = parts[2];
+                const ts = parts[3];
+                const errorCode = parts[4];
+                const errorCount = parts[5];
+                const errorMessage = parts.slice(6).join('|').trim();
+
+                // Extract referenced filename from error message
+                const filenameMatch = errorMessage.match(/(PNMDATA\.[^\s]+)/);
+
+                const refFilename = filenameMatch?.[1] ?? '';
+
+                // Deduce SFTP paths from the PNMDATA filename
+                // PNMDATA.SRC.DST.timestamp.seq → stored in pnmdata/<DST>/
+                // The .ERR is in arch_send/ of the dest operator folder
+                // The original PNMDATA is in arch_send/ too (it's a file WE sent)
+                const refParts = refFilename.match(/^PNMDATA\.(\d{2})\.(\d{2})\./);
+                const refDest = refParts?.[2] ?? destOp;
+                const basePath = `/home/porta_pnmv3/PortaSync/pnmdata/${refDest}`;
+
+                errEntries.push({
+                    sourceOperator: sourceOp,
+                    sourceOperatorName: getOperatorName(sourceOp),
+                    destOperator: destOp,
+                    destOperatorName: getOperatorName(destOp),
+                    timestamp: ts,
+                    formattedDate: formatPnmTimestamp(ts),
+                    errorCode,
+                    errorCount,
+                    errorMessage,
+                    referencedFilename: refFilename,
+                    errFilePath: `${basePath}/arch_send/${refFilename}.ERR`,
+                    originalFilePath: `${basePath}/arch_send/${refFilename}`,
+                    findCommand: `find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.ERR" -mtime -7 -exec echo "=== {} ===" \\; -exec cat {} \\;`,
+                });
+            }
+        }
+
+        // Add summary issue for the ERR file
+        for (const err of errEntries) {
+            issues.push({
+                severity: 'error',
+                message: `${err.errorCode} — ${err.errorMessage}`,
+                type: 'err_entry',
+                details: {
+                    errorCode: err.errorCode,
+                    sourceOperator: err.sourceOperator,
+                    sourceOperatorName: err.sourceOperatorName,
+                    destOperator: err.destOperator,
+                    destOperatorName: err.destOperatorName,
+                    timestamp: err.timestamp,
+                    formattedDate: err.formattedDate,
+                    errorCount: err.errorCount,
+                    errorMessage: err.errorMessage,
+                    referencedFilename: err.referencedFilename,
+                },
+            });
+        }
+
+        // Add conclusion
+        const errorCodes = [...new Set(errEntries.map((e) => e.errorCode))];
+        const isArNonRecu = errorCodes.includes('E011');
+        if (isArNonRecu) {
+            const referencedFiles = errEntries.filter((e) => e.referencedFilename).map((e) => e.referencedFilename);
+            const destOps = [...new Set(errEntries.map((e) => `${e.destOperatorName} (${e.destOperator})`))];
+            issues.push({
+                severity: 'warning',
+                message: `Conclusion : fichier .ERR de type « AR non-reçu » — ${destOps.join(', ')} n'a pas envoyé d'acquittement (ACR) dans les 60 minutes pour ${referencedFiles.length > 0 ? referencedFiles.join(', ') : 'le(s) fichier(s) référencé(s)'}. Ce fichier .ERR est auto-généré par le système. Pas d'action immédiate sauf si le problème se reproduit régulièrement.`,
+                type: 'err_file',
+                details: {
+                    errorCodes: errorCodes.join(', '),
+                    destOperators: destOps.join(', '),
+                    referencedFiles: referencedFiles.join(', '),
+                },
+            });
+        } else {
+            issues.push({
+                severity: 'warning',
+                message: `Conclusion : fichier .ERR contenant ${errEntries.length} erreur(s) de type ${errorCodes.join(', ')}. Vérifier le contexte et les fichiers référencés.`,
+                type: 'err_file',
+                details: { errorCodes: errorCodes.join(', ') },
+            });
+        }
+
+        return {
+            header,
+            footer,
+            tickets: [],
+            ticketSummary: [],
+            uniqueMsisdns: [],
+            operatorsInvolved: errEntries.flatMap((e) => [e.sourceOperatorName, e.destOperatorName]),
+            issues,
+            errEntries,
+            isErrFile: true,
+        };
     }
 
     // Parse tickets (lines between header and footer)
@@ -875,6 +1007,8 @@ export function analyzeFileContent(content: string, importedFilename?: string): 
         uniqueMsisdns: [...msisdnSet].sort(),
         operatorsInvolved: [...operatorSet].sort(),
         issues,
+        errEntries: [],
+        isErrFile: false,
     };
 }
 

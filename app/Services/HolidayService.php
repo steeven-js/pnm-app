@@ -107,7 +107,7 @@ class HolidayService
         $mobile = [
             ['date' => $easter->copy()->subDays(47), 'name' => 'Mardi Gras'],
             ['date' => $easter->copy()->subDays(46), 'name' => 'Mercredi des Cendres'],
-            ['date' => $easter->copy()->subDays(25), 'name' => 'Mi-Carême'],
+            ['date' => $easter->copy()->subDays(24), 'name' => 'Mi-Carême'],
             ['date' => $easter->copy()->subDays(2), 'name' => 'Vendredi Saint'],
             ['date' => $easter->copy()->addDay(), 'name' => 'Lundi de Pâques'],
             ['date' => $easter->copy()->addDays(39), 'name' => 'Ascension'],
