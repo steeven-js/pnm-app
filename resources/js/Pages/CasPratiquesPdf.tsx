@@ -2340,6 +2340,260 @@ function CasFnrNonTransmisEmaPdf() {
   );
 }
 
+// ─── Cas #13 — Rollback DAPI FNR/EMA/EMM KO PDF ─────────────────────────────
+
+function CasRollbackDapiFnrPdf() {
+  return (
+    <Document>
+      {/* PAGE 1 — Contexte + Espace disque + Backup BDD */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI — FNR/EMA/EMM KO</Text>
+            <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['Rollback', 'DAPI', 'FNR', 'EMA', 'EMM', 'Bascule', 'BDD', 'vmqproportasync01'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>Une erreur sur le serveur <Text style={s.bold}>vmqproportasync01</Text> et/ou <Text style={s.bold}>vmqproportawebdb01</Text> a engendre une impossibilite de traiter la bascule et la valorisation. Ce cas documente la procedure complete de rollback.</Text>
+
+        <View style={s.alertError}>
+          <Text style={s.alertTitle}>CRITIQUE — Impact</Text>
+          <Text style={s.alertText}>Sans traitement de la bascule, les portabilites du jour ne sont pas effectives. Les numeros portes ne sont pas routes correctement. Incident a traiter en priorite absolue.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Ticket de reference</Text>
+          <Text style={s.alertText}>https://ticket.fwi.digicelgroup.local/Ticket/Display.html?id=267183</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Verification de l{"'"}espace disque</Text>
+        </View>
+
+        <Text style={s.body}>Un disque plein sur <Text style={s.bold}>vmqproportasync01</Text> est souvent la cause du blocage :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Sur vmqproportasync01 (user porta_pnmv3)</Text>
+          <Text style={s.codeText}>df -kh</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Verifier en particulier /home — si 100% → liberer de l{"'"}espace</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Purger les anciens logs et archives</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># Puis verifier a nouveau :</Text>
+          <Text style={s.codeText}>df -kh</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Sauvegarde des bases de donnees avant rollback</Text>
+        </View>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>OBLIGATOIRE</Text>
+          <Text style={s.alertText}>Toujours faire un backup avant de modifier les donnees en base.</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Sur vmqproportawebdb01 (root)</Text>
+          <Text style={s.codeText}>cd /usr/bin</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>./backup_mysql.sh -v</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># Verifier le backup</Text>
+          <Text style={s.codeText}>cd /backup/</Text>
+          <Text style={s.codeText}>ls -ltr</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}># Verifier l{"'"}espace disque</Text>
+          <Text style={s.codeText}>df -kh</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Rollback DAPI — FNR/EMA/EMM KO</Text>
+          <Text>Page 1 / 3</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 2 — Rollback des états + Relance bascule/valorisation */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI (suite)</Text>
+            <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Rollback des etats des portages</Text>
+        </View>
+
+        <Text style={s.body}>Remettre les portabilites et dossiers du jour a leur etat <Text style={s.bold}>pre-bascule</Text>. Adapter la date dans les requetes :</Text>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Types de portage et etats</Text>
+          <Text style={s.alertText}>Chaque type a 3 etats : pre-bascule, bascule, cloture. Le rollback remet l{"'"}etat a "pre-bascule" et supprime la date de fin/cloture.</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '15%' }]}>Type</Text>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Description</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Etat pre-bascule</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Etats a rollback</Text>
+          </View>
+          {[
+            ['PEN', 'Portage Entrant', '7', '8, 9'],
+            ['PSO', 'Portage Sortant', '20', '21, 22'],
+            ['PET', 'Portage Entrant Tiers', '29', '30, 31'],
+            ['REN', 'Retour Entrant', '53', '54, 55'],
+            ['RSO', 'Retour Sortant', '60', '61, 62'],
+            ['RET', 'Retour Entrant Tiers', '65', '66, 67'],
+          ].map(([type, desc, pre, rollback]) => (
+            <View key={type} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '15%', fontWeight: 'bold' }]}>{type}</Text>
+              <Text style={[s.tableCellLight, { width: '35%' }]}>{desc}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: c.green }]}>{pre}</Text>
+              <Text style={[s.tableCell, { width: '25%', color: c.red }]}>{rollback}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- ROLLBACK DES ETATS — Adapter la date !</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- MAJ PEN</Text>
+          <Text style={s.codeText}>UPDATE PORTAGE SET etat_id_actuel = {"'"}7{"'"}, date_fin=NULL</Text>
+          <Text style={s.codeText}>WHERE date(date_fin) = {"'"}2025-01-06{"'"}</Text>
+          <Text style={s.codeText}>AND etat_id_actuel IN ({"'"}8{"'"},{"'"}9{"'"});</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={s.codeText}>UPDATE DOSSIER SET etat_id_actuel = {"'"}7{"'"}, date_cloture=NULL</Text>
+          <Text style={s.codeText}>WHERE date(date_cloture) = {"'"}2025-01-06{"'"}</Text>
+          <Text style={s.codeText}>AND etat_id_actuel IN ({"'"}8{"'"},{"'"}9{"'"});</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Meme pattern pour PSO(20→21,22), PET(29→30,31),</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- REN(53→54,55), RSO(60→61,62), RET(65→66,67)</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>COMMIT;</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Relance bascule et valorisation</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Sur vmqproportasync01 (user porta_pnmv3)</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># 1. Relancer la bascule</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>/home/porta_pnmv3/PortaSync/TraitementBascule.sh -v</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># 2. Relancer la valorisation</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>/home/porta_pnmv3/PortaSync/TraitementValorisation.sh -v</Text>
+        </View>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertText}>Suite au traitement de la valorisation, <Text style={{ fontWeight: 'bold' }}>alerter l{"'"}equipe VAS</Text> sur la generation tardive du fichier a l{"'"}EMM.</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Rollback DAPI — FNR/EMA/EMM KO</Text>
+          <Text>Page 2 / 3</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 3 — Relance FNR + Vérification + Clôture manuelle + Vigilance */}
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI (suite)</Text>
+            <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Relance du traitement du FNR depuis EMA</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Sur EMA15-Digicel (172.24.119.140) — user batchuser</Text>
+          <Text style={s.codeText}>(echo "LOGIN:batchuser:123batchuser;";sleep 5;</Text>
+          <Text style={s.codeText}> echo "SET:BATCHJOB:FILE,DEF,fnr_action_v3.bh;";</Text>
+          <Text style={s.codeText}> sleep 5; echo "LOGOUT;";sleep 5)| telnet 0 3333</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>6</Text></View>
+          <Text style={s.stepTitle}>Verification du traitement du FNR</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}># Verifier le log sur EMA15-Digicel</Text>
+          <Text style={s.codeText}>ls -lt ~/LogFiles/*fnr_action_v3* | head -3</Text>
+          <Text style={s.codeText}>tail -f ~/LogFiles/{"<"}dernier_fichier_log{">"}</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Resultat attendu :</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Totally 576 commands are successful.</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}># Totally 0 commands failed.</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertText}>Si des commandes ont echoue, un fichier <Text style={{ fontWeight: 'bold' }}>.nok</Text> sera genere. Verifier les MSISDN sur PortaWs et corriger via la page FNR : <Text style={{ fontFamily: 'Courier', fontSize: 6.5 }}>http://172.24.2.21/apis/porta/fnr-update.php</Text></Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>7</Text></View>
+          <Text style={s.stepTitle}>Cloture manuelle des dossiers non clotures</Text>
+        </View>
+
+        <Text style={s.body}>Cloturer manuellement les portabilites et dossiers des cas rollbackes :</Text>
+
+        <View style={s.codeBlock}>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Cloture des portages non clotures</Text>
+          <Text style={s.codeText}>UPDATE PORTAGE</Text>
+          <Text style={s.codeText}>SET date_fin = {"'"}2025-01-06 12:30:00{"'"}</Text>
+          <Text style={s.codeText}>WHERE date_fin IS NULL</Text>
+          <Text style={s.codeText}>AND date(date_portage) = {"'"}2025-01-06{"'"}</Text>
+          <Text style={s.codeText}>AND etat_id_actuel IN (7,20,29,53,60,65);</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>COMMIT;</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Cloture des dossiers non clotures</Text>
+          <Text style={s.codeText}>UPDATE DOSSIER</Text>
+          <Text style={s.codeText}>SET date_cloture = {"'"}2025-01-06 12:30:00{"'"}</Text>
+          <Text style={s.codeText}>WHERE date_cloture IS NULL</Text>
+          <Text style={s.codeText}>AND etat_id_actuel IN (7,20,29,53,60,65);</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>COMMIT;</Text>
+        </View>
+
+        <View style={[s.alertSuccess, { marginTop: 8 }]}>
+          <Text style={s.alertTitle}>Points de vigilance</Text>
+          <Text style={s.alertText}>{"•"} Un <Text style={{ fontWeight: 'bold' }}>disque plein</Text> sur vmqproportasync01 est la cause la plus frequente</Text>
+          <Text style={s.alertText}>{"•"} <Text style={{ fontWeight: 'bold' }}>Toujours faire un backup BDD</Text> avant le rollback (./backup_mysql.sh -v)</Text>
+          <Text style={s.alertText}>{"•"} Adapter la <Text style={{ fontWeight: 'bold' }}>date</Text> dans toutes les requetes SQL au jour de l{"'"}incident</Text>
+          <Text style={s.alertText}>{"•"} Apres la valorisation, <Text style={{ fontWeight: 'bold' }}>alerter l{"'"}equipe VAS</Text> pour la generation tardive du fichier EMM</Text>
+          <Text style={s.alertText}>{"•"} Verifier le FNR apres relance — si erreurs, corriger via les <Text style={{ fontWeight: 'bold' }}>pages web FNR</Text> (172.24.2.21)</Text>
+          <Text style={s.alertText}>{"•"} La cloture manuelle est la <Text style={{ fontWeight: 'bold' }}>derniere etape</Text> — ne pas cloturer avant que tous les traitements soient OK</Text>
+          <Text style={s.alertText}>{"•"} Documenter l{"'"}incident avec le numero de ticket RT pour tracabilite</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Rollback DAPI — FNR/EMA/EMM KO</Text>
+          <Text>Page 3 / 3</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Cas #12 — MSISDN provisoire erreur PDF ─────────────────────────────────
 
 function CasMsisdnProvisoireErreurPdf() {
@@ -2533,6 +2787,10 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'fnr-non-transmis-ema': {
       document: <CasFnrNonTransmisEmaPdf />,
       filename: 'Cas-Pratique-FNR-Non-Transmis-EMA',
+    },
+    'rollback-dapi-fnr-ema-emm': {
+      document: <CasRollbackDapiFnrPdf />,
+      filename: 'Cas-Pratique-Rollback-DAPI-FNR-EMA-EMM',
     },
     'msisdn-provisoire-erreur': {
       document: <CasMsisdnProvisoireErreurPdf />,

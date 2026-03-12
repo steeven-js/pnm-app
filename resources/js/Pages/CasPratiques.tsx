@@ -2478,9 +2478,285 @@ const casMsisdnProvisoireErreur: CasPratique = {
   ),
 };
 
+// ─── Cas #13 — Rollback DAPI FNR/EMA/EMM KO ────────────────────────────────
+
+const casRollbackDapiFnr: CasPratique = {
+  id: 'rollback-dapi-fnr-ema-emm',
+  title: 'Rollback sur DAPI suite Traitement FNR/EMA/EMM KO',
+  date: '12/03/2026',
+  severity: 'critique',
+  category: 'infrastructure',
+  tags: ['Rollback', 'DAPI', 'FNR', 'EMA', 'EMM', 'Bascule', 'BDD', 'vmqproportasync01'],
+  summary:
+    'Une erreur sur vmqproportasync01 et/ou vmqproportawebdb01 a empêché le traitement de la bascule et de la valorisation. Ce cas couvre le rollback complet : vérification espace disque, backup BDD, rollback des états, relance bascule/valorisation/FNR, et clôture manuelle.',
+  content: (
+    <>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Une erreur sur le serveur <strong>vmqproportasync01</strong> et/ou <strong>vmqproportawebdb01</strong> a
+        engendré une impossibilité de traiter la bascule et la valorisation. Ce cas documente la procédure
+        complète de rollback.
+      </Typography>
+
+      <Alert severity="error" sx={{ mb: 2 }}>
+        <strong>CRITIQUE —</strong> Sans traitement de la bascule, les portabilités du jour ne sont pas effectives.
+        Les numéros portés ne sont pas routés correctement. Incident à traiter en priorité absolue.
+      </Alert>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Ticket de référence :</strong> https://ticket.fwi.digicelgroup.local/Ticket/Display.html?id=267183
+      </Alert>
+
+      {/* ── Étape 1 : Vérification espace disque ── */}
+      <StepHeader number={1} icon="solar:server-bold-duotone" title="Vérification de l'espace disque" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Un disque plein sur <strong>vmqproportasync01</strong> est souvent la cause du blocage.
+        Vérifier l&apos;espace disponible sur <code>/home</code> :
+      </Typography>
+
+      <CodeBlock>{`# Sur vmqproportasync01 (user porta_pnmv3)
+df -kh
+
+# Vérifier en particulier /home — si 100% → libérer de l'espace
+# Exemple de sortie problématique :
+# /dev/mapper/vmqproportasync01--vg-home   15G   14G     0 100% /home
+
+# Libérer de l'espace : purger les anciens logs et archives
+# Puis vérifier à nouveau :
+df -kh
+# /dev/mapper/vmqproportasync01--vg-home   15G   14G  194M  99% /home`}</CodeBlock>
+
+      {/* ── Étape 2 : Sauvegarde BDD ── */}
+      <StepHeader number={2} icon="solar:database-bold-duotone" title="Sauvegarde des bases de données avant rollback" />
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>OBLIGATOIRE —</strong> Toujours faire un backup avant de modifier les données en base.
+      </Alert>
+
+      <CodeBlock>{`# Sur vmqproportawebdb01 (root)
+cd /usr/bin
+./backup_mysql.sh -v
+
+# Vérifier le backup
+cd /backup/
+ls -ltr
+
+# Vérifier l'espace disque sur le serveur de BDD
+df -kh`}</CodeBlock>
+
+      {/* ── Étape 3 : Rollback des états ── */}
+      <StepHeader number={3} icon="solar:refresh-bold-duotone" title="Rollback des états des portages" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Remettre les portabilités et dossiers du jour à leur état <strong>pré-bascule</strong>.
+        Adapter la date dans les requêtes (ici <code>2025-01-06</code> = date du jour de l&apos;incident) :
+      </Typography>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Explication des états :</strong> Chaque type de portage a 3 états : pré-bascule, basculé, clôturé.
+        Le rollback remet l&apos;état à &quot;pré-bascule&quot; et supprime la date de fin/clôture.
+      </Alert>
+
+      <TableContainer sx={{ mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>État pré-bascule</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>États à rollback</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>PEN</strong></TableCell>
+              <TableCell>Portage Entrant</TableCell>
+              <TableCell>7</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>8, 9</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>PSO</strong></TableCell>
+              <TableCell>Portage Sortant</TableCell>
+              <TableCell>20</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>21, 22</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>PET</strong></TableCell>
+              <TableCell>Portage Entrant Tiers</TableCell>
+              <TableCell>29</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>30, 31</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>REN</strong></TableCell>
+              <TableCell>Retour Entrant</TableCell>
+              <TableCell>53</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>54, 55</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>RSO</strong></TableCell>
+              <TableCell>Retour Sortant</TableCell>
+              <TableCell>60</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>61, 62</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>RET</strong></TableCell>
+              <TableCell>Retour Entrant Tiers</TableCell>
+              <TableCell>65</TableCell>
+              <TableCell sx={{ color: 'error.main' }}>66, 67</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <CodeBlock>{`-- =============================================
+-- ROLLBACK DES ÉTATS — Adapter la date !
+-- =============================================
+
+-- MAJ PEN (Portage Entrant)
+UPDATE PORTAGE SET etat_id_actuel = '7', date_fin=NULL
+WHERE date(date_fin) = '2025-01-06'
+AND etat_id_actuel IN ('8','9');
+
+UPDATE DOSSIER SET etat_id_actuel = '7', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('8','9');
+
+-- MAJ PSO (Portage Sortant)
+UPDATE PORTAGE SET etat_id_actuel = '20', date_fin=NULL
+WHERE date(date_fin) = '2025-01-06'
+AND etat_id_actuel IN ('21','22');
+
+UPDATE DOSSIER SET etat_id_actuel = '20', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('21','22');
+
+-- MAJ PET (Portage Entrant Tiers)
+UPDATE PORTAGE SET etat_id_actuel = '29', date_fin=NULL
+WHERE date(date_fin) = '2025-01-06'
+AND etat_id_actuel IN ('30','31');
+
+UPDATE DOSSIER SET etat_id_actuel = '29', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('30','31');
+
+-- MAJ REN (Retour Entrant)
+UPDATE PORTAGE SET etat_id_actuel = '53', date_fin=NULL
+WHERE date(date_portage) = '2025-01-06'
+AND etat_id_actuel IN ('54','55');
+
+UPDATE DOSSIER SET etat_id_actuel = '53', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('54','55');
+
+-- MAJ RSO (Retour Sortant)
+UPDATE PORTAGE SET etat_id_actuel = '60', date_fin=NULL
+WHERE date(date_portage) = '2025-01-06'
+AND etat_id_actuel IN ('61','62');
+
+UPDATE DOSSIER SET etat_id_actuel = '60', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('61','62');
+
+-- MAJ RET (Retour Entrant Tiers)
+UPDATE PORTAGE SET etat_id_actuel = '65', date_fin=NULL
+WHERE date(date_portage) = '2025-01-06'
+AND etat_id_actuel IN ('66','67');
+
+UPDATE DOSSIER SET etat_id_actuel = '65', date_cloture=NULL
+WHERE date(date_cloture) = '2025-01-06'
+AND etat_id_actuel IN ('66','67');
+
+COMMIT;`}</CodeBlock>
+
+      {/* ── Étape 4 : Relance bascule + valorisation ── */}
+      <StepHeader number={4} icon="solar:play-bold-duotone" title="Relance du traitement de la bascule et de la valorisation" />
+
+      <CodeBlock>{`# Sur vmqproportasync01 (user porta_pnmv3)
+
+# 1. Relancer la bascule
+/home/porta_pnmv3/PortaSync/TraitementBascule.sh -v
+
+# 2. Relancer la valorisation
+/home/porta_pnmv3/PortaSync/TraitementValorisation.sh -v`}</CodeBlock>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        Suite au traitement de la valorisation, <strong>alerter l&apos;équipe VAS</strong> sur la génération
+        tardive du fichier à l&apos;EMM.
+      </Alert>
+
+      {/* ── Étape 5 : Relance FNR ── */}
+      <StepHeader number={5} icon="solar:routing-bold-duotone" title="Relance du traitement du FNR depuis EMA" />
+
+      <CodeBlock>{`# Sur EMA15-Digicel (172.24.119.140) — user batchuser
+(echo "LOGIN:batchuser:123batchuser;";sleep 5;
+ echo "SET:BATCHJOB:FILE,DEF,fnr_action_v3.bh;";
+ sleep 5; echo "LOGOUT;";sleep 5)| telnet 0 3333`}</CodeBlock>
+
+      {/* ── Étape 6 : Vérification FNR ── */}
+      <StepHeader number={6} icon="solar:check-circle-bold-duotone" title="Vérification du traitement du FNR" />
+
+      <CodeBlock>{`# Sur EMA15-Digicel — vérifier le log
+ls -lt ~/LogFiles/*fnr_action_v3* | head -3
+tail -f ~/LogFiles/<dernier_fichier_log>
+
+# Résultat attendu :
+# BatchJob started at: 2025-01-06 12:24:42;
+# BatchJob finished at: 2025-01-06 12:24:53.
+# Totally 576 commands are successful.
+# Totally 0 commands failed.`}</CodeBlock>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Si des commandes ont échoué, un fichier <strong>.nok</strong> sera généré contenant les demandes en échec.
+        Vérifier les MSISDN concernés sur PortaWs et effectuer une correction manuelle depuis la page dédiée
+        à la mise à jour du FNR (<code>http://172.24.2.21/apis/porta/fnr-update.php</code>).
+      </Alert>
+
+      {/* ── Étape 7 : Clôture manuelle ── */}
+      <StepHeader number={7} icon="solar:lock-bold-duotone" title="Clôture manuelle des dossiers non clôturés" />
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        Clôturer manuellement les portabilités et dossiers des cas rollbackés en mettant
+        la date de fin/clôture. Adapter la date et l&apos;heure :
+      </Typography>
+
+      <CodeBlock>{`-- Clôture des portages non clôturés
+UPDATE PORTAGE
+SET date_fin = '2025-01-06 12:30:00'
+WHERE date_fin IS NULL
+AND date(date_portage) = '2025-01-06'
+AND etat_id_actuel IN (7,20,29,53,60,65);
+
+COMMIT;
+
+-- Clôture des dossiers non clôturés
+UPDATE DOSSIER
+SET date_cloture = '2025-01-06 12:30:00'
+WHERE date_cloture IS NULL
+AND etat_id_actuel IN (7,20,29,53,60,65);
+
+COMMIT;`}</CodeBlock>
+
+      {/* ── Points de vigilance ── */}
+      <Alert severity="success" icon={false} sx={{ mt: 3 }}>
+        <Typography variant="subtitle2" gutterBottom>Points de vigilance</Typography>
+        <Box component="ul" sx={{ pl: 2, mb: 0, '& li': { fontSize: 14, mb: 0.5 } }}>
+          <li>Un <strong>disque plein</strong> sur vmqproportasync01 est la cause la plus fréquente — vérifier en premier</li>
+          <li><strong>Toujours faire un backup BDD</strong> avant le rollback (./backup_mysql.sh -v)</li>
+          <li>Adapter la <strong>date</strong> dans toutes les requêtes SQL au jour de l&apos;incident</li>
+          <li>Après la valorisation, <strong>alerter l&apos;équipe VAS</strong> pour la génération tardive du fichier EMM</li>
+          <li>Vérifier le FNR après relance — si erreurs, corriger via les <strong>pages web FNR</strong> (172.24.2.21)</li>
+          <li>La clôture manuelle est la <strong>dernière étape</strong> — ne pas clôturer avant que tous les traitements soient OK</li>
+          <li>Documenter l&apos;incident avec le numéro de ticket RT pour traçabilité</li>
+        </Box>
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Liste de tous les cas pratiques ────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
+  casRollbackDapiFnr,
   casPortaWsInaccessible,
   casHubEnPanne,
   casAucunFichierRecu,
@@ -2550,6 +2826,10 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
   CDC: 'info',
   Saisie: 'default',
   Correction: 'warning',
+  Rollback: 'error',
+  DAPI: 'info',
+  EMM: 'warning',
+  BDD: 'secondary',
 };
 
 // ─── Page ───────────────────────────────────────────────────────────────────
