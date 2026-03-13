@@ -2653,7 +2653,7 @@ function CasMsisdnProvisoireErreurPdf() {
             <Text style={[s.tableHeaderCell, { width: '45%' }]}>Procedure</Text>
           </View>
           <View style={[s.tableRow, { backgroundColor: '#f0fdf4' }]}>
-            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Pas encore basculee{'\n'}(1110 envoye, ou 1210 recu)</Text>
+            <Text style={[s.tableCell, { width: '30%', fontWeight: 'bold' }]}>Pas encore basculee{'\n'}(1110 envoye, ou 1210 recu, ou 1410 envoye)</Text>
             <Text style={[s.tableCell, { width: '25%', color: '#16a34a', fontWeight: 'bold' }]}>Modifier le numero dans la base de donnees</Text>
             <Text style={[s.tableCellLight, { width: '45%' }]}>Solution la plus simple : corriger le MSISDN provisoire directement dans la base de donnees PortaDB tant que la portabilite n{"'"}est pas encore basculee</Text>
           </View>
@@ -2693,9 +2693,39 @@ function CasMsisdnProvisoireErreurPdf() {
           <Text style={s.listText}>Verifier sur <Text style={s.bold}>PortaWs</Text> que le mandat affiche desormais le bon MSISDN provisoire</Text>
         </View>
 
+        <View style={s.codeBlock}>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Verifier le MSISDN provisoire actuel</Text>
+          <Text style={s.codeText}>SELECT pd.temporary_msisdn, pd.change_date,</Text>
+          <Text style={s.codeText}>       p.msisdn, p.etat_id_actuel, e.label</Text>
+          <Text style={s.codeText}>FROM PORTAGE_DATA pd</Text>
+          <Text style={s.codeText}>JOIN PORTAGE p ON pd.portage_id = p.id</Text>
+          <Text style={s.codeText}>JOIN ETAT e ON p.etat_id_actuel = e.id</Text>
+          <Text style={s.codeText}>WHERE p.msisdn = {"'"}0696XXXXXX{"'"};</Text>
+          <Text style={s.codeText}> </Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Corriger le MSISDN provisoire</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>UPDATE PORTAGE_DATA</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>SET temporary_msisdn = {"'"}0696CORRECT{"'"}</Text>
+          <Text style={{ ...s.codeText, color: '#fbbf24' }}>WHERE portage_id = {"<"}ID_DU_PORTAGE{">"};</Text>
+        </View>
+
         <View style={[s.alertInfo, { marginTop: 8 }]}>
           <Text style={s.alertTitle}>Alternative — Annulation et re-saisie</Text>
           <Text style={s.alertText}>Si la modification en BDD n{"'"}est pas possible, envoyer une annulation (1510 / C001), attendre la confirmation (1530), puis re-saisir avec le bon MSISDN provisoire. <Text style={{ fontWeight: 'bold' }}>Attention :</Text> le delai J+7 repart a zero. Informer le client du nouveau delai.</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : MSISDN provisoire errone</Text>
+          <Text>Page 1 / 2</Text>
+        </View>
+      </Page>
+
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>Cas Pratique : Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
+            <Text style={s.headerSub}>Suite — 11/03/2026</Text>
+          </View>
+          <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
         </View>
 
         <View style={s.stepRow}>
@@ -2715,6 +2745,25 @@ function CasMsisdnProvisoireErreurPdf() {
           <Text style={s.listBullet}>2.</Text>
           <Text style={s.listText}>S{"'"}assurer que le MSISDN est <Text style={s.bold}>disponible en reaffectation</Text></Text>
         </View>
+
+        <View style={s.codeBlock}>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Verifier la disponibilite en reaffectation</Text>
+          <Text style={s.codeText}>SELECT m.msisdn, m.operateur_id_actuel, o.nom,</Text>
+          <Text style={s.codeText}>       p.etat_id_actuel, e.label, e.classe,</Text>
+          <Text style={s.codeText}>       p.date_portage, p.date_fin</Text>
+          <Text style={s.codeText}>FROM MSISDN m</Text>
+          <Text style={s.codeText}>LEFT JOIN PORTAGE p ON m.portage_id_actuel = p.id</Text>
+          <Text style={s.codeText}>LEFT JOIN ETAT e ON p.etat_id_actuel = e.id</Text>
+          <Text style={s.codeText}>LEFT JOIN OPERATEUR o ON m.operateur_id_actuel = o.code</Text>
+          <Text style={s.codeText}>WHERE m.msisdn = {"'"}0696XXXXXX{"'"};</Text>
+          <Text style={{ ...s.codeText, color: '#22c55e' }}>-- Si date_fin IS NOT NULL et classe = {"'"}cloture{"'"} → disponible</Text>
+        </View>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Table PORTAGE_DATA</Text>
+          <Text style={s.alertText}>C{"'"}est dans cette table que le MSISDN provisoire est stocke (colonne <Text style={{ fontWeight: 'bold' }}>temporary_msisdn</Text>). La colonne <Text style={{ fontWeight: 'bold' }}>change_date</Text> est NULL tant que le changement n{"'"}a pas ete effectue le jour de la bascule.</Text>
+        </View>
+
         <View style={s.listItem}>
           <Text style={s.listBullet}>3.</Text>
           <Text style={s.listText}>Verifier que le client est bien joignable sur son numero porte une fois la correction effectuee</Text>
@@ -2732,7 +2781,7 @@ function CasMsisdnProvisoireErreurPdf() {
 
         <View style={s.footer}>
           <Text>PNM App — Cas Pratique : MSISDN provisoire errone</Text>
-          <Text>Page 1 / 1</Text>
+          <Text>Page 2 / 2</Text>
         </View>
       </Page>
     </Document>

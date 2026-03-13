@@ -2382,7 +2382,7 @@ const casMsisdnProvisoireErreur: CasPratique = {
           </TableHead>
           <TableBody>
             <TableRow sx={{ bgcolor: 'success.lighter' }}>
-              <TableCell><strong>Pas encore basculée</strong><br />(1110 envoyé, ou 1210 reçu)</TableCell>
+              <TableCell><strong>Pas encore basculée</strong><br />(1110 envoyé, ou 1210 reçu, ou 1410 envoyé)</TableCell>
               <TableCell sx={{ color: 'success.main', fontWeight: 'bold' }}>Modifier le numéro dans la base de données</TableCell>
               <TableCell>
                 Solution la plus simple : corriger le MSISDN provisoire directement dans la base de données
@@ -2434,6 +2434,19 @@ const casMsisdnProvisoireErreur: CasPratique = {
         </li>
       </Box>
 
+      <CodeBlock>{`-- Vérifier le MSISDN provisoire actuel d'un portage
+SELECT pd.temporary_msisdn, pd.change_date,
+       p.msisdn, p.etat_id_actuel, e.label, e.classe
+FROM PORTAGE_DATA pd
+JOIN PORTAGE p ON pd.portage_id = p.id
+JOIN ETAT e ON p.etat_id_actuel = e.id
+WHERE p.msisdn = '0696XXXXXX';  -- MSISDN à porter
+
+-- Corriger le MSISDN provisoire
+UPDATE PORTAGE_DATA
+SET temporary_msisdn = '0696CORRECT'
+WHERE portage_id = <ID_DU_PORTAGE>;`}</CodeBlock>
+
       <Alert severity="info" sx={{ mb: 2 }}>
         <strong>Alternative — Annulation et re-saisie :</strong> si la modification en BDD n&apos;est pas possible,
         envoyer une annulation (<code>1510</code> / <code>C001</code>), attendre la confirmation (<code>1530</code>),
@@ -2460,6 +2473,24 @@ const casMsisdnProvisoireErreur: CasPratique = {
           Vérifier que le client est bien joignable sur son numéro porté une fois la correction effectuée
         </li>
       </Box>
+
+      <CodeBlock>{`-- Vérifier si le MSISDN est disponible en réaffectation
+-- Se connecter à PortaDB sur vmqproportawebdb01 (172.24.119.68)
+SELECT m.msisdn, m.operateur_id_actuel, o.nom,
+       p.id AS portage_id, p.etat_id_actuel, e.label, e.classe,
+       p.date_portage, p.date_fin
+FROM MSISDN m
+LEFT JOIN PORTAGE p ON m.portage_id_actuel = p.id
+LEFT JOIN ETAT e ON p.etat_id_actuel = e.id
+LEFT JOIN OPERATEUR o ON m.operateur_id_actuel = o.code
+WHERE m.msisdn = '0696XXXXXX';
+-- Si date_fin IS NOT NULL et classe = 'cloture' → MSISDN disponible`}</CodeBlock>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Table PORTAGE_DATA</strong> — C&apos;est dans cette table que le MSISDN provisoire est stocké
+        (colonne <code>temporary_msisdn</code>). La colonne <code>change_date</code> est NULL tant que le
+        changement de MSISDN n&apos;a pas été effectué le jour de la bascule.
+      </Alert>
 
       <Divider sx={{ my: 3 }} />
 

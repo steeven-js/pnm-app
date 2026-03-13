@@ -56,6 +56,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Requetes PNM
     Route::get('/requetes-pnm', fn () => Inertia::render('RequetesPnm'))->name('requetes-pnm');
 
+    // Mobi CRM
+    Route::get('/mobi-crm', fn () => Inertia::render('MobiCrm'))->name('mobi-crm');
+    Route::get('/mobi-cas-pratiques', fn () => Inertia::render('MobiCasPratiques'))->name('mobi-cas-pratiques');
+    Route::get('/mobi-sql', fn () => Inertia::render('MobiSqlQueries'))->name('mobi-sql');
+    Route::get('/mobi-operations', fn () => Inertia::render('MobiOperations'))->name('mobi-operations');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 

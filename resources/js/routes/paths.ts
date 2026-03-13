@@ -88,6 +88,14 @@ export const paths = {
   investigations: '/investigations',
   // CAS PRATIQUES
   casPratiques: '/cas-pratiques',
+  // MOBI CRM
+  mobi: {
+    root: '/mobi-crm',
+    casPratiques: '/mobi-cas-pratiques',
+    sql: '/mobi-sql',
+    operations: '/mobi-operations',
+  },
+  mobiCrm: '/mobi-crm',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG
