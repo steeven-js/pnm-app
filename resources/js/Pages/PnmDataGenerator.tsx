@@ -15,8 +15,6 @@ import Step from '@mui/material/Step';
 import StepContent from '@mui/material/StepContent';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -727,16 +725,15 @@ function ComingSoon({ code, label }: { code: string; label: string }) {
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function PnmDataGenerator() {
-  const [tab, setTab] = useState(0);
+  const [selectedCode, setSelectedCode] = useState('');
 
-  const renderTabContent = () => {
-    const ticketCode = ALL_TICKET_TYPES[tab]?.code;
-    switch (ticketCode) {
+  const renderContent = () => {
+    switch (selectedCode) {
       case '1110': return <Tab1110 />;
       case '1210':
       case '1220': return <Tab1210 />;
       default: {
-        const tt = ALL_TICKET_TYPES[tab];
+        const tt = ALL_TICKET_TYPES.find((t) => t.code === selectedCode);
         return tt ? <ComingSoon code={tt.code} label={tt.label} /> : null;
       }
     }
@@ -758,34 +755,34 @@ export default function PnmDataGenerator() {
 
         <Divider sx={{ my: 2 }} />
 
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
-        >
-          {ALL_TICKET_TYPES.map((tt) => (
-            <Tab
-              key={tt.code}
-              label={
-                <Stack direction="row" alignItems="center" spacing={0.75}>
-                  {tt.ready
-                    ? <Iconify icon="solar:check-circle-bold-duotone" width={16} sx={{ color: 'success.main' }} />
-                    : <Iconify icon="solar:clock-circle-bold-duotone" width={16} sx={{ color: 'text.disabled' }} />}
-                  <span>{tt.code} — {tt.abbr}</span>
-                </Stack>
-              }
-              sx={{ minHeight: 48, textTransform: 'none', fontSize: 13 }}
-            />
-          ))}
-        </Tabs>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+          Selectionnez un ticket a generer
+        </Typography>
 
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            {renderTabContent()}
-          </CardContent>
-        </Card>
+        <TextField
+          select
+          label="code_ticket"
+          value={selectedCode}
+          onChange={(e) => setSelectedCode(e.target.value)}
+          size="small"
+          fullWidth
+          sx={{ mb: 3, maxWidth: 600 }}
+        >
+          <MenuItem value="" disabled><em>— Choisir un type de ticket —</em></MenuItem>
+          {ALL_TICKET_TYPES.map((tt) => (
+            <MenuItem key={tt.code} value={tt.code}>
+              {tt.code} - {tt.abbr} - {tt.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        {selectedCode && (
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              {renderContent()}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Reference card */}
         <Card variant="outlined" sx={{ mt: 3 }}>
