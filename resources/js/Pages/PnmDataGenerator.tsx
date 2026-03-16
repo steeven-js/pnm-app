@@ -189,20 +189,39 @@ export default function PnmDataGenerator() {
   const [ticketType, setTicketType] = useState<TicketType>('1210');
   const [responseCode, setResponseCode] = useState('A001');
   const [fileDate, setFileDate] = useState('');
-  const [fileTime, setFileTime] = useState('');
+  const [fileTime, setFileTime] = useState('21:00');
   const [fileSequence, setFileSequence] = useState('005');
   const [copied, setCopied] = useState(false);
   const [copiedFileName, setCopiedFileName] = useState(false);
+  const [dateAutoSet, setDateAutoSet] = useState(false);
 
   // Parse input tickets
   const parsedTickets = useMemo(() => {
     if (!inputText.trim()) return [];
-    return inputText
+    const tickets = inputText
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
       .map(parse1110Line);
-  }, [inputText]);
+
+    // Auto-detect date from first valid 1110 ticket (dateEmission field)
+    if (!dateAutoSet && tickets.length > 0) {
+      const first = tickets.find((t) => t.valid);
+      if (first) {
+        // Use the dateEmission (when the 1110 was emitted) to get the day
+        const dt = first.dateEmission || first.datetime;
+        if (dt && dt.length >= 8) {
+          const y = dt.slice(0, 4);
+          const m = dt.slice(4, 6);
+          const d = dt.slice(6, 8);
+          setFileDate(`${y}-${m}-${d}`);
+          setDateAutoSet(true);
+        }
+      }
+    }
+
+    return tickets;
+  }, [inputText, dateAutoSet]);
 
   const validTickets = useMemo(() => parsedTickets.filter((t) => t.valid), [parsedTickets]);
 
@@ -285,7 +304,7 @@ export default function PnmDataGenerator() {
                 fullWidth
                 placeholder={`|1110|02|05|02|05|20260313111929|0690100733|bd1ad95b207e761023579243b6a566b3|0001|05P056159ZHT|20260313140212|20260317111849|||97100|20260313|\n|1110|02|05|02|05|20260313122138|0690103635|ef0c9e6b5c2bd46f66231f918cd7b7a6|0002|05P6515442V2|20260313140212|20260317121946|||97100|20260313|`}
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={(e) => { setInputText(e.target.value); setDateAutoSet(false); }}
                 sx={{
                   '& .MuiInputBase-input': { fontFamily: 'monospace', fontSize: 12 },
                   mb: 2,
@@ -350,6 +369,13 @@ export default function PnmDataGenerator() {
               </Typography>
             </StepLabel>
             <StepContent>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <strong>Plage horaire de depot</strong> : 14h — 22h (Annexe 4)<br />
+                <strong>Vacations</strong> : ~10h, ~14h, ~19h<br />
+                Le timestamp du fichier (= date de creation ticket, champ 11) doit etre <strong>hors vacations</strong> mais apres
+                l{"'"}emission du 1110. Creneau recommande : <strong>21h00 — 22h00</strong> le jour de l{"'"}emission.
+              </Alert>
+
               <Stack spacing={2} sx={{ mb: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <TextField
@@ -401,6 +427,7 @@ export default function PnmDataGenerator() {
                     slotProps={{ inputLabel: { shrink: true } }}
                     size="small"
                     sx={{ minWidth: 150 }}
+                    helperText="21h-22h (hors vacations)"
                   />
                   <TextField
                     label="Sequence fichier"
