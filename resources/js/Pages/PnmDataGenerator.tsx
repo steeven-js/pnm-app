@@ -190,7 +190,7 @@ export default function PnmDataGenerator() {
   const [responseCode, setResponseCode] = useState('A001');
   const [fileDate, setFileDate] = useState('');
   const [fileTime, setFileTime] = useState('');
-  const [fileSequence, setFileSequence] = useState('006');
+  const [fileSequence, setFileSequence] = useState('005');
   const [copied, setCopied] = useState(false);
   const [copiedFileName, setCopiedFileName] = useState(false);
 
@@ -408,7 +408,7 @@ export default function PnmDataGenerator() {
                     onChange={(e) => setFileSequence(e.target.value)}
                     size="small"
                     sx={{ minWidth: 120 }}
-                    helperText="Ex: 006"
+                    helperText="Si E008, incrementer (005→006→007...)"
                   />
                 </Stack>
               </Stack>
