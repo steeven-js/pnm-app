@@ -687,10 +687,60 @@ function Tab1110() {
   );
 }
 
+// ─── Ticket type catalog (Annexe 4 / PortaWs) ───────────────────────────────
+
+const ALL_TICKET_TYPES = [
+  { code: '1110', abbr: 'DP', label: 'Demande de portage (particulier)', ready: true },
+  { code: '1120', abbr: 'DE', label: 'Demande de portage (personne morale)', ready: false },
+  { code: '1210', abbr: 'RP', label: 'Reponse : acceptation de la demande', ready: true },
+  { code: '1220', abbr: 'RP', label: 'Reponse : refus de la demande', ready: true },
+  { code: '1410', abbr: 'EP', label: 'Envoi des donnees de portage', ready: false },
+  { code: '1430', abbr: 'CP', label: 'Confirmation de l\'operation de portage', ready: false },
+  { code: '1510', abbr: 'AP', label: 'Annulation OPR avant information operateurs', ready: false },
+  { code: '1520', abbr: 'AN', label: 'Annulation OPD d\'un numero', ready: false },
+  { code: '1530', abbr: 'CA', label: 'Confirmation d\'annulation (OPR/OPD)', ready: false },
+  { code: '2400', abbr: 'BI', label: 'Bon accord portage inverse', ready: false },
+  { code: '2410', abbr: 'PI', label: 'Envoi des donnees de portage inverse', ready: false },
+  { code: '2420', abbr: 'DI', label: 'Confirmation prise en compte portage inverse', ready: false },
+  { code: '2430', abbr: 'CI', label: 'Confirmation portage inverse', ready: false },
+  { code: '3400', abbr: 'BR', label: 'Bon accord restitution', ready: false },
+  { code: '3410', abbr: 'RN', label: 'Envoi des donnees de restitution', ready: false },
+  { code: '3420', abbr: 'RS', label: 'Prise en compte des donnees restitution', ready: false },
+  { code: '3430', abbr: 'RC', label: 'Confirmation mise a jour operateurs', ready: false },
+  { code: '7000', abbr: 'ER', label: 'Erreurs et dysfonctionnement', ready: false },
+] as const;
+
+function ComingSoon({ code, label }: { code: string; label: string }) {
+  return (
+    <Stack alignItems="center" spacing={2} sx={{ py: 6 }}>
+      <Iconify icon="solar:hourglass-bold-duotone" width={48} sx={{ color: 'text.disabled' }} />
+      <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+        {code} — {label}
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'text.disabled' }}>
+        Ce generateur sera disponible prochainement.
+      </Typography>
+    </Stack>
+  );
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function PnmDataGenerator() {
   const [tab, setTab] = useState(0);
+
+  const renderTabContent = () => {
+    const ticketCode = ALL_TICKET_TYPES[tab]?.code;
+    switch (ticketCode) {
+      case '1110': return <Tab1110 />;
+      case '1210':
+      case '1220': return <Tab1210 />;
+      default: {
+        const tt = ALL_TICKET_TYPES[tab];
+        return tt ? <ComingSoon code={tt.code} label={tt.label} /> : null;
+      }
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -701,32 +751,39 @@ export default function PnmDataGenerator() {
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800 }}>Generateur PNMDATA</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Generer des fichiers PNMDATA avec tickets 1110, 1210, 1220
+              Generer des fichiers PNMDATA — tous types de tickets (Annexe 4)
             </Typography>
           </Box>
         </Stack>
 
         <Divider sx={{ my: 2 }} />
 
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label={
-            <Stack direction="row" alignItems="center" spacing={0.75}>
-              <Iconify icon="solar:transfer-horizontal-bold-duotone" width={18} />
-              <span>1110 → 1210/1220</span>
-            </Stack>
-          } />
-          <Tab label={
-            <Stack direction="row" alignItems="center" spacing={0.75}>
-              <Iconify icon="solar:add-circle-bold-duotone" width={18} />
-              <span>Generer 1110</span>
-            </Stack>
-          } />
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
+        >
+          {ALL_TICKET_TYPES.map((tt) => (
+            <Tab
+              key={tt.code}
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                  {tt.ready
+                    ? <Iconify icon="solar:check-circle-bold-duotone" width={16} sx={{ color: 'success.main' }} />
+                    : <Iconify icon="solar:clock-circle-bold-duotone" width={16} sx={{ color: 'text.disabled' }} />}
+                  <span>{tt.code} — {tt.abbr}</span>
+                </Stack>
+              }
+              sx={{ minHeight: 48, textTransform: 'none', fontSize: 13 }}
+            />
+          ))}
         </Tabs>
 
         <Card>
           <CardContent sx={{ p: 3 }}>
-            {tab === 0 && <Tab1210 />}
-            {tab === 1 && <Tab1110 />}
+            {renderTabContent()}
           </CardContent>
         </Card>
 
