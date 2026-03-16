@@ -62,6 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mobi-sql', fn () => Inertia::render('MobiSqlQueries'))->name('mobi-sql');
     Route::get('/mobi-operations', fn () => Inertia::render('MobiOperations'))->name('mobi-operations');
 
+    // PNMDATA Generator
+    Route::get('/pnmdata-generator', fn () => Inertia::render('PnmDataGenerator'))->name('pnmdata-generator');
+
     // Search API (JSON, not Inertia)
     Route::get('/api/search', SearchController::class)->name('api.search');
 

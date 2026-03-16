@@ -96,6 +96,8 @@ export const paths = {
     operations: '/mobi-operations',
   },
   mobiCrm: '/mobi-crm',
+  // PNMDATA GENERATOR
+  pnmdataGenerator: '/pnmdata-generator',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG

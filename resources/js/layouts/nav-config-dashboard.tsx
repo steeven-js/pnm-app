@@ -76,6 +76,11 @@ export const navData: NavSectionProps['data'] = [
         icon: <Iconify icon="solar:database-bold-duotone" width={24} />,
       },
       {
+        title: 'Generateur PNMDATA',
+        path: paths.pnmdataGenerator,
+        icon: <Iconify icon="solar:file-text-bold-duotone" width={24} />,
+      },
+      {
         title: 'MOBI / CRM',
         path: paths.mobi.root,
         icon: <Iconify icon="solar:server-bold-duotone" width={24} />,
