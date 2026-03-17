@@ -3336,14 +3336,14 @@ export default function CasPratiques() {
           )}
         </Stack>
 
-        {/* Search + Category filter */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 3 }}>
+        {/* Row 1: Search + Domain + View toggle */}
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
           <TextField
             size="small"
-            placeholder="Rechercher un cas pratique..."
+            placeholder="Rechercher..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            sx={{ flex: 1, minWidth: 200 }}
+            sx={{ flex: 1, maxWidth: 300 }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -3361,74 +3361,24 @@ export default function CasPratiques() {
               },
             }}
           />
-          <ToggleButtonGroup
-            size="small"
-            value={selectedDomain}
-            exclusive
-            onChange={(_, val) => val !== null && setSelectedDomain(val)}
-          >
-            <ToggleButton value="all">
-              <Tooltip title="Tous les domaines">
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Iconify icon="solar:layers-bold-duotone" width={18} />
-                  <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    Tous ({CAS_PRATIQUES.length})
-                  </Typography>
-                </Stack>
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="pnm">
-              <Tooltip title="PNM">
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Iconify icon="solar:server-bold-duotone" width={18} />
-                  <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    PNM ({counts.byDomain.pnm})
-                  </Typography>
-                </Stack>
-              </Tooltip>
-            </ToggleButton>
-            <ToggleButton value="mobi">
-              <Tooltip title="MOBI">
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Iconify icon="solar:database-bold-duotone" width={18} />
-                  <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    MOBI ({counts.byDomain.mobi})
-                  </Typography>
-                </Stack>
-              </Tooltip>
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <ToggleButtonGroup
-            size="small"
-            value={selectedCategory}
-            exclusive
-            onChange={(_, val) => val !== null && setSelectedCategory(val)}
-          >
-            <ToggleButton value="all">
-              <Tooltip title="Tous">
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Iconify icon="solar:widget-bold-duotone" width={18} />
-                  <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    Tous ({CAS_PRATIQUES.length})
-                  </Typography>
-                </Stack>
-              </Tooltip>
-            </ToggleButton>
-            {(Object.entries(CATEGORY_CONFIG) as [Category, typeof CATEGORY_CONFIG.infrastructure][]).map(
-              ([cat, cfg]) => (
-                <ToggleButton key={cat} value={cat}>
-                  <Tooltip title={cfg.label}>
-                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <Iconify icon={cfg.icon} width={18} />
-                      <Typography variant="caption" sx={{ display: { xs: 'none', md: 'block' } }}>
-                        {cfg.label} ({counts.byCategory[cat]})
-                      </Typography>
-                    </Stack>
-                  </Tooltip>
-                </ToggleButton>
-              )
-            )}
-          </ToggleButtonGroup>
+          <Stack direction="row" spacing={0.5}>
+            {([
+              { value: 'all' as const, label: 'Tous', count: CAS_PRATIQUES.length },
+              { value: 'pnm' as const, label: 'PNM', count: counts.byDomain.pnm },
+              { value: 'mobi' as const, label: 'MOBI', count: counts.byDomain.mobi },
+            ]).map((d) => (
+              <Chip
+                key={d.value}
+                label={`${d.label} (${d.count})`}
+                size="small"
+                variant={selectedDomain === d.value ? 'filled' : 'outlined'}
+                color={selectedDomain === d.value ? 'primary' : 'default'}
+                onClick={() => setSelectedDomain(d.value)}
+                sx={{ fontWeight: selectedDomain === d.value ? 700 : 400 }}
+              />
+            ))}
+          </Stack>
+          <Box sx={{ flex: 1 }} />
           <ToggleButtonGroup
             size="small"
             value={viewMode}
@@ -3442,6 +3392,36 @@ export default function CasPratiques() {
               <Tooltip title="Vue cartes"><Iconify icon="solar:widget-bold-duotone" width={18} /></Tooltip>
             </ToggleButton>
           </ToggleButtonGroup>
+        </Stack>
+
+        {/* Row 2: Category chips */}
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 3, gap: 0.5 }}>
+          <Chip
+            label={`Toutes (${CAS_PRATIQUES.length})`}
+            size="small"
+            variant={selectedCategory === 'all' ? 'filled' : 'outlined'}
+            color={selectedCategory === 'all' ? 'primary' : 'default'}
+            onClick={() => setSelectedCategory('all')}
+            sx={{ fontWeight: selectedCategory === 'all' ? 700 : 400 }}
+          />
+          {(Object.entries(CATEGORY_CONFIG) as [Category, typeof CATEGORY_CONFIG.infrastructure][]).map(
+            ([cat, cfg]) => {
+              const count = counts.byCategory[cat];
+              if (count === 0) return null;
+              return (
+                <Chip
+                  key={cat}
+                  icon={<Iconify icon={cfg.icon} width={16} />}
+                  label={`${cfg.label} (${count})`}
+                  size="small"
+                  variant={selectedCategory === cat ? 'filled' : 'outlined'}
+                  color={selectedCategory === cat ? 'primary' : 'default'}
+                  onClick={() => setSelectedCategory(selectedCategory === cat ? 'all' : cat)}
+                  sx={{ fontWeight: selectedCategory === cat ? 700 : 400 }}
+                />
+              );
+            }
+          )}
         </Stack>
 
         {/* Table view */}
