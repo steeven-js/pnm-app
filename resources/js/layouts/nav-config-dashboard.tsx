@@ -84,12 +84,6 @@ export const navData: NavSectionProps['data'] = [
         title: 'MOBI / CRM',
         path: paths.mobi.root,
         icon: <Iconify icon="solar:server-bold-duotone" width={24} />,
-        children: [
-          { title: 'Documentation', path: paths.mobi.root },
-          { title: 'Cas Pratiques MOBI', path: paths.mobi.casPratiques },
-          { title: 'Requetes SQL CRM', path: paths.mobi.sql },
-          { title: 'Operations MOBI', path: paths.mobi.operations },
-        ],
       },
     ],
   },

@@ -58,9 +58,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Mobi CRM
     Route::get('/mobi-crm', fn () => Inertia::render('MobiCrm'))->name('mobi-crm');
-    Route::get('/mobi-cas-pratiques', fn () => Inertia::render('MobiCasPratiques'))->name('mobi-cas-pratiques');
-    Route::get('/mobi-sql', fn () => Inertia::render('MobiSqlQueries'))->name('mobi-sql');
-    Route::get('/mobi-operations', fn () => Inertia::render('MobiOperations'))->name('mobi-operations');
+    // Redirects — MOBI content merged into PNM pages
+    Route::get('/mobi-cas-pratiques', fn () => redirect('/cas-pratiques'))->name('mobi-cas-pratiques');
+    Route::get('/mobi-sql', fn () => redirect('/requetes-pnm'))->name('mobi-sql');
+    Route::get('/mobi-operations', fn () => redirect('/operations-guide'))->name('mobi-operations');
 
     // PNMDATA Generator
     Route::get('/pnmdata-generator', fn () => Inertia::render('PnmDataGenerator'))->name('pnmdata-generator');
