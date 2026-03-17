@@ -83,7 +83,7 @@ function CasIncohCol3Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Incohérence col.3 PNMDATA</Text>
+            <Text style={s.headerTitle}>#13 — Incohérence col.3 PNMDATA</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -197,7 +197,7 @@ function CasIncohCol3Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Correction & Réintégration</Text>
+            <Text style={s.headerTitle}>#13 — Correction & Réintégration</Text>
             <Text style={s.headerSub}>Suite de la procédure</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -346,7 +346,7 @@ function CasRelancePortabilitePdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Relance portabilité en retard</Text>
+            <Text style={s.headerTitle}>#12 — Relance portabilité en retard</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -485,7 +485,7 @@ function CasRelancePortabilitePdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Email de relance & Suivi</Text>
+            <Text style={s.headerTitle}>#12 — Email de relance & Suivi</Text>
             <Text style={s.headerSub}>Suite de la procédure</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -596,7 +596,7 @@ function CasArNonRecuLogsPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — AR non reçu : Investigation logs</Text>
+            <Text style={s.headerTitle}>#7 — AR non reçu : Investigation logs</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -704,7 +704,7 @@ function CasArNonRecuLogsPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Acquittement & Conclusion</Text>
+            <Text style={s.headerTitle}>#7 — Acquittement & Conclusion</Text>
             <Text style={s.headerSub}>Suite de l{"'"}investigation</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -815,7 +815,7 @@ function CasRefusR322Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Refus R322 : Résiliation effective</Text>
+            <Text style={s.headerTitle}>#9 — Refus R322 : Résiliation effective</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -908,7 +908,7 @@ function CasRefusR322Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Refus R322 : Résiliation effective (suite)</Text>
+            <Text style={s.headerTitle}>#9 — Refus R322 (suite)</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -997,7 +997,7 @@ function CasAnnulation1510Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Annulation 1510/C001</Text>
+            <Text style={s.headerTitle}>#10 — Annulation 1510/C001</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1102,7 +1102,7 @@ function CasAnnulation1510Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Investigation & Actions</Text>
+            <Text style={s.headerTitle}>#10 — Investigation & Actions</Text>
             <Text style={s.headerSub}>Suite de la procédure</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1183,7 +1183,7 @@ function CasErreurE610Pdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Erreur E610 : Flux non attendu</Text>
+            <Text style={s.headerTitle}>#11 — Erreur E610 : Flux non attendu</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1343,7 +1343,7 @@ function CasFichierDejaRecuPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — Fichier déjà reçu (E008)</Text>
+            <Text style={s.headerTitle}>#8 — Fichier déjà reçu (E008)</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1516,7 +1516,7 @@ function CasPortaWsInaccessiblePdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible</Text>
+            <Text style={s.headerTitle}>#2 — PortaWs inaccessible</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1581,7 +1581,7 @@ function CasPortaWsInaccessiblePdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
+            <Text style={s.headerTitle}>#2 — PortaWs inaccessible (suite)</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1640,7 +1640,7 @@ function CasPortaWsInaccessiblePdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique — PortaWs inaccessible (suite)</Text>
+            <Text style={s.headerTitle}>#2 — PortaWs inaccessible (suite)</Text>
             <Text style={s.headerSub}>Portabilité des Numéros Mobiles V3 — Digicel Antilles-Guyane</Text>
           </View>
           <Text style={s.headerSub}>{today}</Text>
@@ -1740,7 +1740,7 @@ function CasHubPortabilitesEchecPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Portabilites HUB en echec</Text>
+            <Text style={s.headerTitle}>#3 — Portabilites HUB en echec</Text>
             <Text style={s.headerSub}>Les portabilites depuis le HUB ne fonctionnent plus — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -1825,7 +1825,7 @@ function CasHubPortabilitesEchecPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Portabilites HUB en echec (suite)</Text>
+            <Text style={s.headerTitle}>#3 — Portabilites HUB en echec (suite)</Text>
             <Text style={s.headerSub}>Les portabilites depuis le HUB ne fonctionnent plus — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -1921,7 +1921,7 @@ function CasAucunFichierRecuPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Aucun fichier recu des operateurs</Text>
+            <Text style={s.headerTitle}>#4 — Aucun fichier recu des operateurs</Text>
             <Text style={s.headerSub}>On ne recoit plus aucun fichier des operateurs sur vmqproportasync01 — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2017,7 +2017,7 @@ function CasAucunFichierRecuPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Aucun fichier recu des operateurs (suite)</Text>
+            <Text style={s.headerTitle}>#4 — Aucun fichier recu des operateurs (suite)</Text>
             <Text style={s.headerSub}>On ne recoit plus aucun fichier des operateurs sur vmqproportasync01 — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2101,7 +2101,7 @@ function CasFnrNonTransmisEmaPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA</Text>
+            <Text style={s.headerTitle}>#5 — FNR non transmis a EMA</Text>
             <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2175,7 +2175,7 @@ function CasFnrNonTransmisEmaPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
+            <Text style={s.headerTitle}>#5 — FNR non transmis a EMA (suite)</Text>
             <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2254,7 +2254,7 @@ function CasFnrNonTransmisEmaPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : FNR non transmis a EMA (suite)</Text>
+            <Text style={s.headerTitle}>#5 — FNR non transmis a EMA (suite)</Text>
             <Text style={s.headerSub}>Le fichier FNR n{"'"}a pas ete transmis a EMA — Alerte batchhandler — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2349,7 +2349,7 @@ function CasRollbackDapiFnrPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI — FNR/EMA/EMM KO</Text>
+            <Text style={s.headerTitle}>#1 — Rollback DAPI — FNR/EMA/EMM KO</Text>
             <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2424,7 +2424,7 @@ function CasRollbackDapiFnrPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI (suite)</Text>
+            <Text style={s.headerTitle}>#1 — Rollback DAPI (suite)</Text>
             <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2513,7 +2513,7 @@ function CasRollbackDapiFnrPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Rollback DAPI (suite)</Text>
+            <Text style={s.headerTitle}>#1 — Rollback DAPI (suite)</Text>
             <Text style={s.headerSub}>Rollback sur DAPI suite Traitement FNR/EMA/EMM KO — 12/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2602,7 +2602,7 @@ function CasMsisdnProvisoireErreurPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
+            <Text style={s.headerTitle}>#6 — Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
             <Text style={s.headerSub}>Le CDC s{"'"}est trompe de MSISDN provisoire — Comment le corriger ? — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2722,7 +2722,7 @@ function CasMsisdnProvisoireErreurPdf() {
       <Page size="A4" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Cas Pratique : Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
+            <Text style={s.headerTitle}>#6 — Le CDC s{"'"}est trompe de MSISDN provisoire</Text>
             <Text style={s.headerSub}>Suite — 11/03/2026</Text>
           </View>
           <Text style={{ fontSize: 8, color: c.light }}>PNM App</Text>
@@ -2795,55 +2795,55 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
   const pdfMap: Record<string, { document: React.ReactElement; filename: string }> = {
     'incoherence-col3-pnmdata': {
       document: <CasIncohCol3Pdf />,
-      filename: 'Cas-Pratique-Incoherence-Col3-PNMDATA',
+      filename: 'Cas-Pratique-13-Incoherence-Col3-PNMDATA',
     },
     'relance-portabilite-retard': {
       document: <CasRelancePortabilitePdf />,
-      filename: 'Cas-Pratique-Relance-Portabilite-Retard',
+      filename: 'Cas-Pratique-12-Relance-Portabilite-Retard',
     },
     'ar-non-recu-investigation-logs': {
       document: <CasArNonRecuLogsPdf />,
-      filename: 'Cas-Pratique-AR-Non-Recu-Investigation-Logs',
+      filename: 'Cas-Pratique-7-AR-Non-Recu-Investigation-Logs',
     },
     'refus-r322-resiliation-effective': {
       document: <CasRefusR322Pdf />,
-      filename: 'Cas-Pratique-Refus-R322-Resiliation',
+      filename: 'Cas-Pratique-9-Refus-R322-Resiliation',
     },
     'annulation-1510-c001': {
       document: <CasAnnulation1510Pdf />,
-      filename: 'Cas-Pratique-Annulation-1510-C001',
+      filename: 'Cas-Pratique-10-Annulation-1510-C001',
     },
     'erreur-e610-flux-non-attendu': {
       document: <CasErreurE610Pdf />,
-      filename: 'Cas-Pratique-Erreur-E610-Flux-Non-Attendu',
+      filename: 'Cas-Pratique-11-Erreur-E610-Flux-Non-Attendu',
     },
     'fichier-deja-recu-e008': {
       document: <CasFichierDejaRecuPdf />,
-      filename: 'Cas-Pratique-Fichier-Deja-Recu-E008',
+      filename: 'Cas-Pratique-8-Fichier-Deja-Recu-E008',
     },
     'portaws-inaccessible': {
       document: <CasPortaWsInaccessiblePdf />,
-      filename: 'Cas-Pratique-PortaWs-Inaccessible',
+      filename: 'Cas-Pratique-2-PortaWs-Inaccessible',
     },
     'hub-portabilites-echec': {
       document: <CasHubPortabilitesEchecPdf />,
-      filename: 'Cas-Pratique-HUB-Portabilites-Echec',
+      filename: 'Cas-Pratique-3-HUB-Portabilites-Echec',
     },
     'aucun-fichier-recu-operateurs': {
       document: <CasAucunFichierRecuPdf />,
-      filename: 'Cas-Pratique-Aucun-Fichier-Recu-Operateurs',
+      filename: 'Cas-Pratique-4-Aucun-Fichier-Recu-Operateurs',
     },
     'fnr-non-transmis-ema': {
       document: <CasFnrNonTransmisEmaPdf />,
-      filename: 'Cas-Pratique-FNR-Non-Transmis-EMA',
+      filename: 'Cas-Pratique-5-FNR-Non-Transmis-EMA',
     },
     'rollback-dapi-fnr-ema-emm': {
       document: <CasRollbackDapiFnrPdf />,
-      filename: 'Cas-Pratique-Rollback-DAPI-FNR-EMA-EMM',
+      filename: 'Cas-Pratique-1-Rollback-DAPI-FNR-EMA-EMM',
     },
     'msisdn-provisoire-erreur': {
       document: <CasMsisdnProvisoireErreurPdf />,
-      filename: 'Cas-Pratique-MSISDN-Provisoire-Erreur',
+      filename: 'Cas-Pratique-6-MSISDN-Provisoire-Erreur',
     },
   };
 

@@ -37,6 +37,7 @@ type Category = 'infrastructure' | 'fichiers' | 'tickets' | 'saisie';
 
 type CasPratique = {
   id: string;
+  number: number;
   title: string;
   date: string;
   tags: string[];
@@ -142,6 +143,7 @@ function StepHeader({ number, icon, title }: { number: number; icon: string; tit
 
 const casIncohCol3: CasPratique = {
   id: 'incoherence-col3-pnmdata',
+  number: 13,
   title: 'Correction d\'une incohérence col.3 dans un fichier PNMDATA',
   date: '04/03/2026',
   severity: 'mineur',
@@ -387,6 +389,7 @@ const casIncohCol3: CasPratique = {
 
 const casRelancePortabilite: CasPratique = {
   id: 'relance-portabilite-retard',
+  number: 12,
   title: 'Relance opérateur donneur pour portabilité en retard',
   date: '04/03/2026',
   severity: 'majeur',
@@ -648,6 +651,7 @@ const casRelancePortabilite: CasPratique = {
 
 const casArNonRecuInvestigation: CasPratique = {
   id: 'ar-non-recu-investigation-logs',
+  number: 7,
   title: 'AR non reçu — Investigation par analyse des logs serveur',
   date: '10/03/2026',
   severity: 'majeur',
@@ -852,6 +856,7 @@ PnmDataAckManager.php|2026-03-10T10:00:42-04:00| <span style="color:#ef4444;font
 
 const casRefusR322: CasPratique = {
   id: 'refus-r322-resiliation-effective',
+  number: 9,
   title: 'Refus R322 — Résiliation effective hors demande de portabilité',
   date: '10/03/2026',
   severity: 'majeur',
@@ -1017,6 +1022,7 @@ const casRefusR322: CasPratique = {
 
 const casAnnulation1510: CasPratique = {
   id: 'annulation-1510-c001',
+  number: 10,
   title: 'Annulation d\'un portage — Tickets 1510/1520 avec code C001',
   date: '10/03/2026',
   severity: 'mineur',
@@ -1197,6 +1203,7 @@ const casAnnulation1510: CasPratique = {
 
 const casErreurE610: CasPratique = {
   id: 'erreur-e610-flux-non-attendu',
+  number: 11,
   title: 'Erreur E610 — Flux non attendu dans la procédure de restitution',
   date: '10/03/2026',
   severity: 'majeur',
@@ -1372,6 +1379,7 @@ const casErreurE610: CasPratique = {
 
 const casFichierDejaRecu: CasPratique = {
   id: 'fichier-deja-recu-e008',
+  number: 8,
   title: 'Fichier déjà reçu (E008) — Suppression manuelle depuis FileZilla',
   date: '10/03/2026',
   severity: 'mineur',
@@ -1547,6 +1555,7 @@ Fin Initialisation
 
 const casPortaWsInaccessible: CasPratique = {
   id: 'portaws-inaccessible',
+  number: 2,
   title: 'Le portail PortaWs ne s\'affiche plus — Diagnostic et résolution',
   date: '11/03/2026',
   severity: 'critique',
@@ -1713,6 +1722,7 @@ df -h
 
 const casHubEnPanne: CasPratique = {
   id: 'hub-portabilites-echec',
+  number: 3,
   title: 'Les portabilités depuis le HUB ne fonctionnent plus',
   date: '11/03/2026',
   severity: 'critique',
@@ -1867,6 +1877,7 @@ tail -n 100 /opt/tomcat9/logs/catalina.out | grep -i "error\\|exception\\|fault"
 
 const casAucunFichierRecu: CasPratique = {
   id: 'aucun-fichier-recu-operateurs',
+  number: 4,
   title: 'On ne reçoit plus aucun fichier des opérateurs sur vmqproportasync01',
   date: '11/03/2026',
   severity: 'critique',
@@ -2078,6 +2089,7 @@ ls -la pnmdata/01/arch_send/ pnmdata/01/send/
 
 const casFnrNonTransmis: CasPratique = {
   id: 'fnr-non-transmis-ema',
+  number: 5,
   title: 'Le fichier FNR n\'a pas été transmis à EMA — Alerte batchhandler',
   date: '11/03/2026',
   severity: 'critique',
@@ -2334,6 +2346,7 @@ tail -f <dernier_fichier_log>
 
 const casMsisdnProvisoireErreur: CasPratique = {
   id: 'msisdn-provisoire-erreur',
+  number: 6,
   title: 'Le CDC s\'est trompé de MSISDN provisoire — Comment le corriger ?',
   date: '11/03/2026',
   severity: 'mineur',
@@ -2513,6 +2526,7 @@ WHERE m.msisdn = '0696XXXXXX';
 
 const casRollbackDapiFnr: CasPratique = {
   id: 'rollback-dapi-fnr-ema-emm',
+  number: 1,
   title: 'Rollback sur DAPI suite Traitement FNR/EMA/EMM KO',
   date: '12/03/2026',
   severity: 'critique',
@@ -3057,7 +3071,7 @@ export default function CasPratiques() {
                       sx={{ cursor: 'pointer', '&:last-child td': { border: 0 } }}
                       onClick={() => setOpenCas(cas)}
                     >
-                      <TableCell sx={{ color: 'text.secondary' }}>{idx + 1}</TableCell>
+                      <TableCell sx={{ color: 'text.secondary' }}>{cas.number}</TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>{cas.title}</Typography>
                       </TableCell>
@@ -3176,7 +3190,7 @@ export default function CasPratiques() {
                         lineHeight: 1.4,
                       }}
                     >
-                      {cas.title}
+                      #{cas.number} — {cas.title}
                     </Typography>
 
                     {/* Summary */}
@@ -3299,7 +3313,7 @@ export default function CasPratiques() {
                     </Typography>
                   </Stack>
                   <Typography variant="h6" sx={{ lineHeight: 1.3 }}>
-                    {openCas.title}
+                    #{openCas.number} — {openCas.title}
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
