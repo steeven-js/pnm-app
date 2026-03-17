@@ -943,6 +943,202 @@ function NotesSection() {
   );
 }
 
+// ─── Flux KAIZEN ─────────────────────────────────────────────────────────────
+
+function FluxKaizenSection() {
+  return (
+    <>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        Cette section documente les 4 flux de portabilite KAIZEN issus des diagrammes de sequence PDF.
+        Chaque flux decrit les interactions entre KAIZEN, les microservices PNM et le CRM.
+      </Alert>
+
+      {/* ── Flow 1: Externe Entrante ─────────────────────────────────────── */}
+
+      <SectionTitle>Flux 1 — Portabilite Externe Entrante (GPMAG → Digicel/KAIZEN)</SectionTitle>
+
+      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          crmOwner=n/a &nbsp;|&nbsp; crmRequestor=KAIZEN &nbsp;|&nbsp; portaDirection=In &nbsp;|&nbsp; portaType=External
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Acteurs :</strong> PortaWebUI, PortaWs, MS Porta, KAIZEN, MS Ressources [MasterCRM], P1 [VAS]
+        </Typography>
+      </InfoCard>
+
+      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          <strong>1.</strong> Activation KAIZEN — saisie MSISDN provisoire + MSISDN a porter + RIO<br />
+          <strong>2.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, PortedOut=false)</code><br />
+          <strong>3.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN Provisoire)</code><br />
+          <strong>4.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Active)</code><br />
+          <strong>5.</strong> <code>PortaUI / CreatePortaParticulier</code> (sans contexte) → <code>MS Porta / CreatePortaGP</code><br />
+          <strong>6.</strong> <code>PortaWS / BindPorta</code> → enrichissement contexte<br />
+          <strong>7.</strong> PNMV3 echanges inter-operateurs<br />
+          <strong>8.</strong> Bascule J+2/3 — <code>MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)</code><br />
+          <strong>9.</strong> <code>KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)</code> → traitement interne<br />
+          <strong>10.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN a porter, Assigned, PortedOut=false)</code><br />
+          <strong>11.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN a porter)</code><br />
+          <strong>12.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=false)</code><br />
+          <strong>13.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN provisoire)</code>
+        </Typography>
+      </Box>
+
+      <CodeBlock title="Appels cles — Externe Entrante">
+{`MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, PortedOut=false)
+MS_Ressources / UpdateSimStatus(Sim, Active)
+PortaUI / CreatePortaParticulier → MS Porta / CreatePortaGP
+PortaWS / BindPorta
+MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)
+KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)
+P1 / registerEvent(Line_Terminate | Line_Activate, MSISDN)`}
+      </CodeBlock>
+
+      {/* ── Flow 2: Externe Sortante ─────────────────────────────────────── */}
+
+      <SectionTitle>Flux 2 — Portabilite Externe Sortante (Digicel/KAIZEN → GPMAG) — via GetRio</SectionTitle>
+
+      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          crmOwner=KAIZEN &nbsp;|&nbsp; crmRequestor=n/a &nbsp;|&nbsp; portaDirection=Out &nbsp;|&nbsp; portaType=External
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Acteurs :</strong> Systeme Externe (PDV GPMAG), PortaWs, KAIZEN, MS_Ressources, MS_Line, MS_Porta, P1 [VAS]
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Declencheur :</strong> Client KAIZEN au PDV GPMAG → USSD <code>#317#</code>
+        </Typography>
+      </InfoCard>
+
+      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          <strong>1.</strong> <code>ESB / GetRIO</code> → <code>MS_Line / getRio(MSISDN)</code> + <code>KAIZEN / GetRio()</code><br />
+          <strong>2.</strong> <code>MS_Line / CheckEligibility(MSISDN, RIO)</code> + <code>KAIZEN / GetRio()</code><br />
+          <strong>3.</strong> CheckEligibility → PNMV3 Process (echanges, ticket 1110)<br />
+          <strong>4.</strong> <code>MS Porta / NotifyPorta(IDPortage, MSISDN a porter, RIO, Status)</code><br />
+          <strong>5.</strong> <code>KAIZEN / Notify(IDPortage, MSISDN a porter, MandateStatus, MandateComment)</code> → traitement interne + modification statut ligne<br />
+          <strong>6.</strong> <code>PortaWs / BindPorta(IDPortage, Contexte)</code><br />
+          <strong>7.</strong> Bascule J+2/3 — <code>MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)</code><br />
+          <strong>8.</strong> <code>KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)</code> → traitement interne<br />
+          <strong>9.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN, Released, PortedOut=True)</code><br />
+          <strong>10.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN)</code><br />
+          <strong>11.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Inactive)</code>
+        </Typography>
+      </Box>
+
+      <CodeBlock title="Appels cles — Externe Sortante (GetRio)">
+{`ESB / GetRIO → MS_Line / getRio(MSISDN) + KAIZEN / GetRio()
+MS_Line / CheckEligibility(MSISDN, RIO)
+MS Porta / NotifyPorta(IDPortage, MSISDN a porter, RIO, Status)
+KAIZEN / Notify(IDPortage, MSISDN a porter, MandateStatus, MandateComment)
+PortaWs / BindPorta(IDPortage, Contexte)
+MS_Ressources / UpdateMsisdnStatus(MSISDN, Released, PortedOut=True)
+MS_Ressources / UpdateSimStatus(Sim, Inactive)`}
+      </CodeBlock>
+
+      {/* ── Flow 3: Variante GetLine ─────────────────────────────────────── */}
+
+      <SectionTitle>Flux 3 — Portabilite Externe Sortante — variante GetLine</SectionTitle>
+
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        <strong>Variante GetLine :</strong> flux identique au Flux 2 (Externe Sortante) sauf que les appels{' '}
+        <code>KAIZEN / GetRio()</code> sont remplaces par <code>KAIZEN / GetLine()</code>.
+      </Alert>
+
+      {/* ── Flow 4: Interne Entrante ─────────────────────────────────────── */}
+
+      <SectionTitle>Flux 4 — Portabilite Interne Entrante (MasterCRM → KAIZEN)</SectionTitle>
+
+      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          Initial : crmOwner=n/a &nbsp;|&nbsp; crmRequestor=KAIZEN &nbsp;|&nbsp; portaDirection=In &nbsp;|&nbsp; portaType=n/a
+        </Typography>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12, mt: 0.5 }}>
+          Enrichi : crmOwner=MasterCRM
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Acteurs :</strong> MS Porta, KAIZEN, MS_Ressources, MasterCRM, MS_Line, MS_WatcherMOBI, P1 [VAS]
+        </Typography>
+      </InfoCard>
+
+      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+          <strong>1.</strong> Activation KAIZEN — MSISDN provisoire + saisie MSISDN Digicel / RIO Digicel<br />
+          <strong>2.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, Ported=false)</code><br />
+          <strong>3.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN provisoire)</code><br />
+          <strong>4.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Active)</code><br />
+          <strong>5.</strong> <code>CreatePortaGP</code> avec mandat portage + contexte initial<br />
+          <strong>6.</strong> <code>MS Line / CheckEligibility(MSISDN Digicel / RIO Digicel)</code> → <code>GetRio()</code><br />
+          <strong>7.</strong> Traitement interne → enrichissement contexte <code>crmOwner=MasterCRM</code><br />
+          <strong>8.</strong> <code>MS Line / TerminateLinePorta(MSISDN Digicel, contexte(crmOwner=MasterCRM, crmRequestor=KAIZEN, portaDirection=In, portaType=n/a))</code><br />
+          <strong>9.</strong> MasterCRM : Demande de Resiliation<br />
+          <strong>10.</strong> <code>MS WatcherMOBI / (MSISDN Digicel, contexte, URLCallBack)</code> → requete SQL MOBI : <code>Select RL, Status from Send_Actions</code><br />
+          <strong>11.</strong> <code>KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)</code><br />
+          <strong>12.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=False)</code><br />
+          <strong>13.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN Provisoire)</code><br />
+          <strong>14.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Digicel, Assigned, PortedOut=false)</code><br />
+          <strong>15.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN Digicel)</code>
+        </Typography>
+      </Box>
+
+      <CodeBlock title="Appels cles — Interne Entrante">
+{`MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, Ported=false)
+MS_Ressources / UpdateSimStatus(Sim, Active)
+CreatePortaGP (mandat portage + contexte initial)
+MS Line / CheckEligibility(MSISDN Digicel / RIO Digicel) → GetRio()
+MS Line / TerminateLinePorta(MSISDN Digicel, contexte(crmOwner=MasterCRM, crmRequestor=KAIZEN))
+MS WatcherMOBI / (MSISDN Digicel, contexte, URLCallBack) → SQL: Select RL, Status from Send_Actions
+KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)`}
+      </CodeBlock>
+
+      {/* ── Summary table ────────────────────────────────────────────────── */}
+
+      <SectionTitle>Tableau recapitulatif des flux KAIZEN</SectionTitle>
+
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Flux</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>crmOwner</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>crmRequestor</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>portaDirection</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>portaType</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Externe Entrante</TableCell>
+              <TableCell>n/a</TableCell>
+              <TableCell>KAIZEN</TableCell>
+              <TableCell>In</TableCell>
+              <TableCell>External</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Externe Sortante</TableCell>
+              <TableCell>KAIZEN</TableCell>
+              <TableCell>n/a</TableCell>
+              <TableCell>Out</TableCell>
+              <TableCell>External</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Interne Entrante</TableCell>
+              <TableCell>MasterCRM (enrichi)</TableCell>
+              <TableCell>KAIZEN</TableCell>
+              <TableCell>In</TableCell>
+              <TableCell>n/a</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="warning" sx={{ mt: 3 }}>
+        Le flux Porta Interne Sortante (KAIZEN → MasterCRM) n{"'"}est pas encore documente.
+      </Alert>
+    </>
+  );
+}
+
 // ─── Section tabs ───────────────────────────────────────────────────────────
 
 const SECTIONS: DocSection[] = [
@@ -969,6 +1165,12 @@ const SECTIONS: DocSection[] = [
     title: 'PNM ↔ MOBI',
     icon: 'solar:transfer-horizontal-bold-duotone',
     content: <InteractionPnmMobiSection />,
+  },
+  {
+    id: 'flux-kaizen',
+    title: 'Flux KAIZEN',
+    icon: 'solar:routing-bold-duotone',
+    content: <FluxKaizenSection />,
   },
   {
     id: 'bdd',
