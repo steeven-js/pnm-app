@@ -2871,6 +2871,7 @@ export default function CasPratiques() {
   const [selectedSeverity, setSelectedSeverity] = useState<Severity | 'all'>('all');
   const [openCas, setOpenCas] = useState<CasPratique | null>(null);
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   const filtered = useMemo(() => {
     let result = CAS_PRATIQUES;
@@ -3016,9 +3017,95 @@ export default function CasPratiques() {
               )
             )}
           </ToggleButtonGroup>
+          <ToggleButtonGroup
+            size="small"
+            value={viewMode}
+            exclusive
+            onChange={(_, val) => val !== null && setViewMode(val)}
+          >
+            <ToggleButton value="table">
+              <Tooltip title="Vue tableau"><Iconify icon="solar:list-bold-duotone" width={18} /></Tooltip>
+            </ToggleButton>
+            <ToggleButton value="cards">
+              <Tooltip title="Vue cartes"><Iconify icon="solar:widget-bold-duotone" width={18} /></Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Stack>
 
+        {/* Table view */}
+        {viewMode === 'table' && (
+          <TableContainer component={Card} sx={{ mb: 3 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, width: 30 }}>#</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Titre</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: 90 }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: 90 }}>Gravite</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: 130 }}>Categorie</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: 50 }} align="center">PDF</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map((cas, idx) => {
+                  const sevCfg = SEVERITY_CONFIG[cas.severity];
+                  const catCfg = CATEGORY_CONFIG[cas.category];
+                  return (
+                    <TableRow
+                      key={cas.id}
+                      hover
+                      sx={{ cursor: 'pointer', '&:last-child td': { border: 0 } }}
+                      onClick={() => setOpenCas(cas)}
+                    >
+                      <TableCell sx={{ color: 'text.secondary' }}>{idx + 1}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>{cas.title}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary">{cas.date}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={sevCfg.label}
+                          size="small"
+                          icon={<Iconify icon={sevCfg.icon} width={14} />}
+                          sx={{
+                            bgcolor: sevCfg.bg, color: sevCfg.color, fontWeight: 700, fontSize: 11, height: 24,
+                            '& .MuiChip-icon': { color: sevCfg.color },
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={catCfg.label}
+                          size="small"
+                          variant="outlined"
+                          icon={<Iconify icon={catCfg.icon} width={14} />}
+                          sx={{ fontSize: 11, height: 24 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Telecharger PDF">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handleDownloadPdf(cas.id); }}
+                            disabled={pdfLoading === cas.id}
+                            sx={{ color: pdfLoading === cas.id ? 'text.disabled' : 'error.main' }}
+                          >
+                            <Iconify icon={pdfLoading === cas.id ? 'solar:refresh-bold-duotone' : 'solar:file-download-bold-duotone'} width={20} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+
         {/* Cards grid */}
+        {viewMode === 'cards' && (
         <Box
           sx={{
             display: 'grid',
@@ -3145,6 +3232,7 @@ export default function CasPratiques() {
             );
           })}
         </Box>
+        )}
 
         {/* Empty state */}
         {filtered.length === 0 && (
