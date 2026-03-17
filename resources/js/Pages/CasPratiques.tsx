@@ -3128,6 +3128,19 @@ export default function CasPratiques() {
                     </Stack>
                   </CardContent>
                 </CardActionArea>
+                <Divider />
+                <Stack direction="row" justifyContent="flex-end" sx={{ px: 1, py: 0.5 }}>
+                  <Tooltip title="Telecharger PDF">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => { e.stopPropagation(); handleDownloadPdf(cas.id); }}
+                      disabled={pdfLoading === cas.id}
+                      sx={{ color: pdfLoading === cas.id ? 'text.disabled' : 'error.main' }}
+                    >
+                      <Iconify icon={pdfLoading === cas.id ? 'solar:refresh-bold-duotone' : 'solar:file-download-bold-duotone'} width={20} />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
               </Card>
             );
           })}
