@@ -949,56 +949,110 @@ function FluxKaizenSection() {
   return (
     <>
       <Alert severity="info" sx={{ mb: 3 }}>
-        Cette section documente les 4 flux de portabilite KAIZEN issus des diagrammes de sequence PDF.
-        Chaque flux decrit les interactions entre KAIZEN, les microservices PNM et le CRM.
+        Cette section documente en detail les 4 flux de portabilite KAIZEN, issus des diagrammes de sequence officiels.
+        Chaque etape est expliquee de maniere narrative pour faciliter la comprehension du processus complet.
       </Alert>
 
-      {/* ── Flow 1: Externe Entrante ─────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* FLUX 1 — EXTERNE ENTRANTE                                        */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
 
       <SectionTitle>Flux 1 — Portabilite Externe Entrante (GPMAG → Digicel/KAIZEN)</SectionTitle>
 
-      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+      <InfoCard title="Contexte du flux" icon="solar:info-circle-bold-duotone" color="#2563eb">
         <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
           crmOwner=n/a &nbsp;|&nbsp; crmRequestor=KAIZEN &nbsp;|&nbsp; portaDirection=In &nbsp;|&nbsp; portaType=External
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
           <strong>Acteurs :</strong> PortaWebUI, PortaWs, MS Porta, KAIZEN, MS Ressources [MasterCRM], P1 [VAS]
         </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Ce flux decrit le parcours complet lorsqu{"'"}un client d{"'"}un operateur externe du GPMAG (Orange, Free, SFR...)
+          souhaite rejoindre Digicel via le CRM KAIZEN.
+        </Typography>
       </InfoCard>
 
-      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
-        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
-          <strong>1.</strong> Activation KAIZEN — saisie MSISDN provisoire + MSISDN a porter + RIO<br />
-          <strong>2.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, PortedOut=false)</code><br />
-          <strong>3.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN Provisoire)</code><br />
-          <strong>4.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Active)</code><br />
-          <strong>5.</strong> <code>PortaUI / CreatePortaParticulier</code> (sans contexte) → <code>MS Porta / CreatePortaGP</code><br />
-          <strong>6.</strong> <code>PortaWS / BindPorta</code> → enrichissement contexte<br />
-          <strong>7.</strong> PNMV3 echanges inter-operateurs<br />
-          <strong>8.</strong> Bascule J+2/3 — <code>MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)</code><br />
-          <strong>9.</strong> <code>KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)</code> → traitement interne<br />
-          <strong>10.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN a porter, Assigned, PortedOut=false)</code><br />
-          <strong>11.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN a porter)</code><br />
-          <strong>12.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=false)</code><br />
-          <strong>13.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN provisoire)</code>
-        </Typography>
-      </Box>
+      <SubTitle>Etape 1 — Activation dans KAIZEN</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le processus demarre lorsqu{"'"}un client d{"'"}un autre operateur du GPMAG souhaite rejoindre Digicel.
+        Le conseiller en point de vente active une nouvelle ligne dans KAIZEN en saisissant un <strong>MSISDN provisoire</strong> (numero
+        temporaire attribue au client), le <strong>MSISDN a porter</strong> (le numero que le client souhaite conserver)
+        et le <strong>RIO</strong> (Releve d{"'"}Identite Operateur, obtenu aupres de l{"'"}operateur donneur via le code USSD).
+        Ce mandat de portage contient egalement le nom, prenom du client et le code du point de vente.
+      </Typography>
 
-      <CodeBlock title="Appels cles — Externe Entrante">
-{`MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, PortedOut=false)
+      <SubTitle>Etape 2 — Reservation du MSISDN provisoire</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Des que l{"'"}activation est lancee, le microservice <strong>MS_Ressources</strong> (qui gere le referentiel MasterCRM)
+        est appele pour marquer le MSISDN provisoire comme <code>Assigned</code> avec <code>PortedOut=false</code>.
+        Cela reserve le numero provisoire dans le CRM et empeche qu{"'"}il soit attribue a un autre client.
+        En parallele, le systeme VAS <strong>P1</strong> enregistre un evenement <code>Line_Terminate</code> sur le MSISDN provisoire
+        pour preparer le terrain, et MS_Ressources active la SIM associee via <code>UpdateSimStatus(Sim, Active)</code>.
+      </Typography>
+
+      <SubTitle>Etape 3 — Creation du portage dans PNM V3</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        L{"'"}interface <strong>PortaWebUI</strong> appelle <code>PortaUI / CreatePortaParticulier</code> sans contexte
+        specifique. Cet appel est relaye vers <strong>MS Porta</strong> qui cree le portage dans la base PNM via <code>CreatePortaGP</code>.
+        Un objet <strong>Portage</strong> est cree avec un ID unique (IDPortage), le MSISDN, le MSISDN provisoire, le RIO,
+        la date de portage, l{"'"}operateur donneur et l{"'"}operateur receveur.
+      </Typography>
+
+      <SubTitle>Etape 4 — Enrichissement du contexte</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>PortaWS</strong> appelle ensuite <code>BindPorta</code> pour enrichir le contexte du portage avec les
+        informations KAIZEN : <code>crmOwner=n/a</code> (le client ne vient pas du CRM Digicel), <code>crmRequestor=KAIZEN</code>
+        (c{"'"}est KAIZEN qui a initie la demande), <code>portaDirection=In</code> (portabilite entrante) et <code>portaType=External</code>
+        (le numero vient d{"'"}un operateur externe). Ce contexte sera transmis a chaque etape suivante pour que
+        chaque microservice sache comment traiter le portage.
+      </Typography>
+
+      <SubTitle>Etape 5 — Echanges inter-operateurs PNM V3</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le processus PNM V3 prend le relais pour gerer les echanges avec l{"'"}operateur donneur : envoi du ticket 1110
+        (demande de portage), reception du ticket 1210 (accord) ou 1220 (refus), echanges de fichiers PNMDATA via SFTP.
+        Cette phase dure en general <strong>J+2 a J+3 jours ouvres</strong> avant la bascule effective.
+      </Typography>
+
+      <SubTitle>Etape 6 — Bascule (J+2/3)</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le jour de la bascule, PNM V3 declenche le processus. <strong>MS Porta</strong> appelle <code>NotifyPorta</code> en transmettant
+        l{"'"}IDPortage, le MSISDN provisoire, le MSISDN a porter, le RIO, le statut et le contexte complet.
+        KAIZEN recoit cette notification via <code>KAIZEN / NotifyPorta</code> et effectue son traitement interne
+        pour finaliser l{"'"}activation de la ligne avec le numero porte.
+      </Typography>
+
+      <SubTitle>Etape 7 — Mise a jour finale des ressources</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Une fois la bascule reussie, plusieurs mises a jour sont effectuees dans l{"'"}ordre :
+        le MSISDN a porter est marque comme <code>Assigned, PortedOut=false</code> dans MS_Ressources (il appartient
+        desormais a Digicel), P1 enregistre un <code>Line_Terminate</code> sur le MSISDN a porter,
+        puis le MSISDN provisoire est libere (<code>Released, PortedOut=false</code>) car il n{"'"}est plus necessaire,
+        et P1 enregistre un <code>Line_Activate</code> sur le MSISDN provisoire pour finaliser la transition dans le VAS.
+      </Typography>
+
+      <CodeBlock title="Appels API cles — Externe Entrante">
+{`// Reservation
+MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, PortedOut=false)
 MS_Ressources / UpdateSimStatus(Sim, Active)
+
+// Creation portage
 PortaUI / CreatePortaParticulier → MS Porta / CreatePortaGP
-PortaWS / BindPorta
-MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)
+PortaWS / BindPorta (enrichissement contexte)
+
+// Post-bascule
 KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)
-P1 / registerEvent(Line_Terminate | Line_Activate, MSISDN)`}
+MS_Ressources / UpdateMsisdnStatus(MSISDN a porter, Assigned, PortedOut=false)
+MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=false)`}
       </CodeBlock>
 
-      {/* ── Flow 2: Externe Sortante ─────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* FLUX 2 — EXTERNE SORTANTE                                        */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
 
-      <SectionTitle>Flux 2 — Portabilite Externe Sortante (Digicel/KAIZEN → GPMAG) — via GetRio</SectionTitle>
+      <SectionTitle>Flux 2 — Portabilite Externe Sortante (Digicel/KAIZEN → GPMAG)</SectionTitle>
 
-      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+      <InfoCard title="Contexte du flux" icon="solar:info-circle-bold-duotone" color="#2563eb">
         <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
           crmOwner=KAIZEN &nbsp;|&nbsp; crmRequestor=n/a &nbsp;|&nbsp; portaDirection=Out &nbsp;|&nbsp; portaType=External
         </Typography>
@@ -1006,96 +1060,207 @@ P1 / registerEvent(Line_Terminate | Line_Activate, MSISDN)`}
           <strong>Acteurs :</strong> Systeme Externe (PDV GPMAG), PortaWs, KAIZEN, MS_Ressources, MS_Line, MS_Porta, P1 [VAS]
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          <strong>Declencheur :</strong> Client KAIZEN au PDV GPMAG → USSD <code>#317#</code>
+          Ce flux decrit le parcours lorsqu{"'"}un client Digicel (gere dans KAIZEN) souhaite quitter Digicel
+          pour un autre operateur du GPMAG.
         </Typography>
       </InfoCard>
 
-      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
-        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
-          <strong>1.</strong> <code>ESB / GetRIO</code> → <code>MS_Line / getRio(MSISDN)</code> + <code>KAIZEN / GetRio()</code><br />
-          <strong>2.</strong> <code>MS_Line / CheckEligibility(MSISDN, RIO)</code> + <code>KAIZEN / GetRio()</code><br />
-          <strong>3.</strong> CheckEligibility → PNMV3 Process (echanges, ticket 1110)<br />
-          <strong>4.</strong> <code>MS Porta / NotifyPorta(IDPortage, MSISDN a porter, RIO, Status)</code><br />
-          <strong>5.</strong> <code>KAIZEN / Notify(IDPortage, MSISDN a porter, MandateStatus, MandateComment)</code> → traitement interne + modification statut ligne<br />
-          <strong>6.</strong> <code>PortaWs / BindPorta(IDPortage, Contexte)</code><br />
-          <strong>7.</strong> Bascule J+2/3 — <code>MS Porta / NotifyPorta(IDPortage, MSISDN provisoire, MSISDN a porter, RIO, Statut, Contexte)</code><br />
-          <strong>8.</strong> <code>KAIZEN / NotifyPorta(IDPortage, MSISDN a porter, MandateStatus, MandateComment, Contexte)</code> → traitement interne<br />
-          <strong>9.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN, Released, PortedOut=True)</code><br />
-          <strong>10.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN)</code><br />
-          <strong>11.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Inactive)</code>
-        </Typography>
-      </Box>
+      <SubTitle>Etape 1 — Declenchement par le client</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le processus est declenche lorsque le client Digicel/KAIZEN se rend dans un point de vente d{"'"}un autre
+        operateur du GPMAG et demande la portabilite de son numero. Le systeme externe appelle le code USSD
+        Digicel <code>#317#</code> pour obtenir le RIO du client. Cet appel transite par l{"'"}ESB qui
+        interroge <code>MS_Line / getRio(MSISDN)</code> et en parallele <code>KAIZEN / GetRio()</code> pour
+        recuperer le Releve d{"'"}Identite Operateur du client.
+      </Typography>
 
-      <CodeBlock title="Appels cles — Externe Sortante (GetRio)">
-{`ESB / GetRIO → MS_Line / getRio(MSISDN) + KAIZEN / GetRio()
+      <SubTitle>Etape 2 — Verification d{"'"}eligibilite</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Avant de lancer le portage, le systeme verifie que le MSISDN est eligible au portage via
+        <code> MS_Line / CheckEligibility(MSISDN, RIO)</code>. Cette verification controle notamment que le numero
+        n{"'"}est pas deja en cours de portage, qu{"'"}il n{"'"}est pas suspendu, et que le RIO est valide.
+        KAIZEN est de nouveau sollicite via <code>GetRio()</code> pour confirmer la coherence des informations.
+      </Typography>
+
+      <SubTitle>Etape 3 — Echanges PNM V3 et notification</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Si l{"'"}eligibilite est confirmee, le processus PNM V3 demarre les echanges inter-operateurs.
+        Un ticket 1110 (demande de portage) est emis par l{"'"}operateur receveur. <strong>MS Porta</strong> notifie
+        ensuite KAIZEN via <code>NotifyPorta(IDPortage, MSISDN a porter, RIO, Status)</code> pour l{"'"}informer
+        qu{"'"}une demande de portage sortant a ete deposee pour ce client.
+        KAIZEN recoit la notification via <code>Notify(IDPortage, MSISDN a porter, MandateStatus, MandateComment)</code>
+        et effectue son traitement interne, notamment la modification du statut de la ligne dans son systeme.
+      </Typography>
+
+      <SubTitle>Etape 4 — Liaison du portage au contexte KAIZEN</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>PortaWs</strong> appelle <code>BindPorta(IDPortage, Contexte)</code> pour associer le portage
+        au contexte KAIZEN : <code>crmOwner=KAIZEN</code> (le client appartient a KAIZEN), <code>crmRequestor=n/a</code>
+        (la demande ne vient pas du CRM Digicel mais de l{"'"}exterieur), <code>portaDirection=Out</code> et <code>portaType=External</code>.
+        Ce contexte permet aux microservices en aval de savoir que c{"'"}est un depart client KAIZEN vers l{"'"}exterieur.
+      </Typography>
+
+      <SubTitle>Etape 5 — Bascule (J+2/3)</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le jour de la bascule, PNM V3 declenche le processus via <code>Bascule()</code>.
+        <strong> MS Porta</strong> notifie a nouveau KAIZEN avec le statut final. KAIZEN effectue son traitement
+        interne de cloture du client.
+      </Typography>
+
+      <SubTitle>Etape 6 — Liberation des ressources</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Apres la bascule, les ressources Digicel sont liberees : le MSISDN est marque comme
+        <code> Released, PortedOut=True</code> dans MS_Ressources (le numero a ete porte vers un autre operateur),
+        P1 enregistre un <code>Line_Activate</code> sur le MSISDN (evenement VAS de fin),
+        et la SIM est desactivee via <code>UpdateSimStatus(Sim, Inactive)</code>.
+        Le client n{"'"}est plus gere par Digicel.
+      </Typography>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <strong>Variante GetLine :</strong> il existe une variante de ce flux ou les appels <code>KAIZEN / GetRio()</code> sont
+        remplaces par <code>KAIZEN / GetLine()</code>. Le reste du flux est strictement identique.
+        La difference porte uniquement sur la methode utilisee par KAIZEN pour recuperer les informations
+        de la ligne du client (GetRio renvoie le RIO, GetLine renvoie les details complets de la ligne).
+      </Alert>
+
+      <CodeBlock title="Appels API cles — Externe Sortante">
+{`// Obtention RIO et eligibilite
+ESB / GetRIO → MS_Line / getRio(MSISDN) + KAIZEN / GetRio()
 MS_Line / CheckEligibility(MSISDN, RIO)
+
+// Notification et liaison contexte
 MS Porta / NotifyPorta(IDPortage, MSISDN a porter, RIO, Status)
 KAIZEN / Notify(IDPortage, MSISDN a porter, MandateStatus, MandateComment)
 PortaWs / BindPorta(IDPortage, Contexte)
+
+// Post-bascule — liberation
 MS_Ressources / UpdateMsisdnStatus(MSISDN, Released, PortedOut=True)
 MS_Ressources / UpdateSimStatus(Sim, Inactive)`}
       </CodeBlock>
 
-      {/* ── Flow 3: Variante GetLine ─────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* FLUX 3 — INTERNE ENTRANTE                                        */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
 
-      <SectionTitle>Flux 3 — Portabilite Externe Sortante — variante GetLine</SectionTitle>
+      <SectionTitle>Flux 3 — Portabilite Interne Entrante (MasterCRM → KAIZEN)</SectionTitle>
 
-      <Alert severity="warning" sx={{ mb: 3 }}>
-        <strong>Variante GetLine :</strong> flux identique au Flux 2 (Externe Sortante) sauf que les appels{' '}
-        <code>KAIZEN / GetRio()</code> sont remplaces par <code>KAIZEN / GetLine()</code>.
-      </Alert>
-
-      {/* ── Flow 4: Interne Entrante ─────────────────────────────────────── */}
-
-      <SectionTitle>Flux 4 — Portabilite Interne Entrante (MasterCRM → KAIZEN)</SectionTitle>
-
-      <InfoCard title="Contexte" icon="solar:info-circle-bold-duotone" color="#2563eb">
+      <InfoCard title="Contexte du flux" icon="solar:info-circle-bold-duotone" color="#2563eb">
         <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
           Initial : crmOwner=n/a &nbsp;|&nbsp; crmRequestor=KAIZEN &nbsp;|&nbsp; portaDirection=In &nbsp;|&nbsp; portaType=n/a
         </Typography>
         <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12, mt: 0.5 }}>
-          Enrichi : crmOwner=MasterCRM
+          Enrichi apres CheckEligibility : crmOwner=MasterCRM
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
           <strong>Acteurs :</strong> MS Porta, KAIZEN, MS_Ressources, MasterCRM, MS_Line, MS_WatcherMOBI, P1 [VAS]
         </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Ce flux est specifique aux portages <strong>internes a Digicel</strong> : un client deja chez Digicel mais gere
+          dans le CRM MasterCRM souhaite migrer vers le CRM KAIZEN. Il n{"'"}y a pas d{"'"}echange inter-operateurs PNM V3,
+          mais les microservices internes orchestrent la migration entre les deux CRM.
+        </Typography>
       </InfoCard>
 
-      <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 2, mb: 3, fontFamily: 'monospace', fontSize: 12, lineHeight: 2 }}>
-        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
-          <strong>1.</strong> Activation KAIZEN — MSISDN provisoire + saisie MSISDN Digicel / RIO Digicel<br />
-          <strong>2.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, Ported=false)</code><br />
-          <strong>3.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN provisoire)</code><br />
-          <strong>4.</strong> <code>MS_Ressources / UpdateSimStatus(Sim, Active)</code><br />
-          <strong>5.</strong> <code>CreatePortaGP</code> avec mandat portage + contexte initial<br />
-          <strong>6.</strong> <code>MS Line / CheckEligibility(MSISDN Digicel / RIO Digicel)</code> → <code>GetRio()</code><br />
-          <strong>7.</strong> Traitement interne → enrichissement contexte <code>crmOwner=MasterCRM</code><br />
-          <strong>8.</strong> <code>MS Line / TerminateLinePorta(MSISDN Digicel, contexte(crmOwner=MasterCRM, crmRequestor=KAIZEN, portaDirection=In, portaType=n/a))</code><br />
-          <strong>9.</strong> MasterCRM : Demande de Resiliation<br />
-          <strong>10.</strong> <code>MS WatcherMOBI / (MSISDN Digicel, contexte, URLCallBack)</code> → requete SQL MOBI : <code>Select RL, Status from Send_Actions</code><br />
-          <strong>11.</strong> <code>KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)</code><br />
-          <strong>12.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=False)</code><br />
-          <strong>13.</strong> <code>P1 / registerEvent(Line_Activate, MSISDN Provisoire)</code><br />
-          <strong>14.</strong> <code>MS_Ressources / UpdateMsisdnStatus(MSISDN Digicel, Assigned, PortedOut=false)</code><br />
-          <strong>15.</strong> <code>P1 / registerEvent(Line_Terminate, MSISDN Digicel)</code>
-        </Typography>
-      </Box>
+      <SubTitle>Etape 1 — Activation dans KAIZEN</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le processus demarre dans KAIZEN lorsque le conseiller en point de vente saisit un MSISDN provisoire
+        ainsi que le MSISDN Digicel du client (son numero actuel) et son RIO Digicel. Le mandat de portage
+        est constitue avec ces informations, le nom/prenom du client, le code du point de vente et le code postal.
+        Le contexte initial est <code>crmOwner=n/a</code> (pas encore determine), <code>crmRequestor=KAIZEN</code>,
+        <code> portaDirection=In</code> et <code>portaType=n/a</code> (ce n{"'"}est pas un portage externe).
+      </Typography>
 
-      <CodeBlock title="Appels cles — Interne Entrante">
-{`MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, Ported=false)
+      <SubTitle>Etape 2 — Reservation du MSISDN provisoire</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Comme pour le flux externe entrante, <strong>MS_Ressources</strong> reserve le MSISDN provisoire en le marquant
+        <code> Assigned, Ported=false</code>. Le systeme VAS P1 enregistre un evenement <code>Line_Terminate</code>
+        sur le MSISDN provisoire, et la SIM est activee via <code>UpdateSimStatus(Sim, Active)</code>.
+      </Typography>
+
+      <SubTitle>Etape 3 — Creation du portage et verification d{"'"}eligibilite</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>MS Porta</strong> cree le portage via <code>CreatePortaGP</code> avec le mandat et le contexte initial.
+        Ensuite, <code>MS Line / CheckEligibility(MSISDN Digicel, RIO Digicel)</code> est appele pour verifier que
+        le numero du client est eligible. MS_Line appelle egalement <code>GetRio()</code> pour valider le RIO.
+      </Typography>
+
+      <SubTitle>Etape 4 — Enrichissement du contexte et identification du CRM source</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        C{"'"}est une etape cruciale propre au portage interne. Le retour de <code>CheckEligibility()</code> permet
+        au systeme d{"'"}identifier que le MSISDN Digicel du client est actuellement gere dans <strong>MasterCRM</strong>.
+        Le contexte est alors enrichi : <code>crmOwner</code> passe de <code>n/a</code> a <code>MasterCRM</code>.
+        Cette information est essentielle car elle determine quel CRM doit effectuer la resiliation de la ligne.
+      </Typography>
+
+      <SubTitle>Etape 5 — Resiliation dans MasterCRM</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>MS Line</strong> appelle <code>TerminateLinePorta(MSISDN Digicel, contexte)</code> pour declencher
+        la resiliation de la ligne dans MasterCRM. Le contexte transmis contient <code>crmOwner=MasterCRM</code>
+        et <code>crmRequestor=KAIZEN</code>, ce qui indique a MasterCRM que c{"'"}est KAIZEN qui recupere le client.
+        MasterCRM recoit la demande de resiliation et la traite.
+      </Typography>
+
+      <SubTitle>Etape 6 — Surveillance MOBI et verification CRM</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le microservice <strong>MS_WatcherMOBI</strong> est sollicite pour surveiller le traitement de la resiliation
+        dans MasterCRM. Il recoit le MSISDN Digicel, le contexte complet et une URL de callback. En interne,
+        il execute la requete SQL MOBI <code>Select RL, Status from Send_Actions</code> pour verifier que
+        la resiliation a bien ete prise en compte par le CRM MasterCRM. Cette etape est importante car elle
+        assure que la migration CRM est effective avant de finaliser le portage.
+      </Typography>
+
+      <SubTitle>Etape 7 — Notification KAIZEN et finalisation</SubTitle>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Une fois la resiliation confirmee dans MasterCRM, KAIZEN est notifie via
+        <code> Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)</code>.
+        Les ressources sont ensuite mises a jour : le MSISDN provisoire est libere
+        (<code>Released, PortedOut=False</code>), P1 enregistre un <code>Line_Activate</code> sur le MSISDN provisoire,
+        le MSISDN Digicel du client est marque comme <code>Assigned, PortedOut=false</code>
+        (il reste chez Digicel mais passe sous KAIZEN), et P1 enregistre un <code>Line_Terminate</code>
+        sur le MSISDN Digicel pour finaliser la transition VAS.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        <strong>Difference cle avec le portage externe :</strong> dans un portage interne, il n{"'"}y a pas d{"'"}echange
+        de fichiers PNMDATA ni de tickets 1110/1210 inter-operateurs. Tout se passe en interne entre les microservices
+        Digicel. La complexite reside dans la coordination entre les deux CRM (MasterCRM et KAIZEN) et la surveillance
+        via MS_WatcherMOBI.
+      </Alert>
+
+      <CodeBlock title="Appels API cles — Interne Entrante">
+{`// Reservation
+MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Assigned, Ported=false)
 MS_Ressources / UpdateSimStatus(Sim, Active)
-CreatePortaGP (mandat portage + contexte initial)
-MS Line / CheckEligibility(MSISDN Digicel / RIO Digicel) → GetRio()
+
+// Creation et eligibilite
+MS Porta / CreatePortaGP (mandat portage + contexte initial)
+MS Line / CheckEligibility(MSISDN Digicel, RIO Digicel) → GetRio()
+
+// Enrichissement contexte → crmOwner = MasterCRM
 MS Line / TerminateLinePorta(MSISDN Digicel, contexte(crmOwner=MasterCRM, crmRequestor=KAIZEN))
-MS WatcherMOBI / (MSISDN Digicel, contexte, URLCallBack) → SQL: Select RL, Status from Send_Actions
-KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)`}
+
+// Surveillance CRM
+MS WatcherMOBI / (MSISDN Digicel, contexte, URLCallBack)
+  → SQL: Select RL, Status from Send_Actions
+
+// Finalisation
+KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)
+MS_Ressources / UpdateMsisdnStatus(MSISDN Provisoire, Released, PortedOut=False)
+MS_Ressources / UpdateMsisdnStatus(MSISDN Digicel, Assigned, PortedOut=false)`}
       </CodeBlock>
 
-      {/* ── Summary table ────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* TABLEAU RECAPITULATIF                                            */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
 
-      <SectionTitle>Tableau recapitulatif des flux KAIZEN</SectionTitle>
+      <SectionTitle>Tableau recapitulatif des contextes KAIZEN</SectionTitle>
 
-      <TableContainer>
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le contexte est l{"'"}element central qui permet a chaque microservice de savoir comment traiter le portage.
+        Il est constitue de 4 champs qui definissent la nature et la direction du portage :
+      </Typography>
+
+      <TableContainer sx={{ mb: 3 }}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -1109,31 +1274,45 @@ KAIZEN / Notify(MSISDN Digicel, MandateStatus, MandateComment, Contexte)`}
           <TableBody>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Externe Entrante</TableCell>
-              <TableCell>n/a</TableCell>
-              <TableCell>KAIZEN</TableCell>
-              <TableCell>In</TableCell>
-              <TableCell>External</TableCell>
+              <TableCell><code>n/a</code></TableCell>
+              <TableCell><code>KAIZEN</code></TableCell>
+              <TableCell><code>In</code></TableCell>
+              <TableCell><code>External</code></TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Externe Sortante</TableCell>
-              <TableCell>KAIZEN</TableCell>
-              <TableCell>n/a</TableCell>
-              <TableCell>Out</TableCell>
-              <TableCell>External</TableCell>
+              <TableCell><code>KAIZEN</code></TableCell>
+              <TableCell><code>n/a</code></TableCell>
+              <TableCell><code>Out</code></TableCell>
+              <TableCell><code>External</code></TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Interne Entrante</TableCell>
-              <TableCell>MasterCRM (enrichi)</TableCell>
-              <TableCell>KAIZEN</TableCell>
-              <TableCell>In</TableCell>
-              <TableCell>n/a</TableCell>
+              <TableCell><code>MasterCRM</code> (enrichi)</TableCell>
+              <TableCell><code>KAIZEN</code></TableCell>
+              <TableCell><code>In</code></TableCell>
+              <TableCell><code>n/a</code></TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Alert severity="warning" sx={{ mt: 3 }}>
-        Le flux Porta Interne Sortante (KAIZEN → MasterCRM) n{"'"}est pas encore documente.
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>crmOwner</strong> designe le CRM qui gere actuellement le client. Pour un portage entrant depuis
+        l{"'"}exterieur, il vaut <code>n/a</code> car le client n{"'"}est pas encore chez Digicel. Pour un portage sortant,
+        il vaut <code>KAIZEN</code> car le client part de KAIZEN. Pour un portage interne, il est enrichi
+        dynamiquement a <code>MasterCRM</code> apres verification d{"'"}eligibilite.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <strong>crmRequestor</strong> designe le CRM qui a initie la demande de portage. Dans les flux entrants,
+        c{"'"}est toujours <code>KAIZEN</code> qui demande. Dans les flux sortants, la demande vient de l{"'"}exterieur
+        donc il vaut <code>n/a</code>.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mt: 2 }}>
+        <strong>Note :</strong> le flux <strong>Porta Interne Sortante</strong> (KAIZEN → MasterCRM) n{"'"}est pas encore
+        documente. Il correspondrait au cas inverse du Flux 3 : un client KAIZEN qui souhaite migrer vers MasterCRM.
       </Alert>
     </>
   );
