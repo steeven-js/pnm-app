@@ -2788,6 +2788,134 @@ function CasMsisdnProvisoireErreurPdf() {
   );
 }
 
+function CasResiliationManuelPsoPdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>#18 — Resiliation manuelle MSISDN pour PSO</Text>
+            <Text style={s.headerSub}>Portabilite des Numeros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['PSO', 'Resiliation', 'SoapUI', 'WSMobiMaster', 'MasterCRM'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Apres chaque portabilite sortante (PSO), le systeme PNM doit resilier la ligne dans MasterCRM.
+          Si cette resiliation echoue ou n{"'"}est pas executee, un <Text style={s.bold}>mail automatique</Text> est
+          genere avec pour objet <Text style={s.bold}>[PNM] Verification des resiliations pour PSO</Text>.
+          Ce mail liste les MSISDN concernes qui necessitent une resiliation manuelle via SoapUI.
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Important</Text>
+          <Text style={s.alertText}>
+            Les MSISDN non resilies restent actifs dans MasterCRM alors que le numero a ete porte chez
+            un autre operateur. Il est important de traiter ce mail rapidement.
+          </Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Ouvrir SoapUI et se connecter au WSDL</Text>
+        </View>
+
+        <Text style={s.body}>
+          Ouvrir SoapUI et charger le projet <Text style={s.bold}>WSDL MOBI - PROD</Text>.
+          Le WSDL est accessible a l{"'"}adresse :
+        </Text>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>http://172.24.4.136/WSMobiMaster/WSProvisioning.svc?wsdl</Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Naviguer vers ExecuteResiliationPs</Text>
+        </View>
+
+        <Text style={s.body}>
+          Dans l{"'"}arborescence du projet, naviguer vers :
+          <Text style={s.bold}> WSMobiMaster - WSProvisioning - PRO</Text> {"->"}{" "}
+          <Text style={s.bold}>BasicHttpBinding_Provisioning</Text> {"->"}{" "}
+          <Text style={s.bold}>ExecuteResiliationPs</Text> {"->"} Request 1
+        </Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Remplir les champs de la requete</Text>
+        </View>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '35%' }]}>Champ</Text>
+            <Text style={[s.tableHeaderCell, { width: '65%' }]}>Valeur</Text>
+          </View>
+          {[
+            ['CodeAction', 'ResiliationPs'],
+            ['MSISDN', 'Le MSISDN a resilier (ex: 0694910859)'],
+            ['DateEffet', 'Date du jour a 09:10:00 (ex: 2026-03-18T09:10:00)'],
+            ['Utilisateur', 'PORTA'],
+            ['Origine', 'PORTA'],
+          ].map(([label, value]) => (
+            <View key={label} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '35%', fontWeight: 'bold' }]}>{label}</Text>
+              <Text style={[s.tableCell, { width: '65%' }]}>{value}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
+          <Text style={s.stepTitle}>Executer la requete</Text>
+        </View>
+
+        <Text style={s.body}>
+          Cliquer sur le <Text style={s.bold}>bouton triangle vert</Text> (Play) pour executer la requete.
+          Repeter l{"'"}operation pour chaque MSISDN liste dans le mail.
+        </Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>5</Text></View>
+          <Text style={s.stepTitle}>Exemple de requete SOAP</Text>
+        </View>
+
+        <View style={s.codeBlock}>
+          <Text style={s.codeText}>
+{`<mob:ExecuteResiliationPs>
+  <mob:CodeAction>ResiliationPs</mob:CodeAction>
+  <mob:MSISDN>0694910859</mob:MSISDN>
+  <mob:DateEffet>2026-03-18T09:10:00</mob:DateEffet>
+  <mob:Utilisateur>PORTA</mob:Utilisateur>
+  <mob:Origine>PORTA</mob:Origine>
+</mob:ExecuteResiliationPs>`}
+          </Text>
+        </View>
+
+        <View style={s.alertSuccess}>
+          <Text style={s.alertTitle}>Rappel</Text>
+          <Text style={s.alertText}>{"•"} Toujours utiliser <Text style={{ fontWeight: 'bold' }}>Utilisateur = PORTA</Text> et <Text style={{ fontWeight: 'bold' }}>Origine = PORTA</Text></Text>
+          <Text style={s.alertText}>{"•"} La DateEffet doit etre la <Text style={{ fontWeight: 'bold' }}>date du jour</Text> avec heure a 09:10:00</Text>
+          <Text style={s.alertText}>{"•"} Verifier la reponse SOAP pour confirmer la prise en compte de la resiliation</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Resiliation manuelle PSO</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -2844,6 +2972,10 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'msisdn-provisoire-erreur': {
       document: <CasMsisdnProvisoireErreurPdf />,
       filename: 'Cas-Pratique-6-MSISDN-Provisoire-Erreur',
+    },
+    'resiliation-manuelle-pso': {
+      document: <CasResiliationManuelPsoPdf />,
+      filename: 'Cas-Pratique-18-Resiliation-Manuelle-PSO',
     },
   };
 

@@ -3140,6 +3140,90 @@ WHERE MSISDN_no IN ('0690XXXXXX');`}</CodeBlock>
   ),
 };
 
+const casResiliationManuelPso: CasPratique = {
+  id: 'resiliation-manuelle-pso',
+  number: 18,
+  domain: 'pnm',
+  title: 'Resiliation manuelle MSISDN pour portabilite sortante (PSO)',
+  date: '18/03/2026',
+  tags: ['PSO', 'resiliation', 'SoapUI', 'WSMobiMaster', 'MasterCRM'],
+  summary: 'Lorsqu\'un mail "[PNM] Verification des resiliations pour PSO" est recu, certains MSISDN n\'ont pas ete resilies automatiquement apres une portabilite sortante. Il faut les resilier manuellement via SoapUI.',
+  severity: 'majeur',
+  category: 'portabilite',
+  content: (
+    <>
+      <Typography variant="h6" gutterBottom>Contexte</Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Apres chaque portabilite sortante (PSO), le systeme PNM doit resilier la ligne dans MasterCRM.
+        Si cette resiliation echoue ou n'est pas executee, un <strong>mail automatique</strong> est genere avec
+        pour objet <strong>[PNM] Verification des resiliations pour PSO</strong>. Ce mail liste les MSISDN
+        concernes qui necessitent une resiliation manuelle.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Alerte —</strong> Les MSISDN non resilies restent actifs dans MasterCRM alors que le numero
+        a ete porte chez un autre operateur. Il est important de traiter ce mail rapidement.
+      </Alert>
+
+      <Typography variant="h6" gutterBottom>Procedure de resiliation manuelle via SoapUI</Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>1.</strong> Ouvrir <strong>SoapUI</strong> et se connecter au WSDL MasterCRM :
+      </Typography>
+      <CodeBlock>{'WSDL Mobi PROD: http://172.24.4.136/WSMobiMaster/WSProvisioning.svc?wsdl'}</CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>2.</strong> Dans l'arborescence, naviguer vers :{' '}
+        <strong>WSMobiMaster - WSProvisioning</strong> → <strong>BasicHttpBinding_Provisioning</strong> → <strong>ExecuteResiliationPs</strong>
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>3.</strong> Remplir les champs de la requete :
+      </Typography>
+
+      <Typography component="div" variant="body2" sx={{ mb: 2, pl: 2, lineHeight: 2 }}>
+        • <strong>CodeAction :</strong> <code>ResiliationPs</code><br />
+        • <strong>MSISDN :</strong> le MSISDN a resilier (ex: <code>0694910859</code>)<br />
+        • <strong>DateEffet :</strong> date du jour au format <code>AAAA-MM-JJTHH:MM:SS</code> avec heure a <code>09:10:00</code>
+        (ex: <code>2026-03-18T09:10:00</code>)<br />
+        • <strong>Utilisateur :</strong> <code>PORTA</code><br />
+        • <strong>Origine :</strong> <code>PORTA</code>
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>4.</strong> Exemple de requete SOAP complete :
+      </Typography>
+      <CodeBlock>
+{`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:mob="...">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <mob:ExecuteResiliationPs>
+         <mob:CodeAction>ResiliationPs</mob:CodeAction>
+         <mob:MSISDN>0694910859</mob:MSISDN>
+         <mob:DateEffet>2026-03-18T09:10:00</mob:DateEffet>
+         <mob:Utilisateur>PORTA</mob:Utilisateur>
+         <mob:Origine>PORTA</mob:Origine>
+      </mob:ExecuteResiliationPs>
+   </soapenv:Body>
+</soapenv:Envelope>`}
+      </CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        <strong>5.</strong> Cliquer sur le <strong>bouton triangle vert</strong> (Play) pour executer la requete.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        <strong>6.</strong> Repeter l'operation pour chaque MSISDN liste dans le mail.
+      </Typography>
+
+      <Alert severity="info" sx={{ mt: 2 }}>
+        <strong>Rappel —</strong> La requete <code>ExecuteResiliationPs</code> se trouve dans le projet
+        <strong> WSDL MOBI - PROD</strong> de SoapUI, sous <code>WSMobiMaster - WSProvisioning - PRO</code>.
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
@@ -3160,6 +3244,7 @@ const CAS_PRATIQUES: CasPratique[] = [
   casMobiMsisdnBloque,
   casMobiWsMobiMaster,
   casMobiEcartPortaCrm,
+  casResiliationManuelPso,
 ];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────
