@@ -943,6 +943,543 @@ function NotesSection() {
   );
 }
 
+// ─── MicroServices ──────────────────────────────────────────────────────────
+
+function MicroServicesSection() {
+  return (
+    <>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        Cette section documente les 10 endpoints des 3 microservices centraux de l{"'"}architecture KAIZEN/PNM :
+        <strong> MS_Line</strong> (gestion des lignes), <strong>MS_Porta</strong> (portabilite) et <strong>MS_Ressources</strong> (referentiel MasterCRM).
+        Chaque endpoint est explique de maniere narrative pour comprendre son role, ses interactions et sa logique metier.
+      </Alert>
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* MS_LINE                                                          */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+
+      <SectionTitle>MS_Line — Microservice de gestion des lignes</SectionTitle>
+
+      <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.8 }}>
+        <strong>MS_Line</strong> est le microservice central de l{"'"}architecture. Il sert d{"'"}abstraction entre les CRM
+        (MasterCRM et KAIZEN) et le reste de l{"'"}ecosysteme PNM. Son role principal est de determiner a quel CRM
+        appartient une ligne (via <code>GetLine</code>) et de router les operations vers le bon systeme.
+        Il expose 6 endpoints couvrant la consultation, la modification, la resiliation et la notification des lignes.
+      </Typography>
+
+      {/* ── GetLine ── */}
+
+      <SubTitle>GET /v1/getLine/msisdn/{'{msisdn}'} — Obtenir les informations d{"'"}une ligne</SubTitle>
+
+      <InfoCard title="Point d'entree pivot" icon="solar:star-bold-duotone" color="#f59e0b">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN &nbsp;|&nbsp;
+          <strong>Parametres OUT :</strong> Informations ligne, CRM_Owner, Code Error
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        <code>GetLine</code> est l{"'"}endpoint le plus fondamental de toute l{"'"}architecture. Lorsqu{"'"}un autre microservice
+        a besoin de savoir a quel CRM appartient un MSISDN, c{"'"}est cet endpoint qu{"'"}il interroge. Le processus suit
+        une logique de <strong>fallback</strong> en deux etapes : d{"'"}abord, MS_Line interroge <strong>MasterCRM</strong> via
+        l{"'"}appel <code>InfoLine(MSISDN)</code>. Si MasterCRM repond que la ligne est active, les informations sont retournees
+        avec <code>CRM_Owner = MasterCRM</code>. Si en revanche la ligne n{"'"}est pas trouvee ou inactive dans MasterCRM,
+        MS_Line effectue un second appel vers <strong>KAIZEN</strong> via <code>InfoLine(MSISDN)</code>. Si KAIZEN confirme que
+        la ligne est active, les informations sont retournees avec <code>CRM_Owner = KAIZEN</code>. Si aucun des deux CRM
+        ne reconnait le MSISDN, une erreur {"\""}Ligne non trouvee{"\""} est generee.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Ce mecanisme de fallback est essentiel car, durant la periode de transition entre MasterCRM et KAIZEN,
+        certaines lignes existent dans l{"'"}un ou l{"'"}autre systeme. <code>GetLine</code> garantit une resolution
+        transparente quel que soit le CRM proprietaire.
+      </Typography>
+
+      <CodeBlock title="Appels externes">
+{`MasterCRM → InfoLine(MSISDN)        // Recherche prioritaire
+KAIZEN    → InfoLine(MSISDN)        // Fallback si non trouve dans MasterCRM
+Retour    → { informations_ligne, CRM_Owner, code_error }`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── GetRIO ── */}
+
+      <SubTitle>GET /v1/getRio/msisdn/{'{msisdn}'} — Obtenir le RIO d{"'"}un MSISDN</SubTitle>
+
+      <InfoCard title="Chaine d'appels" icon="solar:link-bold-duotone" color="#8b5cf6">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN &nbsp;|&nbsp;
+          <strong>Chaine :</strong> MSLine.GetLine → MSPorta.CalculateRIO
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        L{"'"}obtention du RIO (Releve d{"'"}Identite Operateur) a partir d{"'"}un MSISDN est un processus en deux etapes
+        qui illustre bien l{"'"}interdependance des microservices. D{"'"}abord, <code>GetRIO</code> appelle son propre
+        microservice <code>MSLine.GetLine(MSISDN)</code> pour recuperer les informations de la ligne : notamment
+        le <strong>CustomerType</strong> (type de client : particulier/professionnel), le <strong>CustomerID</strong> (identifiant client)
+        et l{"'"}<strong>OperatorID</strong> (identifiant operateur).
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Une fois ces informations obtenues et validees (controle des informations de la ligne), MS_Line appelle
+        <code> MSPorta.CalculateRIO(MSISDN, CustomerType, CustomerID, OperatorID)</code>. Ce second appel delegue
+        le calcul effectif du RIO au microservice MSPorta, qui utilise l{"'"}outil <strong>XTools</strong> pour generer
+        le code RIO selon l{"'"}algorithme reglementaire. Le RIO calcule est ensuite retourne a l{"'"}appelant.
+      </Typography>
+
+      <CodeBlock title="Chaine d'appels">
+{`MSLine.GetLine(MSISDN)
+  → { CustomerType, CustomerID, OperatorID }
+MSPorta.CalculateRIO(MSISDN, CustomerType, CustomerID, OperatorID)
+  → RIO`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── CheckEligibility ── */}
+
+      <SubTitle>GET /v1/checkEligibility/msisdn/{'{msisdn}'}/rio/{'{rio}'} — Verifier l{"'"}eligibilite</SubTitle>
+
+      <InfoCard title="Verification croisee" icon="solar:shield-check-bold-duotone" color="#10b981">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN, RIO &nbsp;|&nbsp;
+          <strong>Appel :</strong> MSPorta.GetRio(MSISDN) pour comparaison
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint verifie si un MSISDN est eligible a la portabilite en comparant le RIO fourni par le client
+        avec le RIO reel calcule par le systeme. Apres validation des parametres d{"'"}entree (MSISDN et RIO),
+        MS_Line appelle <code>MSPorta.GetRio(MSISDN)</code> qui retourne le RIO officiel du numero.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le systeme compare ensuite le RIO fourni en parametre avec le RIO retourne par MSPorta. Si les deux
+        correspondent, le MSISDN est declare <strong>eligible</strong> a la portabilite. Si les RIO different,
+        cela signifie que le client a fourni un RIO errone ou obsolete, et la portabilite est refusee.
+        L{"'"}etape <code>PostCommand</code> finalise le processus en enregistrant le resultat de la verification.
+      </Typography>
+
+      <CodeBlock title="Logique de verification">
+{`// Parametres entrants
+MSISDN, RIO (fourni par le client)
+
+// Verification
+MSPorta.GetRio(MSISDN) → RIO_calcule
+Comparaison: RIO_fourni === RIO_calcule ?
+  → Eligible / Non eligible
+PostCommand → enregistrement du resultat`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── ChangeMSISDN ── */}
+
+      <SubTitle>POST /v1/ChangeMSISDN — Changement de MSISDN (provisoire → a porter)</SubTitle>
+
+      <InfoCard title="Routage par CRM Owner" icon="solar:transfer-horizontal-bold-duotone" color="#2563eb">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN Provisoire, MSISDN A Porter, Contexte &nbsp;|&nbsp;
+          <strong>Pattern :</strong> GetLine → routage CRM
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint est appele lors de la finalisation d{"'"}une portabilite pour remplacer le MSISDN provisoire
+        par le MSISDN definitif (le numero que le client souhaitait conserver). C{"'"}est une operation critique
+        car elle modifie le numero attache a la ligne dans le CRM proprietaire.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le processus commence par determiner quel CRM est proprietaire de la ligne. Pour cela, MS_Line s{"'"}appelle
+        lui-meme via <code>GetLine(MSISDN)</code> afin de recuperer le <strong>crmOwner</strong>. Ensuite, selon
+        la valeur du crmOwner, l{"'"}operation est routee vers le bon systeme :
+      </Typography>
+
+      <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 1.8, pl: 2 }}>
+        • Si <code>CRMOwner = MasterCRM</code> → appel a <code>MasterCRM.ChangeMSISDN(MSISDN_Provisoire, MSISDN_A_Porter)</code><br />
+        • Si <code>CRMOwner = KAIZEN</code> → appel a <code>KAIZEN.ChangeMSISDN(MSISDN_Provisoire, MSISDN_A_Porter)</code><br />
+        • Si le crmOwner n{"'"}est ni MasterCRM ni KAIZEN → une erreur est retournee
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Ce pattern de routage par crmOwner est fondamental dans l{"'"}architecture. On le retrouve egalement
+        dans l{"'"}endpoint <code>NotifySystem</code>. Il garantit que chaque operation est executee dans le bon CRM,
+        quelle que soit la repartition des lignes entre MasterCRM et KAIZEN.
+      </Typography>
+
+      <CodeBlock title="Pattern de routage">
+{`MSLine.GetLine(MSISDN) → { CRMOwner }
+
+if CRMOwner === "MasterCRM":
+    MasterCRM.ChangeMSISDN(MSISDN_Provisoire, MSISDN_A_Porter)
+elif CRMOwner === "KAIZEN":
+    KAIZEN.ChangeMSISDN(MSISDN_Provisoire, MSISDN_A_Porter)
+else:
+    → Error`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── TerminateLine ── */}
+
+      <SubTitle>POST /v1/terminateLine — Resiliation d{"'"}une ligne dans MasterCRM</SubTitle>
+
+      <InfoCard title="Resiliation + surveillance" icon="solar:close-circle-bold-duotone" color="#ef4444">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN, CRM Owner = MasterCRM &nbsp;|&nbsp;
+          <strong>Parametres OUT :</strong> Code Error
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint est specifique a <strong>MasterCRM</strong> — il est appele lorsqu{"'"}une ligne doit etre resiliee
+        dans le cadre d{"'"}une portabilite sortante (le client quitte Digicel). Apres validation des parametres,
+        MS_Line appelle <code>MasterCRM.TerminateLine(MSISDN)</code> pour executer la demande de resiliation.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Si MasterCRM confirme la prise en compte de la resiliation, MS_Line depose ensuite une demande de surveillance
+        aupres de <strong>MS_WatcherMOBI</strong> via <code>WatchLineTermination(MSISDN, requestID)</code>.
+        Le WatcherMOBI va alors surveiller periodiquement dans la base MasterCRM (table <code>Send_Actions</code>)
+        que la resiliation se termine effectivement. Ce mecanisme de surveillance est necessaire car la resiliation
+        dans MasterCRM est un processus <strong>asynchrone</strong> : la demande est deposee puis traitee par batch.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Si la demande de resiliation echoue (prise en compte = No), aucune surveillance n{"'"}est mise en place
+        et un code erreur est retourne directement.
+      </Typography>
+
+      <CodeBlock title="Flux de resiliation">
+{`MasterCRM.TerminateLine(MSISDN)
+  → Prise en compte OK ?
+    OUI → MS_WatcherMOBI.WatchLineTermination(MSISDN, requestID)
+          // Surveillance asynchrone de la resiliation
+    NON → Code Error retourne`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── NotifySystem ── */}
+
+      <SubTitle>POST /v1/NotifySystem — Notification d{"'"}un CRM apres un evenement</SubTitle>
+
+      <InfoCard title="Meme pattern que ChangeMSISDN" icon="solar:bell-bold-duotone" color="#06b6d4">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN Provisoire, Evenement, Contexte &nbsp;|&nbsp;
+          <strong>Pattern :</strong> GetLine → routage CRM
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint notifie le CRM proprietaire d{"'"}une ligne qu{"'"}un evenement s{"'"}est produit (par exemple,
+        la fin d{"'"}une portabilite, un changement de statut, etc.). Il suit exactement le <strong>meme pattern
+        de routage que ChangeMSISDN</strong> : d{"'"}abord un appel a <code>GetLine(MSISDN)</code> pour determiner
+        le crmOwner, puis un routage conditionnel.
+      </Typography>
+
+      <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 1.8, pl: 2 }}>
+        • Si <code>CRMOwner = MasterCRM</code> → <code>MasterCRM.NotifySystem(MSISDN, Event)</code><br />
+        • Si <code>CRMOwner = KAIZEN</code> → <code>KAIZEN.NotifySystem(MSISDN, Event)</code><br />
+        • Sinon → Code Error
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        La notification permet au CRM de mettre a jour ses propres donnees en fonction de l{"'"}evenement recu.
+        Par exemple, apres une portabilite entrante reussie, le CRM est notifie pour actualiser le statut de la ligne.
+      </Typography>
+
+      <CodeBlock title="Pattern de notification (identique a ChangeMSISDN)">
+{`MSLine.GetLine(MSISDN) → { CRMOwner }
+
+if CRMOwner === "MasterCRM":
+    MasterCRM.NotifySystem(MSISDN, Event)
+elif CRMOwner === "KAIZEN":
+    KAIZEN.NotifySystem(MSISDN, Event)
+else:
+    → Error`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* MS_PORTA                                                         */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+
+      <SectionTitle>MS_Porta — Microservice de portabilite</SectionTitle>
+
+      <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.8 }}>
+        <strong>MS_Porta</strong> gere les operations directement liees a la portabilite des numeros. Il expose 2 endpoints :
+        la creation d{"'"}un mandat de portage (qui communique avec la plateforme reglementaire DAPI) et le calcul du RIO
+        (via l{"'"}outil XTools). Ce microservice est utilise par MS_Line et par l{"'"}interface PortaWebUI.
+      </Typography>
+
+      {/* ── CreatePorta ── */}
+
+      <SubTitle>POST /v1/createPorta — Creation d{"'"}un mandat de portage</SubTitle>
+
+      <InfoCard title="Interface avec DAPI" icon="solar:document-add-bold-duotone" color="#2563eb">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN, RIO, MSISDN provisoire, Nom/Prenom, Code PDV &nbsp;|&nbsp;
+          <strong>Parametres OUT :</strong> IDPortage, Date Portage
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint cree un mandat de portage officiel aupres de la plateforme reglementaire <strong>DAPI</strong>
+        (Dispositif d{"'"}Aide a la Portabilite Inter-operateurs). Lorsqu{"'"}un client souhaite conserver son numero
+        en changeant d{"'"}operateur, le conseiller en point de vente fournit toutes les informations necessaires :
+        le MSISDN a porter, le RIO du client, le MSISDN provisoire attribue, les coordonnees du client
+        (nom, prenom) et le code du point de vente.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Apres validation de ces parametres, MS_Porta appelle <code>DAPI.CreatePortaParticulier()</code> qui enregistre
+        le mandat de portage au niveau reglementaire. La DAPI retourne un <strong>IDPortage</strong> (identifiant unique
+        du portage) et une <strong>Date Portage</strong> (date prevue de basculement du numero). L{"'"}etape <code>PostCommand</code>
+        finalise le processus en enregistrant ces informations dans la base PNM.
+      </Typography>
+
+      <CodeBlock title="Creation du mandat">
+{`// Parametres
+MSISDN, RIO, MSISDN_provisoire, Nom, Prenom, Code_PDV
+
+// Appel reglementaire
+DAPI.CreatePortaParticulier()
+  → { IDPortage, DatePortage }
+
+// PostCommand → sauvegarde dans PNM`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── CalculateRIO ── */}
+
+      <SubTitle>POST /v1/calculateRio — Calcul du RIO</SubTitle>
+
+      <InfoCard title="Algorithme reglementaire via XTools" icon="solar:calculator-bold-duotone" color="#8b5cf6">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN, CustomerType, CustomerID, OperatorID
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le RIO (Releve d{"'"}Identite Operateur) est un code unique qui identifie de maniere certaine un abonne
+        et son operateur. Son calcul suit un algorithme reglementaire defini par l{"'"}ARCEP.
+        Cet endpoint recoit les 4 parametres necessaires au calcul : le <strong>MSISDN</strong> du client,
+        le <strong>CustomerType</strong> (particulier ou professionnel), le <strong>CustomerID</strong> (identifiant interne du client)
+        et l{"'"}<strong>OperatorID</strong> (identifiant de l{"'"}operateur dans le referentiel GPMAG).
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Apres validation des parametres, MS_Porta delegue le calcul a l{"'"}outil <strong>XTools</strong> via
+        l{"'"}appel <code>CalculateRIO</code>. XTools applique l{"'"}algorithme reglementaire et retourne le code RIO.
+        Cet endpoint est principalement appele par <code>MSLine.GetRIO</code> qui lui fournit les parametres
+        obtenus via <code>GetLine</code>.
+      </Typography>
+
+      <CodeBlock title="Calcul du RIO">
+{`// Parametres
+MSISDN, CustomerType, CustomerID, OperatorID
+
+// Delegation
+XTools.CalculateRIO(MSISDN, CustomerType, CustomerID, OperatorID)
+  → RIO`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* MS_RESSOURCES                                                    */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+
+      <SectionTitle>MS_Ressources — Microservice de synchronisation du referentiel MasterCRM</SectionTitle>
+
+      <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.8 }}>
+        <strong>MS_Ressources</strong> assure la synchronisation entre KAIZEN et le referentiel MasterCRM. Lorsqu{"'"}une action
+        est effectuee dans KAIZEN (activation de SIM, changement de statut MSISDN), MS_Ressources met a jour
+        les tables correspondantes dans la base de donnees MasterCRM. Il expose 2 endpoints qui maintiennent
+        la coherence des donnees entre les deux systemes pendant la periode de cohabitation.
+      </Typography>
+
+      {/* ── UpdateSimStatus ── */}
+
+      <SubTitle>POST /v1/UpdateSimStatus — Mise a jour du statut SIM</SubTitle>
+
+      <InfoCard title="Synchronisation SIM" icon="solar:sim-card-bold-duotone" color="#10b981">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> Order ID, SIM, SimStatus (Active/Inactive)
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint met a jour le statut d{"'"}une carte SIM dans le referentiel MasterCRM suite a une action
+        effectuee depuis KAIZEN. Lorsqu{"'"}un conseiller active ou desactive une SIM dans KAIZEN, cette modification
+        doit etre repercutee dans MasterCRM pour maintenir la coherence du referentiel.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Apres validation des parametres, le systeme verifie que le <code>SimStatus</code> est une valeur autorisee
+        (<code>Active</code> ou <code>Inactive</code>). Si la valeur est valide, MS_Ressources execute un
+        <code> UPDATE</code> sur la <strong>Table SIM</strong> de la base de donnees MasterCRM. Si le statut fourni
+        n{"'"}est ni Active ni Inactive, l{"'"}operation est refusee et un code erreur est retourne.
+      </Typography>
+
+      <CodeBlock title="Mise a jour SIM">
+{`// Validation
+SimStatus ∈ { "Active", "Inactive" } ?
+  OUI → UPDATE Table SIM SET Status = SimStatus WHERE SIM = :sim
+  NON → Code Error`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* ── UpdateMSISDNStatus ── */}
+
+      <SubTitle>POST /v1/UpdateMSISDNStatus — Mise a jour du statut MSISDN + notification P1</SubTitle>
+
+      <InfoCard title="Synchronisation MSISDN + evenement VAS" icon="solar:phone-bold-duotone" color="#f59e0b">
+        <Typography variant="body2">
+          <strong>Parametres IN :</strong> MSISDN, Status (Assigned/Released), PortedOut (Boolean)
+        </Typography>
+      </InfoCard>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Cet endpoint est plus complexe que <code>UpdateSimStatus</code> car, en plus de mettre a jour le referentiel
+        MasterCRM, il declenche des evenements aupres du systeme VAS <strong>P1</strong>. Deux scenarios sont possibles
+        selon la valeur du parametre <code>Status</code> :
+      </Typography>
+
+      <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 1.8, pl: 2 }}>
+        • <strong>Status = Assigned</strong> : le MSISDN est marque comme attribue dans la base MasterCRM
+        (<code>UPDATE MSISDN Status = Assigned</code>). En parallele, P1 enregistre un evenement
+        <code> RegisterEvent(Line_Terminate, MSISDN)</code>. Cela peut paraitre contre-intuitif, mais dans le contexte
+        de la portabilite, {"\""}assigner{"\""} un MSISDN provisoire implique de {"\""}terminer{"\""} l{"'"}ancienne ligne associee
+        a ce numero dans le systeme VAS.<br /><br />
+
+        • <strong>Status = Released</strong> : le MSISDN est marque comme libere dans MasterCRM
+        (<code>UPDATE MSISDN Status = Released</code>). P1 enregistre alors un evenement
+        <code> RegisterEvent(Line_Activate, MSISDN)</code>. Le numero libere redevient disponible pour une nouvelle
+        attribution, et l{"'"}evenement Line_Activate permet au systeme VAS de preparer les services pour ce numero.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.8 }}>
+        Le parametre <code>PortedOut</code> (Boolean) indique si le MSISDN est un numero porte vers un autre operateur.
+        Si le statut n{"'"}est ni Assigned ni Released, aucune action n{"'"}est effectuee et un code erreur est retourne.
+      </Typography>
+
+      <CodeBlock title="Logique de mise a jour">
+{`if Status === "Assigned":
+    BDD MasterCRM → UPDATE MSISDN Status = Assigned
+    P1 → RegisterEvent(Line_Terminate, MSISDN)
+
+elif Status === "Released":
+    BDD MasterCRM → UPDATE MSISDN Status = Released
+    P1 → RegisterEvent(Line_Activate, MSISDN)
+
+else:
+    → Code Error`}
+      </CodeBlock>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* TABLEAU RECAPITULATIF                                            */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+
+      <SectionTitle>Tableau recapitulatif des 10 endpoints</SectionTitle>
+
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Microservice</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Endpoint</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Methode</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Systemes appeles</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell rowSpan={6}><Chip label="MS_Line" size="small" color="primary" /></TableCell>
+              <TableCell><code>/v1/getLine</code></TableCell>
+              <TableCell>GET</TableCell>
+              <TableCell>Infos ligne + CRM Owner</TableCell>
+              <TableCell>MasterCRM, KAIZEN (fallback)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/getRio</code></TableCell>
+              <TableCell>GET</TableCell>
+              <TableCell>Obtenir le RIO</TableCell>
+              <TableCell>MSLine.GetLine → MSPorta.CalculateRIO</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/checkEligibility</code></TableCell>
+              <TableCell>GET</TableCell>
+              <TableCell>Eligibilite MSISDN/RIO</TableCell>
+              <TableCell>MSPorta.GetRio</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/ChangeMSISDN</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>Changement MSISDN</TableCell>
+              <TableCell>GetLine → MasterCRM ou KAIZEN</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/terminateLine</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>Resiliation ligne</TableCell>
+              <TableCell>MasterCRM, MS_WatcherMOBI</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/NotifySystem</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>Notification CRM</TableCell>
+              <TableCell>GetLine → MasterCRM ou KAIZEN</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell rowSpan={2}><Chip label="MS_Porta" size="small" color="secondary" /></TableCell>
+              <TableCell><code>/v1/createPorta</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>Creer mandat portage</TableCell>
+              <TableCell>DAPI</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/calculateRio</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>Calculer le RIO</TableCell>
+              <TableCell>XTools</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell rowSpan={2}><Chip label="MS_Ressources" size="small" color="warning" /></TableCell>
+              <TableCell><code>/v1/UpdateSimStatus</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>MAJ statut SIM</TableCell>
+              <TableCell>BDD MasterCRM</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>/v1/UpdateMSISDNStatus</code></TableCell>
+              <TableCell>POST</TableCell>
+              <TableCell>MAJ statut MSISDN</TableCell>
+              <TableCell>BDD MasterCRM, P1 [VAS]</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Alert severity="warning" sx={{ mt: 3 }}>
+        <strong>Pattern cle a retenir :</strong> les endpoints <code>ChangeMSISDN</code> et <code>NotifySystem</code>
+        utilisent le meme pattern de routage : appel a <code>GetLine()</code> pour determiner le <code>crmOwner</code>,
+        puis redirection vers MasterCRM ou KAIZEN. Ce pattern est central dans la cohabitation des deux CRM.
+      </Alert>
+    </>
+  );
+}
+
 // ─── Flux KAIZEN ─────────────────────────────────────────────────────────────
 
 function FluxKaizenSection() {
@@ -1350,6 +1887,12 @@ const SECTIONS: DocSection[] = [
     title: 'Flux KAIZEN',
     icon: 'solar:routing-bold-duotone',
     content: <FluxKaizenSection />,
+  },
+  {
+    id: 'microservices',
+    title: 'MicroServices',
+    icon: 'solar:cpu-bolt-bold-duotone',
+    content: <MicroServicesSection />,
   },
   {
     id: 'bdd',
