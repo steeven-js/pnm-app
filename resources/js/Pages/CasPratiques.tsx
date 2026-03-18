@@ -3190,6 +3190,14 @@ const casResiliationManuelPso: CasPratique = {
         • <strong>Origine :</strong> <code>PORTA</code>
       </Typography>
 
+      <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Capture SoapUI — ExecuteResiliationPs</Typography>
+      <Box
+        component="img"
+        src="/images/soapui-execute-resiliation-ps.png"
+        alt="SoapUI — ExecuteResiliationPs avec les champs MSISDN, DateEffet, Utilisateur et Origine"
+        sx={{ width: '100%', borderRadius: 1, border: '1px solid', borderColor: 'divider', mb: 2 }}
+      />
+
       <Typography variant="body2" sx={{ mb: 1 }}>
         <strong>4.</strong> Exemple de requete SOAP complete :
       </Typography>

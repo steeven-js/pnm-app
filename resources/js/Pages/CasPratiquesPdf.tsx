@@ -2873,6 +2873,9 @@ function CasResiliationManuelPsoPdf() {
           ))}
         </View>
 
+        <Text style={[s.body, { fontWeight: 'bold', marginTop: 8 }]}>Capture SoapUI — ExecuteResiliationPs</Text>
+        <Image src="/images/soapui-execute-resiliation-ps.png" style={{ width: '100%', marginVertical: 6, borderRadius: 4 }} />
+
         <View style={s.stepRow}>
           <View style={s.stepCircle}><Text style={s.stepNumber}>4</Text></View>
           <Text style={s.stepTitle}>Executer la requete</Text>
