@@ -3005,9 +3005,9 @@ function CasLiberationMsisdnPortePdf() {
             <Text style={[s.tableHeaderCell, { width: '25%' }]}>FNR</Text>
           </View>
           {[
-            ['0690933928', 'Free Caraibes', '25/11/2025', 'FREEC'],
-            ['0690212523', 'Orange Caraibe', '07/02/2017', 'ORANGE'],
-            ['0690247911', 'Free Caraibes', '14/11/2024', 'FREEC'],
+            ['0690XXXXXX', 'Free Caraibes', 'XX/XX/XXXX', 'FREEC'],
+            ['0690XXXXXX', 'Orange Caraibe', 'XX/XX/XXXX', 'ORANGE'],
+            ['0690XXXXXX', 'Free Caraibes', 'XX/XX/XXXX', 'FREEC'],
           ].map(([msisdn, op, date, fnr]) => (
             <View key={msisdn} style={s.tableRow}>
               <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold' }]}>{msisdn}</Text>

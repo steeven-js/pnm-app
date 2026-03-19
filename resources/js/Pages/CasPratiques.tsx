@@ -3282,11 +3282,11 @@ const casLiberationMsisdnPorte: CasPratique = {
       <Typography variant="h6" gutterBottom>Exemples rencontres</Typography>
 
       <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 2, pl: 2 }}>
-        • <strong>0690933928</strong> — Portabilite sortante vers <strong>Free Caraibes</strong> le 25/11/2025.
+        • <strong>0690XXXXXX</strong> — Portabilite sortante vers <strong>Free Caraibes</strong>.
         FNR : MSISDN chez FREEC.<br />
-        • <strong>0690212523</strong> — Portabilite sortante vers <strong>Orange Caraibe</strong> le 07/02/2017.
+        • <strong>0690XXXXXX</strong> — Portabilite sortante vers <strong>Orange Caraibe</strong>.
         FNR : MSISDN chez ORANGE.<br />
-        • <strong>0690247911</strong> — Portabilite sortante vers <strong>Free Caraibes</strong> le 14/11/2024.
+        • <strong>0690XXXXXX</strong> — Portabilite sortante vers <strong>Free Caraibes</strong>.
         FNR : MSISDN chez FREEC.
       </Typography>
 
