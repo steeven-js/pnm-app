@@ -3232,6 +3232,87 @@ const casResiliationManuelPso: CasPratique = {
   ),
 };
 
+const casLiberationMsisdnPorte: CasPratique = {
+  id: 'liberation-msisdn-porte',
+  number: 19,
+  domain: 'pnm',
+  title: 'Demande de liberation d\'un MSISDN porte chez un autre operateur',
+  date: '19/03/2026',
+  tags: ['MSISDN', 'liberation', 'FNR', 'portabilite sortante', 'quarantaine'],
+  summary: 'Un CDC demande de liberer ou reaffecter un MSISDN a un client. Apres verification dans le FNR et Admin Portal, le numero a ete porte chez un autre operateur et ne peut pas etre reaffecte.',
+  severity: 'mineur',
+  category: 'portabilite',
+  content: (
+    <>
+      <Typography variant="h6" gutterBottom>Contexte</Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Un conseiller en boutique (CDC) ouvre un ticket demandant de liberer ou remettre a disposition un MSISDN
+        pour un client dont la ligne a ete resiliee (impaye, non-rechargement de carte prepayee, etc.).
+        Le numero n'apparait plus dans la liste des numeros reaffectables dans le CRM.
+      </Typography>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Exemples reels —</strong> Ce type de ticket revient regulierement avec des sujets comme
+        {' '}<em>"Demande de recuperation de numero [069XXXXXXX]"</em> ou{' '}
+        <em>"LIBERATION DE MSISDN // 069XXXXXXX"</em>.
+      </Alert>
+
+      <Typography variant="h6" gutterBottom>Procedure de verification</Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>1.</strong> Verifier le MSISDN dans le <strong>FNR</strong> (Fichier National de Reference)
+        pour determiner quel operateur detient actuellement le numero.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>2.</strong> Verifier dans <strong>Admin Portal</strong> (Liste des mandats) l'historique
+        de portabilite du MSISDN. Rechercher si une portabilite sortante a ete effectuee.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        <strong>3.</strong> Si le FNR indique que le MSISDN est chez un autre operateur (FREEC, ORANGE, etc.)
+        et qu'une portabilite sortante cloturee est visible dans Admin Portal, le numero ne nous appartient plus.
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Diagnostic —</strong> Le MSISDN est en <strong>quarantaine</strong> cote Digicel car il a ete
+        porte chez un autre operateur. Il ne peut pas etre reaffecte par nos equipes.
+      </Alert>
+
+      <Typography variant="h6" gutterBottom>Exemples rencontres</Typography>
+
+      <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 2, pl: 2 }}>
+        • <strong>0690933928</strong> — Portabilite sortante vers <strong>Free Caraibes</strong> le 25/11/2025.
+        FNR : MSISDN chez FREEC.<br />
+        • <strong>0690212523</strong> — Portabilite sortante vers <strong>Orange Caraibe</strong> le 07/02/2017.
+        FNR : MSISDN chez ORANGE.<br />
+        • <strong>0690247911</strong> — Portabilite sortante vers <strong>Free Caraibes</strong> le 14/11/2024.
+        FNR : MSISDN chez FREEC.
+      </Typography>
+
+      <Typography variant="h6" gutterBottom>Reponse type</Typography>
+
+      <CodeBlock>
+{`Bonjour,
+
+Le MSISDN est en quarantaine chez nous, puisqu'il a ete porte chez [Operateur] en [Mois Annee].
+
+Ce MSISDN ne pourra donc pas etre reaffecte.
+
+Fermeture du ticket.
+
+Cordialement,
+Steeven JACQUES`}
+      </CodeBlock>
+
+      <Alert severity="success" sx={{ mt: 2 }}>
+        <strong>A retenir —</strong> Un MSISDN porte chez un autre operateur ne peut pas etre libere
+        par Digicel. Le client devra se rapprocher de l'operateur qui detient actuellement le numero.
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
@@ -3253,6 +3334,7 @@ const CAS_PRATIQUES: CasPratique[] = [
   casMobiWsMobiMaster,
   casMobiEcartPortaCrm,
   casResiliationManuelPso,
+  casLiberationMsisdnPorte,
 ];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────

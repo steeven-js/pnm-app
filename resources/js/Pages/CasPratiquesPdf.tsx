@@ -2919,6 +2919,120 @@ function CasResiliationManuelPsoPdf() {
   );
 }
 
+function CasLiberationMsisdnPortePdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      <Page size="A4" style={s.page}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.headerTitle}>#19 — Liberation MSISDN porte chez un autre operateur</Text>
+            <Text style={s.headerSub}>Portabilite des Numeros Mobiles V3 — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={s.headerSub}>{today}</Text>
+        </View>
+
+        <View style={s.tagRow}>
+          {['MSISDN', 'Liberation', 'FNR', 'Portabilite sortante', 'Quarantaine'].map((tag) => (
+            <Text key={tag} style={s.tag}>{tag}</Text>
+          ))}
+        </View>
+
+        <Text style={s.body}>
+          Un conseiller en boutique (CDC) ouvre un ticket demandant de liberer ou remettre a disposition un MSISDN
+          pour un client dont la ligne a ete resiliee (impaye, non-rechargement). Le numero n{"'"}apparait plus dans
+          la liste des numeros reaffectables dans le CRM.
+        </Text>
+
+        <View style={s.alertWarning}>
+          <Text style={s.alertTitle}>Diagnostic</Text>
+          <Text style={s.alertText}>
+            Apres verification dans le FNR et Admin Portal, le MSISDN a ete porte chez un autre operateur
+            via une portabilite sortante. Le numero est en quarantaine et ne peut pas etre reaffecte par Digicel.
+          </Text>
+        </View>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>1</Text></View>
+          <Text style={s.stepTitle}>Verifier le MSISDN dans le FNR</Text>
+        </View>
+
+        <Text style={s.body}>
+          Consulter le <Text style={s.bold}>FNR</Text> (Fichier National de Reference) pour determiner
+          quel operateur detient actuellement le numero. Si le FNR indique FREEC, ORANGE ou un autre
+          operateur, le numero ne nous appartient plus.
+        </Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>2</Text></View>
+          <Text style={s.stepTitle}>Verifier l{"'"}historique dans Admin Portal</Text>
+        </View>
+
+        <Text style={s.body}>
+          Dans <Text style={s.bold}>Admin Portal</Text> {">"} Liste des mandats, rechercher le MSISDN.
+          Verifier si une <Text style={s.bold}>portabilite sortante</Text> cloturee existe. Cela confirme
+          que le numero a ete porte vers un autre operateur.
+        </Text>
+
+        <View style={s.stepRow}>
+          <View style={s.stepCircle}><Text style={s.stepNumber}>3</Text></View>
+          <Text style={s.stepTitle}>Repondre au CDC et fermer le ticket</Text>
+        </View>
+
+        <Text style={s.body}>
+          Informer le CDC que le MSISDN est en quarantaine et ne peut pas etre reaffecte.
+          Fermer le ticket.
+        </Text>
+
+        <View style={s.alertInfo}>
+          <Text style={s.alertTitle}>Reponse type</Text>
+          <Text style={s.alertText}>
+            Bonjour,{"\n\n"}
+            Le MSISDN est en quarantaine chez nous, puisqu{"'"}il a ete porte chez [Operateur] en [Mois Annee].{"\n\n"}
+            Ce MSISDN ne pourra donc pas etre reaffecte.{"\n\n"}
+            Fermeture du ticket.
+          </Text>
+        </View>
+
+        <Text style={[s.body, { fontWeight: 'bold', marginTop: 10 }]}>Exemples rencontres</Text>
+
+        <View style={{ marginVertical: 6 }}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>MSISDN</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Operateur</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>Date portage</Text>
+            <Text style={[s.tableHeaderCell, { width: '25%' }]}>FNR</Text>
+          </View>
+          {[
+            ['0690933928', 'Free Caraibes', '25/11/2025', 'FREEC'],
+            ['0690212523', 'Orange Caraibe', '07/02/2017', 'ORANGE'],
+            ['0690247911', 'Free Caraibes', '14/11/2024', 'FREEC'],
+          ].map(([msisdn, op, date, fnr]) => (
+            <View key={msisdn} style={s.tableRow}>
+              <Text style={[s.tableCell, { width: '25%', fontWeight: 'bold' }]}>{msisdn}</Text>
+              <Text style={[s.tableCell, { width: '25%' }]}>{op}</Text>
+              <Text style={[s.tableCell, { width: '25%' }]}>{date}</Text>
+              <Text style={[s.tableCell, { width: '25%' }]}>{fnr}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.alertSuccess}>
+          <Text style={s.alertTitle}>A retenir</Text>
+          <Text style={s.alertText}>{"•"} Un MSISDN porte chez un autre operateur ne peut pas etre libere par Digicel</Text>
+          <Text style={s.alertText}>{"•"} Le client devra se rapprocher de l{"'"}operateur qui detient le numero</Text>
+        </View>
+
+        <View style={s.footer}>
+          <Text>PNM App — Cas Pratique : Liberation MSISDN porte</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 // ─── Export functions ───────────────────────────────────────────────────────
 
 export async function generateCasPratiquePdf(casId: string): Promise<void> {
@@ -2979,6 +3093,10 @@ export async function generateCasPratiquePdf(casId: string): Promise<void> {
     'resiliation-manuelle-pso': {
       document: <CasResiliationManuelPsoPdf />,
       filename: 'Cas-Pratique-18-Resiliation-Manuelle-PSO',
+    },
+    'liberation-msisdn-porte': {
+      document: <CasLiberationMsisdnPortePdf />,
+      filename: 'Cas-Pratique-19-Liberation-MSISDN-Porte',
     },
   };
 
