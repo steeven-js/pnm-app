@@ -229,10 +229,48 @@ function analyzeTicketCheck(output: string, _ctx: InvestigationContext): StepAna
   }
 
   if (has1220) {
+    const refusDetails: string[] = ['Le portage a ete refuse via un ticket 1220.'];
+
+    // Detect specific refusal codes
+    const REFUS_CODES: Record<string, string> = {
+      R322: 'Resiliation effective — la ligne du client a ete resiliee. On ne peut pas porter une ligne resiliee.',
+      R320: 'Numero non attribue — le MSISDN n\'est pas attribue chez l\'operateur donneur.',
+      R310: 'RIO invalide — le RIO fourni ne correspond pas au MSISDN.',
+      R311: 'RIO expire — le RIO a expire, le client doit en redemander un.',
+      R330: 'Portage deja en cours — une demande de portage est deja active pour ce numero.',
+      R340: 'Delai non respecte — le delai reglementaire n\'est pas respecte.',
+      R350: 'Opposition du titulaire — le titulaire de la ligne s\'oppose au portage.',
+      R360: 'Numero suspendu — la ligne est suspendue (impaye, fraude...).',
+    };
+
+    const foundCodes: string[] = [];
+    for (const [code, desc] of Object.entries(REFUS_CODES)) {
+      if (new RegExp(code, 'i').test(output)) {
+        foundCodes.push(code);
+        refusDetails.push(`Code ${code} : ${desc}`);
+      }
+    }
+
+    if (foundCodes.length === 0) {
+      refusDetails.push('Code de refus non identifie automatiquement. Verifier le champ code_motif dans le resultat.');
+    }
+
+    // Specific guidance per refusal type
+    if (foundCodes.includes('R322')) {
+      refusDetails.push('Action : Informer le CDC que la portabilite n\'est pas possible sur une ligne resiliee. Le client doit d\'abord reactiver sa ligne chez l\'operateur donneur.');
+    } else if (foundCodes.includes('R310') || foundCodes.includes('R311')) {
+      refusDetails.push('Action : Demander au client de fournir un nouveau RIO valide (via appel USSD aupres de son operateur).');
+    } else if (foundCodes.includes('R330')) {
+      refusDetails.push('Action : Attendre la fin du portage en cours ou annuler la demande precedente.');
+    } else if (foundCodes.includes('R360')) {
+      refusDetails.push('Action : Le client doit regulariser sa situation (paiement) aupres de son operateur actuel avant de pouvoir porter.');
+    }
+
     return {
       status: 'error',
-      message: 'Le portage a ete refuse (ticket 1220). Investiguer le motif.',
-      details: ['Un refus a ete emis. Verifier le code de refus.'],
+      message: `Le portage a ete refuse (1220)${foundCodes.length > 0 ? ` — Code ${foundCodes.join(', ')}` : ''}.`,
+      details: refusDetails,
+      extractedValues: foundCodes.length > 0 ? { code_refus: foundCodes[0] } : undefined,
     };
   }
 
