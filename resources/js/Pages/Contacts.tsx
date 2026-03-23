@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
+import { Document, Page as PdfPage, Text, View, StyleSheet, Font, pdf } from '@react-pdf/renderer';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
@@ -193,6 +195,107 @@ function ContactCard({ contact, operateurColor }: { contact: Contact; operateurC
   );
 }
 
+// ─── PDF ────────────────────────────────────────────────────────────────────
+
+Font.register({
+  family: 'Helvetica',
+  fonts: [{ src: 'Helvetica' }, { src: 'Helvetica-Bold', fontWeight: 'bold' }],
+});
+
+const ps = StyleSheet.create({
+  page: { padding: 40, fontFamily: 'Helvetica', fontSize: 9, color: '#212B36' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E8EB' },
+  headerTitle: { fontSize: 14, fontWeight: 'bold', color: '#00A76F' },
+  headerSub: { fontSize: 8, color: '#637381' },
+  footer: { position: 'absolute', bottom: 25, left: 40, right: 40, flexDirection: 'row', justifyContent: 'space-between', fontSize: 7, color: '#637381', borderTopWidth: 0.5, borderTopColor: '#E5E8EB', paddingTop: 5 },
+  opCard: { marginBottom: 14, borderWidth: 0.5, borderColor: '#E5E8EB', borderRadius: 4, padding: 10 },
+  opHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: '#E5E8EB' },
+  opName: { fontSize: 12, fontWeight: 'bold' },
+  opCode: { fontSize: 8, color: '#637381', marginLeft: 8, backgroundColor: '#F9FAFB', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3, borderWidth: 0.5, borderColor: '#E5E8EB' },
+  opEmail: { fontSize: 8, color: '#637381', marginBottom: 6 },
+  contactRow: { marginBottom: 6, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: '#E5E8EB' },
+  contactName: { fontSize: 9, fontWeight: 'bold', marginBottom: 1 },
+  contactRole: { fontSize: 7.5, color: '#637381', marginBottom: 2 },
+  contactDetail: { fontSize: 8, color: '#212B36', marginBottom: 1 },
+  contactLabel: { fontSize: 7, color: '#637381' },
+  tableHeader: { flexDirection: 'row', backgroundColor: '#F4F6F8', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 1, borderBottomColor: '#E5E8EB', marginTop: 14 },
+  tableHeaderCell: { fontSize: 8, fontWeight: 'bold', color: '#212B36' },
+  tableRow: { flexDirection: 'row', paddingVertical: 3, paddingHorizontal: 6, borderBottomWidth: 0.5, borderBottomColor: '#E5E8EB' },
+  tableCell: { fontSize: 8, color: '#212B36' },
+});
+
+function ContactsPdf() {
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <Document>
+      <PdfPage size="A4" style={ps.page}>
+        <View style={ps.header}>
+          <View>
+            <Text style={ps.headerTitle}>Contacts Operateurs — GPMAG</Text>
+            <Text style={ps.headerSub}>Annuaire des correspondants PNM — Digicel Antilles-Guyane</Text>
+          </View>
+          <Text style={ps.headerSub}>{today}</Text>
+        </View>
+
+        {OPERATEURS.map((op) => (
+          <View key={op.code} style={[ps.opCard, { borderLeftWidth: 3, borderLeftColor: op.color }]} wrap={false}>
+            <View style={ps.opHeader}>
+              <Text style={ps.opName}>{op.nom}</Text>
+              <Text style={ps.opCode}>Code {op.code}</Text>
+            </View>
+
+            {op.emailGenerique && (
+              <Text style={ps.opEmail}>Email generique : {op.emailGenerique}</Text>
+            )}
+
+            {op.contacts.map((contact) => (
+              <View key={contact.email} style={ps.contactRow}>
+                <Text style={ps.contactName}>{contact.prenom} {contact.nom}</Text>
+                {contact.role && <Text style={ps.contactRole}>{contact.role}</Text>}
+                <Text style={ps.contactDetail}>{contact.email}</Text>
+                {contact.telephone.map((tel) => (
+                  <Text key={tel} style={ps.contactDetail}>{tel}</Text>
+                ))}
+              </View>
+            ))}
+          </View>
+        ))}
+
+        <View style={ps.tableHeader}>
+          <Text style={[ps.tableHeaderCell, { width: '15%' }]}>Code</Text>
+          <Text style={[ps.tableHeaderCell, { width: '25%' }]}>Operateur</Text>
+          <Text style={[ps.tableHeaderCell, { width: '30%' }]}>Email generique</Text>
+          <Text style={[ps.tableHeaderCell, { width: '30%' }]}>Contact principal</Text>
+        </View>
+        {OPERATEURS.map((op) => (
+          <View key={op.code} style={ps.tableRow}>
+            <Text style={[ps.tableCell, { width: '15%', fontWeight: 'bold' }]}>{op.code}</Text>
+            <Text style={[ps.tableCell, { width: '25%' }]}>{op.nom}</Text>
+            <Text style={[ps.tableCell, { width: '30%' }]}>{op.emailGenerique || '—'}</Text>
+            <Text style={[ps.tableCell, { width: '30%' }]}>{op.contacts[0]?.email || '—'}</Text>
+          </View>
+        ))}
+
+        <View style={ps.footer}>
+          <Text>PNM App — Contacts Operateurs GPMAG</Text>
+          <Text>Page 1 / 1</Text>
+        </View>
+      </PdfPage>
+    </Document>
+  );
+}
+
+async function downloadContactsPdf() {
+  const blob = await pdf(<ContactsPdf /> as React.ReactElement<import('@react-pdf/renderer').DocumentProps>).toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Contacts-Operateurs-GPMAG.pdf';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 export default function Contacts() {
@@ -218,16 +321,26 @@ export default function Contacts() {
       <Head title="Contacts Operateurs" />
 
       <Box sx={{ px: { xs: 2, md: 4 }, py: 3, maxWidth: 900, mx: 'auto' }}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-          <Iconify icon="solar:users-group-rounded-bold-duotone" width={32} sx={{ color: 'primary.main' }} />
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>
-              Contacts Operateurs
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Annuaire des correspondants PNM des operateurs du GPMAG
-            </Typography>
-          </Box>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Iconify icon="solar:users-group-rounded-bold-duotone" width={32} sx={{ color: 'primary.main' }} />
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                Contacts Operateurs
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Annuaire des correspondants PNM des operateurs du GPMAG
+              </Typography>
+            </Box>
+          </Stack>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Iconify icon="solar:file-download-bold-duotone" width={18} />}
+            onClick={downloadContactsPdf}
+          >
+            PDF
+          </Button>
         </Stack>
 
         <Divider sx={{ my: 2 }} />
