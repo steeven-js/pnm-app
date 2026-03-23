@@ -70,6 +70,28 @@ function EmailSubjectRow({ item }: { item: EmailSubject }) {
     );
 }
 
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = useCallback(async () => {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, [text]);
+
+    return (
+        <Tooltip title={copied ? 'Copié !' : 'Copier la commande'}>
+            <IconButton
+                size="small"
+                onClick={handleCopy}
+                sx={{ position: 'absolute', top: 4, right: 4, color: 'grey.400', '&:hover': { color: 'grey.100' } }}
+            >
+                <Iconify icon={copied ? 'solar:check-circle-bold' : 'solar:copy-bold'} width={16} />
+            </IconButton>
+        </Tooltip>
+    );
+}
+
 const STATUS_LABELS: Record<EventStatus, { label: string; color: 'default' | 'success' | 'error' | 'warning' }> = {
     pending: { label: 'En attente', color: 'default' },
     verified: { label: 'Vérifié', color: 'success' },
@@ -349,6 +371,22 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                     )}
 
                     <Divider sx={{ mb: 2 }} />
+
+                    {event.sshCommands && event.sshCommands.length > 0 && (
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                                Commande SSH (vmqproportasync01)
+                            </Typography>
+                            {event.sshCommands.map((cmd, idx) => (
+                                <Box key={idx} sx={{ position: 'relative', mb: 0.5 }}>
+                                    <Box sx={{ bgcolor: 'grey.900', color: 'grey.100', borderRadius: 1, p: 1, pr: 5, fontFamily: 'monospace', fontSize: '0.75rem', overflowX: 'auto' }}>
+                                        $ {cmd}
+                                    </Box>
+                                    <CopyButton text={cmd} />
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
 
                     {supportsLogPaste && !readOnly && (
                         <Button

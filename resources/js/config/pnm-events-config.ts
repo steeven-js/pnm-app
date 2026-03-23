@@ -11,6 +11,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         icon: 'solar:server-bold-duotone',
         category: 'supervision',
         checkType: 'server',
+        sshCommands: ['tail -n 12 /home/porta_pnmv3/PortaSync/log/EmaExtracter.log && tail -n 12 /home/porta_pnmv3/PortaSync/log/EmmExtracter.log'],
         checklist: [
             // EmaExtracter — bascule
             'EmaExtracter : Orange Caraïbe Check success',
@@ -100,6 +101,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         icon: 'solar:file-check-bold-duotone',
         category: 'supervision',
         checkType: 'server',
+        sshCommands: ['tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log'],
         checklist: [
             'PnmDataManager : Fichier PNMDATA op. 01 généré',
             'PnmDataManager : Fichier PNMDATA op. 03 généré',
@@ -139,6 +141,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         icon: 'solar:shield-check-bold-duotone',
         category: 'supervision',
         checkType: 'server',
+        sshCommands: ['tail -f /home/porta_pnmv3/PortaSync/log/PnmAckManager.log'],
         checklist: [
             'PnmAckManager : Op. 03 — Aucun AR SYNC non-reçu',
             'PnmAckManager : Op. 04 — Aucun AR SYNC non-reçu',

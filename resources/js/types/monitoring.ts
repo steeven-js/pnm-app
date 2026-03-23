@@ -41,6 +41,7 @@ export type PnmEventConfig = {
     category: EventCategory;
     checkType: CheckType;
     emailSubjects?: EmailSubject[];
+    sshCommands?: string[];
 };
 
 export type EnrichedPnmEvent = PnmEventConfig & {
