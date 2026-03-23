@@ -41,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Glossary
     Route::get('/glossary', [GlossaryController::class, 'index'])->name('glossary.index');
 
+    // Contacts Operateurs
+    Route::get('/contacts', fn () => Inertia::render('Contacts'))->name('contacts');
+
     // Changelog
     Route::get('/changelog', fn () => Inertia::render('Changelog'))->name('changelog');
 

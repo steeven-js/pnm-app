@@ -98,6 +98,8 @@ export const paths = {
   mobiCrm: '/mobi-crm',
   // PNMDATA GENERATOR
   pnmdataGenerator: '/pnmdata-generator',
+  // CONTACTS
+  contacts: '/contacts',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG

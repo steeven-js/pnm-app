@@ -94,6 +94,11 @@ export const navData: NavSectionProps['data'] = [
     subheader: 'Référence',
     items: [
       {
+        title: 'Contacts Operateurs',
+        path: paths.contacts,
+        icon: <Iconify icon="solar:users-group-rounded-bold-duotone" width={24} />,
+      },
+      {
         title: 'Glossaire',
         path: paths.glossary,
         icon: <Iconify icon="solar:book-bold-duotone" width={24} />,
