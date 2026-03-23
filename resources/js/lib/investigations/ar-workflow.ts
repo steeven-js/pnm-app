@@ -130,15 +130,30 @@ function analyzeAcrSearch(output: string, _ctx: InvestigationContext): StepAnaly
   }
 
   if (hasError) {
+    const details: string[] = [
+      'Le fichier a ete rejete (fichier .ERR present).',
+    ];
+
+    // Parse ERR content for common error codes
+    if (/E008/i.test(output)) details.push('Code E008 : Fichier deja recu (doublon). Pas d\'action necessaire.');
+    else if (/E003/i.test(output)) details.push('Code E003 : Erreur de format dans le fichier.');
+    else if (/E001/i.test(output)) details.push('Code E001 : Fichier non attendu par l\'operateur.');
+    else if (/E002/i.test(output)) details.push('Code E002 : Numero de sequence invalide.');
+    else if (/E004/i.test(output)) details.push('Code E004 : Emetteur non reconnu.');
+    else if (/E005/i.test(output)) details.push('Code E005 : Destinataire incorrect.');
+    else if (/E006/i.test(output)) details.push('Code E006 : Nombre de lignes incorrect.');
+    else if (/E000/i.test(output)) details.push('Code E000 : Aucune erreur (acquittement OK).');
+    else details.push('Utiliser la commande "cat" pour lire le contenu du .ERR et connaitre le motif.');
+
+    // Extract ERR filenames for context
+    const errFiles = [...new Set(output.match(/[\w./]+\.ERR/g) ?? [])];
+    if (errFiles.length > 0) details.push(`Fichier(s) .ERR : ${errFiles.join(', ')}`);
+
     return {
-      status: 'error',
-      message: 'Un fichier .ERR a ete detecte. L\'operateur a rejete le fichier.',
-      details: [
-        'Le fichier a ete rejete (fichier .ERR present).',
-        'Verifier le contenu du .ERR pour connaitre le motif du rejet.',
-        'Action : investiguer le fichier original et renvoyer si necessaire.',
-      ],
-      extractedValues: { acr_found: 'err' },
+      status: /E000/.test(output) ? 'success' : 'error',
+      message: /E000/.test(output) ? 'Acquittement recu (E000). Le fichier a ete traite.' : 'Un fichier .ERR a ete detecte. L\'operateur a rejete le fichier.',
+      details,
+      extractedValues: { acr_found: /E000/.test(output) ? 'oui' : 'err' },
     };
   }
 
@@ -326,6 +341,12 @@ export const arWorkflow: WorkflowDefinition = {
           server: 'vmqproportasync01',
           template: 'find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.ERR" -mtime -3 -ls',
         },
+        {
+          type: 'ssh',
+          label: 'Lire le contenu d\'un fichier .ERR (remplacer le chemin)',
+          server: 'vmqproportasync01',
+          template: 'cat /home/porta_pnmv3/PortaSync/pnmdata/{{op_destinataire}}/arch_send/*.ERR 2>/dev/null | head -50',
+        },
       ],
       expectsResult: true,
       resultPlaceholder: 'Collez ici le resultat de la commande...',
@@ -333,6 +354,7 @@ export const arWorkflow: WorkflowDefinition = {
       tips: [
         'Si l\'ACR est present, l\'incident est resolu — le mail a ete envoye avant le traitement.',
         'Un fichier .ERR signifie un rejet par l\'operateur (a investiguer).',
+        'Utiliser la commande "cat" pour lire le contenu du .ERR et connaitre le motif du rejet.',
         'Verifier l\'heure de l\'ACR vs l\'heure du mail d\'incident.',
       ],
     },
