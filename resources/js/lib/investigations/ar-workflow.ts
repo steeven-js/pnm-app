@@ -12,12 +12,13 @@ const OPERATOR_MAP: Record<string, string> = {
 function parseArEmail(text: string): InvestigationContext | null {
   const ctx: InvestigationContext = {};
 
-  // Extract filenames (PNMDATA.XX.XX...)
-  const filenames = [...new Set(text.match(/PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
+  // Extract filenames (PNMDATA or PNMSYNC)
+  const filenames = [...new Set(text.match(/PNM(?:DATA|SYNC)\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
   if (filenames.length > 0) {
     ctx.filename = filenames[0];
     ctx.all_filenames = filenames;
     ctx.nb_fichiers = String(filenames.length);
+    ctx.file_type = filenames[0].startsWith('PNMSYNC') ? 'PNMSYNC' : 'PNMDATA';
   }
 
   // Extract MSISDN
@@ -37,10 +38,25 @@ function parseArEmail(text: string): InvestigationContext | null {
     ctx.op_destinataire_name = OPERATOR_MAP[parts[2]] ?? parts[2];
   }
 
+  // Extract error ticket format [0000, 02, 04, timestamp, Ecode, ...]
+  const errTicket = text.match(/\[\s*\d{4}\s*,\s*(\d{2})\s*,\s*(\d{2})\s*,\s*\d{14}\s*,\s*(E\d{3})/);
+  if (errTicket) {
+    ctx.op_expediteur = errTicket[1];
+    ctx.op_destinataire = errTicket[2];
+    ctx.op_expediteur_name = OPERATOR_MAP[errTicket[1]] ?? errTicket[1];
+    ctx.op_destinataire_name = OPERATOR_MAP[errTicket[2]] ?? errTicket[2];
+    ctx.error_code = errTicket[3];
+  }
+
+  // Extract delay from "envoye depuis plus de XX minutes"
+  const delayMinMatch = text.match(/depuis\s+plus\s+de\s+(\d+)\s*minutes/i);
+  if (delayMinMatch) ctx.delay_minutes = delayMinMatch[1];
+
   // Detect AR type
-  if (/AR\s*(SYNC|sync)/i.test(text)) ctx.ar_type = 'SYNC';
+  if (/AR\s*(SYNC|sync)|non.recu.*PNMSYNC|PNMSYNC.*non.recu/i.test(text)) ctx.ar_type = 'SYNC';
   else if (/ACR/i.test(text)) ctx.ar_type = 'ACR';
   else if (/12[12]0|en attente|attente/i.test(text)) ctx.ar_type = 'ticket_1210';
+  else if (/non.recu|non-recu|non recu/i.test(text)) ctx.ar_type = 'AR_non_recu';
   else ctx.ar_type = 'inconnu';
 
   // Extract delay (minutes)
@@ -80,24 +96,50 @@ function analyzeArSummary(output: string, ctx: InvestigationContext): StepAnalys
   }
 
   const msisdns = [...new Set(output.match(/06[0-9]{8}/g) ?? [])];
-  const filenames = [...new Set(output.match(/PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
+  const filenames = [...new Set(output.match(/PNM(?:DATA|SYNC)\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
+
+  // Extract error ticket [0000, XX, YY, timestamp, Exxx, ...]
+  const errTicket = output.match(/\[\s*\d{4}\s*,\s*(\d{2})\s*,\s*(\d{2})\s*,\s*\d{14}\s*,\s*(E\d{3})/);
+  const hasArNonRecu = /AR\s*non.recu|non.acquit|envoye\s+depuis\s+plus/i.test(output);
 
   const details: string[] = [];
   if (msisdns.length > 0) details.push(`${msisdns.length} MSISDN detecte(s).`);
-  if (filenames.length > 0) details.push(`${filenames.length} fichier(s) PNMDATA concerne(s).`);
-
-  if (msisdns.length === 0 && filenames.length === 0) {
-    return { status: 'warning', message: 'Aucun MSISDN ni fichier detecte dans le contenu colle.' };
+  if (filenames.length > 0) {
+    const syncCount = filenames.filter(f => f.startsWith('PNMSYNC')).length;
+    const dataCount = filenames.filter(f => f.startsWith('PNMDATA')).length;
+    if (syncCount > 0) details.push(`${syncCount} fichier(s) PNMSYNC concerne(s).`);
+    if (dataCount > 0) details.push(`${dataCount} fichier(s) PNMDATA concerne(s).`);
+  }
+  if (errTicket) {
+    const opExp = OPERATOR_MAP[errTicket[1]] ?? errTicket[1];
+    const opDest = OPERATOR_MAP[errTicket[2]] ?? errTicket[2];
+    details.push(`Ticket d'erreur detecte : ${opExp} → ${opDest}, code ${errTicket[3]}.`);
+  }
+  if (hasArNonRecu) {
+    details.push('Type d\'incident : AR non-recu (acquittement manquant).');
   }
 
+  const extractedValues: Record<string, string | string[]> = {};
+  if (msisdns.length > 0) { extractedValues.all_msisdns = msisdns; extractedValues.msisdn = msisdns[0]; extractedValues.nb_msisdns = String(msisdns.length); }
+  if (filenames.length > 0) { extractedValues.all_filenames = filenames; extractedValues.filename = filenames[0]; extractedValues.nb_fichiers = String(filenames.length); }
+  if (errTicket) {
+    extractedValues.op_expediteur = errTicket[1];
+    extractedValues.op_destinataire = errTicket[2];
+    extractedValues.op_expediteur_name = OPERATOR_MAP[errTicket[1]] ?? errTicket[1];
+    extractedValues.op_destinataire_name = OPERATOR_MAP[errTicket[2]] ?? errTicket[2];
+    extractedValues.error_code = errTicket[3];
+  }
+
+  if (msisdns.length === 0 && filenames.length === 0 && !errTicket && !hasArNonRecu) {
+    return { status: 'warning', message: 'Aucun MSISDN, fichier ni ticket d\'erreur detecte dans le contenu colle.' };
+  }
+
+  const totalItems = msisdns.length + filenames.length + (errTicket ? 1 : 0);
   return {
     status: 'info',
-    message: `${msisdns.length} MSISDN et ${filenames.length} fichier(s) identifies. Passez a la verification.`,
+    message: `${totalItems} element(s) identifie(s). Passez a la verification.`,
     details,
-    extractedValues: {
-      ...(msisdns.length > 0 ? { all_msisdns: msisdns, msisdn: msisdns[0], nb_msisdns: String(msisdns.length) } : {}),
-      ...(filenames.length > 0 ? { all_filenames: filenames, filename: filenames[0], nb_fichiers: String(filenames.length) } : {}),
-    },
+    extractedValues,
   };
 }
 
