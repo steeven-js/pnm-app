@@ -286,15 +286,19 @@ function autoFillPso(
 ): AutoFillResult | null {
     // Detect PSO email body or CSV content
     const isEmail = /PSO du jour/i.test(content) || /ci-joint le detail des PSO/i.test(content);
-    const isCsv = /RECORD_NO.*ACTION_COD/i.test(content) || /;RLPS;/i.test(content);
+    const isCsv = /RECORD_NO.*ACTION_COD/i.test(content) || /[;\s]RL[PW]S?[;\s]/i.test(content);
 
     if (!isEmail && !isCsv) return null;
 
     let rowCount: number | null = null;
+    let rlpsCount = 0;
+    let rlwCount = 0;
     if (isCsv) {
-        // Count data rows (lines containing RLPS)
-        const dataLines = content.split('\n').filter((l) => /;RLPS;/i.test(l));
+        // Count data rows (lines containing RLPS or RLW — separated by ; or spaces)
+        const dataLines = content.split('\n').filter((l) => /\bRLPS\b|\bRLW\b/i.test(l));
         rowCount = dataLines.length;
+        rlpsCount = dataLines.filter((l) => /\bRLPS\b/i.test(l)).length;
+        rlwCount = dataLines.filter((l) => /\bRLW\b/i.test(l)).length;
     }
 
     const rules: Record<string, () => boolean> = {
@@ -309,7 +313,7 @@ function autoFillPso(
         lines.push('Email PSO reçu - fichier CSV à ouvrir');
     }
     if (rowCount !== null) {
-        lines.push(`Volumétrie PSO: ${rowCount} lignes`);
+        lines.push(`Volumétrie PSO: ${rowCount} lignes (GPMAG: ${rlpsCount}, WIZZEE: ${rlwCount})`);
     }
 
     return { checkedItems, notes: lines.join('\n') };
