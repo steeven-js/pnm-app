@@ -4,8 +4,9 @@ export { interpolate } from './types';
 import { incidentWorkflow } from './incident-workflow';
 import { vacationWorkflow } from './vacation-workflow';
 import { arWorkflow } from './ar-workflow';
+import { syncWorkflow } from './sync-workflow';
 
-export const WORKFLOWS = [incidentWorkflow, arWorkflow, vacationWorkflow];
+export const WORKFLOWS = [incidentWorkflow, arWorkflow, syncWorkflow, vacationWorkflow];
 
 /** Detect workflow from email text */
 export function detectWorkflow(emailText: string) {
@@ -14,8 +15,9 @@ export function detectWorkflow(emailText: string) {
       if (emailText.includes(subject)) return wf;
     }
   }
-  // Fallback: try regex patterns
-  if (/12XX|AR\s*SYNC|acquit/i.test(emailText)) return arWorkflow;
+  // Fallback: try regex patterns — order matters (most specific first)
+  if (/PNMSYNC|\.tmp\.ERR|non\s*acquit/i.test(emailText)) return syncWorkflow;
+  if (/12XX|AR\s*SYNC/i.test(emailText)) return arWorkflow;
   if (/\[PNM\]\s*\[?\s*INCIDENT/i.test(emailText)) return incidentWorkflow;
   if (/vacation/i.test(emailText)) return vacationWorkflow;
   return null;
