@@ -193,6 +193,27 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'Aucun fichier .ERR détecté',
         ],
     },
+    // ── 15:25 ──
+    {
+        key: 'porta_prevues',
+        label: 'Portabilités prévues DIGICEL-WIZZEE',
+        description:
+            'Email de reporting avec les portabilités prévues du jour (IN/OUT Digicel + Wizzee) et les portabilités internes de la veille. Comparer avec le PSO du matin.',
+        scheduledTime: '15:25',
+        icon: 'solar:chart-2-bold-duotone',
+        category: 'reporting',
+        checkType: 'email',
+        emailSubjects: [
+            { subject: '[PNM] Reporting - Portabilités DIGICEL/WIZZEE prévues', origin: 'internal' },
+        ],
+        checklist: [
+            'Email portabilités prévues reçu',
+            'Vérifier IN/OUT DIGICEL',
+            'Vérifier IN/OUT WIZZEE',
+            'Vérifier portabilités internes veille',
+            'Comparer volumétrie avec PSO du matin',
+        ],
+    },
     // ── 15:35 ──
     {
         key: 'vacation_2',

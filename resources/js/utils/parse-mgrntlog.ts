@@ -35,6 +35,7 @@ const PARSERS: Record<string, ParserFn> = {
     incidents: autoFillIncidents,
     rio_reporting: autoFillRio,
     pso_jour: autoFillPso,
+    porta_prevues: autoFillPortaPrevues,
     verif_generation_pnmdata: autoFillVerifGeneration,
     verif_acquittements: autoFillVerifAcquittements,
     tickets_attente: autoFillTickets,
@@ -315,6 +316,58 @@ function autoFillPso(
     if (rowCount !== null) {
         lines.push(`Volumétrie PSO: ${rowCount} lignes (GPMAG: ${rlpsCount}, WIZZEE: ${rlwCount})`);
     }
+
+    return { checkedItems, notes: lines.join('\n') };
+}
+
+// ===================================================================
+// 6b. Portabilités prévues DIGICEL/WIZZEE parser
+// ===================================================================
+
+function autoFillPortaPrevues(
+    _eventKey: string,
+    checklist: string[],
+    content: string,
+): AutoFillResult | null {
+    // Detect the reporting email
+    const isEmail = /portabilit[eé]s\s*(internes|pr[eé]vues)/i.test(content)
+        || /DIGICEL.*\nIN:/i.test(content)
+        || /WIZZEE.*\nIN:/i.test(content);
+
+    if (!isEmail) return null;
+
+    // Extract portabilités internes veille
+    const internesMatch = content.match(/portabilit[eé]s\s*internes\s*(?:de\s*la\s*veille)?\s*:?\s*(\d+)/i);
+    const internes = internesMatch ? parseInt(internesMatch[1], 10) : null;
+
+    // Extract DIGICEL IN/OUT
+    const digicelBlock = content.match(/DIGICEL[\s\S]*?IN\s*:\s*(\d+)[\s\S]*?OUT\s*:\s*(\d+)/i);
+    const digicelIn = digicelBlock ? parseInt(digicelBlock[1], 10) : null;
+    const digicelOut = digicelBlock ? parseInt(digicelBlock[2], 10) : null;
+
+    // Extract WIZZEE IN/OUT
+    const wizzeeBlock = content.match(/WIZZEE[\s\S]*?IN\s*:\s*(\d+)[\s\S]*?OUT\s*:\s*(\d+)/i);
+    const wizzeeIn = wizzeeBlock ? parseInt(wizzeeBlock[1], 10) : null;
+    const wizzeeOut = wizzeeBlock ? parseInt(wizzeeBlock[2], 10) : null;
+
+    const totalIn = (digicelIn ?? 0) + (wizzeeIn ?? 0);
+    const totalOut = (digicelOut ?? 0) + (wizzeeOut ?? 0);
+
+    const rules: Record<string, () => boolean> = {
+        'Email portabilités prévues reçu': () => true,
+        'Vérifier IN/OUT DIGICEL': () => digicelIn !== null,
+        'Vérifier IN/OUT WIZZEE': () => wizzeeIn !== null,
+        'Vérifier portabilités internes veille': () => internes !== null,
+        'Comparer volumétrie avec PSO du matin': () => false, // manual
+    };
+
+    const checkedItems = checklist.filter((item) => rules[item]?.());
+
+    const lines = ['[Auto] Portabilités prévues'];
+    if (internes !== null) lines.push(`Portabilités internes veille: ${internes}`);
+    if (digicelIn !== null && digicelOut !== null) lines.push(`DIGICEL — IN: ${digicelIn} / OUT: ${digicelOut}`);
+    if (wizzeeIn !== null && wizzeeOut !== null) lines.push(`WIZZEE — IN: ${wizzeeIn} / OUT: ${wizzeeOut}`);
+    if (totalIn > 0 || totalOut > 0) lines.push(`TOTAL — IN: ${totalIn} / OUT: ${totalOut}`);
 
     return { checkedItems, notes: lines.join('\n') };
 }
