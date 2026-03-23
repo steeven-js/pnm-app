@@ -73,6 +73,107 @@ function AnalysisDisplay({ analysis }: { analysis: StepAnalysis }) {
   );
 }
 
+// ─── Report Generator ────────────────────────────────────────────────────────
+
+function generateReport(workflow: WorkflowDefinition, state: InvestigationState): string {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  const lines: string[] = [];
+  lines.push('='.repeat(72));
+  lines.push(`RAPPORT D'INVESTIGATION — ${dateStr} a ${timeStr}`);
+  lines.push(`Type : ${workflow.title}`);
+  lines.push('='.repeat(72));
+  lines.push('');
+
+  // Context summary
+  const ctx = state.context;
+  const ctxEntries = Object.entries(ctx).filter(([, v]) => v && (typeof v === 'string' ? v.length < 60 : true));
+  if (ctxEntries.length > 0) {
+    lines.push('DONNEES EXTRAITES');
+    lines.push('-'.repeat(40));
+    for (const [key, value] of ctxEntries) {
+      const display = Array.isArray(value) ? value.join(', ') : (value ?? '');
+      lines.push(`  ${key}: ${display}`);
+    }
+    lines.push('');
+  }
+
+  // Step results
+  lines.push('RESULTATS PAR ETAPE');
+  lines.push('-'.repeat(40));
+  lines.push('');
+
+  for (const step of workflow.steps) {
+    const result = state.stepResults[step.id];
+    const isCompleted = state.completedSteps.includes(step.id);
+
+    lines.push(`--- ${step.title} ${isCompleted ? '[COMPLETE]' : '[NON TRAITE]'} ---`);
+
+    if (result) {
+      lines.push(`  Statut : ${result.analysis.status.toUpperCase()}`);
+      lines.push(`  ${result.analysis.message}`);
+      if (result.analysis.details) {
+        for (const d of result.analysis.details) {
+          lines.push(`    - ${d}`);
+        }
+      }
+    } else {
+      lines.push('  (pas de resultat)');
+    }
+    lines.push('');
+  }
+
+  // Actions / Suivi
+  lines.push('ACTIONS ET SUIVI');
+  lines.push('-'.repeat(40));
+
+  const lastStep = workflow.steps[workflow.steps.length - 1];
+  if (lastStep?.tips) {
+    for (const tip of lastStep.tips) {
+      lines.push(`  [ ] ${tip}`);
+    }
+  }
+
+  // Check for escalations needed
+  const hasErrors = Object.values(state.stepResults).some(r => r.analysis.status === 'error');
+  const hasWarnings = Object.values(state.stepResults).some(r => r.analysis.status === 'warning');
+
+  lines.push('');
+  lines.push('PRIORITE');
+  lines.push('-'.repeat(40));
+  if (hasErrors) {
+    lines.push('  >>> HAUTE — Des erreurs ont ete detectees. Action requise.');
+  } else if (hasWarnings) {
+    lines.push('  >>> MOYENNE — Points de vigilance. A surveiller.');
+  } else {
+    lines.push('  >>> BASSE — Situation sous controle.');
+  }
+
+  lines.push('');
+  lines.push('='.repeat(72));
+  lines.push(`Genere par PNM App — Investigations — ${dateStr}`);
+  lines.push('='.repeat(72));
+
+  return lines.join('\n');
+}
+
+function downloadReport(workflow: WorkflowDefinition, state: InvestigationState) {
+  const report = generateReport(workflow, state);
+  const now = new Date();
+  const dateFile = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const filename = `Rapport_Investigation_${workflow.id}_${dateFile}.txt`;
+
+  const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ─── Main Wizard ────────────────────────────────────────────────────────────
 
 type Props = {
@@ -291,6 +392,14 @@ export function InvestigationWizard({ workflow, initialContext, onReset }: Props
             <Stack direction="row" spacing={1}>
               <Button variant="text" color="inherit" onClick={onReset}>
                 Recommencer
+              </Button>
+              <Button
+                variant="outlined"
+                color="info"
+                onClick={() => downloadReport(workflow, state)}
+                startIcon={<Iconify icon="solar:file-download-bold-duotone" width={18} />}
+              >
+                Rapport .txt
               </Button>
               {!isLastStep && (
                 <Button

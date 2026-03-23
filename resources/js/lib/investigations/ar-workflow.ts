@@ -1,0 +1,416 @@
+import type { WorkflowDefinition, InvestigationContext, StepAnalysis } from './types';
+
+// ─── Operator map ───────────────────────────────────────────────────────────
+
+const OPERATOR_MAP: Record<string, string> = {
+  '01': 'Orange Caraibe', '02': 'Digicel', '03': 'SFR/Only',
+  '04': 'Dauphin Telecom', '05': 'UTS Caraibe', '06': 'Free Caraibe',
+};
+
+// ─── Email parser ───────────────────────────────────────────────────────────
+
+function parseArEmail(text: string): InvestigationContext | null {
+  const ctx: InvestigationContext = {};
+
+  // Extract filenames (PNMDATA.XX.XX...)
+  const filenames = [...new Set(text.match(/PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
+  if (filenames.length > 0) {
+    ctx.filename = filenames[0];
+    ctx.all_filenames = filenames;
+    ctx.nb_fichiers = String(filenames.length);
+  }
+
+  // Extract MSISDN
+  const msisdns = [...new Set(text.match(/06[0-9]{8}/g) ?? [])];
+  if (msisdns.length > 0) {
+    ctx.msisdn = msisdns[0];
+    ctx.all_msisdns = msisdns;
+    ctx.nb_msisdns = String(msisdns.length);
+  }
+
+  // Extract operator codes from filenames
+  if (ctx.filename) {
+    const parts = (ctx.filename as string).split('.');
+    ctx.op_expediteur = parts[1];
+    ctx.op_destinataire = parts[2];
+    ctx.op_expediteur_name = OPERATOR_MAP[parts[1]] ?? parts[1];
+    ctx.op_destinataire_name = OPERATOR_MAP[parts[2]] ?? parts[2];
+  }
+
+  // Detect AR type
+  if (/AR\s*(SYNC|sync)/i.test(text)) ctx.ar_type = 'SYNC';
+  else if (/ACR/i.test(text)) ctx.ar_type = 'ACR';
+  else if (/12[12]0|en attente|attente/i.test(text)) ctx.ar_type = 'ticket_1210';
+  else ctx.ar_type = 'inconnu';
+
+  // Extract delay (minutes)
+  const delayMatch = text.match(/(\d+)\s*(?:min|minutes)/i);
+  if (delayMatch) ctx.delay_minutes = delayMatch[1];
+
+  // Extract ticket codes
+  const tickets = [...new Set(text.match(/\b(1110|1210|1220|1410|1430|7000)\b/g) ?? [])];
+  if (tickets.length > 0) ctx.ticket_codes = tickets;
+
+  // Count "Attente" lines (from Excel summary in email)
+  const attenteMatch = text.match(/Attente\s+12XX\s+\w+\s+vers\s+\w+\s*:\s*(\d+)/gi);
+  if (attenteMatch) {
+    ctx.nb_attente_total = String(attenteMatch.reduce((sum, m) => {
+      const n = m.match(/:\s*(\d+)/);
+      return sum + (n ? parseInt(n[1], 10) : 0);
+    }, 0));
+  }
+
+  // Detect source operator from email patterns
+  if (/Free\s*Caraibe/i.test(text)) ctx.operateur_source = 'Free Caraibe';
+  else if (/Orange/i.test(text)) ctx.operateur_source = 'Orange Caraibe';
+  else if (/SFR|Outremer/i.test(text)) ctx.operateur_source = 'SFR/Only';
+  else if (/Dauphin/i.test(text)) ctx.operateur_source = 'Dauphin Telecom';
+  else if (/UTS/i.test(text)) ctx.operateur_source = 'UTS Caraibe';
+
+  ctx.incident_type = 'ar_non_recu';
+
+  return Object.keys(ctx).length > 0 ? ctx : null;
+}
+
+// ─── Result analyzers ───────────────────────────────────────────────────────
+
+function analyzeArSummary(output: string, ctx: InvestigationContext): StepAnalysis {
+  if (!output.trim()) {
+    return { status: 'warning', message: 'Aucun contenu colle. Collez le contenu du mail ou du fichier Excel.' };
+  }
+
+  const msisdns = [...new Set(output.match(/06[0-9]{8}/g) ?? [])];
+  const filenames = [...new Set(output.match(/PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3}/g) ?? [])];
+
+  const details: string[] = [];
+  if (msisdns.length > 0) details.push(`${msisdns.length} MSISDN detecte(s).`);
+  if (filenames.length > 0) details.push(`${filenames.length} fichier(s) PNMDATA concerne(s).`);
+
+  if (msisdns.length === 0 && filenames.length === 0) {
+    return { status: 'warning', message: 'Aucun MSISDN ni fichier detecte dans le contenu colle.' };
+  }
+
+  return {
+    status: 'info',
+    message: `${msisdns.length} MSISDN et ${filenames.length} fichier(s) identifies. Passez a la verification.`,
+    details,
+    extractedValues: {
+      ...(msisdns.length > 0 ? { all_msisdns: msisdns, msisdn: msisdns[0], nb_msisdns: String(msisdns.length) } : {}),
+      ...(filenames.length > 0 ? { all_filenames: filenames, filename: filenames[0], nb_fichiers: String(filenames.length) } : {}),
+    },
+  };
+}
+
+function analyzeAcrSearch(output: string, _ctx: InvestigationContext): StepAnalysis {
+  const lower = output.toLowerCase();
+
+  if (!output.trim()) {
+    return {
+      status: 'warning',
+      message: 'Aucune sortie. Verifiez la commande et reessayez.',
+    };
+  }
+
+  // Check if ACR found
+  const hasAcr = /\.ACR/i.test(output) || /acquit/i.test(output);
+  const hasSuccess = /success|ok|recu|received/i.test(output);
+  const hasError = /\.ERR/i.test(output) || /error|erreur/i.test(output);
+  const noResult = output.trim().split('\n').length <= 1 && !/PNMDATA/.test(output);
+
+  if (noResult) {
+    return {
+      status: 'error',
+      message: 'Aucun ACR trouve. L\'operateur n\'a toujours pas acquitte le fichier.',
+      details: [
+        'Le fichier PNMDATA envoye n\'a pas ete acquitte par l\'operateur.',
+        'Si le delai depasse 24h, envisager une relance.',
+      ],
+      extractedValues: { acr_found: 'non' },
+    };
+  }
+
+  if (hasError) {
+    return {
+      status: 'error',
+      message: 'Un fichier .ERR a ete detecte. L\'operateur a rejete le fichier.',
+      details: [
+        'Le fichier a ete rejete (fichier .ERR present).',
+        'Verifier le contenu du .ERR pour connaitre le motif du rejet.',
+        'Action : investiguer le fichier original et renvoyer si necessaire.',
+      ],
+      extractedValues: { acr_found: 'err' },
+    };
+  }
+
+  if (hasAcr || hasSuccess) {
+    return {
+      status: 'success',
+      message: 'ACR trouve ! L\'operateur a acquitte le fichier.',
+      details: [
+        'L\'acquittement a ete recu depuis l\'envoi du mail d\'incident.',
+        'Cet incident est probablement resolu — le traitement a eu lieu avec un delai.',
+        'Verifier que le ticket 1210 a bien ete emis suite a l\'acquittement.',
+      ],
+      extractedValues: { acr_found: 'oui' },
+    };
+  }
+
+  return {
+    status: 'info',
+    message: 'Resultat recupere. Analyser manuellement si l\'ACR est present.',
+    extractedValues: { acr_found: 'a_verifier' },
+  };
+}
+
+function analyzeTicketCheck(output: string, _ctx: InvestigationContext): StepAnalysis {
+  if (!output.trim()) {
+    return { status: 'warning', message: 'Aucun resultat. Verifiez la requete.' };
+  }
+
+  const has1210 = /1210/.test(output);
+  const has1220 = /1220/.test(output);
+  const has1430 = /1430/.test(output);
+
+  if (has1430) {
+    return {
+      status: 'success',
+      message: 'Le portage est confirme (ticket 1430 present). L\'incident est resolu.',
+      details: ['Le ticket 1430 (Confirmation de Portage) est present.', 'Le processus s\'est termine normalement, avec du retard.'],
+    };
+  }
+
+  if (has1210) {
+    return {
+      status: 'success',
+      message: 'La reponse 1210 a ete emise. Le ticket en attente est maintenant traite.',
+      details: ['Le ticket 1210 (Reponse positive) a ete envoye.', 'L\'incident est resolu — la reponse etait en attente au moment du mail.'],
+    };
+  }
+
+  if (has1220) {
+    return {
+      status: 'error',
+      message: 'Le portage a ete refuse (ticket 1220). Investiguer le motif.',
+      details: ['Un refus a ete emis. Verifier le code de refus.'],
+    };
+  }
+
+  return {
+    status: 'warning',
+    message: 'Aucune reponse (1210/1220) trouvee. Le ticket est toujours en attente.',
+    details: [
+      'Aucune reponse n\'a encore ete emise pour ce MSISDN.',
+      'Verifier si le traitement a eu lieu (logs serveur).',
+      'Si > 24h d\'attente, relancer l\'operateur donneur.',
+    ],
+  };
+}
+
+function analyzeDelay(output: string, _ctx: InvestigationContext): StepAnalysis {
+  if (!output.trim()) {
+    return { status: 'info', message: 'Indiquez le delai ou la date du mail incident.' };
+  }
+
+  // Try to parse a number (hours)
+  const hoursMatch = output.match(/(\d+)\s*h/i);
+  const daysMatch = output.match(/(\d+)\s*j/i);
+  const minutesMatch = output.match(/(\d+)\s*min/i);
+
+  let totalHours = 0;
+  if (daysMatch) totalHours = parseInt(daysMatch[1], 10) * 24;
+  else if (hoursMatch) totalHours = parseInt(hoursMatch[1], 10);
+  else if (minutesMatch) totalHours = parseInt(minutesMatch[1], 10) / 60;
+  else {
+    // Try bare number as hours
+    const bare = output.trim().match(/^\d+$/);
+    if (bare) totalHours = parseInt(bare[0], 10);
+  }
+
+  if (totalHours === 0) {
+    return { status: 'info', message: 'Delai non detecte. Indiquez en heures (ex: "4h", "2j", "30min").' };
+  }
+
+  if (totalHours < 4) {
+    return {
+      status: 'success',
+      message: `Delai : ~${totalHours}h. C'est normal — attendre la prochaine vacation.`,
+      details: [
+        'Un delai de quelques heures est courant entre l\'envoi et l\'acquittement.',
+        'Le mail d\'incident a ete envoye avant que la vacation traite le fichier.',
+        'Action : rien a faire, le traitement suivra son cours normal.',
+      ],
+    };
+  }
+
+  if (totalHours < 24) {
+    return {
+      status: 'warning',
+      message: `Delai : ~${totalHours}h. Surveiller — le traitement devrait avoir lieu dans la journee.`,
+      details: [
+        'Le delai est significatif mais pas encore critique.',
+        'Verifier les logs serveur pour confirmer que le traitement est en cours.',
+        'Si toujours en attente demain, relancer l\'operateur.',
+      ],
+    };
+  }
+
+  if (totalHours < 72) {
+    return {
+      status: 'error',
+      message: `Delai : ~${Math.round(totalHours / 24)}j (${totalHours}h). Relancer l'operateur donneur.`,
+      details: [
+        'Le delai depasse 24h, ce qui est anormal.',
+        'Envoyer un email de relance a l\'operateur concerne.',
+        'Mettre FWI_PNM_SI@digicelgroup.fr en copie.',
+      ],
+    };
+  }
+
+  return {
+    status: 'error',
+    message: `Delai critique : ~${Math.round(totalHours / 24)}j. Escalader immediatement.`,
+    details: [
+      'Le delai depasse 3 jours — situation critique.',
+      'Escalader au support N2 Porta et au secretariat GPMAG si necessaire.',
+      'Envoyer un email de relance urgent a l\'operateur.',
+    ],
+  };
+}
+
+// ─── Workflow definition ────────────────────────────────────────────────────
+
+export const arWorkflow: WorkflowDefinition = {
+  id: 'ar-non-recu',
+  title: '[PNM] AR non-reçus / Tickets en attente',
+  icon: 'solar:clock-circle-bold-duotone',
+  color: '#f59e0b',
+  description: 'Investigation des acquittements non-recus et tickets 12XX en attente. Guide la verification et la priorisation.',
+  emailSubjects: ['[PNM] Ticket 12XX en attente', '[PNM] Tickets 12XX en attente', '[PNM] AR SYNC non-recu', 'Attente 12XX'],
+  parseEmail: parseArEmail,
+  steps: [
+    {
+      id: 'parse-incident',
+      title: 'Analyser le mail d\'incident',
+      icon: 'solar:letter-opened-bold-duotone',
+      description: 'Collez le contenu du mail (ou du fichier Excel) pour identifier les MSISDN et fichiers concernes.',
+      expectsResult: true,
+      resultPlaceholder: 'Collez ici le contenu du mail ou le contenu CSV/Excel...\n\nExemple :\nAttente 12XX DC vers Free : 5\n\nOu les lignes du fichier Excel avec les MSISDN et fichiers PNMDATA.',
+      analyzeResult: analyzeArSummary,
+      tips: [
+        'Le mail "[PNM] Tickets 12XX en attente" est souvent envoye AVANT la premiere vacation (10h-11h).',
+        'Les MSISDN listes sont dans la majorite des cas traites lors de cette vacation.',
+        'Un mail recu a 09h ne signifie pas forcement un vrai incident.',
+      ],
+    },
+    {
+      id: 'check-acr',
+      title: 'Verifier si l\'ACR a ete recu depuis',
+      icon: 'solar:magnifer-bold-duotone',
+      description: 'Rechercher sur le serveur si l\'acquittement (ACR) du fichier a ete recu entre-temps.',
+      commands: [
+        {
+          type: 'ssh',
+          label: 'Rechercher l\'ACR du fichier dans les archives',
+          server: 'vmqproportasync01',
+          template: 'ls -la /home/porta_pnmv3/PortaSync/pnmdata/{{op_expediteur}}/arch_recv/ | grep -i "ACR\\|$(date +%Y%m%d)" | tail -n 20',
+        },
+        {
+          type: 'ssh',
+          label: 'Rechercher le fichier specifique dans les logs',
+          server: 'vmqproportasync01',
+          template: 'grep "{{filename}}" /home/porta_pnmv3/PortaSync/log/PnmAckManager.log | tail -n 10',
+        },
+        {
+          type: 'ssh',
+          label: 'Verifier les fichiers .ERR recents',
+          server: 'vmqproportasync01',
+          template: 'find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.ERR" -mtime -3 -ls',
+        },
+      ],
+      expectsResult: true,
+      resultPlaceholder: 'Collez ici le resultat de la commande...',
+      analyzeResult: analyzeAcrSearch,
+      tips: [
+        'Si l\'ACR est present, l\'incident est resolu — le mail a ete envoye avant le traitement.',
+        'Un fichier .ERR signifie un rejet par l\'operateur (a investiguer).',
+        'Verifier l\'heure de l\'ACR vs l\'heure du mail d\'incident.',
+      ],
+    },
+    {
+      id: 'check-ticket-status',
+      title: 'Verifier le ticket 1210 dans PortaDB',
+      icon: 'solar:ticket-bold-duotone',
+      description: 'Verifier si le ticket 1210 (reponse) a ete emis pour les MSISDN concernes.',
+      commands: [
+        {
+          type: 'sql',
+          label: 'Verifier les tickets emis pour le MSISDN',
+          template: `SELECT d.code_ticket, d.msisdn, d.date_creation_ticket,
+  d.operateur_origine, d.operateur_destination, d.code_motif
+FROM DATA d
+WHERE d.msisdn = '{{msisdn}}'
+ORDER BY d.date_creation_ticket DESC
+LIMIT 10;`,
+        },
+        {
+          type: 'sql',
+          label: 'Verifier l\'etat du portage',
+          template: `SELECT p.msisdn, e.label AS etat, e.classe,
+  DATE(p.date_portage) AS date_portage, DATE(p.date_debut) AS date_debut
+FROM PORTAGE p
+JOIN DOSSIER dos ON p.dossier_id = dos.id
+JOIN ETAT e ON dos.etat_id_actuel = e.id
+WHERE p.msisdn = '{{msisdn}}'
+ORDER BY p.date_debut DESC
+LIMIT 5;`,
+        },
+      ],
+      expectsResult: true,
+      resultPlaceholder: 'Collez ici le resultat de la requete SQL...',
+      analyzeResult: analyzeTicketCheck,
+      tips: [
+        'Si le ticket 1210 est present avec une date recente, l\'incident est resolu.',
+        'Si aucun 1210, verifier si le traitement de la vacation a bien eu lieu (etape suivante).',
+        'Executer ces requetes sur PortaDB (vmqproportawebdb01).',
+      ],
+    },
+    {
+      id: 'evaluate-delay',
+      title: 'Evaluer le delai et prioriser',
+      icon: 'solar:clock-circle-bold-duotone',
+      description: 'Indiquez depuis combien de temps le ticket est en attente pour determiner l\'action a mener.',
+      inputs: [
+        {
+          key: 'delai_attente',
+          label: 'Delai depuis le mail d\'incident',
+          placeholder: 'Ex: 2h, 1j, 30min',
+          type: 'text',
+        },
+      ],
+      expectsResult: true,
+      resultPlaceholder: 'Indiquez le delai (ex: "2h", "1j", "48h", "3j")...',
+      analyzeResult: analyzeDelay,
+      tips: [
+        '< 4h : Normal, attendre la prochaine vacation.',
+        '4h-24h : Surveiller, le traitement devrait avoir lieu.',
+        '24h-72h : Relancer l\'operateur par email.',
+        '> 72h : Escalader au support N2 et au GPMAG.',
+      ],
+    },
+    {
+      id: 'conclusion',
+      title: 'Conclusion et action',
+      icon: 'solar:check-circle-bold-duotone',
+      description: 'Synthese de l\'investigation et actions a entreprendre.',
+      tips: [
+        'Mail "[PNM] Tickets 12XX" recu AVANT vacation → dans 90% des cas, se resout seul apres la 1ere vacation.',
+        'Si ACR recu depuis → incident resolu, rien a faire.',
+        'Si toujours en attente < 24h → surveiller, re-verifier apres la prochaine vacation.',
+        'Si > 24h sans reponse → relancer l\'operateur donneur par email.',
+        'Si > 72h → escalader au support N2 Porta + secretariat GPMAG.',
+        'Toujours mettre FWI_PNM_SI@digicelgroup.fr en copie des relances.',
+        'Pour Free Caraibe : le mail est envoye a ~09h, avant la vacation 1 → faux positifs frequents.',
+      ],
+    },
+  ],
+};
