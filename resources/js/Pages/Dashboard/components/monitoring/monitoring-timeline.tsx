@@ -115,7 +115,7 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
         setSelectedKey((prev) => (prev === key ? null : key));
     }, []);
 
-    const handleSave = useCallback(async (eventKey: string, status: EventStatus, checkedItems: string[], notes: string) => {
+    const handleSave = useCallback(async (eventKey: string, status: EventStatus, checkedItems: string[], notes: string, metadata?: Record<string, unknown>) => {
         setSaving(true);
         try {
             const response = await fetch('/api/monitoring', {
@@ -123,7 +123,7 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
                 credentials: 'same-origin',
                 body: JSON.stringify({
-                    event_type: eventKey, event_date: now.format('YYYY-MM-DD'), status, checked_items: checkedItems, notes: notes || null,
+                    event_type: eventKey, event_date: now.format('YYYY-MM-DD'), status, checked_items: checkedItems, notes: notes || null, metadata: metadata || null,
                 }),
             });
             if (!response.ok) throw new Error('Save failed');

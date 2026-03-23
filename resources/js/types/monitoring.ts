@@ -7,6 +7,7 @@ export type MonitoringEvent = {
     status: EventStatus;
     notes: string | null;
     checked_items: string[] | null;
+    metadata: Record<string, unknown> | null;
     verified_at: string | null;
 };
 

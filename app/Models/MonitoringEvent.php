@@ -16,6 +16,7 @@ class MonitoringEvent extends Model
         'status',
         'notes',
         'checked_items',
+        'metadata',
         'verified_at',
     ];
 
@@ -24,6 +25,7 @@ class MonitoringEvent extends Model
         return [
             'event_date' => 'date',
             'checked_items' => 'array',
+            'metadata' => 'array',
             'verified_at' => 'datetime',
         ];
     }

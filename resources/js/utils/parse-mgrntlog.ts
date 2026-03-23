@@ -8,6 +8,7 @@ export type AutoFillResult = {
     checkedItems: string[];
     notes: string;
     parsedData?: unknown;
+    metadata?: Record<string, unknown>;
 };
 
 // ---------------------------------------------------------------------------
@@ -317,7 +318,14 @@ function autoFillPso(
         lines.push(`Volumétrie PSO: ${rowCount} lignes (GPMAG: ${rlpsCount}, WIZZEE: ${rlwCount})`);
     }
 
-    return { checkedItems, notes: lines.join('\n') };
+    // Store PSO counts in metadata for comparison with previsions
+    const metadata: Record<string, unknown> = {
+        pso_total: rowCount,
+        pso_gpmag: rlpsCount,
+        pso_wizzee: rlwCount,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -369,7 +377,18 @@ function autoFillPortaPrevues(
     if (wizzeeIn !== null && wizzeeOut !== null) lines.push(`WIZZEE — IN: ${wizzeeIn} / OUT: ${wizzeeOut}`);
     if (totalIn > 0 || totalOut > 0) lines.push(`TOTAL — IN: ${totalIn} / OUT: ${totalOut}`);
 
-    return { checkedItems, notes: lines.join('\n') };
+    // Store previsions in metadata for next-day PSO comparison
+    const metadata: Record<string, unknown> = {
+        digicel_in: digicelIn,
+        digicel_out: digicelOut,
+        wizzee_in: wizzeeIn,
+        wizzee_out: wizzeeOut,
+        total_in: totalIn,
+        total_out: totalOut,
+        internes: internes,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================

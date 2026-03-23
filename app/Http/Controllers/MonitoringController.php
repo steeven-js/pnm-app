@@ -44,6 +44,7 @@ class MonitoringController extends Controller
             'notes' => 'nullable|string|max:2000',
             'checked_items' => 'nullable|array',
             'checked_items.*' => 'string|max:255',
+            'metadata' => 'nullable|array',
         ]);
 
         $event = MonitoringEvent::updateOrCreate(
@@ -56,10 +57,39 @@ class MonitoringController extends Controller
                 'status' => $validated['status'],
                 'notes' => $validated['notes'] ?? null,
                 'checked_items' => $validated['checked_items'] ?? null,
+                'metadata' => $validated['metadata'] ?? null,
                 'verified_at' => $validated['status'] === 'verified' ? now() : null,
             ],
         );
 
         return response()->json($event);
+    }
+
+    /**
+     * Get previous day's porta_prevues metadata for PSO comparison.
+     */
+    public function previsions(Request $request): JsonResponse
+    {
+        $request->validate([
+            'date' => 'sometimes|date_format:Y-m-d',
+        ]);
+
+        $date = $request->has('date')
+            ? Carbon::parse($request->input('date'))
+            : Carbon::now('America/Martinique')->startOfDay();
+
+        // Look for porta_prevues from yesterday
+        $yesterday = $date->copy()->subDay();
+
+        $event = MonitoringEvent::where('user_id', $request->user()->id)
+            ->where('event_type', 'porta_prevues')
+            ->forDate($yesterday)
+            ->first();
+
+        return response()->json([
+            'previsions' => $event?->metadata,
+            'previsions_date' => $yesterday->format('Y-m-d'),
+            'event_status' => $event?->status,
+        ]);
     }
 }

@@ -19,7 +19,7 @@ import { LogPasteDialog } from './log-paste-dialog';
 
 type EventDetailPanelProps = {
     event: EnrichedPnmEvent | null;
-    onSave: (eventKey: string, status: EventStatus, checkedItems: string[], notes: string) => void;
+    onSave: (eventKey: string, status: EventStatus, checkedItems: string[], notes: string, metadata?: Record<string, unknown>) => void;
     saving?: boolean;
     readOnly?: boolean;
 };
@@ -305,16 +305,20 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
     const [notes, setNotes] = useState('');
     const [logDialogOpen, setLogDialogOpen] = useState(false);
     const [incidentData, setIncidentData] = useState<ParsedIncidentEmail | null>(null);
+    const [eventMetadata, setEventMetadata] = useState<Record<string, unknown> | undefined>(undefined);
 
     const supportsLogPaste = event
         ? SUPPORTED_EVENT_KEYS.includes(event.key) || event.key.startsWith('vacation_')
         : false;
 
-    const handleLogApply = useCallback((autoChecked: string[], autoNotes: string, parsedData?: unknown) => {
+    const handleLogApply = useCallback((autoChecked: string[], autoNotes: string, parsedData?: unknown, metadata?: Record<string, unknown>) => {
         setCheckedItems((prev) => [...new Set([...prev, ...autoChecked])]);
         setNotes((prev) => (prev ? `${prev}\n\n${autoNotes}` : autoNotes));
         if (parsedData && typeof parsedData === 'object' && 'incidents' in parsedData) {
             setIncidentData(parsedData as ParsedIncidentEmail);
+        }
+        if (metadata) {
+            setEventMetadata((prev) => ({ ...prev, ...metadata }));
         }
     }, []);
 
@@ -323,15 +327,16 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
             setCheckedItems(event.dbEvent?.checked_items ?? []);
             setNotes(event.dbEvent?.notes ?? '');
             setIncidentData(null);
+            setEventMetadata(undefined);
         }
     }, [event?.key, event?.dbEvent]);
 
     const handleSave = useCallback(
         (status: EventStatus) => {
             if (!event) return;
-            onSave(event.key, status, checkedItems, notes);
+            onSave(event.key, status, checkedItems, notes, eventMetadata);
         },
-        [event, checkedItems, notes, onSave],
+        [event, checkedItems, notes, eventMetadata, onSave],
     );
 
     return (

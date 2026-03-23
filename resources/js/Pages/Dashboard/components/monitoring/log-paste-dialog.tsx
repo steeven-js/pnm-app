@@ -17,7 +17,7 @@ type LogPasteDialogProps = {
     onClose: () => void;
     eventKey: string;
     checklist: string[];
-    onApply: (checkedItems: string[], notes: string, parsedData?: unknown) => void;
+    onApply: (checkedItems: string[], notes: string, parsedData?: unknown, metadata?: Record<string, unknown>) => void;
 };
 
 const DIALOG_CONFIG: Record<string, { title: string; description: string; placeholder: string }> = {
@@ -61,6 +61,11 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         description: 'Collez le contenu de PnmDataManager.log (tail -n 14 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log) pour vérifier la génération des fichiers PNMDATA de vacation.',
         placeholder: `Collez le résultat de tail ici...\n\nPnmDataManager.php|...| Traitement operateur 01\nPnmDataManager.php|...| ..........Generation du fichier PNMDATA.02.01... (#tickets: 360)\n...\nPnmDataManager.php|...| Fin de Traitement`,
     },
+    porta_prevues: {
+        title: 'Auto-remplir depuis le mail Portabilités prévues',
+        description: 'Collez le contenu du mail [PNM] Reporting - Portabilités DIGICEL/WIZZEE prévues pour extraire les volumes IN/OUT et les stocker pour comparaison avec le PSO du lendemain.',
+        placeholder: `Collez le contenu du mail ici...\n\nNombre de portabilités internes de la veille: 4\n\nNombre de portabilités prévues le 23/03/2026:\n\nDIGICEL\nIN: 13\nOUT: 36\n\nWIZZEE\nIN: 4\nOUT: 16`,
+    },
     verif_acquittements: {
         title: 'Auto-remplir depuis PnmAckManager.log',
         description: 'Collez le contenu de PnmAckManager.log (tail -n 50 /home/porta_pnmv3/PortaSync/log/PnmAckManager.log) pour vérifier les acquittements des fichiers PNMDATA.',
@@ -95,7 +100,7 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
 
     const handleApply = () => {
         if (preview) {
-            onApply(preview.checkedItems, preview.notes, preview.parsedData);
+            onApply(preview.checkedItems, preview.notes, preview.parsedData, preview.metadata);
             handleClose();
         }
     };
