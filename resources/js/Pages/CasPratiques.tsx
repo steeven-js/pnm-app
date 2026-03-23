@@ -3313,6 +3313,76 @@ Steeven JACQUES`}
   ),
 };
 
+const casTmpErrBloque: CasPratique = {
+  id: 'tmp-err-bloque-recv',
+  number: 20,
+  domain: 'pnm',
+  title: 'Fichier .tmp.ERR bloque dans recv/ (Dauphin/UTS)',
+  date: '23/03/2026',
+  tags: ['.tmp.ERR', 'recv', 'Dauphin Telecom', 'UTS', 'PNMSYNC', 'suppression'],
+  summary: 'Un fichier .tmp.ERR reste bloque dans le dossier recv/ d\'un operateur (souvent Dauphin ou UTS). Le fichier original a ete traite et se trouve dans arch_recv/. Le .tmp.ERR doit etre supprime manuellement.',
+  severity: 'mineur',
+  category: 'fichiers',
+  content: (
+    <>
+      <Typography variant="h6" gutterBottom>Contexte</Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Lors du traitement des fichiers PNMSYNC ou PNMDATA, il arrive qu'un fichier <code>.tmp.ERR</code>
+        reste bloque dans le dossier <code>recv/</code> d'un operateur sur le serveur vmqproportasync01.
+        Ce phenomene est recurrent chez les petits operateurs comme <strong>Dauphin Telecom (04)</strong> et
+        <strong> UTS Caraibe (05)</strong> qui envoient regulierement des fichiers avec des irregularites.
+      </Typography>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Exemple reel —</strong> Fichier <code>PNMSYNC.02.04.20260315231633.001.tmp.ERR</code> bloque
+        dans <code>/home/porta_pnmv3/PortaSync/pnmdata/04/recv/</code> (Dauphin Telecom).
+      </Alert>
+
+      <Typography variant="h6" gutterBottom>Procedure de resolution</Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>1.</strong> Identifier les fichiers .tmp.ERR bloques :
+      </Typography>
+      <CodeBlock>{'find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.tmp.ERR" -ls'}</CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>2.</strong> Verifier que le fichier original a bien ete traite en cherchant dans <code>arch_recv/</code> :
+      </Typography>
+      <CodeBlock>{'ls -la /home/porta_pnmv3/PortaSync/pnmdata/04/arch_recv/ | tail -n 10'}</CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Si le fichier original (sans .tmp.ERR) est present dans arch_recv/, cela confirme
+        que le traitement a eu lieu. Le .tmp.ERR est un residu qui peut etre supprime.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>3.</strong> Lire le contenu du .tmp.ERR pour comprendre l'erreur :
+      </Typography>
+      <CodeBlock>{'cat /home/porta_pnmv3/PortaSync/pnmdata/04/recv/PNMSYNC.02.04.20260315231633.001.tmp.ERR'}</CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Le contenu affiche le code erreur (ex: E010) et les details du fichier concerne.
+      </Typography>
+
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        <strong>4.</strong> Apres verification, supprimer le .tmp.ERR :
+      </Typography>
+      <CodeBlock>{'rm /home/porta_pnmv3/PortaSync/pnmdata/04/recv/PNMSYNC.02.04.20260315231633.001.tmp.ERR'}</CodeBlock>
+
+      <Alert severity="warning" sx={{ mt: 2, mb: 2 }}>
+        <strong>Attention —</strong> Toujours verifier dans arch_recv/ AVANT de supprimer.
+        Ne jamais supprimer un .tmp.ERR si le fichier original n'a pas ete traite.
+      </Alert>
+
+      <Alert severity="success" sx={{ mt: 2 }}>
+        <strong>A retenir —</strong> Les fichiers .tmp.ERR de Dauphin (04) et UTS (05) sont des incidents
+        recurrents lies a des irregularites d'envoi de ces petits operateurs. La suppression manuelle
+        apres verification est la procedure standard.
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
@@ -3335,6 +3405,7 @@ const CAS_PRATIQUES: CasPratique[] = [
   casMobiEcartPortaCrm,
   casResiliationManuelPso,
   casLiberationMsisdnPorte,
+  casTmpErrBloque,
 ];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────

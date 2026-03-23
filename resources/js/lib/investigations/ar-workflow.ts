@@ -114,8 +114,34 @@ function analyzeAcrSearch(output: string, _ctx: InvestigationContext): StepAnaly
   // Check if ACR found
   const hasAcr = /\.ACR/i.test(output) || /acquit/i.test(output);
   const hasSuccess = /success|ok|recu|received/i.test(output);
+  const hasTmpErr = /\.tmp\.ERR/i.test(output);
   const hasError = /\.ERR/i.test(output) || /error|erreur/i.test(output);
   const noResult = output.trim().split('\n').length <= 1 && !/PNMDATA/.test(output);
+
+  // Special case: .tmp.ERR files stuck in recv/
+  if (hasTmpErr) {
+    const tmpFiles = [...new Set(output.match(/[\w./]+\.tmp\.ERR/g) ?? [])];
+    const isDauphinOrUts = /\/04\/|\/05\/|dauphin|uts/i.test(output);
+
+    const details: string[] = [
+      `Fichier(s) .tmp.ERR detecte(s) : ${tmpFiles.join(', ')}`,
+      'Un .tmp.ERR dans recv/ est un fichier BLOQUE qui empeche le traitement.',
+      'Etape 1 : Verifier dans arch_recv/ si le fichier original a deja ete traite.',
+      'Etape 2 : Si le fichier existe dans arch_recv/, le .tmp.ERR peut etre supprime en toute securite.',
+      'Etape 3 : Utiliser la commande "rm" proposee ci-dessus pour supprimer le .tmp.ERR.',
+    ];
+
+    if (isDauphinOrUts) {
+      details.push('Note : Dauphin Telecom (04) et UTS (05) generent regulierement ce type de fichier. C\'est un incident recurrent chez ces petits operateurs.');
+    }
+
+    return {
+      status: 'warning',
+      message: 'Fichier .tmp.ERR bloque detecte dans recv/. Verification et suppression necessaires.',
+      details,
+      extractedValues: { acr_found: 'tmp_err', has_tmp_err: 'oui' },
+    };
+  }
 
   if (noResult) {
     return {
@@ -343,9 +369,27 @@ export const arWorkflow: WorkflowDefinition = {
         },
         {
           type: 'ssh',
-          label: 'Lire le contenu d\'un fichier .ERR (remplacer le chemin)',
+          label: 'Lire le contenu d\'un fichier .ERR',
           server: 'vmqproportasync01',
           template: 'cat /home/porta_pnmv3/PortaSync/pnmdata/{{op_destinataire}}/arch_send/*.ERR 2>/dev/null | head -50',
+        },
+        {
+          type: 'ssh',
+          label: 'Chercher les .tmp.ERR bloques dans recv/',
+          server: 'vmqproportasync01',
+          template: 'find /home/porta_pnmv3/PortaSync/pnmdata/ -name "*.tmp.ERR" -ls',
+        },
+        {
+          type: 'ssh',
+          label: 'Verifier si le fichier original est dans arch_recv/',
+          server: 'vmqproportasync01',
+          template: 'ls -la /home/porta_pnmv3/PortaSync/pnmdata/{{op_destinataire}}/arch_recv/ | tail -n 10',
+        },
+        {
+          type: 'ssh',
+          label: 'Supprimer le .tmp.ERR bloque (APRES verification)',
+          server: 'vmqproportasync01',
+          template: 'rm /home/porta_pnmv3/PortaSync/pnmdata/{{op_destinataire}}/recv/*.tmp.ERR',
         },
       ],
       expectsResult: true,
@@ -354,8 +398,9 @@ export const arWorkflow: WorkflowDefinition = {
       tips: [
         'Si l\'ACR est present, l\'incident est resolu — le mail a ete envoye avant le traitement.',
         'Un fichier .ERR signifie un rejet par l\'operateur (a investiguer).',
-        'Utiliser la commande "cat" pour lire le contenu du .ERR et connaitre le motif du rejet.',
-        'Verifier l\'heure de l\'ACR vs l\'heure du mail d\'incident.',
+        'Un fichier .tmp.ERR dans recv/ est un fichier BLOQUE. Verifier dans arch_recv/ si le fichier original a ete traite. Si oui → supprimer le .tmp.ERR.',
+        'Dauphin Telecom (04) et UTS Caraibe (05) sont des petits operateurs avec des irregularites frequentes. Les .tmp.ERR sont recurrents chez eux.',
+        'Utiliser "cat" pour lire le contenu du .ERR et connaitre le motif du rejet.',
       ],
     },
     {
