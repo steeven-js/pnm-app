@@ -331,18 +331,19 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
 
                 if (prevKey) {
                     const prevEvent = dbEvents.find((e) => e.event_type === prevKey);
-                    if (prevEvent?.metadata && typeof prevEvent.metadata === 'object') {
-                        const comparison = compareVacations(
-                            prevEvent.metadata as Record<string, unknown>,
-                            metadata,
-                        );
+                    const prevMeta = prevEvent?.metadata as Record<string, unknown> | null | undefined;
+                    const hasPrevMeta = prevMeta && typeof prevMeta === 'object' && prevMeta.operators;
+
+                    if (hasPrevMeta) {
+                        const comparison = compareVacations(prevMeta, metadata);
                         finalNotes = `${autoNotes}\n\n${comparison.summary}`;
 
-                        // Auto-check the comparison checklist item
                         if (comparison.allResolved) {
                             finalChecked.push('Comparer avec vacation 1 : fichiers manquants réapparus ?');
                             finalChecked.push('Comparer avec vacation 2 : fichiers manquants réapparus ?');
                         }
+                    } else if (prevEvent) {
+                        finalNotes = `${autoNotes}\n\n--- Comparaison ---\n  ⚠ ${prevKey === 'vacation_1' ? 'Vacation 1' : 'Vacation 2'} traitée mais sans metadata. Re-coller le mail de ${prevKey === 'vacation_1' ? 'vacation 1' : 'vacation 2'} et re-sauvegarder d'abord.`;
                     } else {
                         finalNotes = `${autoNotes}\n\n--- Comparaison ---\n  ⚠ ${prevKey === 'vacation_1' ? 'Vacation 1' : 'Vacation 2'} non traitée — impossible de comparer.`;
                     }
