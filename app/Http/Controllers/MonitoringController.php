@@ -7,6 +7,7 @@ use App\Services\HolidayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class MonitoringController extends Controller
@@ -55,8 +56,13 @@ class MonitoringController extends Controller
             'verified_at' => $validated['status'] === 'verified' ? now() : null,
         ];
 
-        // Only include metadata if the column exists (migration may not have run yet)
-        if (isset($validated['metadata']) && Schema::hasColumn('monitoring_events', 'metadata')) {
+        // Auto-add metadata column if missing (migration may not have run)
+        if (isset($validated['metadata'])) {
+            if (!Schema::hasColumn('monitoring_events', 'metadata')) {
+                Schema::table('monitoring_events', function ($table) {
+                    $table->json('metadata')->nullable()->after('checked_items');
+                });
+            }
             $data['metadata'] = $validated['metadata'];
         }
 
@@ -88,13 +94,11 @@ class MonitoringController extends Controller
         // Look for porta_prevues from yesterday
         $yesterday = $date->copy()->subDay();
 
-        // Check if metadata column exists before querying
+        // Auto-add metadata column if missing
         if (!Schema::hasColumn('monitoring_events', 'metadata')) {
-            return response()->json([
-                'previsions' => null,
-                'previsions_date' => $yesterday->format('Y-m-d'),
-                'event_status' => null,
-            ]);
+            Schema::table('monitoring_events', function ($table) {
+                $table->json('metadata')->nullable()->after('checked_items');
+            });
         }
 
         $event = MonitoringEvent::where('user_id', $request->user()->id)
