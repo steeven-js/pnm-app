@@ -7,6 +7,7 @@ use App\Services\HolidayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class MonitoringController extends Controller
 {
@@ -47,19 +48,25 @@ class MonitoringController extends Controller
             'metadata' => 'nullable|array',
         ]);
 
+        $data = [
+            'status' => $validated['status'],
+            'notes' => $validated['notes'] ?? null,
+            'checked_items' => $validated['checked_items'] ?? null,
+            'verified_at' => $validated['status'] === 'verified' ? now() : null,
+        ];
+
+        // Only include metadata if the column exists (migration may not have run yet)
+        if (isset($validated['metadata']) && Schema::hasColumn('monitoring_events', 'metadata')) {
+            $data['metadata'] = $validated['metadata'];
+        }
+
         $event = MonitoringEvent::updateOrCreate(
             [
                 'event_type' => $validated['event_type'],
                 'event_date' => $validated['event_date'],
                 'user_id' => $request->user()->id,
             ],
-            [
-                'status' => $validated['status'],
-                'notes' => $validated['notes'] ?? null,
-                'checked_items' => $validated['checked_items'] ?? null,
-                'metadata' => $validated['metadata'] ?? null,
-                'verified_at' => $validated['status'] === 'verified' ? now() : null,
-            ],
+            $data,
         );
 
         return response()->json($event);
@@ -80,6 +87,15 @@ class MonitoringController extends Controller
 
         // Look for porta_prevues from yesterday
         $yesterday = $date->copy()->subDay();
+
+        // Check if metadata column exists before querying
+        if (!Schema::hasColumn('monitoring_events', 'metadata')) {
+            return response()->json([
+                'previsions' => null,
+                'previsions_date' => $yesterday->format('Y-m-d'),
+                'event_status' => null,
+            ]);
+        }
 
         $event = MonitoringEvent::where('user_id', $request->user()->id)
             ->where('event_type', 'porta_prevues')
