@@ -101,7 +101,7 @@ function parseVacationReport(content: string): VacationReport | null {
 }
 
 function autoFillVacation(
-    _eventKey: string,
+    eventKey: string,
     checklist: string[],
     content: string,
 ): AutoFillResult | null {
@@ -140,7 +140,107 @@ function autoFillVacation(
     }
     if (report.hasErrFiles) lines.push('⚠ Fichier(s) .ERR détecté(s) !');
 
-    return { checkedItems, notes: lines.join('\n') };
+    // Store vacation data in metadata for comparison with next vacation
+    const metadata: Record<string, unknown> = {
+        vacation_key: eventKey,
+        files_exchanged: report.filesExchanged,
+        files_expected: report.filesExpected,
+        has_err: report.hasErrFiles,
+        operators: report.operatorSections.map((op) => ({
+            code: op.code,
+            name: op.name,
+            files: op.hasReceivedFiles,
+            acr: op.hasReceivedAcr,
+        })),
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
+}
+
+/**
+ * Compare two vacation reports and return a diff summary.
+ * Called from the event detail panel when previous vacation metadata is available.
+ */
+export function compareVacations(
+    prevMetadata: Record<string, unknown>,
+    currentMetadata: Record<string, unknown>,
+): { summary: string; allResolved: boolean } {
+    const prevOps = (prevMetadata.operators ?? []) as { code: string; name: string; files: boolean; acr: boolean }[];
+    const currOps = (currentMetadata.operators ?? []) as { code: string; name: string; files: boolean; acr: boolean }[];
+
+    const prevExchanged = (prevMetadata.files_exchanged ?? 0) as number;
+    const prevExpected = (prevMetadata.files_expected ?? 0) as number;
+    const currExchanged = (currentMetadata.files_exchanged ?? 0) as number;
+    const currExpected = (currentMetadata.files_expected ?? 0) as number;
+    const prevKey = (prevMetadata.vacation_key ?? '') as string;
+
+    const prevLabel = prevKey === 'vacation_1' ? 'Vacation 1' : prevKey === 'vacation_2' ? 'Vacation 2' : 'Vacation précédente';
+
+    const lines: string[] = [];
+    lines.push(`--- Comparaison avec ${prevLabel} ---`);
+    lines.push(`  ${prevLabel}: ${prevExchanged}/${prevExpected} échangés`);
+    lines.push(`  Actuelle: ${currExchanged}/${currExpected} échangés`);
+
+    // Find operators that were missing in prev but present now
+    const resolved: string[] = [];
+    const stillMissing: string[] = [];
+    const newIssues: string[] = [];
+
+    for (const prevOp of prevOps) {
+        const currOp = currOps.find((o) => o.code === prevOp.code);
+        if (!currOp) continue;
+
+        // Was missing files, now has them
+        if (!prevOp.files && currOp.files) {
+            resolved.push(`${prevOp.code} ${prevOp.name} : fichier réapparu`);
+        }
+        // Was missing ACR, now has it
+        if (!prevOp.acr && currOp.acr) {
+            resolved.push(`${prevOp.code} ${prevOp.name} : ACR reçu`);
+        }
+        // Still missing files
+        if (!prevOp.files && !currOp.files) {
+            stillMissing.push(`${prevOp.code} ${prevOp.name} : toujours aucun fichier`);
+        }
+        // Still missing ACR
+        if (!prevOp.acr && !currOp.acr && prevOp.files) {
+            stillMissing.push(`${prevOp.code} ${prevOp.name} : ACR toujours manquant`);
+        }
+    }
+
+    // Check for new issues in current that weren't in prev
+    for (const currOp of currOps) {
+        const prevOp = prevOps.find((o) => o.code === currOp.code);
+        if (!prevOp) continue;
+        if (prevOp.files && !currOp.files) {
+            newIssues.push(`${currOp.code} ${currOp.name} : fichier disparu !`);
+        }
+    }
+
+    if (resolved.length > 0) {
+        lines.push('  ✓ Résolus :');
+        for (const r of resolved) lines.push(`    ${r}`);
+    }
+    if (stillMissing.length > 0) {
+        lines.push('  ⚠ Toujours en attente :');
+        for (const m of stillMissing) lines.push(`    ${m}`);
+    }
+    if (newIssues.length > 0) {
+        lines.push('  ✗ Nouveaux problèmes :');
+        for (const n of newIssues) lines.push(`    ${n}`);
+    }
+    if (resolved.length === 0 && stillMissing.length === 0 && newIssues.length === 0) {
+        lines.push('  Aucun changement notable entre les deux vacations.');
+    }
+
+    const prevHadErr = prevMetadata.has_err as boolean;
+    const currHasErr = currentMetadata.has_err as boolean;
+    if (prevHadErr && !currHasErr) lines.push('  ✓ Fichiers .ERR résolus');
+    if (!prevHadErr && currHasErr) lines.push('  ⚠ Nouveaux fichiers .ERR détectés !');
+
+    const allResolved = stillMissing.length === 0 && newIssues.length === 0;
+
+    return { summary: lines.join('\n'), allResolved };
 }
 
 // ===================================================================

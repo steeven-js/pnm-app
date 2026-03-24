@@ -228,7 +228,7 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
 
                         <Box sx={{ mt: 1.5, mb: 0.5 }}><TimelineLegend /></Box>
 
-                        <EventDetailPanel event={selectedEvent} onSave={handleSave} saving={saving} readOnly={!isToday} />
+                        <EventDetailPanel event={selectedEvent} onSave={handleSave} saving={saving} readOnly={!isToday} dbEvents={activeDbEvents} />
                     </>
                 )}
             </Paper>

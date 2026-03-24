@@ -10,8 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
 import { Iconify } from 'src/components/iconify';
-import type { EnrichedPnmEvent, EventStatus, EmailSubject } from 'src/types/monitoring';
-import { SUPPORTED_EVENT_KEYS } from 'src/utils/parse-mgrntlog';
+import type { EnrichedPnmEvent, EventStatus, EmailSubject, MonitoringEvent } from 'src/types/monitoring';
+import { SUPPORTED_EVENT_KEYS, compareVacations } from 'src/utils/parse-mgrntlog';
 import type { ParsedIncidentEmail, ParsedIncident } from 'src/lib/pnm-utils';
 import { EventChecklist } from './event-checklist';
 import { EventNotes } from './event-notes';
@@ -22,6 +22,7 @@ type EventDetailPanelProps = {
     onSave: (eventKey: string, status: EventStatus, checkedItems: string[], notes: string, metadata?: Record<string, unknown>) => void;
     saving?: boolean;
     readOnly?: boolean;
+    dbEvents?: MonitoringEvent[];
 };
 
 function EmailSubjectRow({ item }: { item: EmailSubject }) {
@@ -300,7 +301,7 @@ function IncidentDetailBlock({ data }: { data: ParsedIncidentEmail }) {
     );
 }
 
-export function EventDetailPanel({ event, onSave, saving = false, readOnly = false }: EventDetailPanelProps) {
+export function EventDetailPanel({ event, onSave, saving = false, readOnly = false, dbEvents = [] }: EventDetailPanelProps) {
     const [checkedItems, setCheckedItems] = useState<string[]>([]);
     const [notes, setNotes] = useState('');
     const [logDialogOpen, setLogDialogOpen] = useState(false);
@@ -312,15 +313,46 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
         : false;
 
     const handleLogApply = useCallback((autoChecked: string[], autoNotes: string, parsedData?: unknown, metadata?: Record<string, unknown>) => {
-        setCheckedItems((prev) => [...new Set([...prev, ...autoChecked])]);
-        setNotes((prev) => (prev ? `${prev}\n\n${autoNotes}` : autoNotes));
+        let finalNotes = autoNotes;
+        let finalChecked = [...autoChecked];
+
         if (parsedData && typeof parsedData === 'object' && 'incidents' in parsedData) {
             setIncidentData(parsedData as ParsedIncidentEmail);
         }
         if (metadata) {
             setEventMetadata((prev) => ({ ...prev, ...metadata }));
+
+            // Auto-compare vacations: if this is vacation_2 or vacation_3, find previous
+            if (event && metadata.vacation_key) {
+                const currentKey = metadata.vacation_key as string;
+                let prevKey: string | null = null;
+                if (currentKey === 'vacation_2') prevKey = 'vacation_1';
+                else if (currentKey === 'vacation_3') prevKey = 'vacation_2';
+
+                if (prevKey) {
+                    const prevEvent = dbEvents.find((e) => e.event_type === prevKey);
+                    if (prevEvent?.metadata && typeof prevEvent.metadata === 'object') {
+                        const comparison = compareVacations(
+                            prevEvent.metadata as Record<string, unknown>,
+                            metadata,
+                        );
+                        finalNotes = `${autoNotes}\n\n${comparison.summary}`;
+
+                        // Auto-check the comparison checklist item
+                        if (comparison.allResolved) {
+                            finalChecked.push('Comparer avec vacation 1 : fichiers manquants réapparus ?');
+                            finalChecked.push('Comparer avec vacation 2 : fichiers manquants réapparus ?');
+                        }
+                    } else {
+                        finalNotes = `${autoNotes}\n\n--- Comparaison ---\n  ⚠ ${prevKey === 'vacation_1' ? 'Vacation 1' : 'Vacation 2'} non traitée — impossible de comparer.`;
+                    }
+                }
+            }
         }
-    }, []);
+
+        setCheckedItems((prev) => [...new Set([...prev, ...finalChecked])]);
+        setNotes((prev) => (prev ? `${prev}\n\n${finalNotes}` : finalNotes));
+    }, [event, dbEvents]);
 
     useEffect(() => {
         if (event) {
