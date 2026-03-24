@@ -123,22 +123,27 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
                 credentials: 'same-origin',
                 body: JSON.stringify({
-                    event_type: eventKey, event_date: now.format('YYYY-MM-DD'), status, checked_items: checkedItems, notes: notes || null, metadata: metadata || null,
+                    event_type: eventKey, event_date: displayDate, status, checked_items: checkedItems, notes: notes || null, metadata: metadata || null,
                 }),
             });
             if (!response.ok) throw new Error('Save failed');
 
             const savedEvent: MonitoringEvent = await response.json();
-            setDbEvents((prev) => {
+            const updateEvents = (prev: MonitoringEvent[]) => {
                 const idx = prev.findIndex((e) => e.event_type === eventKey);
                 if (idx >= 0) { const next = [...prev]; next[idx] = savedEvent; return next; }
                 return [...prev, savedEvent];
-            });
+            };
+            if (isToday) {
+                setDbEvents(updateEvents);
+            } else {
+                setHistoryEvents(updateEvents);
+            }
             setSnackbar({ open: true, message: `Événement marqué comme "${status}"`, severity: 'success' });
         } catch {
             setSnackbar({ open: true, message: 'Erreur lors de la sauvegarde', severity: 'error' });
         } finally { setSaving(false); }
-    }, [now]);
+    }, [displayDate, isToday]);
 
     const totalEvents = enrichedEvents.length;
     const treatedEvents = enrichedEvents.filter((e) => e.status !== 'pending').length;

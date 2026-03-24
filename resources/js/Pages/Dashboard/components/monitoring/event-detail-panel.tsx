@@ -425,7 +425,7 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                         </Box>
                     )}
 
-                    {supportsLogPaste && !readOnly && (
+                    {supportsLogPaste && (
                         <Button
                             size="small"
                             variant="outlined"
@@ -439,20 +439,22 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
 
                     {incidentData && <IncidentDetailBlock data={incidentData} />}
 
-                    <EventChecklist items={event.checklist} checkedItems={checkedItems} onChange={setCheckedItems} readOnly={readOnly} />
+                    <EventChecklist items={event.checklist} checkedItems={checkedItems} onChange={setCheckedItems} readOnly={false} />
                     <Box sx={{ mt: 2 }} />
-                    <EventNotes value={notes} onChange={setNotes} readOnly={readOnly} />
+                    <EventNotes value={notes} onChange={setNotes} readOnly={false} />
 
-                    {!readOnly && (
-                        <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: 'flex-end' }}>
-                            <Button variant="outlined" color="warning" size="small" onClick={() => handleSave('skipped')} disabled={saving}>Ignorer</Button>
-                            <Button variant="outlined" color="error" size="small" onClick={() => handleSave('issue')} disabled={saving}>Signaler problème</Button>
-                            <Button variant="contained" color="success" size="small" onClick={() => handleSave('verified')} disabled={saving}
-                                startIcon={<Iconify icon="solar:check-circle-bold" width={18} />}>
-                                Marquer vérifié
-                            </Button>
-                        </Stack>
-                    )}
+                    <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: 'flex-end' }}>
+                        {!readOnly && (
+                            <>
+                                <Button variant="outlined" color="warning" size="small" onClick={() => handleSave('skipped')} disabled={saving}>Ignorer</Button>
+                                <Button variant="outlined" color="error" size="small" onClick={() => handleSave('issue')} disabled={saving}>Signaler problème</Button>
+                            </>
+                        )}
+                        <Button variant="contained" color="success" size="small" onClick={() => handleSave(event.dbEvent?.status === 'verified' ? 'verified' : 'verified')} disabled={saving}
+                            startIcon={<Iconify icon="solar:check-circle-bold" width={18} />}>
+                            {readOnly ? 'Re-sauvegarder' : 'Marquer vérifié'}
+                        </Button>
+                    </Stack>
 
                     {supportsLogPaste && (
                         <LogPasteDialog
