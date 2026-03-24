@@ -49,7 +49,7 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
     const [historyHoliday, setHistoryHoliday] = useState<{ isHoliday: boolean; holidayDetails: MonitoringData['holidayDetails'] }>({ isHoliday: false, holidayDetails: [] });
     const [loadingHistory, setLoadingHistory] = useState(false);
 
-    const isToday = viewDate === null;
+    const isToday = viewDate === null || viewDate === todayStr;
     const displayDate = isToday ? todayStr : viewDate;
 
     // Today's events (live)
