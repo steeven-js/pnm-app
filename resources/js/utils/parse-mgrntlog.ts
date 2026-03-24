@@ -703,7 +703,21 @@ function autoFillVerifBasculeEmail(
         /Pas d['']information erron[eé]e/i.test(content) ||
         /aucune?\s*erreur.*PORTAGE_DATA/i.test(content) ||
         /integrite.*OK/i.test(content);
-    const controleOk = hasControleEmaEmail && (integriteOk || /traitement.*OK/i.test(content) || /Pas d['']information erron/i.test(content));
+
+    // Parse fnr_action_v3.bh format
+    const hasFnrAction = /fnr_action_v3\.bh/i.test(content);
+    const fnrPresent = /fnr_action_v3\.bh.*(?:present|existe)/i.test(content);
+    const pourcentageMatch = content.match(/Pourcentage\s+de\s+commandes\s+OK\s*:\s*(\d+)\s*%/i);
+    const pourcentageOk = pourcentageMatch ? parseInt(pourcentageMatch[1], 10) : null;
+    const logFileMatch = content.match(/(\/var\/sog\/BatchHandler\/[^\s]+\.log)/i);
+
+    const controleOk = hasControleEmaEmail && (
+        integriteOk ||
+        /traitement.*OK/i.test(content) ||
+        /Pas d['']information erron/i.test(content) ||
+        (hasFnrAction && fnrPresent) ||
+        (pourcentageOk !== null && pourcentageOk >= 95)
+    );
 
     const rules: Record<string, () => boolean> = {
         'Email [PNMV3] Verification Bascule Porta MOBI : FIN reçu': () => hasBasculeFinEmail,
@@ -729,12 +743,20 @@ function autoFillVerifBasculeEmail(
     if (hasControleEmaEmail) {
         lines.push('');
         lines.push('--- [PNM] Controle fichier batchhandler FNR_V3 sur EMA ---');
-        if (integriteOk) {
+        if (hasFnrAction) {
+            lines.push(`  Fichier fnr_action_v3.bh: ${fnrPresent ? 'présent' : 'absent'}`);
+            if (pourcentageOk !== null) {
+                lines.push(`  Commandes OK: ${pourcentageOk}%${pourcentageOk < 100 ? ' ⚠ actions en échec à vérifier' : ''}`);
+            }
+            if (logFileMatch) {
+                lines.push(`  Log: ${logFileMatch[1]}`);
+            }
+        } else if (integriteOk) {
             lines.push('  Intégrité PORTAGE_DATA: OK (pas d\'information erronée)');
         } else {
             lines.push('  ⚠ Intégrité PORTAGE_DATA: à vérifier');
         }
-        lines.push(`  Fichiers EMA: ${controleOk ? 'OK' : 'à vérifier'}`);
+        lines.push(`  Contrôle EMA: ${controleOk ? 'OK' : 'à vérifier'}`);
     }
 
     if (!hasBasculeFinEmail) lines.push('\n⚠ Email [PNMV3] FIN non détecté');
