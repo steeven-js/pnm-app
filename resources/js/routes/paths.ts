@@ -101,6 +101,8 @@ export const paths = {
   pnmdataGenerator: '/pnmdata-generator',
   // CONTACTS
   contacts: '/contacts',
+  // TICKETS KNOWLEDGE BASE
+  ticketsKnowledge: '/tickets-knowledge',
   // GLOSSARY
   glossary: '/glossary',
   // CHANGELOG

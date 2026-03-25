@@ -44,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Contacts Operateurs
     Route::get('/contacts', fn () => Inertia::render('Contacts'))->name('contacts');
 
+    // Tickets Knowledge Base
+    Route::get('/tickets-knowledge', fn () => Inertia::render('TicketsKnowledge'))->name('tickets-knowledge');
+
     // Changelog
     Route::get('/changelog', fn () => Inertia::render('Changelog'))->name('changelog');
 
