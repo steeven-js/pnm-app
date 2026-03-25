@@ -54,6 +54,7 @@
         "mermaid": "^11.12.3",
         "minimal-shared": "^1.1.5",
         "nprogress": "^0.2.0",
+        "pdfkit": "^0.18.0",
         "react-hook-form": "^7.71.1",
         "react-markdown": "^10.1.0",
         "remark-gfm": "^4.0.1",
