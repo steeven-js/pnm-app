@@ -186,8 +186,8 @@ function analyzeEntry(entry: ParsedEntry, now: Date): AnalysisResult {
 
   // Overdue if the first vacation deadline has passed (response should have started arriving)
   const isOverdue = deadlines[0].passed;
-  // Should email if past the last vacation (V3 19h) — no more chances for response
-  const shouldEmail = deadlines[2].passed;
+  // Should email as soon as any vacation deadline has passed — response is late
+  const shouldEmail = isOverdue;
 
   return { entry, deadlines, isOverdue, shouldEmail };
 }
@@ -376,13 +376,9 @@ export default function LatifaMailGenerator() {
                         size="small"
                         color={r.entry.status === 'En cours' ? 'warning' : 'default'}
                       />
-                      {r.shouldEmail && (
+                      {r.shouldEmail ? (
                         <Chip label="RELANCE" size="small" color="error" />
-                      )}
-                      {r.isOverdue && !r.shouldEmail && (
-                        <Chip label="EN RETARD" size="small" color="warning" />
-                      )}
-                      {!r.isOverdue && (
+                      ) : (
                         <Chip label="DANS LES TEMPS" size="small" color="success" />
                       )}
                     </Box>
@@ -449,13 +445,8 @@ export default function LatifaMailGenerator() {
             <Box>
               {entriesToEmail.length > 0 ? (
                 <Alert severity="error" icon={<Iconify icon="solar:letter-bold" width={20} />}>
-                  <strong>{entriesToEmail.length}</strong> portage(s) en attente de réponse au-delà de la
-                  dernière vacation. Il faut envoyer le mail de relance à Latifa.
-                </Alert>
-              ) : results.some((r) => r.isOverdue) ? (
-                <Alert severity="warning">
-                  Des vacations de réponse sont dépassées mais la dernière vacation (V3 19h) n&apos;est pas
-                  encore passée. Surveillez la prochaine vacation.
+                  <strong>{entriesToEmail.length}</strong> portage(s) en attente de réponse — deadline dépassée.
+                  Il faut envoyer le mail de relance à Latifa.
                 </Alert>
               ) : (
                 <Alert severity="success">
