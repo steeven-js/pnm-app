@@ -36,7 +36,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         label: 'Contrôle bascule & fichiers EMA (email)',
         description:
             'Emails de confirmation de bascule PORTA MOBI et de contrôle des fichiers batchhandler FNR_V3 sur EMA. Vérifier la fin du traitement et l\'absence d\'erreur.',
-        scheduledTime: '09:00',
+        scheduledTime: '09:30',
         icon: 'solar:letter-bold-duotone',
         category: 'supervision',
         checkType: 'email',
