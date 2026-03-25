@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/verify/filename-decoder', [VerifyToolController::class, 'filenameDecoder'])->name('verify.filename-decoder');
     Route::get('/verify/portage-id', [VerifyToolController::class, 'portageIdCalculator'])->name('verify.portage-id');
     Route::get('/verify/msisdn-checker', [VerifyToolController::class, 'msisdnChecker'])->name('verify.msisdn-checker');
+    Route::get('/verify/latifa-mail', [VerifyToolController::class, 'latifaMailGenerator'])->name('verify.latifa-mail');
 
     // Profile (Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -42,6 +42,15 @@ const TOOLS = [
     color: '#ef4444',
     count: 'Hash MD5 : OPR + OPD + Date + MSISDN',
   },
+  {
+    title: 'Mail Latifa — Relance portage',
+    description:
+      "Vérifiez les deadlines de réponse 12XX et générez un mail de relance pour les portages en retard.",
+    icon: 'solar:letter-bold-duotone',
+    href: '/verify/latifa-mail',
+    color: '#8b5cf6',
+    count: 'Deadlines vacations, mail automatique',
+  },
 ];
 
 export default function VerifyIndex() {

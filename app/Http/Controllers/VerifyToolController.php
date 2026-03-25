@@ -31,4 +31,9 @@ class VerifyToolController extends Controller
     {
         return Inertia::render('Verify/MsisdnChecker');
     }
+
+    public function latifaMailGenerator(): Response
+    {
+        return Inertia::render('Verify/LatifaMailGenerator');
+    }
 }
