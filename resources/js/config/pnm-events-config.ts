@@ -32,26 +32,6 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         ],
     },
     {
-        key: 'verif_bascule_email',
-        label: 'Contrôle bascule & fichiers EMA (email)',
-        description:
-            'Emails de confirmation de bascule PORTA MOBI et de contrôle des fichiers batchhandler FNR_V3 sur EMA. Vérifier la fin du traitement et l\'absence d\'erreur.',
-        scheduledTime: '09:30',
-        icon: 'solar:letter-bold-duotone',
-        category: 'supervision',
-        checkType: 'email',
-        emailSubjects: [
-            { subject: '[PNMV3]Verification Bascule Porta MOBI : FIN', origin: 'internal' },
-            { subject: '[PNM]Controle fichier batchhandler FNR_V3 sur EMA', origin: 'internal' },
-        ],
-        checklist: [
-            'Email [PNMV3] Verification Bascule Porta MOBI : FIN reçu',
-            'Bascule terminée sans erreur',
-            'Email [PNM] Controle fichier batchhandler FNR_V3 sur EMA reçu',
-            'Fichiers EMA traités correctement',
-        ],
-    },
-    {
         key: 'rio_reporting',
         label: 'Reporting RIO incorrect',
         description:
@@ -89,6 +69,27 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'AR non-reçus > 60 min : contacter opérateur',
             'Fichiers non acquittés : signaler si récurrent',
             'Conflits [OUVERT] : investiguer si récent (< 7j)',
+        ],
+    },
+    // ── 09:30 ──
+    {
+        key: 'verif_bascule_email',
+        label: 'Contrôle bascule & fichiers EMA (email)',
+        description:
+            'Emails de confirmation de bascule PORTA MOBI et de contrôle des fichiers batchhandler FNR_V3 sur EMA. Vérifier la fin du traitement et l\'absence d\'erreur.',
+        scheduledTime: '09:30',
+        icon: 'solar:letter-bold-duotone',
+        category: 'supervision',
+        checkType: 'email',
+        emailSubjects: [
+            { subject: '[PNMV3]Verification Bascule Porta MOBI : FIN', origin: 'internal' },
+            { subject: '[PNM]Controle fichier batchhandler FNR_V3 sur EMA', origin: 'internal' },
+        ],
+        checklist: [
+            'Email [PNMV3] Verification Bascule Porta MOBI : FIN reçu',
+            'Bascule terminée sans erreur',
+            'Email [PNM] Controle fichier batchhandler FNR_V3 sur EMA reçu',
+            'Fichiers EMA traités correctement',
         ],
     },
     // ── 10:15 ──
