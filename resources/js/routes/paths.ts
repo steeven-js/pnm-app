@@ -56,6 +56,7 @@ export const paths = {
     filenameDecoder: '/verify/filename-decoder',
     portageId: '/verify/portage-id',
     msisdnChecker: '/verify/msisdn-checker',
+    latifaMail: '/verify/latifa-mail',
   },
   // RESOLVE TOOLS
   resolve: {

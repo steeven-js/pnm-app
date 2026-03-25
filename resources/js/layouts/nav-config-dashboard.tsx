@@ -44,6 +44,7 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Calcul de dates', path: paths.verify.dateCalculator },
           { title: 'Décodeur fichier', path: paths.verify.filenameDecoder },
           { title: 'ID Portage', path: paths.verify.portageId },
+          { title: 'Mail Latifa', path: paths.verify.latifaMail },
         ],
       },
       {
