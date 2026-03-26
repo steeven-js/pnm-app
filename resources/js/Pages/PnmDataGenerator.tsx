@@ -458,7 +458,7 @@ function Tab1210() {
             <>
               <OutputBlock content={output} fileName={fileName} />
               <Alert severity="warning">
-                Creez le fichier <code>{fileName}</code> sur le serveur puis lancez <code>./PnmDataAckManager.sh -v</code>.
+                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
             </>
           )}
@@ -675,7 +675,7 @@ function Tab1110() {
                 </CardContent>
               </Card>
               <Alert severity="warning">
-                Creez le fichier <code>{fileName}</code> sur le serveur puis lancez <code>./PnmDataAckManager.sh -v</code>.
+                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
             </>
           )}
