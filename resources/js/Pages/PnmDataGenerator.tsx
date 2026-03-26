@@ -483,14 +483,46 @@ function Tab1210() {
                   ? `${dpRaw.slice(6, 8)}/${dpRaw.slice(4, 6)}/${dpRaw.slice(0, 4)}`
                   : 'XX/XX/XXXX';
                 const mailBodyPlain = `Hi Winifred,\n\nWe have transmitted the file ${sourceFileName} containing the ticket${plural ? 's' : ''} 1110 concerning the portabilit${plural ? 'ies' : 'y'} of ${msisdns}, scheduled on ${dpFormatted}.\nWe have also created and integrated the attached file ${fileName} containing the ticket${plural ? 's' : ''} 1210 for UTS acceptance.\n\nWishing you a good reception.`;
+                const mailSubject = `[PNM] Portability ${msisdns} to Digicel`;
                 return (
                   <Card variant="outlined" sx={{ mt: 2, borderLeft: 4, borderLeftColor: '#00a651' }}>
                     <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
                         <Iconify icon="solar:letter-bold-duotone" width={20} sx={{ color: '#00a651' }} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Mail UTS (Winifred)</Typography>
-                        <Chip label="uts-french-portability@cwc.com" size="small" variant="outlined" sx={{ fontFamily: 'monospace', fontSize: 11 }} />
                       </Stack>
+
+                      {/* Objet */}
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 60 }}>Objet :</Typography>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>{mailSubject}</Typography>
+                        <CopyButton text={mailSubject} label="Copier l'objet" />
+                      </Stack>
+
+                      {/* À */}
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 60 }}>À :</Typography>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 11 }}>winifred.tjinasioe@cwc.com</Typography>
+                        <CopyButton text="winifred.tjinasioe@cwc.com" label="Copier" />
+                      </Stack>
+
+                      {/* Cc */}
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 60 }}>Cc :</Typography>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 11 }}>martin.paquette@libertycaribbean.com; uts-french-portability@cwc.com; FWI_PNM_SI@digicelgroup.fr</Typography>
+                        <CopyButton text="martin.paquette@libertycaribbean.com; uts-french-portability@cwc.com; FWI_PNM_SI@digicelgroup.fr" label="Copier" />
+                      </Stack>
+
+                      {/* Pièce jointe */}
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, minWidth: 60 }}>PJ :</Typography>
+                        <Chip icon={<Iconify icon="solar:file-bold" width={14} />} label={fileName} size="small" color="success" variant="soft" sx={{ fontFamily: 'monospace', fontSize: 11 }} />
+                        <Typography variant="caption" color="error">(obligatoire)</Typography>
+                      </Stack>
+
+                      <Divider sx={{ mb: 1.5 }} />
+
+                      {/* Corps du mail */}
                       <Box sx={{ bgcolor: 'grey.50', borderRadius: 1, p: 2, fontSize: 13, whiteSpace: 'pre-wrap', border: '1px solid', borderColor: 'divider', position: 'relative', lineHeight: 1.8 }}>
                         Hi Winifred,{'\n\n'}
                         We have transmitted the file <strong>{sourceFileName}</strong> containing the ticket{plural ? 's' : ''} 1110 concerning the portabilit{plural ? 'ies' : 'y'} of <strong>{msisdns}</strong>, scheduled on <strong>{dpFormatted}</strong>.{'\n'}
