@@ -278,8 +278,8 @@ function generate1210PnmData(
   const fn = `PNMDATA.${opd}.${opr}.${fileTimestamp}.${fileSequence}`;
   const total = String(valid.length + 2).padStart(6, '0');
   const header = `0123456789|${fn}|${opd}|${fileTimestamp}`;
-  const lines = valid.map((t) =>
-    `${ticketType}|${t.opd}|${t.opr}|${t.opr}|${t.opd}|${t.datetime}|${t.msisdn}|${t.rio}|${t.seq}|${responseCode}|${fileTimestamp}||`
+  const lines = valid.map((t, i) =>
+    `${ticketType}|${t.opd}|${t.opr}|${t.opr}|${t.opd}|${t.datetime}|${t.msisdn}|${t.rio}|${String(i + 1).padStart(4, '0')}|${responseCode}|${fileTimestamp}||`
   );
   const footer = `9876543210|${opd}|${fileTimestamp}|${total}`;
   return [header, ...lines, footer].join('\n');
