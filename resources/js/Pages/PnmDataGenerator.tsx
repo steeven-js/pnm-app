@@ -326,7 +326,20 @@ function Tab1210() {
 
   const parsedTickets = useMemo(() => {
     if (!inputText.trim()) return [];
-    const tickets = inputText.split('\n').map((l) => l.trim()).filter(Boolean).map(parse1110Line);
+
+    // Try to extract source PNMDATA filename from Admin Portal header
+    const srcMatch = inputText.match(/Fichier\s+(PNMDATA\.\d{2}\.\d{2}\.\d{14}\.\d{3})/i);
+    if (srcMatch && !sourceFileName) {
+      setSourceFileName(srcMatch[1]);
+    }
+
+    // Filter lines: keep only those starting with | or containing |1110|
+    const lines = inputText.split('\n').map((l) => l.trim()).filter(Boolean);
+    const ticketLines = lines.filter((l) => /\|1110\|/.test(l) || /^\d+\.\s*\|/.test(l));
+    // Clean numbered prefix (e.g., "1. |1110|..." → "|1110|...")
+    const cleaned = ticketLines.map((l) => l.replace(/^\d+\.\s*/, ''));
+
+    const tickets = (cleaned.length > 0 ? cleaned : lines).map(parse1110Line);
     if (!dateAutoSet && tickets.length > 0) {
       const first = tickets.find((t) => t.valid);
       if (first) {
@@ -338,7 +351,7 @@ function Tab1210() {
       }
     }
     return tickets;
-  }, [inputText, dateAutoSet]);
+  }, [inputText, dateAutoSet, sourceFileName]);
 
   const validTickets = useMemo(() => parsedTickets.filter((t) => t.valid), [parsedTickets]);
   const fileTimestamp = useMemo(() => toTimestamp(fileDate, fileTime), [fileDate, fileTime]);
@@ -359,7 +372,7 @@ function Tab1210() {
         <StepLabel><Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Coller les tickets 1110</Typography></StepLabel>
         <StepContent>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-            Collez les lignes 1110 depuis PortaWebUI (Liste des Fichiers). Une ligne par ticket.
+            Collez les lignes 1110 depuis Admin Portal (Liste des Fichiers). Vous pouvez coller le bloc complet (en-tete + tickets) ou uniquement les lignes 1110.
           </Typography>
           <TextField multiline rows={5} fullWidth
             placeholder={`|1110|02|05|02|05|20260313111929|0690100733|bd1ad95b...|0001|05P056159ZHT|20260313140212|20260317111849|||97100|20260313|`}
@@ -448,7 +461,7 @@ function Tab1210() {
                 required
                 onChange={(e) => setSourceFileName(e.target.value)}
                 placeholder="Ex: PNMDATA.02.05.20260325190157.003"
-                helperText="Nom complet du fichier PNMDATA transmis a UTS contenant le(s) 1110 (obligatoire pour le mail UTS)"
+                helperText="Auto-detecte si vous collez le bloc complet d'Admin Portal, sinon saisir manuellement"
                 error={!sourceFileName && validTickets.length > 0}
               />
             )}
