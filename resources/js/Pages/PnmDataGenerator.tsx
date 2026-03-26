@@ -460,7 +460,7 @@ function Tab1210() {
               <Alert severity="warning">
                 Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
-              {ticketType === '1210' && validTickets.length > 0 && validTickets[0].opr === '05' && (() => {
+              {ticketType === '1210' && validTickets.length > 0 && (validTickets[0].opd === '05' || validTickets[0].opr === '05') && (() => {
                 const msisdns = validTickets.map((t) => t.msisdn).join('/');
                 const dpRaw = validTickets[0].datePortage || '';
                 const dpFormatted = dpRaw.length >= 8
