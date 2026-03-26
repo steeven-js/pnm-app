@@ -460,6 +460,32 @@ function Tab1210() {
               <Alert severity="warning">
                 Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
+              {ticketType === '1210' && validTickets.length > 0 && validTickets[0].opr === '05' && (() => {
+                const msisdns = validTickets.map((t) => t.msisdn).join('/');
+                const dpRaw = validTickets[0].datePortage || '';
+                const dpFormatted = dpRaw.length >= 8
+                  ? `${dpRaw.slice(6, 8)}/${dpRaw.slice(4, 6)}/${dpRaw.slice(0, 4)}`
+                  : 'XX/XX/XXXX';
+                const srcFileName = `PNMDATA.${validTickets[0].opr}.${validTickets[0].opd}.${validTickets[0].datetime || 'XXXXXXXXXXXXXX'}.XXX`;
+                const mailBody = `Hi Winifred,\n\nWe have transmitted the file ${srcFileName} containing the tickets 1110 concerning the portability of ${msisdns}, scheduled on ${dpFormatted}.\nWe have also created and integrated the attached file containing the tickets 1210 for UTS acceptance.\n\nWishing you a good reception.`;
+                return (
+                  <Card variant="outlined" sx={{ mt: 2, borderLeft: 4, borderLeftColor: '#00a651' }}>
+                    <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                        <Iconify icon="solar:letter-bold-duotone" width={20} sx={{ color: '#00a651' }} />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Mail UTS (Winifred)</Typography>
+                        <Chip label="uts-french-portability@cwc.com" size="small" variant="outlined" sx={{ fontFamily: 'monospace', fontSize: 11 }} />
+                      </Stack>
+                      <Box sx={{ bgcolor: 'grey.50', borderRadius: 1, p: 2, fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', border: '1px solid', borderColor: 'divider', position: 'relative' }}>
+                        {mailBody}
+                        <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+                          <CopyButton text={mailBody} label="Copier le mail" />
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </>
           )}
         </StepContent>
