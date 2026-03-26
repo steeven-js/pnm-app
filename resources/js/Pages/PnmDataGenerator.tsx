@@ -485,7 +485,7 @@ function Tab1210() {
             <>
               <OutputBlock content={output} fileName={fileName} />
               <Alert severity="warning">
-                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
+                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[1]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
               {ticketType === '1210' && validTickets.length > 0 && (validTickets[0].opd === '05' || validTickets[0].opr === '05') && sourceFileName && (() => {
                 const count = validTickets.length;
@@ -764,7 +764,7 @@ function Tab1110() {
                 </CardContent>
               </Card>
               <Alert severity="warning">
-                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[2]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
+                Placez le fichier dans <code>/home/porta_pnmv3/PortaSync/pnmdata/{fileName.split('.')[1]}/recv/{fileName}</code> puis lancez <code>./PnmDataAckManager.sh -v</code>.
               </Alert>
             </>
           )}
