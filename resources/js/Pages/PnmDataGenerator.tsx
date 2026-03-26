@@ -441,14 +441,14 @@ function Tab1210() {
             </Stack>
             {validTickets.length > 0 && (validTickets[0].opd === '05' || validTickets[0].opr === '05') && (
               <TextField
-                label="Fichier PNMDATA source (contenant le 1110)"
+                label="Fichier PNMDATA recu d'UTS (contenant le 1110)"
                 value={sourceFileName}
                 size="small"
                 fullWidth
                 required
                 onChange={(e) => setSourceFileName(e.target.value)}
                 placeholder="Ex: PNMDATA.02.05.20260325190157.003"
-                helperText="Nom complet du fichier PNMDATA envoye a UTS contenant le(s) 1110 (obligatoire pour le mail UTS)"
+                helperText="Nom complet du fichier PNMDATA recu d'UTS contenant le(s) 1110 (obligatoire pour le mail UTS)"
                 error={!sourceFileName && validTickets.length > 0}
               />
             )}
@@ -482,7 +482,7 @@ function Tab1210() {
                 const dpFormatted = dpRaw.length >= 8
                   ? `${dpRaw.slice(6, 8)}/${dpRaw.slice(4, 6)}/${dpRaw.slice(0, 4)}`
                   : 'XX/XX/XXXX';
-                const mailBodyPlain = `Hi Winifred,\n\nWe have transmitted the file ${sourceFileName} containing the ticket${plural ? 's' : ''} 1110 concerning the portabilit${plural ? 'ies' : 'y'} of ${msisdns}, scheduled on ${dpFormatted}.\nWe have also created and integrated the attached file ${fileName} containing the ticket${plural ? 's' : ''} 1210 for UTS acceptance.\n\nWishing you a good reception.`;
+                const mailBodyPlain = `Hi Winifred,\n\nWe have received the file ${sourceFileName} containing the ticket${plural ? 's' : ''} 1110 concerning the portabilit${plural ? 'ies' : 'y'} of ${msisdns}, scheduled on ${dpFormatted}.\nWe have also created and integrated the attached file ${fileName} containing the ticket${plural ? 's' : ''} 1210 for UTS acceptance.\n\nWishing you a good reception.`;
                 return (
                   <Card variant="outlined" sx={{ mt: 2, borderLeft: 4, borderLeftColor: '#00a651' }}>
                     <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
@@ -493,7 +493,7 @@ function Tab1210() {
                       </Stack>
                       <Box sx={{ bgcolor: 'grey.50', borderRadius: 1, p: 2, fontSize: 13, whiteSpace: 'pre-wrap', border: '1px solid', borderColor: 'divider', position: 'relative', lineHeight: 1.8 }}>
                         Hi Winifred,{'\n\n'}
-                        We have transmitted the file <strong>{sourceFileName}</strong> containing the ticket{plural ? 's' : ''} 1110 concerning the portabilit{plural ? 'ies' : 'y'} of <strong>{msisdns}</strong>, scheduled on <strong>{dpFormatted}</strong>.{'\n'}
+                        We have received the file <strong>{sourceFileName}</strong> containing the ticket{plural ? 's' : ''} 1110 concerning the portabilit{plural ? 'ies' : 'y'} of <strong>{msisdns}</strong>, scheduled on <strong>{dpFormatted}</strong>.{'\n'}
                         We have also created and integrated the attached file <strong>{fileName}</strong> containing the ticket{plural ? 's' : ''} 1210 for UTS acceptance.{'\n\n'}
                         Wishing you a good reception.
                         <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
