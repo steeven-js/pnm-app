@@ -29,6 +29,7 @@ import { HolidayBanner } from './holiday-banner';
 import { TimelineTrack } from './timeline-track';
 import { TimelineLegend } from './timeline-legend';
 import { EventDetailPanel } from './event-detail-panel';
+import { DailyReportButton } from './daily-report';
 
 const TZ = 'America/Martinique';
 
@@ -183,6 +184,8 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
                             </Stack>
                             <LinearProgress variant="determinate" value={progressPercent} color="success" sx={{ height: 6, borderRadius: 3 }} />
                         </Box>
+
+                        <DailyReportButton date={displayDate} />
 
                         {/* Date navigation */}
                         <Stack direction="row" alignItems="center" spacing={0.5}>
