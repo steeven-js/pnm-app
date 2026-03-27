@@ -104,25 +104,7 @@ export default function Dashboard() {
           ))}
         </Grid>
 
-        {/* Domain Progress */}
-        {domains && domains.length > 0 && (
-          <>
-            <Typography variant="h5" sx={{ mb: 3 }}>
-              Progression par domaine
-            </Typography>
-
-            <Grid container spacing={3}>
-              {domains.map((domain) => (
-                <Grid key={domain.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <DomainCard
-                    domain={domain}
-                    progress={domainProgress?.[domain.id]}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </>
-        )}
+        {/* Domain Progress — déplacé dans la page Progression */}
       </Box>
     </DashboardLayout>
   );
