@@ -472,6 +472,7 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                             eventKey={event.key}
                             checklist={event.checklist}
                             onApply={handleLogApply}
+                            hasAttachment={event.hasAttachment}
                         />
                     )}
                 </Box>

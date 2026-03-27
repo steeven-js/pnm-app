@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
@@ -18,6 +19,7 @@ type LogPasteDialogProps = {
     eventKey: string;
     checklist: string[];
     onApply: (checkedItems: string[], notes: string, parsedData?: unknown, metadata?: Record<string, unknown>) => void;
+    hasAttachment?: boolean;
 };
 
 const DIALOG_CONFIG: Record<string, { title: string; description: string; placeholder: string }> = {
@@ -78,12 +80,30 @@ function getConfig(eventKey: string) {
     return DIALOG_CONFIG[eventKey] ?? DIALOG_CONFIG.vacation;
 }
 
-export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: LogPasteDialogProps) {
+export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply, hasAttachment }: LogPasteDialogProps) {
     const [pastedContent, setPastedContent] = useState('');
     const [preview, setPreview] = useState<AutoFillResult | null>(null);
     const [error, setError] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const config = getConfig(eventKey);
+
+    const handleFileImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const text = evt.target?.result as string;
+            if (text) {
+                setPastedContent(text);
+                setPreview(null);
+                setError('');
+            }
+        };
+        reader.readAsText(file);
+        // Reset input so same file can be re-imported
+        e.target.value = '';
+    }, []);
 
     const handleParse = () => {
         setError('');
@@ -123,9 +143,34 @@ export function LogPasteDialog({ open, onClose, eventKey, checklist, onApply }: 
                     {config.description}
                 </Typography>
 
+                {hasAttachment && (
+                    <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Iconify icon="solar:paperclip-bold" width={16} />}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            Importer fichier (CSV/XLS/TXT)
+                        </Button>
+                        {pastedContent && (
+                            <Typography variant="caption" color="success.main" sx={{ alignSelf: 'center' }}>
+                                Fichier chargé ({pastedContent.split('\n').length} lignes)
+                            </Typography>
+                        )}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".csv,.txt,.xls,.xlsx,.tsv"
+                            style={{ display: 'none' }}
+                            onChange={handleFileImport}
+                        />
+                    </Stack>
+                )}
+
                 <TextField
                     multiline
-                    minRows={6}
+                    minRows={hasAttachment ? 4 : 6}
                     maxRows={12}
                     fullWidth
                     size="small"
