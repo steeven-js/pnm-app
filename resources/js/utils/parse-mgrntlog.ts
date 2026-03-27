@@ -275,7 +275,9 @@ function autoFillCto(
     if (volume !== null) lines.push(`Volumétrie CTO du jour: ${volume}`);
     if (finTraitement) lines.push(`Fin de traitement automate bascule: ${finTraitement}`);
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = { cto_volume: volume, fin_traitement: finTraitement };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -332,7 +334,19 @@ function autoFillIncidents(
         lines.push(`MSISDN: ${parsed.msisdnsConcerned.join(', ')}`);
     }
 
-    return { checkedItems, notes: lines.join('\n'), parsedData: parsed };
+    const metadata: Record<string, unknown> = {
+        total_incidents: parsed.totalCount,
+        refusals: summary.refusals,
+        file_errors: summary.fileErrors,
+        annulations: summary.annulations,
+        ar_non_recu: summary.arNonRecu,
+        file_not_ack: summary.fileNotAck,
+        operators_involved: parsed.operatorsInvolved,
+        msisdns_concerned: parsed.msisdnsConcerned,
+        has_conflit: conflitsOuvert,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), parsedData: parsed, metadata };
 }
 
 // ===================================================================
@@ -374,7 +388,13 @@ function autoFillRio(
         lines.push(`⚠ ${totalRefus} refus RIO à traiter`);
     }
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = {
+        refus_entrante: refusEntrante,
+        refus_sortante: refusSortante,
+        total_refus: totalRefus,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -526,14 +546,20 @@ function autoFillTickets(
     if (tickets1210 !== null) lines.push(`Tickets 1210 DT: ${tickets1210} en attente`);
     if (ticketsGen !== null) lines.push(`Tickets généraux: ${ticketsGen} en attente`);
     // If user pasted both mails
+    let ticketsGenCount: number | null = null;
     if (tickets1210 !== null && ticketsGenMatch && !ticketsGen) {
-        const genCount = parseInt(ticketsGenMatch[1], 10);
-        if (genCount !== tickets1210) {
-            lines.push(`Tickets généraux: ${genCount} en attente`);
+        ticketsGenCount = parseInt(ticketsGenMatch[1], 10);
+        if (ticketsGenCount !== tickets1210) {
+            lines.push(`Tickets généraux: ${ticketsGenCount} en attente`);
         }
     }
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = {
+        tickets_1210: tickets1210,
+        tickets_generaux: ticketsGen ?? ticketsGenCount,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -586,7 +612,17 @@ function autoFillPrevisions(
     }
     lines.push(`  Total    IN: ${totalIn}  OUT: ${totalOut}`);
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = {
+        internes,
+        digicel_in: digicelIn,
+        digicel_out: digicelOut,
+        wizzee_in: wizzeeIn,
+        wizzee_out: wizzeeOut,
+        total_in: totalIn,
+        total_out: totalOut,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -706,7 +742,23 @@ function autoFillVerifBascule(
     if (!ema.hasContent) lines.push('\n⚠ EmaExtracter.log non détecté dans le contenu collé');
     if (!emm.hasContent) lines.push('\n⚠ EmmExtracter.log non détecté dans le contenu collé');
 
-    return { checkedItems, notes: lines.join('\n') };
+    const emaOk = VERIF_OPERATORS.filter((op) => ema.opResults[op]).length;
+    const emmOk = VERIF_OPERATORS.filter((op) => emm.opResults[op]).length;
+    const metadata: Record<string, unknown> = {
+        ema_operators_ok: emaOk,
+        ema_operators_total: VERIF_OPERATORS.length,
+        ema_count: ema.count,
+        ema_duration: ema.duration,
+        ema_finished: ema.finished,
+        emm_operators_ok: emmOk,
+        emm_operators_total: VERIF_OPERATORS.length,
+        emm_count: emm.count,
+        emm_duration: emm.duration,
+        emm_finished: emm.finished,
+        all_ok: emaOk === VERIF_OPERATORS.length && emmOk === VERIF_OPERATORS.length && ema.finished && emm.finished,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -762,7 +814,17 @@ function autoFillVerifGeneration(
         lines.push(`\n⚠ ${missingOps.length} opérateur(s) non détecté(s) et pas de Fin de Traitement — le log est peut-être tronqué, réessayez avec plus de lignes (ex. tail -n 20).`);
     }
 
-    return { checkedItems, notes: lines.join('\n') };
+    const totalTickets = opCodes.reduce((sum, code) => sum + (generated[code]?.tickets ?? 0), 0);
+    const metadata: Record<string, unknown> = {
+        operators_generated: opCodes.filter((c) => !!generated[c]).length,
+        operators_total: opCodes.length,
+        operators_missing: missingOps,
+        total_tickets: totalTickets,
+        fin_traitement: finTraitement,
+        files: Object.fromEntries(opCodes.map((c) => [c, generated[c]])),
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -862,7 +924,18 @@ function autoFillVerifBasculeEmail(
     if (!hasBasculeFinEmail) lines.push('\n⚠ Email [PNMV3] FIN non détecté');
     if (!hasControleEmaEmail) lines.push('\n⚠ Email [PNM] Controle EMA non détecté');
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = {
+        bascule_fin: hasBasculeFinEmail,
+        bascule_no_error: basculeNoError,
+        rl_ok: rlOk,
+        rl_total: rlTotal,
+        controle_ema: hasControleEmaEmail,
+        controle_ok: controleOk,
+        fnr_present: fnrPresent,
+        pourcentage_ok: pourcentageOk,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
 
 // ===================================================================
@@ -939,5 +1012,14 @@ function autoFillVerifAcquittements(
         lines.push(`\n⚠ ${missingOps.length} opérateur(s) non détecté(s) dans le contenu collé (${missingOps.map((o) => o.name).join(', ')}). Le log est peut-être tronqué — réessayez avec plus de lignes (ex. tail -n 100).`);
     }
 
-    return { checkedItems, notes: lines.join('\n') };
+    const metadata: Record<string, unknown> = {
+        operators_ok: ACK_OP_MAP.filter((op) => opChecks[op.code]).length,
+        operators_total: ACK_OP_MAP.length,
+        operators_missing: missingOps.map((o) => o.name),
+        acr_count: acrCount,
+        not_found_count: notFoundCount,
+        fin_traitement: finTraitement,
+    };
+
+    return { checkedItems, notes: lines.join('\n'), metadata };
 }
