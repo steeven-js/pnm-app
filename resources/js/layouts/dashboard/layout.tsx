@@ -68,7 +68,7 @@ export function DashboardLayout({
   const navVars = dashboardNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
-  const { value: chatOpen, onFalse: onChatClose, onTrue: onChatOpen } = useBoolean();
+  // const { value: chatOpen, onFalse: onChatClose, onTrue: onChatOpen } = useBoolean(); // Assistant IA — pas prioritaire
 
   const navData = slotProps?.nav?.data ?? dynamicNavData;
 
@@ -181,6 +181,7 @@ export function DashboardLayout({
       slots={{
         bottomArea: (
           <Box sx={{ px: 2.5, pb: 2 }}>
+            {/* Assistant IA — pas prioritaire
             <Button
               fullWidth
               variant="soft"
@@ -191,6 +192,7 @@ export function DashboardLayout({
             >
               {!isNavMini && 'Assistant IA'}
             </Button>
+            */}
 
             <Box
               component={RouterLink}
@@ -225,7 +227,7 @@ export function DashboardLayout({
 
   return (
     <>
-    <ChatPanel open={chatOpen} onClose={onChatClose} />
+    {/* <ChatPanel open={chatOpen} onClose={onChatClose} /> */} {/* Assistant IA — pas prioritaire */}
     <SettingsDrawer defaultSettings={defaultSettings} />
     <LayoutSection
       /** **************************************
