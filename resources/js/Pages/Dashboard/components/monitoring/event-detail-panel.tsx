@@ -350,39 +350,7 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                 }
             }
 
-            // Auto-compare PSO vs previsions veille
-            if (event?.key === 'pso_jour' && metadata.pso_total !== undefined) {
-                try {
-                    const csrfToken = document.cookie.split('; ').find((c) => c.startsWith('XSRF-TOKEN='))?.split('=')[1]?.replace(/%3D/g, '=') ?? '';
-                    const res = await fetch('/api/monitoring/previsions', {
-                        headers: { Accept: 'application/json', 'X-XSRF-TOKEN': csrfToken },
-                        credentials: 'same-origin',
-                    });
-                    if (res.ok) {
-                        const prev = await res.json();
-                        if (prev.previsions) {
-                            const prevOut = ((prev.previsions.digicel_out ?? 0) as number) + ((prev.previsions.wizzee_out ?? 0) as number);
-                            const psoTotal = (metadata.pso_gpmag as number ?? 0) + (metadata.pso_wizzee as number ?? 0);
-                            const ecart = prevOut > 0 ? Math.abs(psoTotal - prevOut) / prevOut * 100 : 0;
-                            const isCoherent = ecart <= 20;
-
-                            finalNotes += `\n\n--- Comparaison PSO vs Prévisions veille (${prev.previsions_date}) ---`;
-                            finalNotes += `\n  PSO réel : ${psoTotal} (GPMAG: ${metadata.pso_gpmag}, WIZZEE: ${metadata.pso_wizzee})`;
-                            finalNotes += `\n  Prévisions OUT : ${prevOut} (DIGICEL: ${prev.previsions.digicel_out ?? 0}, WIZZEE: ${prev.previsions.wizzee_out ?? 0})`;
-                            finalNotes += `\n  Écart : ${ecart.toFixed(1)}% ${isCoherent ? '✅' : '⚠️ > 20%'}`;
-
-                            if (isCoherent) {
-                                finalChecked.push('Volumétrie cohérente avec prévisions veille');
-                                finalChecked.push("Pas d'écart > 20% avec la prévision");
-                            }
-                        } else {
-                            finalNotes += `\n\n--- Comparaison PSO ---\n  ⚠ Pas de prévisions trouvées pour la veille (${prev.previsions_date}). Valider l'événement "Portabilités prévues" de la veille d'abord.`;
-                        }
-                    }
-                } catch {
-                    finalNotes += '\n\n⚠ Impossible de récupérer les prévisions de la veille.';
-                }
-            }
+            // PSO: no comparison needed — rare event for manual resiliation only
         }
 
         setCheckedItems((prev) => [...new Set([...prev, ...finalChecked])]);

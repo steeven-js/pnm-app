@@ -218,30 +218,15 @@ class MonitoringController extends Controller
             }
         }
 
-        // PSO vs Previsions comparison
+        // PSO resiliation warnings
         $psoEvent = $events->get('pso_jour');
-        if ($psoEvent && $previsions?->metadata) {
-            $psoMeta = $psoEvent->metadata ?? [];
-            $prevMeta = $previsions->metadata ?? [];
-
-            $psoTotal = ($psoMeta['pso_gpmag'] ?? 0) + ($psoMeta['pso_wizzee'] ?? 0);
-            $prevTotal = ($prevMeta['digicel_out'] ?? 0) + ($prevMeta['wizzee_out'] ?? 0);
-
-            $ecart = $prevTotal > 0 ? abs($psoTotal - $prevTotal) / $prevTotal * 100 : 0;
-
-            $comparisons[] = [
-                'type' => 'pso_vs_previsions',
-                'label' => 'PSO réel vs Prévisions veille',
-                'actual' => $psoTotal,
-                'expected' => $prevTotal,
-                'ecart_pct' => round($ecart, 1),
-                'ok' => $ecart <= 20,
-                'detail' => [
-                    'pso_gpmag' => $psoMeta['pso_gpmag'] ?? 0,
-                    'pso_wizzee' => $psoMeta['pso_wizzee'] ?? 0,
-                    'prev_digicel_out' => $prevMeta['digicel_out'] ?? 0,
-                    'prev_wizzee_out' => $prevMeta['wizzee_out'] ?? 0,
-                ],
+        if ($psoEvent?->metadata && ($psoEvent->metadata['has_resiliations'] ?? false)) {
+            $warnings[] = [
+                'event_type' => 'pso_jour',
+                'details' => sprintf(
+                    '%d MSISDN avec résiliation non effectuée — procédure SoapUI (Cas Pratique #18)',
+                    $psoEvent->metadata['msisdn_count'] ?? 0,
+                ),
             ];
         }
 

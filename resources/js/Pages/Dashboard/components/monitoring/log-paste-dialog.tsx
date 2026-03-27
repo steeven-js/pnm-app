@@ -39,9 +39,9 @@ const DIALOG_CONFIG: Record<string, { title: string; description: string; placeh
         placeholder: `Collez le contenu du mail ici...\n\nStats du 11/02/2026 pour les demandes de portabilite refusees pour motif RIO incorrect :\n\nIl y a 0 cas de refus en porta entrante.\n\nIl y a 0 cas de refus en porta sortante.`,
     },
     pso_jour: {
-        title: 'Auto-remplir depuis le PSO',
-        description: "Collez le contenu de l'email [PNMV3] PSO du jour ou le contenu du fichier CSV joint pour remplir la checklist.",
-        placeholder: `Collez le contenu du mail ou du CSV ici...\n\nBonjour,\nVeuillez trouver ci-joint le detail des PSO du jour.\n\n--- ou le CSV ---\n\nRECORD_NO;ACTION_COD;OPERATEUR;N_DE_MOBILE...\n72035481;RLPS;GPMAG;0690199788...`,
+        title: 'Auto-remplir depuis le mail PSO résiliations',
+        description: "Collez le contenu du mail [PNM] Verification des resiliations pour PSO. Ce mail signale les résiliations non effectuées lors de la bascule (très rare).",
+        placeholder: `Collez le contenu du mail ici...\n\nBonjour,\n\nIl y a X résiliation(s) non effective(s) pour la bascule.\n\nMSISDN : 069XXXXXXX\n...`,
     },
     tickets_attente: {
         title: 'Auto-remplir depuis les mails tickets',

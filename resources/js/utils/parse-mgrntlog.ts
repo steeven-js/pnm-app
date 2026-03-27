@@ -398,7 +398,7 @@ function autoFillRio(
 }
 
 // ===================================================================
-// 6.  PSO du jour parser
+// 6.  PSO — Vérification résiliations non effectuées
 // ===================================================================
 
 function autoFillPso(
@@ -406,43 +406,49 @@ function autoFillPso(
     checklist: string[],
     content: string,
 ): AutoFillResult | null {
-    // Detect PSO email body or CSV content
-    const isEmail = /PSO du jour/i.test(content) || /ci-joint le detail des PSO/i.test(content);
-    const isCsv = /RECORD_NO.*ACTION_COD/i.test(content) || /[;\s]RL[PW]S?[;\s]/i.test(content);
+    // Detect PSO resiliation verification email
+    const isPsoMail = /Verification des resiliations pour PSO/i.test(content)
+        || /resiliation.*PSO/i.test(content)
+        || /PSO.*resiliation/i.test(content);
 
-    if (!isEmail && !isCsv) return null;
+    if (!isPsoMail) return null;
 
-    let rowCount: number | null = null;
-    let rlpsCount = 0;
-    let rlwCount = 0;
-    if (isCsv) {
-        // Count data rows (lines containing RLPS or RLW — separated by ; or spaces)
-        const dataLines = content.split('\n').filter((l) => /\bRLPS\b|\bRLW\b/i.test(l));
-        rowCount = dataLines.length;
-        rlpsCount = dataLines.filter((l) => /\bRLPS\b/i.test(l)).length;
-        rlwCount = dataLines.filter((l) => /\bRLW\b/i.test(l)).length;
-    }
+    // Extract number of MSISDN with failed resiliation
+    const countMatch = content.match(/(\d+)\s*MSISDN/i);
+    const msisdnCount = countMatch ? parseInt(countMatch[1], 10) : null;
+
+    // Extract MSISDN list
+    const msisdns = [...new Set(content.match(/06[0-9]{8}/g) ?? [])];
+
+    const hasResiliations = (msisdnCount !== null && msisdnCount > 0) || msisdns.length > 0;
 
     const rules: Record<string, () => boolean> = {
-        'Email [PNMV3] PSO du jour reçu': () => true,
-        'Ouvrir fichier Pnm_PSO_MOBI CSV': () => isCsv,
+        'Email [PNM] Verification des resiliations pour PSO reçu': () => true,
+        'Vérifier si des MSISDN nécessitent une résiliation manuelle': () => true,
+        'Si oui : résiliation via SoapUI (voir Cas Pratique #18)': () => !hasResiliations,
+        'Confirmer résiliation effectuée': () => !hasResiliations,
     };
 
     const checkedItems = checklist.filter((item) => rules[item]?.());
 
-    const lines = ['[Auto] PSO du jour'];
-    if (isEmail && !isCsv) {
-        lines.push('Email PSO reçu - fichier CSV à ouvrir');
-    }
-    if (rowCount !== null) {
-        lines.push(`Volumétrie PSO: ${rowCount} lignes (GPMAG: ${rlpsCount}, WIZZEE: ${rlwCount})`);
+    const lines = ['[Auto] Vérification résiliations pour PSO'];
+    if (hasResiliations) {
+        lines.push(`⚠ ${msisdnCount ?? msisdns.length} MSISDN avec résiliation non effectuée`);
+        if (msisdns.length > 0) lines.push(`MSISDN concernés : ${msisdns.join(', ')}`);
+        lines.push('');
+        lines.push('Procédure : résiliation manuelle via SoapUI (Cas Pratique #18)');
+        lines.push('  WSDL : http://172.24.4.136/WSMobiMaster/WSProvisioning.svc?wsdl');
+        lines.push('  Requête : ExecuteResiliationPs');
+        lines.push('  Utilisateur : PORTA | Origine : PORTA');
+        lines.push('  DateEffet : date du jour à 09:10:00');
+    } else {
+        lines.push('Aucune résiliation en attente — RAS');
     }
 
-    // Store PSO counts in metadata for comparison with previsions
     const metadata: Record<string, unknown> = {
-        pso_total: rowCount,
-        pso_gpmag: rlpsCount,
-        pso_wizzee: rlwCount,
+        has_resiliations: hasResiliations,
+        msisdn_count: msisdnCount ?? msisdns.length,
+        msisdns,
     };
 
     return { checkedItems, notes: lines.join('\n'), metadata };

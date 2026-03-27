@@ -115,22 +115,21 @@ export const pnmEventsConfig: PnmEventConfig[] = [
     // ── 10:16 ──
     {
         key: 'pso_jour',
-        label: 'PSO du jour Forfait',
+        label: 'PSO — Vérification résiliations',
         description:
-            "Email PSO (Plan de Service Opérateur) du jour avec fichier CSV contenant les actions de portabilité prévues.",
+            "Mail [PNM] Verification des resiliations pour PSO. Très rare : signale les résiliations non effectuées lors de la bascule. Procédure : résiliation manuelle via SoapUI (voir Cas Pratique #18).",
         scheduledTime: '10:16',
         icon: 'solar:clipboard-list-bold-duotone',
         category: 'reporting',
         checkType: 'email',
-        hasAttachment: true,
         emailSubjects: [
             { subject: '[PNM] Verification des resiliations pour PSO', origin: 'internal' },
         ],
         checklist: [
-            'Email [PNMV3] PSO du jour reçu',
-            'Ouvrir fichier Pnm_PSO_MOBI CSV',
-            'Volumétrie cohérente avec prévisions veille',
-            "Pas d'écart > 20% avec la prévision",
+            'Email [PNM] Verification des resiliations pour PSO reçu',
+            'Vérifier si des MSISDN nécessitent une résiliation manuelle',
+            'Si oui : résiliation via SoapUI (voir Cas Pratique #18)',
+            'Confirmer résiliation effectuée',
         ],
     },
     // ── 11:15 ──

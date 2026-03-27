@@ -11,7 +11,7 @@ const EVENT_LABELS: Record<string, { label: string; time: string }> = {
     incidents: { label: 'Incidents PNM détectés', time: '09:01' },
     verif_bascule_email: { label: 'Contrôle bascule & fichiers EMA', time: '09:30' },
     verif_generation_pnmdata: { label: 'Génération fichiers vacation', time: '10:15' },
-    pso_jour: { label: 'PSO du jour Forfait', time: '10:16' },
+    pso_jour: { label: 'PSO — Vérification résiliations', time: '10:16' },
     verif_acquittements: { label: 'Acquittements & portages', time: '11:15' },
     tickets_attente: { label: 'Tickets en attente', time: '11:30' },
     vacation_1: { label: '1ère vacation', time: '11:35' },
@@ -121,8 +121,12 @@ function generateReportText(data: any): string {
                 break;
 
             case 'pso_jour':
-                if (meta.pso_total !== undefined) {
-                    L.push(`         ${meta.pso_total} lignes (GPMAG: ${meta.pso_gpmag ?? 0}, WIZZEE: ${meta.pso_wizzee ?? 0})`);
+                if (meta.has_resiliations) {
+                    L.push(`         ⚠ ${meta.msisdn_count} MSISDN avec résiliation non effectuée`);
+                    if (meta.msisdns?.length) L.push(`         MSISDN : ${(meta.msisdns as string[]).join(', ')}`);
+                    L.push('         → Procédure : résiliation manuelle via SoapUI (Cas Pratique #18)');
+                } else if (meta.has_resiliations === false) {
+                    L.push('         Aucune résiliation en attente — RAS');
                 }
                 break;
 
