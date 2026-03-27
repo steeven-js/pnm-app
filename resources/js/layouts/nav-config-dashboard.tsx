@@ -44,12 +44,8 @@ export const navData: NavSectionProps['data'] = [
         children: [
           { title: 'Codes PNM', path: paths.resolve.codes },
           { title: 'Incidents', path: paths.resolve.incidents },
+          { title: 'Investigations', path: paths.investigations },
         ],
-      },
-      {
-        title: 'Investigations',
-        path: paths.investigations,
-        icon: <Iconify icon="solar:magnifer-zoom-in-bold-duotone" width={24} />,
       },
       {
         title: 'Generateur PNMDATA',
