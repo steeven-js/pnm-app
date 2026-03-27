@@ -19,11 +19,6 @@ export const navData: NavSectionProps['data'] = [
         icon: <Iconify icon="solar:home-angle-bold-duotone" width={24} />,
       },
       {
-        title: 'Connaissances',
-        path: paths.knowledge.root,
-        icon: <Iconify icon="solar:notebook-bold-duotone" width={24} />,
-      },
-      {
         title: 'Progression',
         path: paths.dashboard.progress,
         icon: <Iconify icon="solar:chart-bold-duotone" width={24} />,
@@ -31,10 +26,10 @@ export const navData: NavSectionProps['data'] = [
     ],
   },
   /**
-   * Outils PNM
+   * Outils
    */
   {
-    subheader: 'Outils PNM',
+    subheader: 'Outils',
     items: [
       {
         title: 'Vérifier',
@@ -62,29 +57,38 @@ export const navData: NavSectionProps['data'] = [
         icon: <Iconify icon="solar:magnifer-zoom-in-bold-duotone" width={24} />,
       },
       {
-        title: 'Guide Opérations',
-        path: paths.operationsGuide,
-        icon: <Iconify icon="solar:clipboard-check-bold-duotone" width={24} />,
-      },
-      {
-        title: 'Cas Pratiques',
-        path: paths.casPratiques,
-        icon: <Iconify icon="solar:case-round-bold-duotone" width={24} />,
-      },
-      {
-        title: 'Requetes SQL',
-        path: paths.requetesPnm,
-        icon: <Iconify icon="solar:database-bold-duotone" width={24} />,
-      },
-      {
         title: 'Generateur PNMDATA',
         path: paths.pnmdataGenerator,
         icon: <Iconify icon="solar:file-text-bold-duotone" width={24} />,
+      },
+    ],
+  },
+  /**
+   * Base de Connaissances (dépliable)
+   */
+  {
+    subheader: 'Base de Connaissances',
+    items: [
+      {
+        title: 'PNM V3',
+        path: paths.knowledge.root,
+        icon: <Iconify icon="solar:notebook-bold-duotone" width={24} />,
+        children: [
+          { title: 'Connaissances', path: paths.knowledge.root },
+          { title: 'Guide Opérations', path: paths.operationsGuide },
+          { title: 'Cas Pratiques', path: paths.casPratiques },
+          { title: 'Requetes SQL', path: paths.requetesPnm },
+        ],
       },
       {
         title: 'MOBI / CRM',
         path: paths.mobi.root,
         icon: <Iconify icon="solar:server-bold-duotone" width={24} />,
+      },
+      {
+        title: 'Base Tickets',
+        path: paths.ticketsKnowledge,
+        icon: <Iconify icon="solar:archive-bold-duotone" width={24} />,
       },
     ],
   },
@@ -94,11 +98,6 @@ export const navData: NavSectionProps['data'] = [
   {
     subheader: 'Référence',
     items: [
-      {
-        title: 'Base Tickets',
-        path: paths.ticketsKnowledge,
-        icon: <Iconify icon="solar:archive-bold-duotone" width={24} />,
-      },
       {
         title: 'Contacts Operateurs',
         path: paths.contacts,
