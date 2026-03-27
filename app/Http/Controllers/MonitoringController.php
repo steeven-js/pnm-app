@@ -91,24 +91,43 @@ class MonitoringController extends Controller
             ? Carbon::parse($request->input('date'))
             : Carbon::now('America/Martinique')->startOfDay();
 
-        // Look for porta_prevues from yesterday
-        $yesterday = $date->copy()->subDay();
+        // Look for porta_prevues from previous working day (skip weekends and holidays)
+        $lookback = $date->copy()->subDay();
+        $maxLookback = 5; // max 5 days back (handles long weekends)
+        $event = null;
 
-        // Auto-add metadata column if missing
-        if (!Schema::hasColumn('monitoring_events', 'metadata')) {
-            Schema::table('monitoring_events', function ($table) {
-                $table->json('metadata')->nullable()->after('checked_items');
-            });
+        for ($i = 0; $i < $maxLookback; $i++) {
+            // Skip weekends (Saturday=6, Sunday=0)
+            if ($lookback->isSaturday() || $lookback->isSunday()) {
+                $lookback->subDay();
+                continue;
+            }
+
+            // Skip holidays
+            if ($this->holidayService->isHolidayAnywhere($lookback)) {
+                $lookback->subDay();
+                continue;
+            }
+
+            // Auto-add metadata column if missing
+            if (!Schema::hasColumn('monitoring_events', 'metadata')) {
+                Schema::table('monitoring_events', function ($table) {
+                    $table->json('metadata')->nullable()->after('checked_items');
+                });
+            }
+
+            $event = MonitoringEvent::where('user_id', $request->user()->id)
+                ->where('event_type', 'porta_prevues')
+                ->forDate($lookback)
+                ->first();
+
+            if ($event?->metadata) break;
+            $lookback->subDay();
         }
-
-        $event = MonitoringEvent::where('user_id', $request->user()->id)
-            ->where('event_type', 'porta_prevues')
-            ->forDate($yesterday)
-            ->first();
 
         return response()->json([
             'previsions' => $event?->metadata,
-            'previsions_date' => $yesterday->format('Y-m-d'),
+            'previsions_date' => $lookback->format('Y-m-d'),
             'event_status' => $event?->status,
         ]);
     }
