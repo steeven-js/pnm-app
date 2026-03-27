@@ -1022,6 +1022,7 @@ function autoFillVerifAcquittements(
         operators_ok: ACK_OP_MAP.filter((op) => opChecks[op.code]).length,
         operators_total: ACK_OP_MAP.length,
         operators_missing: missingOps.map((o) => o.name),
+        operator_checks: Object.fromEntries(ACK_OP_MAP.map((op) => [op.code, opChecks[op.code]])),
         acr_count: acrCount,
         not_found_count: notFoundCount,
         fin_traitement: finTraitement,

@@ -116,6 +116,14 @@ function generateReportText(data: any): string {
             case 'verif_generation_pnmdata':
                 if (meta.operators_generated !== undefined) {
                     L.push(`         ${meta.operators_generated}/${meta.operators_total} opérateurs : fichiers PNMDATA générés`);
+                    if (meta.files) {
+                        for (const code of ['01', '03', '04', '05', '06']) {
+                            const f = (meta.files as Record<string, { file: string; tickets: number } | null>)[code];
+                            if (f) {
+                                L.push(`         Op. ${code}: ${f.file} (${f.tickets} tickets)`);
+                            }
+                        }
+                    }
                     if (meta.total_tickets) L.push(`         Total tickets : ${meta.total_tickets}`);
                 }
                 break;
@@ -133,8 +141,16 @@ function generateReportText(data: any): string {
             case 'verif_acquittements':
                 if (meta.operators_ok !== undefined) {
                     L.push(`         ${meta.operators_ok}/${meta.operators_total} opérateurs : aucun AR SYNC non-reçu`);
+                    if (meta.operator_checks) {
+                        const opNames: Record<string, string> = { '03': 'SFR Caraïbe', '04': 'Dauphin Télécom', '05': 'UTS', '06': 'FREEC' };
+                        const checks = meta.operator_checks as Record<string, boolean>;
+                        for (const code of ['03', '04', '05', '06']) {
+                            const ok = checks[code];
+                            L.push(`         Op. ${code} (${opNames[code]}): ${ok ? 'Check success' : '⚠ Non détecté'}`);
+                        }
+                    }
                     if (meta.acr_count) L.push(`         ACR traités : ${meta.acr_count}`);
-                    if (meta.not_found_count > 0) L.push(`         ⚠ ${meta.not_found_count} fichier(s) NOT FOUND`);
+                    if ((meta.not_found_count as number) > 0) L.push(`         ⚠ ${meta.not_found_count} fichier(s) NOT FOUND`);
                 }
                 break;
 
