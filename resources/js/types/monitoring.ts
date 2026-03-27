@@ -43,6 +43,7 @@ export type PnmEventConfig = {
     checkType: CheckType;
     emailSubjects?: EmailSubject[];
     sshCommands?: string[];
+    hasAttachment?: boolean;
 };
 
 export type EnrichedPnmEvent = PnmEventConfig & {

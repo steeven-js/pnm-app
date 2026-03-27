@@ -60,7 +60,10 @@ export function TimelineNode({ event, isSelected, onClick }: TimelineNodeProps) 
                 }}>
                     {event.scheduledTime}
                 </Typography>
-                <Iconify icon={ct.icon} width={14} sx={{ color: ct.color, opacity: 0.85 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                    <Iconify icon={ct.icon} width={14} sx={{ color: ct.color, opacity: 0.85 }} />
+                    {event.hasAttachment && <Iconify icon="solar:paperclip-bold" width={12} sx={{ color: '#8b5cf6', opacity: 0.85 }} />}
+                </Box>
             </Box>
         </Tooltip>
     );

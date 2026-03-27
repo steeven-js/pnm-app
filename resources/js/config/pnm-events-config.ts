@@ -122,6 +122,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         icon: 'solar:clipboard-list-bold-duotone',
         category: 'reporting',
         checkType: 'email',
+        hasAttachment: true,
         emailSubjects: [
             { subject: '[PNM] Verification des resiliations pour PSO', origin: 'internal' },
         ],
@@ -162,6 +163,7 @@ export const pnmEventsConfig: PnmEventConfig[] = [
         icon: 'solar:ticket-bold-duotone',
         category: 'incident',
         checkType: 'email',
+        hasAttachment: true,
         checklist: [
             'Email tickets 1210 reçu',
             'Email tickets en attente reçu',

@@ -392,6 +392,14 @@ export function EventDetailPanel({ event, onSave, saving = false, readOnly = fal
                                 fontWeight: 600, fontSize: 11,
                             }}
                         />
+                        {event.hasAttachment && (
+                            <Chip
+                                icon={<Iconify icon="solar:paperclip-bold" width={14} />}
+                                label="PJ"
+                                size="small"
+                                sx={{ bgcolor: '#8b5cf618', color: '#8b5cf6', fontWeight: 600, fontSize: 11 }}
+                            />
+                        )}
                         <Chip label={STATUS_LABELS[event.status].label} color={STATUS_LABELS[event.status].color} size="small" />
                     </Stack>
 
