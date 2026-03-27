@@ -18,11 +18,6 @@ export const navData: NavSectionProps['data'] = [
         path: paths.dashboard.root,
         icon: <Iconify icon="solar:home-angle-bold-duotone" width={24} />,
       },
-      {
-        title: 'Progression',
-        path: paths.dashboard.progress,
-        icon: <Iconify icon="solar:chart-bold-duotone" width={24} />,
-      },
     ],
   },
   /**
@@ -89,6 +84,11 @@ export const navData: NavSectionProps['data'] = [
         title: 'Base Tickets',
         path: paths.ticketsKnowledge,
         icon: <Iconify icon="solar:archive-bold-duotone" width={24} />,
+      },
+      {
+        title: 'Progression',
+        path: paths.dashboard.progress,
+        icon: <Iconify icon="solar:chart-bold-duotone" width={24} />,
       },
     ],
   },
