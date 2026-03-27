@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/monitoring', [MonitoringController::class, 'index'])->name('api.monitoring.index');
     Route::post('/api/monitoring', [MonitoringController::class, 'store'])->name('api.monitoring.store');
     Route::get('/api/monitoring/previsions', [MonitoringController::class, 'previsions'])->name('api.monitoring.previsions');
+    Route::get('/api/monitoring/report', [MonitoringController::class, 'report'])->name('api.monitoring.report');
 
     // Chat IA (JSON API, not Inertia)
     Route::get('api/chat/conversations', [ChatController::class, 'index'])->name('api.chat.index');

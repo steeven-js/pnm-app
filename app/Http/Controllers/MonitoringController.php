@@ -112,4 +112,152 @@ class MonitoringController extends Controller
             'event_status' => $event?->status,
         ]);
     }
+
+    /**
+     * Generate daily report from all monitoring events.
+     */
+    public function report(Request $request): JsonResponse
+    {
+        $request->validate([
+            'date' => 'sometimes|date_format:Y-m-d',
+        ]);
+
+        $date = $request->has('date')
+            ? Carbon::parse($request->input('date'))
+            : Carbon::now('America/Martinique')->startOfDay();
+
+        $events = MonitoringEvent::where('user_id', $request->user()->id)
+            ->forDate($date)
+            ->get()
+            ->keyBy('event_type');
+
+        // Get previous day's previsions for PSO comparison
+        $yesterday = $date->copy()->subDay();
+        $previsions = MonitoringEvent::where('user_id', $request->user()->id)
+            ->where('event_type', 'porta_prevues')
+            ->forDate($yesterday)
+            ->first();
+
+        // Build report data
+        $totalEvents = $events->count();
+        $verified = $events->where('status', 'verified')->count();
+        $issues = $events->where('status', 'issue')->count();
+        $skipped = $events->where('status', 'skipped')->count();
+        $pending = $events->where('status', 'pending')->count();
+
+        // Timeline detail per event
+        $timeline = [];
+        $warnings = [];
+        $comparisons = [];
+
+        foreach ($events as $type => $event) {
+            $meta = $event->metadata ?? [];
+            $entry = [
+                'event_type' => $type,
+                'status' => $event->status,
+                'verified_at' => $event->verified_at?->format('H:i'),
+                'notes' => $event->notes,
+                'metadata' => $meta,
+                'checked_items' => $event->checked_items ?? [],
+            ];
+            $timeline[] = $entry;
+
+            // Collect warnings from metadata
+            if ($event->status === 'issue') {
+                $warnings[] = [
+                    'event_type' => $type,
+                    'details' => $event->notes,
+                ];
+            }
+
+            // Check for specific issues in metadata
+            if (isset($meta['total_incidents']) && $meta['total_incidents'] > 0) {
+                $warnings[] = [
+                    'event_type' => $type,
+                    'details' => sprintf(
+                        '%d incident(s) : %d refus, %d AR non-reçu, %d erreurs fichier',
+                        $meta['total_incidents'],
+                        $meta['refusals'] ?? 0,
+                        $meta['ar_non_recu'] ?? 0,
+                        $meta['file_errors'] ?? 0,
+                    ),
+                ];
+            }
+
+            if (isset($meta['total_refus']) && $meta['total_refus'] > 0) {
+                $warnings[] = [
+                    'event_type' => $type,
+                    'details' => sprintf('%d refus RIO à traiter', $meta['total_refus']),
+                ];
+            }
+
+            if (isset($meta['not_found_count']) && $meta['not_found_count'] > 0) {
+                $warnings[] = [
+                    'event_type' => $type,
+                    'details' => sprintf('%d fichier(s) NOT FOUND dans les acquittements', $meta['not_found_count']),
+                ];
+            }
+        }
+
+        // PSO vs Previsions comparison
+        $psoEvent = $events->get('pso_jour');
+        if ($psoEvent && $previsions?->metadata) {
+            $psoMeta = $psoEvent->metadata ?? [];
+            $prevMeta = $previsions->metadata ?? [];
+
+            $psoTotal = ($psoMeta['pso_gpmag'] ?? 0) + ($psoMeta['pso_wizzee'] ?? 0);
+            $prevTotal = ($prevMeta['digicel_out'] ?? 0) + ($prevMeta['wizzee_out'] ?? 0);
+
+            $ecart = $prevTotal > 0 ? abs($psoTotal - $prevTotal) / $prevTotal * 100 : 0;
+
+            $comparisons[] = [
+                'type' => 'pso_vs_previsions',
+                'label' => 'PSO réel vs Prévisions veille',
+                'actual' => $psoTotal,
+                'expected' => $prevTotal,
+                'ecart_pct' => round($ecart, 1),
+                'ok' => $ecart <= 20,
+                'detail' => [
+                    'pso_gpmag' => $psoMeta['pso_gpmag'] ?? 0,
+                    'pso_wizzee' => $psoMeta['pso_wizzee'] ?? 0,
+                    'prev_digicel_out' => $prevMeta['digicel_out'] ?? 0,
+                    'prev_wizzee_out' => $prevMeta['wizzee_out'] ?? 0,
+                ],
+            ];
+        }
+
+        // Vacation comparisons
+        $vac1 = $events->get('vacation_1');
+        $vac2 = $events->get('vacation_2');
+        $vac3 = $events->get('vacation_3');
+
+        if ($vac1 && $vac2 && $vac1->metadata && $vac2->metadata) {
+            $comparisons[] = [
+                'type' => 'vacation_1_vs_2',
+                'label' => 'Vacation 1 vs Vacation 2',
+                'vac1_files' => ($vac1->metadata['files_exchanged'] ?? 0) . '/' . ($vac1->metadata['files_expected'] ?? 0),
+                'vac2_files' => ($vac2->metadata['files_exchanged'] ?? 0) . '/' . ($vac2->metadata['files_expected'] ?? 0),
+                'vac1_err' => $vac1->metadata['has_err'] ?? false,
+                'vac2_err' => $vac2->metadata['has_err'] ?? false,
+            ];
+        }
+
+        return response()->json([
+            'date' => $date->format('Y-m-d'),
+            'date_formatted' => $date->translatedFormat('l j F Y'),
+            'user' => $request->user()->name,
+            'summary' => [
+                'total_events' => $totalEvents,
+                'verified' => $verified,
+                'issues' => $issues,
+                'skipped' => $skipped,
+                'pending' => $pending,
+                'completion_pct' => $totalEvents > 0 ? round(($verified + $issues + $skipped) / $totalEvents * 100) : 0,
+            ],
+            'timeline' => $timeline,
+            'warnings' => $warnings,
+            'comparisons' => $comparisons,
+            'is_holiday' => $this->holidayService->isHolidayAnywhere($date),
+        ]);
+    }
 }
