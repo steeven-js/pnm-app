@@ -834,12 +834,12 @@ export default function Protocoles() {
           {/* Grid */}
           <Grid container spacing={2}>
             {filtered.map((p) => (
-              <Grid item key={p.id} xs={12} sm={6} md={4}>
+              <Grid key={p.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <ProtocoleCard protocole={p} onClick={() => setSelected(p)} />
               </Grid>
             ))}
             {filtered.length === 0 && (
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
                   <Iconify icon="solar:document-bold-duotone" width={48} sx={{ opacity: 0.3, mb: 1 }} />
                   <Typography>Aucun protocole trouvé</Typography>
