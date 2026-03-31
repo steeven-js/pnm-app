@@ -68,6 +68,7 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Connaissances', path: paths.knowledge.root },
           { title: 'Guide Opérations', path: paths.operationsGuide },
           { title: 'Cas Pratiques', path: paths.casPratiques },
+          { title: 'Protocoles', path: paths.protocoles },
           { title: 'Requetes SQL', path: paths.requetesPnm },
           { title: 'MOBI / CRM', path: paths.mobi.root },
           { title: 'Progression', path: paths.dashboard.progress },

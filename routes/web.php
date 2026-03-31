@@ -59,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cas Pratiques
     Route::get('/cas-pratiques', fn () => Inertia::render('CasPratiques'))->name('cas-pratiques');
 
+    // Protocoles
+    Route::get('/protocoles', fn () => Inertia::render('Protocoles'))->name('protocoles');
+
     // Requetes PNM
     Route::get('/requetes-pnm', fn () => Inertia::render('RequetesPnm'))->name('requetes-pnm');
 
