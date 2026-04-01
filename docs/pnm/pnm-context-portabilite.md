@@ -28,8 +28,8 @@ La version V3 (depuis 2012) introduit :
 | 02 | Digicel AFG | 60042 |
 | 03 | Outremer Telecom / SFR | 60044 |
 | 04 | Dauphin Telecom | 60043 |
-| 05 | UTS Caraibe | - |
-| 06 | Free Caraibes | - |
+| 05 | UTS Caraibe | 60045 |
+| 06 | Free Caraibes | 60048 |
 
 ### 1.4 Contacts GPMAG
 
@@ -425,6 +425,8 @@ Codes operateurs FNR :
 - Digicel : `60042`
 - Dauphin : `60043`
 - OMT : `60044`
+- UTS : `60045`
+- Free : `60048`
 
 ---
 

@@ -26,8 +26,8 @@ Le FNR utilise des commandes **NPSUB** envoyees sur EMA via le fichier `fnr_acti
 | 60042 | Digicel AFG |
 | 60043 | Dauphin Telecom |
 | 60044 | Outremer Telecom / SFR |
-
-(UTS et Free n'ont pas de code FNR propre)
+| 60045 | UTS Caraibe |
+| 60048 | Free Caraibes |
 
 ## Interfaces DAPI
 
@@ -96,6 +96,8 @@ Le routage FNR doit correspondre a l'operateur actuel dans PortaDB :
 - operateur_id_actuel = 2 (Digicel) → FNR code 60042 (ou absent si numero d'origine Digicel)
 - operateur_id_actuel = 3 (SFR) → FNR code 60044
 - operateur_id_actuel = 4 (Dauphin) → FNR code 60043
+- operateur_id_actuel = 5 (UTS) → FNR code 60045
+- operateur_id_actuel = 6 (Free) → FNR code 60048
 
 ## Notes operationnelles
 
