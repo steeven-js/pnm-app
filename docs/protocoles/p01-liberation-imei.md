@@ -30,10 +30,10 @@ Le processus est semi-automatise : un script Oracle (`oracle@digicelgroup.fr`) e
 
 ### 1. Connexion au serveur
 
-Se connecter en SSH au serveur de production.
+Se connecter en SSH au serveur de production via mRemoteNG (en root), puis basculer vers l'utilisateur oracle.
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 ```
 
 ### 2. Acceder au repertoire

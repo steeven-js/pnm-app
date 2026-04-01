@@ -33,10 +33,10 @@ mysql -e "SELECT msisdn, operateur_id_actuel FROM PortaDB.MSISDN WHERE msisdn = 
 
 ### 1. Connexion au serveur
 
-Se connecter en SSH au serveur de production.
+Se connecter en SSH au serveur de production via mRemoteNG (en root), puis basculer vers l'utilisateur oracle.
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 ```
 
 ### 2. Option A — Script automatise

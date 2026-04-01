@@ -18,10 +18,10 @@ Le format ICCID Digicel est : `8959620XXXXXXXXXXXX` (19-20 chiffres, prefixe 895
 
 ### 1. Connexion au serveur
 
-Se connecter en SSH au serveur de production puis a Oracle MOBI.
+Se connecter en SSH au serveur de production via mRemoteNG (en root), basculer vers oracle, puis ouvrir Oracle MOBI.
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 

@@ -39,7 +39,7 @@ Le "rattrapage" consiste a resynchroniser la ligne entre le CRM (MasterCRM) et l
 ### 1. Diagnostic — Verifier l'etat dans MOBI
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 

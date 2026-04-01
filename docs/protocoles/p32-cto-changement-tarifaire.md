@@ -49,7 +49,7 @@ Avant toute intervention, verifier avec le CDC :
 ### 2. Connexion a Oracle MOBI
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 

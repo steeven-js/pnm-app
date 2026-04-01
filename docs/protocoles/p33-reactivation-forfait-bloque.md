@@ -36,7 +36,7 @@ Un forfait peut etre bloque avec le code SM[24] (Souscription Minimale 24 mois),
 ### 1. Verifier l'etat du forfait dans MOBI
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 

@@ -28,10 +28,10 @@ Ce probleme survient frequemment dans deux situations :
 
 ### 1. Connexion a Oracle MOBI
 
-Se connecter au serveur puis a la base Oracle.
+Se connecter au serveur via mRemoteNG (en root), basculer vers oracle, puis ouvrir Oracle MOBI.
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 

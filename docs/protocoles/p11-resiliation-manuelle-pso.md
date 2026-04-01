@@ -79,7 +79,7 @@ Verifier la reponse : le code retour doit confirmer la resiliation.
 Apres l'appel WS, confirmer que la ligne est bien resiliee dans MasterCRM :
 
 ```bash
-ssh oracle@vmqprostdb01
+su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 
