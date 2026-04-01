@@ -428,9 +428,123 @@ Codes operateurs FNR :
 
 ---
 
-## 10. Connexions et acces
+## 10. Flux de donnees : PNMDATA → PortaDB → FNR
 
-### 10.1 Serveur PNM (sFTP)
+### 10.1 Vue d'ensemble
+
+Trois systemes distincts interviennent dans la portabilite. Ils ont chacun un role different et sont alimentes par des sources differentes :
+
+```
++------------------+     +------------------+     +------------------+
+|    PNMDATA       |     |     PortaDB      |     |       FNR        |
+|  (fichiers)      |---->|   (base MySQL)   |---->|  (routage reseau)|
++------------------+     +------------------+     +------------------+
+  Fichiers echanges        Reference admin         Routage des appels
+  entre operateurs         "qui detient quel       "ou envoyer l'appel
+  via sFTP                  numero"                 vers un porte"
+```
+
+### 10.2 Les 3 systemes en detail
+
+| Systeme | Type | Role | Contenu |
+|---------|------|------|---------|
+| **PNMDATA / PNMSYNC** | Fichiers texte (sFTP) | Vehiculer les tickets de portage entre operateurs | Demandes (1110), reponses (1210), confirmations (1410), etc. |
+| **PortaDB (table MSISDN)** | Base MySQL (vmqproportawebdb01) | Reference administrative de la portabilite | Tous les MSISDN connus du systeme, avec leur operateur actuel et leur tranche d'origine |
+| **FNR** | Fichier National de Routage (reseau) | Router les appels vers les numeros portes | Commandes NPSUB : CREATE, SET, DELETE pour chaque MSISDN porte |
+
+### 10.3 Comment la table MSISDN de PortaDB est alimentee
+
+La table MSISDN n'est **pas** alimentee par le FNR. Elle est alimentee par **3 sources** :
+
+**Source 1 — TRANCHE (attribution initiale ARCEP)**
+
+Avant tout portage, chaque MSISDN est rattache a une tranche. La tranche definit l'operateur **attributaire d'origine** (celui a qui l'ARCEP a attribue le bloc de numeros).
+
+```
+Table TRANCHE : operateur_id = operateur attributaire d'origine
+Table MSISDN  : operateur_id_actuel = operateur qui detient le numero MAINTENANT
+```
+
+Au depart, `operateur_id_actuel` = `tranche.operateur_id`. Apres un portage, seul `operateur_id_actuel` change. La tranche ne change jamais.
+
+**Source 2 — PNMDATA (tickets de portage)**
+
+Quand un portage est complete (bascule), le processus met a jour `operateur_id_actuel` dans la table MSISDN :
+
+```
+Exemple : 0690431001 porte de Digicel vers Orange
+
+Avant bascule : operateur_id_actuel = 2 (Digicel)
+Apres bascule : operateur_id_actuel = 1 (Orange)
+
+La tranche reste : operateur_id = 2 (Digicel)
+→ C'est un numero PORTE (operateur actuel != operateur tranche)
+```
+
+Le flux de mise a jour :
+1. Ticket 1110 (demande) recu dans PNMDATA
+2. Ticket 1210 (acceptation) echange
+3. Ticket 1410 (envoi donnees portage) echange
+4. **Bascule** : script `EmaExtracter.sh` met a jour PortaDB + MOBI
+5. `operateur_id_actuel` est mis a jour dans la table MSISDN
+
+**Source 3 — PNMSYNC (synchronisation hebdomadaire)**
+
+Chaque dimanche a 22H, les fichiers PNMSYNC sont echanges entre tous les operateurs. Ils servent a **reconcilier** les bases de portabilite :
+
+- Si un operateur a un ecart dans sa base, PNMSYNC le corrige
+- Script : `PnmSyncManager.sh` (generation) + `PnmSyncAckManager.sh` (integration)
+- En cas d'ecart, une alerte est envoyee : `PNM INCIDENT : Numeros en ecart dans le fichier de synchronisation`
+
+### 10.4 Comment le FNR est mis a jour
+
+Le FNR est mis a jour **apres la bascule** par un processus separe :
+
+```
+Bascule (9H00 jours ouvres)
+    |
+    v
+EmaExtracter.sh
+    |
+    +---> MAJ PortaDB (table MSISDN.operateur_id_actuel)
+    |
+    +---> Generation fichier fnr_action_v3.bh
+          (commandes NPSUB : CREATE/SET/DELETE)
+              |
+              v
+          Envoi vers EMA (digimqema01)
+              |
+              v
+          BatchHandler execute les commandes FNR
+              |
+              v
+          FNR mis a jour (routage reseau actif)
+```
+
+Le script `Pnm-FNR_presence_V3.sh` verifie chaque jour :
+1. Que le fichier `fnr_action_v3.bh` est present sur EMA
+2. Que le fichier log a ete cree (execution confirmee)
+3. Que le pourcentage de commandes OK est > 50%
+
+### 10.5 Difference entre PortaDB et FNR
+
+| | PortaDB (table MSISDN) | FNR |
+|---|---|---|
+| **Role** | Reference administrative | Routage reseau |
+| **Question** | "Chez quel operateur est ce numero ?" | "Ou router l'appel vers ce numero ?" |
+| **Type** | Base de donnees MySQL | Fichier de routage reseau |
+| **Serveur** | vmqproportawebdb01 | Reseau (via EMA) |
+| **MAJ par** | PNMDATA + PNMSYNC + bascule | fnr_action_v3.bh (commandes NPSUB) |
+| **Contient** | Tous les MSISDN (tous operateurs) | Uniquement les MSISDN portes |
+| **Interrogation** | `mysql -e "SELECT ... FROM PortaDB.MSISDN"` | `GET:NPSUB:MSISDN,590690XXXXXX;` ou http://172.24.2.21/apis/porta/fnr-get-info.html |
+
+**Point cle :** Un numero natif (jamais porte) est dans PortaDB mais **pas** dans le FNR. Le FNR ne contient que les numeros qui ont change d'operateur, car seuls ceux-la ont besoin d'un reroutage.
+
+---
+
+## 11. Connexions et acces
+
+### 11.1 Serveur PNM (sFTP)
 
 ```bash
 # Mode normal
@@ -446,10 +560,10 @@ echo "put nomdufichier.extension" | sftp -oPort=22 pnm_02@193.251.160.208
 sftp_put pnm_01@94.198.176.178 /opt/pkg/expl/PNM/tmp/PNMDATA.02.01.20151104095843.001.ACR /home/pnm_01/datapnm/RECV
 ```
 
-### 10.2 Portail PortaWs
+### 11.2 Portail PortaWs
 - URL : http://172.24.119.72:8080/PortaWs/
 
-### 10.3 Liens utiles
+### 11.3 Liens utiles
 - Procedures sur SharePoint : https://digicelja.sharepoint.com/sites/fwi_IT_Application/APP-VENTES/SitePages/Procedures%20portabilit%C3%A9.aspx
 - Serveur fichiers : `\\mqfiles002.digicelgroup.local\Services\DRSI\DSI\APPLICATION\Domaines\Portabilite`
 
