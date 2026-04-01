@@ -3,36 +3,60 @@
 **Categorie :** Facturation
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
+**Scripts :** Pnm_Facturation_Mensuelle_PEN.sh / Pnm_Facturation_Mensuelle_PSO.sh
 **Declencheur :** Execution mensuelle automatique (crontab)
 
 ---
 
 ## Contexte
 
-Generation automatique des rapports de facturation mensuels pour les portabilites entrantes (PEN) et sortantes (PSO).
+Generation automatique des rapports de facturation mensuels pour les portabilites :
+- **PEN** (Portabilite Entrante) : numeros portes VERS Digicel — ticket 1410
+- **PSO** (Portabilite Sortante) : numeros portes DEPUIS Digicel — ticket 1210
 
-## Etapes
+Ces rapports sont envoyes a l'equipe comptabilite pour la facturation inter-operateurs.
 
-### 1. Execution automatique
+## Destinataires
 
-Les scripts s'executent mensuellement via crontab :
-- Pnm_Facturation_Mensuelle_PEN.sh — portabilites entrantes (ticket 1410)
-- Pnm_Facturation_Mensuelle_PSO.sh — portabilites sortantes (ticket 1210)
+Les emails sont envoyes a :
+- fwi_pnm_si (equipe PNM)
+- Comptabilite Digicel
 
-Emails envoyes a fwi_pnm_si + comptabilite.
+## Contenu du rapport
 
-### 2. Contenu du rapport
+Le rapport ventile les portabilites par operateur :
 
-Par operateur (OC, SFRC, DT, UTS, FREEC) :
-- Type de mandat : simple ou multiple
+| Operateur | Code |
+|-----------|------|
+| OC | Orange Caraibe |
+| SFRC | SFR Caraibe |
+| DT | Dauphin Telecom |
+| UTS | UTS Caraibe |
+| FREEC | Free Caraibes |
+
+Pour chaque operateur :
+- Type de mandat : **simple** (1 numero) ou **multiple** (plusieurs numeros sur un meme mandat)
 - ID portage
 - Date mandat / transaction
 - Nombre de lignes
 - Premier numero eligible
 
-### 3. Execution manuelle
+### Distinction mandats simples / multiples
 
-Si le rapport n'a pas ete envoye, relancer manuellement.
+```sql
+-- Mandats simples : id_portage = id_portage_multiple
+-- Mandats multiples : id_portage != id_portage_multiple
+```
+
+Les mandats multiples sont comptes une seule fois par `id_portage_multiple` (et non par numero individuel).
+
+## Execution automatique
+
+Les scripts s'executent mensuellement via crontab sur vmqproportawebdb01.
+
+## Execution manuelle
+
+Si le rapport n'a pas ete envoye, relancer manuellement :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -40,3 +64,9 @@ cd ~/scripts/
 ./Pnm_Facturation_Mensuelle_PEN.sh
 ./Pnm_Facturation_Mensuelle_PSO.sh
 ```
+
+## Notes operationnelles
+
+- Verifier en debut de mois que les rapports du mois precedent ont bien ete envoyes.
+- Les rapports sont en format XLS envoyes en piece jointe de l'email.
+- Pour le bilan annuel, voir protocole P30 (Facturation annuelle PEN).
