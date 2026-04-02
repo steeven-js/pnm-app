@@ -1,7 +1,7 @@
 # P07 — Annulation Fidelisation (APP_OCS 11605)
 
 **Categorie :** Exploitation
-**Serveur :** vmqprostdb01 (APP_OCS)
+**Serveur :** vmqprostdb01
 **Utilisateur :** oracle
 **Declencheur :** Ticket RT — annulation fidelisation avant liberation IMEI ou changement de terminal
 **Temps moyen :** 2-3 jours (processus multi-etapes avec allers-retours CDC)
@@ -22,28 +22,63 @@ La difference avec la requete 11561 :
 Le processus complet suit ce deroulement type :
 
 ```
-Jour 1 : Liberation ancien IMEI
-         → Informer le CDC
-Jour 2 : CDC effectue le changement de terminal
-         → CDC confirme : "Le changement de materiel a ete fait"
-Jour 3 : Liberation nouvel IMEI
-         → MAJ dates engagement/FID via APP_OCS 11605
-         → Fermeture ticket
+Ticket 1 (ex: #276682) :
+  Jour 1 : Annulation FID via APP_OCS 11605
+           → Liberation ancien IMEI (P01)
+           → Informer le CDC
+  Jour 2 : CDC effectue le changement de terminal
+           → CDC confirme : "Le changement de materiel a ete fait"
+  Jour 3 : Liberation nouvel IMEI (P01)
+           → Fermeture ticket 1
+
+Ticket 2 (ex: #276770) — suite du ticket 1 :
+  Jour 3+ : Reattribution des points de fidelite
+           → MAJ dates FID via script Reengagement_whiptail_V2.sh (P06)
+           → Fermeture ticket 2
 ```
 
 ## Etapes
 
-### 1. Acceder a APP_OCS
+### 1. Connexion au serveur
 
-Ouvrir l'interface web APP_OCS supervision.
+Se connecter via mRemoteNG (en root) sur vmqprostdb01, puis basculer vers oracle.
 
+```bash
+su - oracle
+```
+
+### 2. Etape 1 — Annulation FID via APP_OCS 11605
+
+**Methode A — Interface web :**
+
+Ouvrir l'interface web APP_OCS supervision :
 ```
 http://172.24.114.165/OCS/supervision/index.php
 ```
 
-### 2. Etape 1 — Liberer l'ancien IMEI
+Executer la requete 11605 pour annuler la fidelisation :
+- **MSISDN** du client
+- **Numero de ticket RT**
+- **type_trace** : MAJ_suite_annulation_fid
+- **code requete** : 11605
+
+**Methode B — Script shell :**
+
+```bash
+cd /home/oracle/script/MAJ_DATE_ENGAGEMENT
+./Reengagement_whiptail_V2.sh
+```
+
+Renseigner les champs via l'interface whiptail (voir P06 pour le detail des etapes).
+
+### 3. Etape 2 — Liberer l'ancien IMEI
 
 Proceder a la liberation de l'ancien terminal (voir protocole P01 — Liberation IMEI).
+
+```bash
+cd ~/script/LIBERATION/IMEI/
+./liberation_IMEI.sh -v
+```
 
 Informer le CDC :
 ```
@@ -52,48 +87,52 @@ Tu peux proceder au changement de terminal.
 Merci de confirmer quand ce sera fait.
 ```
 
-### 3. Etape 2 — Attendre confirmation CDC
+### 4. Etape 3 — Attendre confirmation CDC
 
 Le CDC effectue le changement de terminal dans MasterCRM/Hub. Attendre sa confirmation : "Le changement de materiel a ete fait."
 
-### 4. Etape 3 — Liberer le nouvel IMEI
+### 5. Etape 4 — Liberer le nouvel IMEI
 
 Apres confirmation du CDC, liberer le nouvel IMEI (protocole P01).
 
-### 5. Etape 4 — Executer la requete 11605
+### 6. Etape 5 — Reattribuer les points de fidelite (P06)
 
-Dans APP_OCS, executer la requete 11605 pour annuler la fidelisation :
+Une fois le changement de materiel confirme, reattribuer les points de fidelite via le script Reengagement :
+
+```bash
+su - oracle
+cd /home/oracle/script/MAJ_DATE_ENGAGEMENT
+./Reengagement_whiptail_V2.sh
+```
 
 Renseigner :
-- **MSISDN** du client
-- **Numero de ticket RT**
-- **date_fin_abo** : date souhaitee (generalement dans le passe)
-- **date_ref_anciennete** : date de reference anciennete
-- **date_eligible_fid** : date eligibilite fidelisation
-- **type_trace** : MAJ_date_engagement_et_FID
-- **code requete** : 11605
+- MSISDN du client
+- Date d'engagement : nouvelle date calculee
+- Date d'anciennete : date d'origine du contrat
+- Date eligibilite FID : nouvelle date calculee
+- Numero RT : numero du ticket en cours
+- Libelle : MAJ_suite_annulation_fid
+- Code utilisateur : votre code (ex: SJ623255, DD617299)
+- Type de requete : **Mise a jour des trois dates**
 
-### 6. Verifier la trace automatique
+Le script execute la procedure PL/SQL et envoie un mail automatique sur le ticket RT.
 
-APP_OCS envoie automatiquement un commentaire sur le ticket RT avec la trace :
+### 7. Verifier la trace
+
+Dans l'historique APP_OCS du client, la trace apparait :
 
 ```
-msisdn = '069XXXXXXX',
-date_fin_abo = DD/MM/YYYY,
-date_ref_anciennete = DD/MM/YYYY,
-date_eligible_fid = DD/MM/YYYY,
-numero_rt = XXXXXX,
-type_trace = MAJ_date_engagement_et_FID,
-code requete : 11605
+Question : RT276682 - MAJ_suite_annulation_fid - Code DD617299 - Line_no 7314800
+Reponse  : Ancienne date : 29/03/28 Nouvelle date : 17/01/2027
 ```
 
-### 7. Fermer le ticket RT
+La ligne "APP - Correction FID par Admin" apparait dans l'historique des requetes du client avec le statut "Traite".
 
-Fermer le ticket apres toutes les etapes completees.
+### 8. Fermer le ticket RT
 
 ```
 Bonjour,
-L'annulation de la fidelisation a ete effectuee et les IMEI ont ete liberes.
+La mise a jour de la fidelisation a ete effectuee suite au changement de materiel.
 Je ferme donc le ticket.
 --
 Cdt,
@@ -101,7 +140,17 @@ Cdt,
 Equipe Application
 ```
 
-## Exemple concret (ticket #276399)
+## Exemple concret 1 (tickets #276682 + #276770)
+
+Client PIERRE MAX SAMUEL, MSISDN 0690450331, Line_no 7314800 :
+
+| Jour | Ticket | Action |
+|------|--------|--------|
+| ~31/03 | #276682 | Annulation FID + liberation IMEI. CDC informe pour changement materiel. |
+| ~01/04 | #276682 | CDC confirme le changement de materiel. Liberation nouvel IMEI. Ticket ferme. |
+| 02/04 | #276770 | Reattribution points FID via `Reengagement_whiptail_V2.sh` : MAJ_suite_annulation_fid, code DD617299. Ancienne date 29/03/28 → Nouvelle date 17/01/2027. |
+
+## Exemple concret 2 (ticket #276399)
 
 Client 295393, MSISDN 0690833916 — annulation fidelisation + changement terminal :
 
@@ -114,7 +163,9 @@ Client 295393, MSISDN 0690833916 — annulation fidelisation + changement termin
 
 ## Notes operationnelles
 
-- Ce protocole est toujours couple a au moins une liberation IMEI (P01).
+- Ce protocole est toujours couple a au moins une liberation IMEI (P01) et une MAJ FID (P06).
+- Le processus genere souvent **2 tickets RT** : un pour l'annulation FID + liberation IMEI, un second pour la reattribution des points apres changement materiel.
 - Les allers-retours CDC allongent le delai — prevoir 2-3 jours au minimum.
 - Le code 11605 est specifique aux annulations. Ne pas confondre avec 11561 (ajout/MAJ).
+- Le libelle de trace pour ce workflow est `MAJ_suite_annulation_fid`.
 - Si le CDC ne repond pas apres 2 jours, relancer par commentaire sur le ticket RT.
