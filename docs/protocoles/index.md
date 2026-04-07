@@ -1,6 +1,6 @@
 # Protocoles — Index
 
-**Total :** 33 protocoles | **Derniere MAJ :** 01/04/2026
+**Total :** 34 protocoles | **Derniere MAJ :** 07/04/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentes de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, etapes detaillees, requetes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -12,7 +12,7 @@
 - [P03 — Liberation SIM](p03-liberation-sim.md) — SQL MOBI, verification ligne active, format ICCID
 - [P04 — Liberation Offre](p04-liberation-offre.md) — customer_package + package_right, liberation simple/avec restriction
 
-## Exploitation (7)
+## Exploitation (8)
 
 - [P06 — MAJ Fidelisation APP_OCS 11561](p06-maj-fidelisation-11561.md) — Reengagement 24 mois, report mois FID, MAJ date
 - [P07 — Annulation Fidelisation APP_OCS 11605](p07-annulation-fidelisation-11605.md) — Multi-etapes 2-3 jours, interaction CDC
@@ -21,6 +21,7 @@
 - [P29 — Stats ESB Porta](p29-stats-esb-porta.md) — Statistiques WS, base LOGGER, jours feries
 - [P32 — CTO Changement tarifaire bloque](p32-cto-changement-tarifaire.md) — Item CTO, regle cross-territoire Antilles/Guyane
 - [P33 — Reactivation forfait bloque SM](p33-reactivation-forfait-bloque.md) — Multi-etapes : restriction droits + liberation + FID
+- [P34 — Desactivation suppression Point de Vente](p34-desactivation-pdv.md) — Del_profil_Mobi, suppression items/packages/groups PDV
 
 ## Portabilite (12)
 

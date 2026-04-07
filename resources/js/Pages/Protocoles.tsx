@@ -541,6 +541,43 @@ const PROTOCOLES: Protocole[] = [
       },
     ],
   },
+
+  // ── Désactivation PDV ──
+  {
+    id: 'p16',
+    title: 'Désactivation / Suppression Point de Vente (PDV)',
+    category: 'exploitation',
+    summary: 'Supprimer le profil d\'un point de vente (code agence) dans MOBI : items_right, package_right, group_users.',
+    serveur: 'vmqprostdb01',
+    utilisateur: 'oracle',
+    tags: ['PDV', 'point de vente', 'code agence', 'Del_profil_Mobi', 'désactivation'],
+    steps: [
+      {
+        title: 'Connexion au serveur',
+        content: 'Se connecter en SSH au serveur de production.',
+        code: 'ssh oracle@vmqprostdb01',
+      },
+      {
+        title: 'Accéder au répertoire du script',
+        content: 'Le script se trouve dans le répertoire BCD, pas dans ~/script/.',
+        code: 'cd /dbs01/bcd/production/script/',
+      },
+      {
+        title: 'Exécuter le script de suppression',
+        content: 'Usage : ./Del_profil_Mobi_ss_validation.sh <Code_PDV> <NUM_RT>\n\nLe script vérifie automatiquement :\n• USERS MOBI PDV (identité, statut DESACTIVE)\n• CS_GROUP_USERS et GROUP_USERS (groupes)\n• PACKAGE_RIGHT (droits packages)\n• ITEMS_RIGHT (droits items — peut être volumineux)\n• USERS CRM PDV\n\nPuis supprime les droits sans demander confirmation.',
+        code: './Del_profil_Mobi_ss_validation.sh 7140003 276775',
+        warning: 'Le script supprime SANS validation interactive. Bien vérifier le code agence avant exécution. Si USER_PROFI n\'est pas "DESACTIVE", ne pas exécuter sans confirmation du demandeur.',
+      },
+      {
+        title: 'Vérifier le résultat',
+        content: 'Le script termine par :\n"SUPPRESSION DES ITEMS_RIGHT PDV"\n"Fin script"\n\nLa suppression peut prendre plusieurs minutes si beaucoup d\'items (ex: 8347).',
+      },
+      {
+        title: 'Fermer le ticket RT',
+        content: '"Bonjour,\nLe profil du point de vente [NOM PDV] (code agence [CODE]) a été désactivé et supprimé.\nJe ferme le ticket.\n--\nCdt,\n[Prénom NOM]\nEquipe Application"',
+      },
+    ],
+  },
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
