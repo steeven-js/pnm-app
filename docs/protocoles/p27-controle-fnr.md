@@ -84,18 +84,55 @@ ssh batchuser@EMA15-Digicel "find /var/sog/BatchHandler/Users/batchuser/LogFiles
 # Se connecter
 ssh batchuser@EMA15-Digicel
 
-# Verifier si le fichier FNR du jour est present
+# Aller dans le repertoire LogFiles
+cd /var/sog/BatchHandler/Users/batchuser/LogFiles
+```
+
+### Verifier si le fichier FNR du jour a ete traite
+
+Le fichier `fnr_action_v3.bh` est deplace dans `VerifiedFiles/` apres execution.
+Il n'est donc **plus dans BatchJob/** si tout s'est bien passe.
+
+```bash
+# Verifier dans BatchJob (present = pas encore traite)
 ls -la /var/sog/BatchHandler/Users/batchuser/BatchJob/fnr_action_v3.bh
 
-# Verifier les logs du jour
-ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*
-
-# Lire le log pour verifier le pourcentage OK
-cat /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action_v3.bh.log | grep Totally
-
-# Si .nok existe, lister les MSISDN en erreur
-cat /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action_v3.bh.nok
+# Si absent de BatchJob, verifier le log du jour dans LogFiles
+# Format : YYYY-MM-DD_HH.MM.SS_fnr_action_v3.bh.log
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*
 ```
+
+### Lire le log du jour pour verifier le pourcentage OK
+
+```bash
+# Exemple pour le 08/04/2026
+cat 2026-04-08_09.10.06_fnr_action_v3.bh.log | grep Totally
+```
+
+### Verifier s'il y a eu des commandes en echec (.nok)
+
+```bash
+# Lister les .nok (s'il en existe)
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action_v3.bh.nok
+
+# Lire le contenu du .nok (MSISDN en erreur)
+# Exemple : le 24/03 a eu un .nok
+cat 2026-03-24_09.10.06_fnr_action_v3.bh.nok
+```
+
+### Nommage des fichiers logs
+
+```
+Format : YYYY-MM-DD_HH.MM.SS_fnr_action_v3.bh.log
+         YYYY-MM-DD_HH.MM.SS_fnr_action_v3.bh.nok  (si erreurs)
+
+Exemples reels :
+  2026-04-08_09.10.06_fnr_action_v3.bh.log  (11 Ko — normal)
+  2026-03-24_09.10.06_fnr_action_v3.bh.nok  (44 octets — erreur)
+  2026-04-01_10.27.55_fnr_action_v3.bh.log  (execute a 10h27 au lieu de 9h10)
+```
+
+> **Note :** L'execution normale est a 09:10. Si l'heure est differente (ex: 10:27 le 01/04), cela signifie que le fichier FNR a ete genere en retard par EmaExtracter.
 
 ## Scripts utilitaires disponibles sur EMA
 
