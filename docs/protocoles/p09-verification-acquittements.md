@@ -54,7 +54,16 @@ La mention "Fin de Traitement" doit etre presente a la fin.
 
 Si un fichier ACR n'est pas trouve :
 
-1. **Verifier sur le sFTP** que le fichier .ACR a ete depose par l'operateur :
+1. **Verifier sur le serveur** que le fichier .ACR a ete recu :
+   ```bash
+   # Fichiers recus de Orange (01)
+   ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/recv/
+   # Fichiers recus de SFR (03)
+   ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/03/recv/
+   # etc. pour 04, 05, 06
+   ```
+
+   Ou verifier directement sur le sFTP :
    ```bash
    sftp pnm_02@193.251.160.208
    ls -la /home/pnm_02/in/

@@ -59,9 +59,37 @@ Exemple de log normal :
 
 > **Note :** 0 tickets pour un operateur est normal si aucune portabilite n'est en cours avec cet operateur.
 
-### 3. Verifier les fichiers sur le sFTP
+### 3. Verifier les fichiers generes sur le serveur
 
-Les fichiers sont deposes sur le sFTP inter-operateurs.
+Les fichiers PNMDATA sont stockes dans l'arborescence suivante sur vmqproportasync01 :
+
+```
+/home/porta_pnmv3/PortaSync/pnmdata/
+├── 01/          (Orange Caraibe)
+│   ├── send/        ← fichiers PNMDATA a envoyer
+│   ├── recv/        ← fichiers PNMDATA recus
+│   ├── arch_send/   ← archives des fichiers envoyes
+│   └── arch_recv/   ← archives des fichiers recus
+├── 02/          (Digicel — fichiers internes)
+├── 03/          (SFR)
+├── 04/          (Dauphin Telecom)
+├── 05/          (UTS)
+├── 06/          (Free Caraibes)
+└── extract/     (extractions)
+```
+
+```bash
+# Verifier les fichiers du jour envoyes a Orange (01)
+ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/send/
+
+# Verifier les archives du jour
+ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/arch_send/ | tail -5
+
+# Verifier les fichiers recus d'Orange
+ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/recv/
+```
+
+### 4. Verifier les fichiers sur le sFTP inter-operateurs
 
 ```bash
 sftp pnm_02@193.251.160.208
