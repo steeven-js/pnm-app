@@ -97,7 +97,7 @@ Le script `Pnm-Verif-Bascule-MOBI_CCA.sh` est une version allegee de la verifica
 |---------|---------|-----------|
 | PortaDB | vmqproportawebdb01 | MySQL local |
 | MOBI | vmqprostdb01 | Oracle `pb/gaston@MCST50A.BTC.COM` |
-| EMA | digimqema01 | SSH `batchusr@digimqema01` |
+| EMA | EMA15-Digicel | SSH `batchuser@EMA15-Digicel` |
 
 ## Notes operationnelles
 

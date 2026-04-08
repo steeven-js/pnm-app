@@ -27,7 +27,7 @@ WIZZEE est le systeme de facturation/echange qui gere les operations de provisio
 ### 1. Se connecter a EMA
 
 ```bash
-ssh batchusr@digimqema01
+ssh batchuser@EMA15-Digicel
 ```
 
 ### 2. Verifier les operations en erreur
@@ -36,7 +36,7 @@ Consulter le dashboard EMA ou les logs pour identifier les operations WIZZEE en 
 
 ```bash
 # Rechercher les SIM_SWAP en erreur dans les logs du jour
-find /global/var/sog/BatchHandler/Users/batchusr/LogFiles -name '*.log' -type f -mtime 0 | \
+find /var/sog/BatchHandler/Users/batchuser/LogFiles -name '*.log' -type f -mtime 0 | \
   xargs grep -l "SIM_SWAP\|WIZZEE"
 ```
 

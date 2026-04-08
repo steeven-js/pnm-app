@@ -45,8 +45,8 @@ Chercher :
 ### 2. Verifier le fichier FNR sur EMA
 
 ```bash
-ssh batchusr@digimqema01
-find /global/var/sog/BatchHandler/Users/batchusr/BatchJob -name 'fnr_action_v3.bh' -type f -mtime 0
+ssh batchuser@EMA15-Digicel
+find /var/sog/BatchHandler/Users/batchuser/BatchJob -name 'fnr_action_v3.bh' -type f -mtime 0
 ```
 
 Si le fichier est absent : EmaExtracter n'a pas genere le FNR → probleme en amont.
@@ -54,8 +54,8 @@ Si le fichier est absent : EmaExtracter n'a pas genere le FNR → probleme en am
 ### 3. Verifier le log FNR
 
 ```bash
-ssh batchusr@digimqema01
-find /global/var/sog/BatchHandler/Users/batchusr/LogFiles -name '*fnr_action_v3.bh.log' -type f -mtime 0
+ssh batchuser@EMA15-Digicel
+find /var/sog/BatchHandler/Users/batchuser/LogFiles -name '*fnr_action_v3.bh.log' -type f -mtime 0
 ```
 
 Verifier le pourcentage de commandes OK :
@@ -67,8 +67,8 @@ Verifier le pourcentage de commandes OK :
 Si un fichier `.nok` existe, il contient les commandes NPSUB qui ont echoue :
 
 ```bash
-ssh batchusr@digimqema01
-find /global/var/sog/BatchHandler/Users/batchusr/LogFiles -name '*fnr_action_v3.bh.nok' -type f -mtime 0
+ssh batchuser@EMA15-Digicel
+find /var/sog/BatchHandler/Users/batchuser/LogFiles -name '*fnr_action_v3.bh.nok' -type f -mtime 0
 cat [fichier_nok]
 ```
 
