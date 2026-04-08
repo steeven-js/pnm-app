@@ -18,7 +18,7 @@ Alimenter le fichier d'entree avec les id_portage a rechercher :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 vi Id_portage.txt
 # Ajouter un id_portage par ligne
 ```

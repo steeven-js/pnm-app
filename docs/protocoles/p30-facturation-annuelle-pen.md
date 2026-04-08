@@ -61,6 +61,6 @@ ORDER BY NOMBRE DESC;
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./Pnm_Facturation_Annuelle_PEN.sh
 ```

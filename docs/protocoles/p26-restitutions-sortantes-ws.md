@@ -68,6 +68,6 @@ Pour chaque MSISDN, le script recherche l'ancien id_portage :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./Pnm-Restitutions-Sortantes-Tickets.sh
 ```

@@ -53,6 +53,6 @@ Si jour ferie, l'email le mentionne : "il s'agit d'un jour ferie, il n'y aura do
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./Pnm_Stats_Bascule_ESB.sh
 ```

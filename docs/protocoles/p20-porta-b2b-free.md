@@ -18,7 +18,7 @@ Le script detecte les nouvelles demandes et les bloque :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./refus_porta_free_b2b.sh
 ```
 

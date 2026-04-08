@@ -60,7 +60,7 @@ Si le rapport n'a pas ete envoye, relancer manuellement :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./Pnm_Facturation_Mensuelle_PEN.sh
 ./Pnm_Facturation_Mensuelle_PSO.sh
 ```

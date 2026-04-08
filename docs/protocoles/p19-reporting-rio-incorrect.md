@@ -23,7 +23,7 @@ Destinataires : fwi_pnm_si + equipe fraude (linda.haustant, karine.bidoyet, audr
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./check_refus_porta_rio_incorrect.sh
 ```
 

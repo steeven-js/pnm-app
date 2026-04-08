@@ -43,7 +43,7 @@ En cas d'echec du cron, relancer manuellement :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
-cd ~/scripts/
+cd /home/porta_pnmv3/Scripts/
 ./PortaDB-export-csv.sh
 ```
 
