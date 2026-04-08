@@ -1,8 +1,8 @@
 # P15 — Interrogation / Gestion FNR
 
 **Categorie :** Debug / Diagnostic
-**Serveur :** DAPI (172.24.2.21)
-**Utilisateur :** N/A (interface web)
+**Serveur :** digimqapi01 (172.24.2.21) — serveur VAS gere par le pole CORE
+**Utilisateur :** N/A (interface web) — pas de SSH necessaire
 **Declencheur :** Besoin de verifier ou modifier le routage FNR d'un MSISDN
 
 ---
