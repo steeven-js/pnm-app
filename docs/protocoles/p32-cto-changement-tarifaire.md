@@ -62,22 +62,25 @@ FROM CUSTOMER_PACKAGE
 WHERE LI_CUSTOMER_NO = XXXXXXX
 AND PACK_END_ACTIVATION IS NULL;
 
--- Rechercher l'offre cible par nom
-SELECT PACK_ID, PACK_CODE, PACK_DESCRIPTION
-FROM PACKAGE_DEF
+-- Rechercher l'offre cible par nom (dans CUSTOMER_PACKAGE d'un client existant)
+SELECT DISTINCT PACK_CODE, PACK_DESCRIPTION
+FROM CUSTOMER_PACKAGE
 WHERE PACK_DESCRIPTION LIKE '%LIFE PRO%1h-1Go%';
 ```
 
-### 4. Verifier si l'item CTO existe deja
+> **Note :** La table `PACKAGE_DEF` n'existe pas dans Oracle MOBI. Rechercher les offres via `CUSTOMER_PACKAGE`.
+
+### 4. Verifier l'historique CTO du client
 
 ```sql
--- Verifier si la transition existe
-SELECT * FROM CTO_TRANSITION
-WHERE PACK_SOURCE = 'XXXX'
-AND PACK_CIBLE = 'YYYY';
+-- Verifier les CTO deja effectues pour ce client
+SELECT CTO_CUSTOMER_NO, CTO_LINE_NO, CTO_OFFRE, CTO_DATE, CTO_COMMENTAIRE, CTO_NO
+FROM TRACE_CTO
+WHERE CTO_CUSTOMER_NO = XXXXXXX
+ORDER BY CTO_DATE DESC;
 ```
 
-Si aucun resultat : la transition n'existe pas, il faut la creer.
+> **Note :** La table de trace CTO est `TRACE_CTO` (pas `CTO_TRANSITION` qui n'existe pas).
 
 ### 5. Creer l'item CTO
 

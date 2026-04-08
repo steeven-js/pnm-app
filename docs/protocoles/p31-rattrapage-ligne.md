@@ -56,16 +56,19 @@ Verifier :
 - `LINE_SIM_NO` : la SIM est-elle bien associee ?
 - `LINE_PACK_CODE` : l'offre est-elle correcte ?
 
-### 2. Diagnostic — Verifier l'historique des changements MSISDN
+### 2. Diagnostic — Verifier l'historique des actions sur la ligne
 
 ```sql
--- Verifier si un changement de MSISDN recent a ete rejete
-SELECT * FROM MSISDN_CHANGE_HISTORY
-WHERE LINE_NO = 'XXXXXXX'
-ORDER BY CHANGE_DATE DESC;
+-- Verifier les actions recentes sur la ligne (changement MSISDN, rattrapage, etc.)
+SELECT LINE_NO, LINE_MSISDN_ACTIVE, LINE_STATUS, LINE_CHANGE
+FROM LINE
+WHERE LI_CUSTOMER_NO = XXXXXXX
+ORDER BY LINE_CHANGE DESC;
 ```
 
-Si un changement est en statut "rejete" : le nouveau numero n'est pas correctement provisionne dans le reseau, ce qui explique le "numero non attribue".
+> **Note :** La table `MSISDN_CHANGE_HISTORY` n'existe pas dans Oracle MOBI. L'historique des changements se consulte via la table `LINE` et les logs MasterCRM.
+
+Si la ligne est en statut "activation rejetee" : le rattrapage precedent a echoue et la ligne est bloquee.
 
 ### 3. Diagnostic — Verifier dans PortaDB
 
