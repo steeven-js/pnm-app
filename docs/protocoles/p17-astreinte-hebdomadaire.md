@@ -55,23 +55,24 @@ Le ticket sert de **journal de bord** : chaque action effectuee pendant l'astrei
 
 ### 7. Check WIZZEE quotidien
 
-Le check WIZZEE est la tache principale du week-end. Il consiste a verifier dans EMA les erreurs de traitement WIZZEE et les corriger.
+Le check WIZZEE est la tache principale du week-end. Il consiste a relever les erreurs WIZZEE et les adresser aux equipes concernees.
 
-**Types d'erreurs rencontrees :**
+> **Important :** L'equipe Application n'intervient **pas directement** sur la plateforme WIZZEE. On releve les erreurs et on les transmet a l'equipe VAS ou DEV.
 
-| Erreur | Description | Action |
+**Types d'erreurs et equipes a contacter :**
+
+| Erreur | Description | Equipe |
 |--------|-------------|--------|
-| Change resource SIM_SWAP problem | Echec du changement de SIM | Retry via EMA. Si persiste apres 2 retries → creer ticket @DEV |
-| createChargesAndDueBalances_1=204 | Erreur de facturation WIZZEE | Checker avec team WIZZEE (noter le billingAccountOuid) |
-| createNetworkExchange_1=408 | Timeout echange reseau | Retry — generalement OK au 2e essai |
-| Termination on EMA failed | Echec resiliation sur EMA | Retry — generalement OK au 2e essai |
+| Change resource SIM_SWAP problem | Echec du changement de SIM | Equipe DEV (ticket) |
+| createChargesAndDueBalances_1=204 | Erreur de facturation WIZZEE | Equipe VAS |
+| createNetworkExchange_1=408 | Timeout echange reseau | Equipe VAS |
+| Termination on EMA failed | Echec resiliation sur EMA | Equipe VAS |
 
-**Procedure de retry :**
-1. Identifier l'erreur dans le dashboard EMA
-2. Cliquer sur "Retry" pour chaque cas en erreur
-3. Verifier que le retry a abouti (statut OK)
-4. Si echec persistant apres 2 retries : escalader vers @DEV ou team WIZZEE
-5. Documenter chaque action dans le ticket RT d'astreinte
+**Procedure :**
+1. Relever les erreurs WIZZEE (alertes/emails)
+2. Identifier le type d'erreur et le MSISDN concerne
+3. Adresser a l'equipe VAS ou creer un ticket @DEV selon le type
+4. Documenter chaque action dans le ticket RT d'astreinte
 
 (Voir ticket #276367 — exemple d'astreinte avec SIM_SWAP, billing, network exchange et EMA termination)
 
