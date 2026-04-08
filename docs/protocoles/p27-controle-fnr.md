@@ -90,8 +90,9 @@ cd /var/sog/BatchHandler/Users/batchuser/LogFiles
 
 ### Verifier si le fichier FNR du jour a ete traite
 
-Le fichier `fnr_action_v3.bh` est deplace dans `VerifiedFiles/` apres execution.
-Il n'est donc **plus dans BatchJob/** si tout s'est bien passe.
+Le fichier `fnr_action_v3.bh` est **supprime de BatchJob/** apres execution par le BatchHandler.
+Il n'est donc plus present si tout s'est bien passe. Le seul moyen de confirmer l'execution
+est de verifier la presence du log du jour dans `LogFiles/`.
 
 ```bash
 # Verifier dans BatchJob (present = pas encore traite)
