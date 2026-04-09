@@ -92,8 +92,8 @@ pourcentage_ok = (OK * 100) / (OK + KO)
 Le log contient les commandes CAI (CREATE, SET, DELETE) avec les MSISDN :
 
 ```bash
-# Lire le log complet du jour
-cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.log | head -50
+# Lire le log complet du jour (copier-coller le nom du log de l'etape 2)
+cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.log
 ```
 
 > **Note :** Le fichier `fnr_action_v3.bh` original n'est PAS archive.
