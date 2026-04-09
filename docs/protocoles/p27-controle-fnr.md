@@ -113,11 +113,22 @@ DELETE:NPSUB:MSISDN,590XXXXXXXXX;              ← Portabilite SORTANTE (numero 
 RESP:0;
 ```
 
-Codes NP (prefixe de routage) :
-- `52303` = Digicel
-- `60041` = Orange Caraibe
-- `60043` = Dauphin Telecom
-- `60044` = SFR / Outremer Telecom
+Codes NP (prefixe de routage) — MAJ 08/04/2026 :
+
+Orange Caraibe (nouveaux prefixes actifs depuis le 08/04/2026) :
+- `52303` = Orange Caraibe Guadeloupe
+- `52313` = Orange Caraibe Martinique
+- `52333` = Orange Caraibe Guyane
+
+Digicel (anciens prefixes, migration en stand-by) :
+- `52301` = Digicel Guadeloupe (nouveau, pas encore actif)
+- `52311` = Digicel Martinique (nouveau, pas encore actif)
+- `52331` = Digicel Guyane (nouveau, pas encore actif)
+- `60042` = Digicel (ancien prefixe, toujours actif)
+
+Autres operateurs (anciens prefixes, migration en stand-by) :
+- `60043` = Dauphin Telecom (ancien) / `52304` = DT Guadeloupe (nouveau)
+- `60044` = SFR / Outremer Telecom (ancien) / `52300/52310/52330` = SFRC (nouveau)
 - `60045` = UTS Caraibe
 - `60048` = Free Caraibes
 

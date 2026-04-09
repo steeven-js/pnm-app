@@ -18,11 +18,20 @@ Les operations FNR sont necessaires dans plusieurs situations :
 
 Le FNR utilise des commandes **NPSUB** envoyees sur EMA via le fichier `fnr_action_v3.bh`.
 
-## Codes reseau FNR
+## Codes reseau FNR — MAJ 08/04/2026
+
+Orange Caraibe — nouveaux prefixes actifs depuis le 08/04/2026 :
+
+| Code FNR | Operateur | Territoire |
+|----------|-----------|------------|
+| 52303 | Orange Caraibe | Guadeloupe |
+| 52313 | Orange Caraibe | Martinique |
+| 52333 | Orange Caraibe | Guyane |
+
+Autres operateurs (anciens prefixes, toujours actifs) :
 
 | Code FNR | Operateur |
 |----------|-----------|
-| 60041 | Orange Caraibe |
 | 60042 | Digicel AFG |
 | 60043 | Dauphin Telecom |
 | 60044 | Outremer Telecom / SFR |
@@ -92,7 +101,7 @@ mysql -e "SELECT msisdn, operateur_id_actuel FROM PortaDB.MSISDN WHERE msisdn = 
 ```
 
 Le routage FNR doit correspondre a l'operateur actuel dans PortaDB :
-- operateur_id_actuel = 1 (Orange) → FNR code 60041
+- operateur_id_actuel = 1 (Orange) → FNR code 52303 (GP) / 52313 (MQ) / 52333 (GY) — depuis le 08/04/2026
 - operateur_id_actuel = 2 (Digicel) → FNR code 60042 (ou absent si numero d'origine Digicel)
 - operateur_id_actuel = 3 (SFR) → FNR code 60044
 - operateur_id_actuel = 4 (Dauphin) → FNR code 60043

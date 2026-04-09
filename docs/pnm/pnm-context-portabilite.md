@@ -22,14 +22,14 @@ La version V3 (depuis 2012) introduit :
 
 ### 1.3 Operateurs du GPMAG
 
-| Code | Operateur | Code FNR |
-|------|-----------|----------|
-| 01 | Orange Caraibe | 60041 |
-| 02 | Digicel AFG | 60042 |
-| 03 | Outremer Telecom / SFR | 60044 |
-| 04 | Dauphin Telecom | 60043 |
-| 05 | UTS Caraibe | 60045 |
-| 06 | Free Caraibes | 60048 |
+| Code | Operateur | Code FNR (ancien) | Nouveaux prefixes 2024 (par territoire) |
+|------|-----------|-------------------|----------------------------------------|
+| 01 | Orange Caraibe | ~~60041~~ | **52303** (GP) / **52313** (MQ) / **52333** (GY) — actif 08/04/2026 |
+| 02 | Digicel AFG | 60042 | 52301 (GP) / 52311 (MQ) / 52331 (GY) — stand-by |
+| 03 | Outremer Telecom / SFR | 60044 | 52300 (GP) / 52310 (MQ) / 52330 (GY) — stand-by |
+| 04 | Dauphin Telecom | 60043 | 52304 (GP) — stand-by |
+| 05 | UTS Caraibe | 60045 | — |
+| 06 | Free Caraibes | 60048 | — |
 
 ### 1.4 Contacts GPMAG
 
@@ -420,9 +420,9 @@ SET:NPSUB:MSISDN,590690XXXXXX:NP,6004X;
 DELETE:NPSUB:MSISDN,590690XXXXXX;
 ```
 
-Codes operateurs FNR :
-- Orange : `60041`
-- Digicel : `60042`
+Codes operateurs FNR (MAJ 08/04/2026) :
+- Orange : `52303` (GP) / `52313` (MQ) / `52333` (GY) — nouveaux prefixes actifs depuis 08/04/2026
+- Digicel : `60042` (ancien, toujours actif)
 - Dauphin : `60043`
 - OMT : `60044`
 - UTS : `60045`

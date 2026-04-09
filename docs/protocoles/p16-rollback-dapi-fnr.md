@@ -106,7 +106,7 @@ mysql -e "SELECT msisdn, operateur_id_actuel FROM PortaDB.MSISDN WHERE msisdn = 
 ```
 
 Puis interroger le FNR via http://172.24.2.21/apis/porta/fnr-get-info.html pour le meme numero et comparer :
-- operateur_id_actuel = 1 (Orange) → FNR doit afficher 60041
+- operateur_id_actuel = 1 (Orange) → FNR doit afficher 52303 (GP) / 52313 (MQ) / 52333 (GY) — depuis le 08/04/2026
 - operateur_id_actuel = 2 (Digicel) → FNR doit afficher 60042 (ou absent si numero d'origine Digicel)
 - operateur_id_actuel = 3 (SFR) → FNR doit afficher 60044
 - operateur_id_actuel = 4 (Dauphin) → FNR doit afficher 60043
