@@ -52,11 +52,15 @@ find /var/sog/BatchHandler/Users/batchuser/BatchJob -name 'fnr_action_v3.bh' -ty
 
 Le script Pnm-FNR_presence_V3.sh retente 15 fois (toutes les 30 secondes) si le fichier n'est pas encore present.
 
-### 2. Attente du log d'execution
+### 2. Verifier le log d'execution
+
+Lister les derniers logs FNR (methode recommandee) :
 
 ```bash
-ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action* | tail -5
 ```
+
+> **Note :** Ne pas utiliser `$(date +%Y-%m-%d)` car le shell EMA peut ne pas l'evaluer. Utiliser `tail -5` pour voir les derniers logs et verifier que la date du jour est presente.
 
 ### 3. Calcul du pourcentage de commandes OK
 
@@ -71,7 +75,7 @@ pourcentage_ok = (OK * 100) / (OK + KO)
 ### 4. Verification du fichier .nok (commandes en echec)
 
 ```bash
-ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*.nok
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -5
 ```
 
 ### 5. Resultat
