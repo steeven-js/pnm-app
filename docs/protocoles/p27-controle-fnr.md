@@ -41,18 +41,21 @@ Arborescence :
 
 ### 1. Verification presence fichier fnr_action_v3.bh
 
+Se connecter a EMA puis executer (sans guillemets autour de la commande) :
+
 ```bash
-ssh batchuser@EMA15-Digicel "find /var/sog/BatchHandler/Users/batchuser/BatchJob \
-  -name 'fnr_action_v3.bh' -type f -mtime 0"
+ssh batchuser@EMA15-Digicel
+find /var/sog/BatchHandler/Users/batchuser/BatchJob -name 'fnr_action_v3.bh' -type f -mtime 0
 ```
 
-Le script retente 15 fois (toutes les 30 secondes) si le fichier n'est pas encore present.
+> **Note :** Si pas de resultat = le fichier a deja ete traite et supprime par le BatchHandler. C'est normal. Verifier le log du jour a l'etape 2.
+
+Le script Pnm-FNR_presence_V3.sh retente 15 fois (toutes les 30 secondes) si le fichier n'est pas encore present.
 
 ### 2. Attente du log d'execution
 
 ```bash
-ssh batchuser@EMA15-Digicel "find /var/sog/BatchHandler/Users/batchuser/LogFiles \
-  -name '*fnr_action_v3.bh.log' -type f -mtime 0"
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*
 ```
 
 ### 3. Calcul du pourcentage de commandes OK
@@ -68,8 +71,7 @@ pourcentage_ok = (OK * 100) / (OK + KO)
 ### 4. Verification du fichier .nok (commandes en echec)
 
 ```bash
-ssh batchuser@EMA15-Digicel "find /var/sog/BatchHandler/Users/batchuser/LogFiles \
-  -name '*fnr_action_v3.bh.nok' -type f -mtime 0"
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*.nok
 ```
 
 ### 5. Resultat
