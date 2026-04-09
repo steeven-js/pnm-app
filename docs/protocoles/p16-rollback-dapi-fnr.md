@@ -46,16 +46,15 @@ Chercher :
 
 ```bash
 ssh batchuser@EMA15-Digicel
-find /var/sog/BatchHandler/Users/batchuser/BatchJob -name 'fnr_action_v3.bh' -type f -mtime 0
+ls -la /var/sog/BatchHandler/Users/batchuser/BatchJob/fnr_action_v3.bh
 ```
 
-Si le fichier est absent : EmaExtracter n'a pas genere le FNR → probleme en amont.
+Si le fichier est absent = deja traite et supprime (normal), ou pas encore genere. Verifier le log a l'etape 3.
 
 ### 3. Verifier le log FNR
 
 ```bash
-ssh batchuser@EMA15-Digicel
-find /var/sog/BatchHandler/Users/batchuser/LogFiles -name '*fnr_action_v3.bh.log' -type f -mtime 0
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action* | tail -5
 ```
 
 Verifier le pourcentage de commandes OK :
