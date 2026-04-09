@@ -64,7 +64,22 @@ ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action* | tail -5
 
 ### 3. Calcul du pourcentage de commandes OK
 
-Le log contient 2 lignes "Totally" :
+Copier le nom du log du jour affiche a l'etape 2 et l'utiliser dans la commande :
+
+```bash
+# Reperer le nom du log du jour dans le resultat de l'etape 2 :
+# Exemple : 2026-04-09_09.10.06_fnr_action_v3.bh.log
+#
+# Puis copier-coller le nom dans la commande :
+cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.log | grep Totally
+```
+
+Exemple reel :
+```bash
+cat 2026-04-09_09.10.06_fnr_action_v3.bh.log | grep Totally
+```
+
+Le resultat affiche 2 lignes "Totally" :
 - Ligne 1 : nombre de commandes OK
 - Ligne 2 : nombre de commandes KO
 
