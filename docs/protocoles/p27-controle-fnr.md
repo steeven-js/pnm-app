@@ -181,12 +181,12 @@ cat 2026-04-08_09.10.06_fnr_action_v3.bh.log | grep Totally
 ### Verifier s'il y a eu des commandes en echec (.nok)
 
 ```bash
-# Lister les .nok (s'il en existe)
-ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action_v3.bh.nok
+# Lister les derniers .nok (s'il en existe)
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -5
 
 # Lire le contenu du .nok (MSISDN en erreur)
-# Exemple : le 24/03 a eu un .nok
-cat 2026-03-24_09.10.06_fnr_action_v3.bh.nok
+# Copier-coller le nom du fichier .nok dans la commande :
+cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.nok
 ```
 
 ### Nommage des fichiers logs
