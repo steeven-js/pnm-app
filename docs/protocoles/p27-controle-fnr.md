@@ -87,7 +87,43 @@ Le resultat affiche 2 lignes "Totally" :
 pourcentage_ok = (OK * 100) / (OK + KO)
 ```
 
-### 4. Verification du fichier .nok (commandes en echec)
+### 4. Lire le detail des commandes CAI executees
+
+Le log contient les commandes CAI (CREATE, SET, DELETE) avec les MSISDN :
+
+```bash
+# Lire le log complet du jour
+cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.log | head -50
+```
+
+> **Note :** Le fichier `fnr_action_v3.bh` original n'est PAS archive.
+> Il est supprime apres execution. Le log est le seul endroit ou
+> le contenu des commandes est conserve.
+
+Format des commandes dans le log :
+
+```
+CREATE:NPSUB:MSISDN,590XXXXXXXXX:NP,XXXXX;   ← Portabilite ENTRANTE (numero arrive)
+RESP:0;                                         ← Succes
+
+SET:NPSUB:MSISDN,590XXXXXXXXX:NP,XXXXX;       ← MODIFICATION routage
+RESP:0;
+
+DELETE:NPSUB:MSISDN,590XXXXXXXXX;              ← Portabilite SORTANTE (numero repart)
+RESP:0;
+```
+
+Codes NP (prefixe de routage) :
+- `52303` = Digicel
+- `60041` = Orange Caraibe
+- `60043` = Dauphin Telecom
+- `60044` = SFR / Outremer Telecom
+- `60045` = UTS Caraibe
+- `60048` = Free Caraibes
+
+`RESP:0` = commande OK. Toute autre valeur = erreur.
+
+### 5. Verification du fichier .nok (commandes en echec)
 
 ```bash
 ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -5
