@@ -14,6 +14,7 @@ import { LevelBadge } from './Dashboard/components/level-badge';
 import { IntentionCard } from './Dashboard/components/intention-card';
 import { DomainCard } from './Dashboard/components/domain-card';
 import { MonitoringTimeline } from './Dashboard/components/monitoring/monitoring-timeline';
+import { PortabilityDeadlines } from './Dashboard/components/monitoring/portability-deadlines';
 
 // ----------------------------------------------------------------------
 
@@ -88,6 +89,11 @@ export default function Dashboard() {
             <MonitoringTimeline monitoring={monitoring} />
           </Box>
         )}
+
+        {/* Portability Deadlines */}
+        <Box sx={{ mb: 5 }}>
+          <PortabilityDeadlines />
+        </Box>
 
         {/* Intention Cards */}
         <Grid container spacing={3} sx={{ mb: 5 }}>
