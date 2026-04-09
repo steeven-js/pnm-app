@@ -68,8 +68,10 @@ Si un fichier `.nok` existe, il contient les commandes NPSUB qui ont echoue :
 
 ```bash
 ssh batchuser@EMA15-Digicel
-find /var/sog/BatchHandler/Users/batchuser/LogFiles -name '*fnr_action_v3.bh.nok' -type f -mtime 0
-cat [fichier_nok]
+ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -5
+
+# Copier-coller le nom du fichier .nok dans la commande :
+cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.nok
 ```
 
 Chaque ligne contient un MSISDN dont le routage n'a pas ete mis a jour.
