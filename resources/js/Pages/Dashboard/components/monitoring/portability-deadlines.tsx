@@ -31,213 +31,217 @@ function isWorkingDay(date: Date): boolean {
   return !isWeekend(date) && !isHoliday(date);
 }
 
-function nextWorkingDay(from: Date): Date {
-  const d = new Date(from);
-  d.setDate(d.getDate() + 1);
-  while (!isWorkingDay(d)) d.setDate(d.getDate() + 1);
-  return d;
-}
-
 function addWorkingDays(from: Date, n: number): Date {
   let d = new Date(from);
   let count = 0;
   while (count < n) {
-    d = nextWorkingDay(d);
+    d.setDate(d.getDate() + 1);
+    while (!isWorkingDay(d)) d.setDate(d.getDate() + 1);
     count++;
   }
   return d;
 }
 
-function formatDateShort(date: Date): string {
+function subtractWorkingDays(from: Date, n: number): Date {
+  let d = new Date(from);
+  let count = 0;
+  while (count < n) {
+    d.setDate(d.getDate() - 1);
+    while (!isWorkingDay(d)) d.setDate(d.getDate() - 1);
+    count++;
+  }
+  return d;
+}
+
+function formatDate(date: Date): string {
   return date.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
-function formatDateFull(date: Date): string {
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+function formatDateLong(date: Date): string {
+  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// ─── Vacations et echeances ─────────────────────────────────────────────────
+
+type VacationSlot = { hour: number; label: string };
+
+const VACATIONS: VacationSlot[] = [
+  { hour: 10, label: '10H' },
+  { hour: 14, label: '14H' },
+  { hour: 19, label: '19H' },
+];
+
+/** Determine la prochaine vacation 1210 possible par rapport a maintenant */
+function getNextDeadlineInfo(jpDate: Date, now: Date) {
+  // JD+1 = veille ouvrée du portage
+  const jd1 = subtractWorkingDays(jpDate, 1);
+  // Deadline 1210 = JD+1 a 10H max
+  const deadline1210 = new Date(jd1);
+  deadline1210.setHours(10, 0, 0, 0);
+
+  // Deadline 1410 = JD+1 a 14H max
+  const deadline1410 = new Date(jd1);
+  deadline1410.setHours(14, 0, 0, 0);
+
+  const isPast1210 = now > deadline1210;
+  const isPast1410 = now > deadline1410;
+
+  // Prochaine vacation pour 1210
+  let nextVacation1210 = '';
+  if (!isPast1210) {
+    // JD = 2 jours ouvres avant JP
+    const jd = subtractWorkingDays(jpDate, 2);
+    // 1210 peut arriver a JD 14H, JD 19H, ou JD+1 10H
+    const slots = [
+      { date: jd, hour: 14 },
+      { date: jd, hour: 19 },
+      { date: jd1, hour: 10 },
+    ];
+    for (const slot of slots) {
+      const slotTime = new Date(slot.date);
+      slotTime.setHours(slot.hour, 0, 0, 0);
+      if (now < slotTime) {
+        nextVacation1210 = `${formatDate(slot.date)} ${slot.hour}H`;
+        break;
+      }
+    }
+    if (!nextVacation1210) nextVacation1210 = `${formatDate(jd1)} 10H`;
+  }
+
+  return { deadline1210, deadline1410, isPast1210, isPast1410, nextVacation1210 };
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
-
-type PortageDateInfo = {
-  jpDate: Date;
-  jpLabel: string;
-  jdDate: Date;
-  deadlines: { ticket: string; date: string; time: string; color: string }[];
-  isToday: boolean;
-  isTomorrow: boolean;
-};
 
 export function PortabilityDeadlines() {
   const data = useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // Trouver les prochains jours de portage (JP) pour les 5 prochains jours ouvres
-    const portageDates: PortageDateInfo[] = [];
+    // Trouver les 3 prochains jours de portage
+    const items: {
+      jpDate: Date;
+      label: string;
+      tag: string | null;
+      tagColor: 'primary' | 'warning' | 'default';
+      info: ReturnType<typeof getNextDeadlineInfo>;
+    }[] = [];
+
     let checkDate = new Date(today);
-
-    // On cherche les JP a venir (portages prevus dans les prochains jours)
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 10 && items.length < 3; i++) {
       if (isWorkingDay(checkDate)) {
-        const jp = checkDate;
-        // JD = JP - 2 jours ouvres (la demande a ete faite 2 jours ouvres avant)
-        let jdCandidate = new Date(jp);
-        let workDaysBack = 0;
-        while (workDaysBack < 2) {
-          jdCandidate.setDate(jdCandidate.getDate() - 1);
-          if (isWorkingDay(jdCandidate)) workDaysBack++;
-        }
-        const jd = jdCandidate;
-        const jd1 = addWorkingDays(jd, 1);
-
-        const isJpToday = jp.toDateString() === today.toDateString();
+        const jp = new Date(checkDate);
+        const isToday = jp.toDateString() === today.toDateString();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const isJpTomorrow = jp.toDateString() === tomorrow.toDateString();
+        const isTomorrow = jp.toDateString() === tomorrow.toDateString();
 
-        let jpLabel: string;
-        if (isJpToday) jpLabel = "Aujourd'hui";
-        else if (isJpTomorrow) jpLabel = 'Demain';
-        else jpLabel = formatDateShort(jp);
-
-        portageDates.push({
+        items.push({
           jpDate: jp,
-          jpLabel,
-          jdDate: jd,
-          isToday: isJpToday,
-          isTomorrow: isJpTomorrow,
-          deadlines: [
-            {
-              ticket: '1210/1220',
-              date: formatDateShort(jd1),
-              time: '10H00',
-              color: '#22c55e',
-            },
-            {
-              ticket: '1410',
-              date: formatDateShort(jd1),
-              time: '14H00',
-              color: '#3b82f6',
-            },
-            {
-              ticket: 'Bascule',
-              date: formatDateShort(jp),
-              time: '08H30-10H00',
-              color: '#8b5cf6',
-            },
-            {
-              ticket: '1430',
-              date: formatDateShort(jp),
-              time: '19H00',
-              color: '#06b6d4',
-            },
-          ],
+          label: formatDateLong(jp),
+          tag: isToday ? "AUJOURD'HUI" : isTomorrow ? 'DEMAIN' : null,
+          tagColor: isToday ? 'primary' : 'warning',
+          info: getNextDeadlineInfo(jp, now),
         });
-
-        if (portageDates.length >= 3) break;
       }
       checkDate.setDate(checkDate.getDate() + 1);
     }
 
-    return portageDates;
+    return items;
   }, []);
 
   return (
     <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
-      <Stack spacing={2.5}>
+      <Stack spacing={2}>
         {/* Header */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Iconify icon="solar:calendar-bold-duotone" width={24} sx={{ color: 'primary.main' }} />
-          <Box>
-            <Typography variant="subtitle1" fontWeight={700}>
-              Prochaines echeances de portage
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Cas standard JD+2 jours ouvres — Hors week-end et jours feries GPMAG
-            </Typography>
-          </Box>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Iconify icon="solar:calendar-bold-duotone" width={22} sx={{ color: 'primary.main' }} />
+          <Typography variant="subtitle1" fontWeight={700}>
+            Echeances portabilite
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            — Cas standard JD+2
+          </Typography>
         </Stack>
 
         {/* Portage dates */}
-        <Stack spacing={2}>
-          {data.map((portage) => (
-            <Box
-              key={portage.jpDate.toISOString()}
-              sx={{
-                p: 2,
-                borderRadius: 1.5,
-                border: portage.isToday ? '2px solid' : '1px solid',
-                borderColor: portage.isToday ? 'primary.main' : 'divider',
-                bgcolor: portage.isToday ? 'primary.lighter' : 'transparent',
-              }}
-            >
-              {/* Date de portage */}
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                <Iconify
-                  icon="solar:transfer-horizontal-bold-duotone"
-                  width={20}
-                  sx={{ color: portage.isToday ? 'primary.main' : 'text.secondary' }}
-                />
-                <Typography variant="subtitle2" fontWeight={700}>
-                  Portage prevu : {portage.jpLabel}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  ({formatDateFull(portage.jpDate)})
-                </Typography>
-                {portage.isToday && (
-                  <Chip label="AUJOURD'HUI" size="small" color="primary" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 800 }} />
-                )}
-                {portage.isTomorrow && (
-                  <Chip label="DEMAIN" size="small" color="warning" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 800 }} />
-                )}
-              </Stack>
-
-              {/* Demande JD */}
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                Demandes deposees le {formatDateShort(portage.jdDate)} (JD)
-              </Typography>
-
-              {/* Deadlines row */}
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                {portage.deadlines.map((d) => (
-                  <Box
-                    key={d.ticket}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.75,
-                      px: 1.5,
-                      py: 0.75,
-                      borderRadius: 1,
-                      bgcolor: `${d.color}10`,
-                      border: `1px solid ${d.color}30`,
-                    }}
-                  >
-                    <Chip
-                      label={d.ticket}
-                      size="small"
-                      sx={{
-                        fontSize: '0.65rem',
-                        fontWeight: 800,
-                        height: 18,
-                        bgcolor: `${d.color}20`,
-                        color: d.color,
-                      }}
-                    />
-                    <Typography variant="caption" fontWeight={700} sx={{ color: d.color }}>
-                      {d.date} {d.time}
+        <Stack spacing={1.5}>
+          {data.map((item) => {
+            const { info } = item;
+            return (
+              <Box
+                key={item.jpDate.toISOString()}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  p: 1.5,
+                  borderRadius: 1.5,
+                  border: item.tag === "AUJOURD'HUI" ? '2px solid' : '1px solid',
+                  borderColor: item.tag === "AUJOURD'HUI" ? 'primary.main' : 'divider',
+                  bgcolor: item.tag === "AUJOURD'HUI" ? 'primary.lighter' : 'transparent',
+                }}
+              >
+                {/* Date portage */}
+                <Box sx={{ minWidth: 120, flexShrink: 0 }}>
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Iconify icon="solar:transfer-horizontal-bold-duotone" width={18} sx={{ color: '#8b5cf6' }} />
+                    <Typography variant="body2" fontWeight={700}>
+                      {formatDate(item.jpDate)}
                     </Typography>
-                  </Box>
-                ))}
-              </Stack>
-            </Box>
-          ))}
-        </Stack>
+                  </Stack>
+                  {item.tag && (
+                    <Chip label={item.tag} size="small" color={item.tagColor} sx={{ fontSize: '0.6rem', height: 18, fontWeight: 800, mt: 0.5 }} />
+                  )}
+                </Box>
 
-        {/* Source */}
-        <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'right' }}>
-          Source : GPMAG ANNEXE 1 Ter — Cas standard JD+2 jours ouvres
-        </Typography>
+                {/* Echeance 1210 */}
+                <Box sx={{ flex: 1 }}>
+                  {info.isPast1210 ? (
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Iconify icon="solar:check-circle-bold" width={16} sx={{ color: '#22c55e' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Delai 1210 expire
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography variant="body2">
+                      <Typography component="span" variant="body2" fontWeight={700} sx={{ color: '#22c55e' }}>
+                        1210
+                      </Typography>
+                      {' attendu avant '}
+                      <Typography component="span" variant="body2" fontWeight={700}>
+                        {info.nextVacation1210}
+                      </Typography>
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Echeance 1410 */}
+                <Box sx={{ flex: 1 }}>
+                  {info.isPast1410 ? (
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Iconify icon="solar:check-circle-bold" width={16} sx={{ color: '#3b82f6' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Delai 1410 expire
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography variant="body2">
+                      <Typography component="span" variant="body2" fontWeight={700} sx={{ color: '#3b82f6' }}>
+                        1410
+                      </Typography>
+                      {' avant '}
+                      <Typography component="span" variant="body2" fontWeight={700}>
+                        {formatDate(subtractWorkingDays(item.jpDate, 1))} 14H
+                      </Typography>
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
+        </Stack>
       </Stack>
     </Paper>
   );
