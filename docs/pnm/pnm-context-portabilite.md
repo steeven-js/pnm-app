@@ -112,6 +112,30 @@ La version V3 (depuis 2012) introduit :
 | Vacation 3 | 19H - 20H |
 | Synchronisation | Dimanche 22H - 24H |
 
+#### Regle d'affectation aux vacations (cutoff)
+
+Les demandes de portabilite (tickets 1110) sont affectees a la **prochaine vacation disponible** selon l'heure de reception :
+
+| Heure de reception de la demande | Vacation d'inscription | Jour |
+|----------------------------------|----------------------|------|
+| Avant 10H00 | V1 (10H) | Meme jour |
+| Entre 10H00 et 14H00 | V2 (14H) | Meme jour |
+| Entre 14H00 et 19H00 | V3 (19H) | Meme jour |
+| **Apres 19H00** | **V1 (10H)** | **Jour ouvre suivant** |
+
+> **Important :** Toute demande recue apres la derniere vacation (19H) est automatiquement inscrite a la V1 du **prochain jour ouvre**. Le week-end, les demandes s'accumulent et sont traitees le lundi a 10H.
+
+**Exemples concrets (09/04/2026) :**
+- `0690297677` recu a 11:27 → inscrit V2 du **09/04** a 14H00
+- `0694026259` recu a 20:38 → inscrit V1 du **10/04** a 10H00 (apres cutoff 19H)
+- `0696906746` recu a 21:12 → inscrit V1 du **10/04** a 10H00 (apres cutoff 19H)
+
+Le champ d'inscription dans le ticket 1110 indique la date/heure de la vacation cible :
+```
+1110|02|01|02|01|20260409203827|0694026259|...|20260410100006|...
+                 ^date creation              ^vacation cible = 10/04 10H00
+```
+
 ### 4.3 Fichiers echanges
 
 #### Nommage

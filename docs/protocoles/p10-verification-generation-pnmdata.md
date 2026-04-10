@@ -121,6 +121,19 @@ Si le PnmDataManager n'a pas genere les fichiers :
 
 4. Verifier le check_envoi_vacation pour confirmer que les fichiers ont ete envoyes sur le sFTP
 
+## Regle de cutoff — Affectation des demandes aux vacations
+
+Les demandes de portabilite recues sont affectees a la prochaine vacation disponible :
+
+| Heure de reception | Vacation | Jour |
+|---|---|---|
+| Avant 10H | V1 (10H) | Meme jour |
+| 10H - 14H | V2 (14H) | Meme jour |
+| 14H - 19H | V3 (19H) | Meme jour |
+| **Apres 19H** | **V1 (10H)** | **Jour ouvre suivant** |
+
+> Les demandes du week-end s'accumulent et sont traitees le lundi matin a 10H (V1).
+
 ## Notes operationnelles
 
 - Les fichiers PNMDATA sont generes **uniquement les jours ouvres** (lundi-vendredi).
