@@ -90,10 +90,12 @@ const TICKETS: TicketDoc[] = [
     symptome: 'R\u00e9affectation MSISDN interne Digicel \u2014 collaborateur demande r\u00e9cup\u00e9ration d\'un num\u00e9ro.',
     contexte: 'Un collaborateur Digicel souhaite r\u00e9cup\u00e9rer un MSISDN pr\u00e9c\u00e9demment utilis\u00e9 en interne. Le num\u00e9ro est en statut inactif dans la base.',
     diagnostic: 'Le MSISDN est au statut 0 (inactif) avec MS_CLASS=0. Il faut le passer en statut 7 (disponible) puis r\u00e9activer avec MS_CLASS=73 apr\u00e8s activation.',
-    solution: `SQL: UPDATE MSISDN SET ST_MSISDN_ID='0', MSISDN_STATUS='7', MS_CLASS='0' WHERE MSISDN='XXXXXXXXXX';
--- Apr\u00e8s activation par le commercial :
-UPDATE MSISDN SET MS_CLASS='73' WHERE MSISDN='XXXXXXXXXX';`,
-    motsCles: ['MSISDN', 'r\u00e9affectation', 'collaborateur', 'MS_CLASS', 'MSISDN_STATUS'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'réaffectation', 'collaborateur', 'liberation_MSISDN.sh', 'vmqprostdb01'],
   },
   {
     id: 't2',
@@ -249,8 +251,12 @@ V\u00e9rifier que le forfait passe bien en "d\u00e9bloqu\u00e9" apr\u00e8s la MA
     symptome: 'Demande de num\u00e9ro r\u00e9affectation SQL \u2014 remettre un MSISDN en disponibilit\u00e9.',
     contexte: 'Un num\u00e9ro MSISDN doit \u00eatre remis en disponibilit\u00e9 (statut 7) pour r\u00e9affectation.',
     diagnostic: 'Le MSISDN est au statut inactif avec MS_CLASS=0. Il faut le passer en statut 7.',
-    solution: `SQL: UPDATE MSISDN SET ST_MSISDN_ID='0', MSISDN_STATUS='7' WHERE MS_CLASS='0' AND MSISDN='XXXXXXXXXX';`,
-    motsCles: ['MSISDN', 'num\u00e9ro', 'r\u00e9affectation', 'MSISDN_STATUS', 'statut 7'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'numéro', 'réaffectation', 'liberation_MSISDN.sh', 'vmqprostdb01'],
   },
   {
     id: 't13',
@@ -400,8 +406,12 @@ UPDATE line_active_item SET LI_END_BILL_DATE='31/12/2050', LI_END_LINKAFTER='31/
     symptome: 'Libération numéro — COLLÈGE ALEXANDRE STELLIO — Client 2000272.',
     contexte: 'Client 2000272. Demande de libération de numéro MSISDN pour le Collège Alexandre Stellio.',
     diagnostic: 'MSISDN en statut inactif, doit être remis en disponibilité (statut 7) pour réaffectation.',
-    solution: 'SQL: UPDATE MSISDN SET ST_MSISDN_ID=\'0\', MSISDN_STATUS=\'7\', MS_CLASS=\'0\' WHERE MSISDN=\'XXXXXXXXXX\';',
-    motsCles: ['MSISDN', 'libération numéro', 'réaffectation', 'MSISDN_STATUS', 'statut 7'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'libération numéro', 'réaffectation', 'liberation_MSISDN.sh', 'vmqprostdb01'],
   },
   {
     id: 't23',
@@ -414,8 +424,12 @@ UPDATE line_active_item SET LI_END_BILL_DATE='31/12/2050', LI_END_LINKAFTER='31/
     symptome: 'Libération numéro — SARL SOCARCOM — Client 1696037.',
     contexte: 'Client 1696037. Demande de libération de numéro pour la SARL SOCARCOM.',
     diagnostic: 'MSISDN en statut inactif, doit être remis en disponibilité pour réaffectation.',
-    solution: 'SQL: UPDATE MSISDN SET ST_MSISDN_ID=\'0\', MSISDN_STATUS=\'7\', MS_CLASS=\'0\' WHERE MSISDN=\'XXXXXXXXXX\';',
-    motsCles: ['MSISDN', 'libération numéro', 'réaffectation', 'SOCARCOM', 'MSISDN_STATUS'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'libération numéro', 'réaffectation', 'SOCARCOM', 'liberation_MSISDN.sh', 'vmqprostdb01'],
   },
   {
     id: 't24',
@@ -428,8 +442,12 @@ UPDATE line_active_item SET LI_END_BILL_DATE='31/12/2050', LI_END_LINKAFTER='31/
     symptome: 'Demande de réaffectation de numéro MSISDN.',
     contexte: 'Demande de réaffectation d\'un MSISDN — remise en disponibilité pour un nouveau client.',
     diagnostic: 'MSISDN en statut inactif (MS_CLASS=0), doit être passé en statut 7 (disponible).',
-    solution: 'SQL: UPDATE MSISDN SET ST_MSISDN_ID=\'0\', MSISDN_STATUS=\'7\', MS_CLASS=\'0\' WHERE MSISDN=\'XXXXXXXXXX\';',
-    motsCles: ['MSISDN', 'réaffectation', 'MSISDN_STATUS', 'statut 7', 'MS_CLASS'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'réaffectation', 'liberation_MSISDN.sh', 'vmqprostdb01'],
   },
   {
     id: 't25',
@@ -559,10 +577,12 @@ Trace : msisdn='0694920925', date_fin_abo=04/08/2023, date_ref_anciennete=05/08/
     symptome: 'Libération MSISDN pour réaffectation — SC SERVICE DBS DIGICEL — Client Business 2037236 — 0690112580.',
     contexte: 'Demande de libération de la ligne 0690112580 pour réaffectation comme ligne de prêt. Client Business.',
     diagnostic: 'MSISDN en statut inactif avec MS_CLASS=0. Mise à jour vers statut réaffectable (MSISDN_STATUS=7).',
-    solution: `SQL: UPDATE MSISDN SET ST_MSISDN_ID='0', MSISDN_STATUS='7'
-WHERE MSISDN_no IN ('0690112580') AND MS_CLASS='0';
-COMMIT;`,
-    motsCles: ['MSISDN', 'réaffectation', 'MSISDN_STATUS', 'statut 7', 'Business', 'ligne de prêt'],
+    solution: `Sur vmqprostdb01 :
+su - oracle
+cd ~/script/LIBERATION/MSISDN/
+./liberation_MSISDN.sh
+Le script demande le numéro de ticket RT et le MSISDN, puis exécute la libération et envoie un mail de confirmation.`,
+    motsCles: ['MSISDN', 'réaffectation', 'liberation_MSISDN.sh', 'vmqprostdb01', 'Business', 'ligne de prêt'],
   },
   {
     id: 't33',
@@ -742,8 +762,9 @@ COMMIT;`,
     date: '2026-02-23',
     symptome: 'Libération IMEI et numéro — COLLÈGE ALEXANDRE STELLIO — Client 2000272.',
     contexte: 'Demande de libération combinée IMEI + MSISDN pour le Collège Alexandre Stellio, client 2000272.',
-    diagnostic: 'IMEI et MSISDN verrouillés. Double libération nécessaire : APP_OCS pour IMEI puis SQL pour MSISDN.',
-    solution: 'APP_OCS — Libération IMEI, puis UPDATE MSISDN SET MSISDN_STATUS=\'7\' pour le numéro.',
+    diagnostic: 'IMEI et MSISDN verrouillés. Double libération nécessaire : APP_OCS pour IMEI puis script pour MSISDN.',
+    solution: `APP_OCS — Libération IMEI.
+Puis sur vmqprostdb01 : su - oracle → cd ~/script/LIBERATION/MSISDN/ → ./liberation_MSISDN.sh pour libérer le MSISDN.`,
     motsCles: ['IMEI', 'MSISDN', 'libération', 'combinée', 'APP_OCS', 'Collège Stellio'],
   },
 ];

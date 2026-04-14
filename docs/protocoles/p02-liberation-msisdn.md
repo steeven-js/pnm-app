@@ -69,6 +69,7 @@ WHERE MSISDN_NO = '069XXXXXXX';
 | MSISDN_STATUS | 7 | Reaffectable |
 | MSISDN_STATUS | 0 ou 1 | Inactif / Actif |
 | MS_CLASS | 0 | Classe normale (client Digicel standard) |
+| MS_CLASS | 72 | Classe numero or (masque dans MasterCRM) |
 | MS_CLASS | 73 | Classe collaborateur (interne Digicel) |
 
 ### 4. Option B — SQL manuel : Remettre en disponibilite
@@ -116,7 +117,33 @@ COMMIT;
 
 (Voir ticket #276549 — demande interne Digicel, MS_CLASS 73)
 
-### 6. Cas particulier : Erreur de portabilite
+### 6. Cas particulier : Numero or (MS_CLASS = 72)
+
+Les numeros or (MS_CLASS = 72) n'apparaissent pas dans la liste des MSISDN reaffectables sur MasterCRM. Il faut temporairement changer la classe pour permettre au CDC de faire la manipulation, puis la restaurer.
+
+**Etape 1** — Passer MS_CLASS de 72 a 0 pour rendre le numero visible dans MasterCRM :
+```sql
+UPDATE MSISDN
+SET ST_MSISDN_ID = '0', MSISDN_STATUS = '7', MS_CLASS = '0'
+WHERE MSISDN_NO = '069XXXXXXX';
+COMMIT;
+```
+
+**Etape 2** — Informer le CDC : "Le MSISDN est disponible en reaffectation dans le stock 211. Tu peux proceder."
+
+**Etape 3** — Une fois que le CDC a effectue sa tache, remettre MS_CLASS a 72 :
+```sql
+UPDATE MSISDN
+SET MS_CLASS = '72'
+WHERE MSISDN_NO = '069XXXXXXX';
+COMMIT;
+```
+
+> **Important :** Ne pas oublier de remettre MS_CLASS a 72 apres l'intervention du CDC, sinon le numero perd son statut de numero or.
+
+(Voir ticket #276942 — SARL CAV ISLE, client 2222173)
+
+### 7. Cas particulier : Erreur de portabilite
 
 Quand le MSISDN est bloque suite a une erreur de portabilite (mauvais numero provisoire saisi sur le HUB) :
 1. Passer le MSISDN porte en statut reaffectable (meme requete etape 4)
@@ -125,7 +152,7 @@ Quand le MSISDN est bloque suite a une erreur de portabilite (mauvais numero pro
 
 (Voir ticket #276089 — erreur de saisie PDV sur le HUB)
 
-### 7. Le "stock 211"
+### 8. Le "stock 211"
 
 Quand un MSISDN est remis en disponibilite, il apparait dans le **stock 211** de MasterCRM. C'est le stock de numeros reaffectables visible par le CDC.
 
@@ -137,7 +164,7 @@ Le MSISDN est disponible en reaffectation dans le stock 211.
 
 (Voir ticket #276421)
 
-### 8. Fermer le ticket RT
+### 9. Fermer le ticket RT
 
 ```
 Bonjour,
