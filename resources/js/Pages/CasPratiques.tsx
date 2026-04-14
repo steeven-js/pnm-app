@@ -3383,6 +3383,68 @@ const casTmpErrBloque: CasPratique = {
   ),
 };
 
+const casImeiSansMsisdn: CasPratique = {
+  id: 'imei-sans-msisdn',
+  number: 21,
+  domain: 'pnm',
+  title: 'Liberation IMEI sans MSISDN rattache (resiliation apres ouverture)',
+  date: '14/04/2026',
+  tags: ['IMEI', 'liberation', 'APP_OCS', 'resiliation', 'sans MSISDN', 'changement avis'],
+  summary: 'Un IMEI est verrouille dans APP_OCS mais n\'est rattache a aucun MSISDN. Le client a demande une ouverture de ligne puis a change d\'avis et fait resilier immediatement. L\'IMEI reste bloque sans numero associe.',
+  severity: 'mineur',
+  category: 'crm',
+  content: (
+    <>
+      <Typography variant="h6" gutterBottom>Contexte</Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Un client ouvre une ligne en boutique (PDV) puis change d'avis et demande la resiliation
+        dans la foulee. La ligne est resiliee (statut technique 37) mais l'IMEI reste verrouille
+        dans APP_OCS. Dans MasterCRM, le champ MSISDN de la ligne est vide car le numero a ete
+        detache lors de la resiliation.
+      </Typography>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <strong>Exemple reel —</strong> Ticket #276942, client 2222173 (SARL CAV ISLE).
+        Ouverture de ligne le 14/04/2026 a 09:47 par le PDV, puis resiliation a 10:24 suite cause
+        exceptionnelle. IMEI 356942281734726 (Apple iPhone 13 Pro 256Go) bloque sans MSISDN.
+      </Alert>
+
+      <Typography variant="h6" gutterBottom>Ce qu'on observe dans MasterCRM</Typography>
+      <Typography component="div" variant="body2" sx={{ mb: 2, lineHeight: 2, pl: 2 }}>
+        • Statut technique : <strong>37 — Ligne resiliee</strong><br />
+        • Champ MSISDN : <strong>vide</strong> (pas de numero rattache)<br />
+        • IMEI : renseigne mais verrouille<br />
+        • Dernieres requetes : ouverture puis resiliation le meme jour
+      </Typography>
+
+      <Typography variant="h6" gutterBottom>Procedure</Typography>
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        La liberation se fait normalement via le script sur vmqprostdb01 :
+      </Typography>
+      <CodeBlock>{`su - oracle
+cd ~/script/LIBERATION/IMEI/
+./liberation_IMEI.sh -v`}</CodeBlock>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        Le script affichera les champs <code>LINE_NO</code> et <code>LINE_MSISDN_ACT</code> vides.
+        C'est normal pour ce type de cas (similaire a un IMEI en quarantaine).
+      </Typography>
+
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>Point d'attention —</strong> Ne pas confondre avec un IMEI en quarantaine classique.
+        Ici l'IMEI etait bien rattache a une ligne qui a ete resiliee. Verifier les dernieres
+        requetes dans la fiche client pour confirmer le scenario ouverture/resiliation.
+      </Alert>
+
+      <Alert severity="success" sx={{ mt: 2 }}>
+        <strong>A retenir —</strong> Quand un IMEI est verrouille sans MSISDN associe suite a une
+        resiliation rapide, la liberation standard via APP_OCS fonctionne normalement. Le script
+        gere ce cas comme un IMEI en quarantaine.
+      </Alert>
+    </>
+  ),
+};
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CAS_PRATIQUES: CasPratique[] = [
@@ -3406,6 +3468,7 @@ const CAS_PRATIQUES: CasPratique[] = [
   casResiliationManuelPso,
   casLiberationMsisdnPorte,
   casTmpErrBloque,
+  casImeiSansMsisdn,
 ];
 
 // ─── Tag colors ─────────────────────────────────────────────────────────────

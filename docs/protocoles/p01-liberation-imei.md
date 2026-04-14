@@ -102,7 +102,20 @@ Quand le CDC demande liberation IMEI + annulation fidelisation :
 Ce processus prend generalement 2-3 jours avec des allers-retours CDC.
 (Voir ticket #276399)
 
-### 8. Fermer le ticket RT
+### 8. Cas particulier : IMEI sans MSISDN rattache (ligne resiliee, changement d'avis)
+
+Il arrive qu'un IMEI soit verrouille dans APP_OCS mais ne soit rattache a aucun MSISDN. Cela se produit quand :
+- Le client a demande une ouverture de ligne puis a change d'avis et demande la resiliation
+- La ligne a ete resiliee mais l'IMEI n'a pas ete libere automatiquement
+- Le MSISDN a ete detache avant la liberation de l'IMEI
+
+Dans MasterCRM, la fiche client montre le champ MSISDN vide et le statut technique en "Ligne resiliee".
+
+**Procedure** : La liberation se fait normalement via le script (etapes 1 a 5). Le script affichera les champs LINE_NO et LINE_MSISDN_ACT vides, comme pour un IMEI en quarantaine. C'est normal dans ce cas.
+
+(Voir ticket #276942 — SARL CAV ISLE, client 2222173 — ouverture puis resiliation immediate, IMEI sans MSISDN)
+
+### 9. Fermer le ticket RT
 
 ```
 Bonjour,
