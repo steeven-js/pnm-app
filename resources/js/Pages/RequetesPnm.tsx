@@ -1013,9 +1013,144 @@ WHERE MSISDN_no IN ('0690XXXXXX');`}
   );
 }
 
+function ImeiHardStockSection() {
+  return (
+    <>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        La table <strong>HARD_STOCK_DETAIL</strong> sur <strong>vmqprotool02</strong> (base PB@MCST) contient
+        l{"'"}inventaire de tous les terminaux (IMEI). C{"'"}est ici qu{"'"}on verifie et libere les IMEI.
+      </Alert>
+
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Chip label="Serveur : vmqprotool02" color="primary" size="small" variant="soft" />
+        <Chip label="BDD : PB@MCST (Oracle)" color="warning" size="small" variant="soft" />
+        <Chip label="Outil : Toad for Oracle" size="small" variant="soft" />
+      </Stack>
+
+      <SectionTitle>Statuts IMEI (STATUS)</SectionTitle>
+
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Code</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Signification</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Description</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>1</strong></TableCell>
+              <TableCell>En stock</TableCell>
+              <TableCell>Terminal neuf en stock, pas encore vendu</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>2</strong></TableCell>
+              <TableCell>Vendu/Affecte</TableCell>
+              <TableCell>En cours d{"'"}utilisation, affecte a un client</TableCell>
+            </TableRow>
+            <TableRow sx={{ bgcolor: 'success.lighter' }}>
+              <TableCell><strong>3</strong></TableCell>
+              <TableCell>Disponible</TableCell>
+              <TableCell>Libere, pret a la vente/reaffectation</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>5</strong></TableCell>
+              <TableCell>Retour/Transit</TableCell>
+              <TableCell>Terminal en transit ou retour</TableCell>
+            </TableRow>
+            <TableRow sx={{ bgcolor: 'warning.lighter' }}>
+              <TableCell><strong>7</strong></TableCell>
+              <TableCell>Vendu/Verrouille</TableCell>
+              <TableCell>Lie a une ligne — c{"'"}est ce statut qu{"'"}on libere</TableCell>
+            </TableRow>
+            <TableRow sx={{ bgcolor: 'error.lighter' }}>
+              <TableCell><strong>8</strong></TableCell>
+              <TableCell>Bloque/Quarantaine</TableCell>
+              <TableCell>Bloque suite a manipulation echouee ou fraude</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>99</strong></TableCell>
+              <TableCell>Supprime</TableCell>
+              <TableCell>Hors service</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <SectionTitle>Reconditionne (RECONDI)</SectionTitle>
+
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Code</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Signification</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>0</strong></TableCell>
+              <TableCell>Terminal neuf</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>1</strong></TableCell>
+              <TableCell>Terminal reconditionne</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <SectionTitle>Requetes de verification</SectionTitle>
+
+      <CodeBlock title="Verification basique d'un IMEI">
+{`SELECT HD_SERIAL_NUMBER, SALE_TO_CUSTOMER, SALE_TO_LINKCODE,
+       SALE_TO_LINKTYPE, SALE_TO_DATE, HD_ORIGINE, STATUS, RECONDI
+FROM HARD_STOCK_DETAIL
+WHERE HD_SERIAL_NUMBER IN ('IMEI_ICI');`}
+      </CodeBlock>
+
+      <CodeBlock title="Verification detaillee avec ligne associee">
+{`SELECT SALE_TO_CUSTOMER, hd.HD_IMEI_NUMBER, HA_INTERNAL_NAME,
+       SALE_TO_DATE, SALE_TO_LINKCODE, TO_CHAR(STATUS), LAST_STOCK,
+       LINE_NO, l.LINE_MSISDN_ACTIVE, TO_CHAR(l.LINE_STATUS)
+FROM HARD_STOCK_DETAIL hd
+JOIN LINE l ON hd.SALE_TO_LINKCODE = TO_CHAR(l.LINE_NO)
+WHERE hd.HD_IMEI_NUMBER IN ('IMEI_ICI');`}
+      </CodeBlock>
+
+      <CodeBlock title="Liberation manuelle d'un IMEI (si script indisponible)">
+{`UPDATE HARD_STOCK_DETAIL
+SET SALE_TO_CUSTOMER = '0', SALE_TO_LINKCODE = ' ',
+    SALE_TO_LINKTYPE = ' ', SALE_TO_DATE = NULL,
+    HD_ORIGINE = ' ', STATUS = '3', RECONDI = 0
+WHERE HD_SERIAL_NUMBER IN ('IMEI_ICI')
+AND STATUS NOT IN (1, 2, 8);
+COMMIT;`}
+      </CodeBlock>
+
+      <InfoCard title="Interpretation" icon="solar:info-circle-bold-duotone" color="#2563eb">
+        <Typography variant="body2">
+          Un IMEI a liberer est generalement en <strong>STATUS = 7</strong> (verrouille)
+          avec une <strong>LINE_STATUS = 37</strong> (ligne resiliee).
+          Apres liberation, il passe en <strong>STATUS = 3</strong> (disponible).
+          Si LINE_MSISDN_ACTIVE est vide, l{"'"}IMEI n{"'"}est rattache a aucun numero
+          (cas resiliation immediate ou quarantaine).
+        </Typography>
+      </InfoCard>
+    </>
+  );
+}
+
 // ─── CRM Section tabs ───────────────────────────────────────────────────────
 
 const CRM_SECTIONS: DocSection[] = [
+  {
+    id: 'table-imei',
+    title: 'Table IMEI',
+    icon: 'solar:smartphone-bold-duotone',
+    content: <ImeiHardStockSection />,
+  },
   {
     id: 'table-msisdn',
     title: 'Table MSISDN',

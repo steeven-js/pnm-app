@@ -140,6 +140,49 @@ Equipe Application
 
 Puis fermer le ticket (statut : resolu).
 
+## Reference : Statuts IMEI (HARD_STOCK_DETAIL)
+
+Table `HARD_STOCK_DETAIL` sur vmqprotool02 (base PB@MCST).
+
+### STATUS
+
+| Code | Signification | Description |
+|------|--------------|-------------|
+| 1 | En stock | Terminal neuf en stock, pas encore vendu |
+| 2 | Vendu/Affecte | En cours d'utilisation, affecte a un client |
+| 3 | Disponible | Libere, pret a la vente/reaffectation |
+| 5 | Retour/Transit | Terminal en transit ou retour |
+| 7 | Vendu/Verrouille | Lie a une ligne (c'est ce statut qu'on libere) |
+| 8 | Bloque/Quarantaine | Bloque suite a manipulation echouee ou fraude |
+| 99 | Supprime | Hors service |
+
+### RECONDI
+
+| Code | Signification |
+|------|--------------|
+| 0 | Terminal neuf |
+| 1 | Terminal reconditionne |
+
+### Requete de verification
+
+```sql
+-- Verification basique
+SELECT HD_SERIAL_NUMBER, SALE_TO_CUSTOMER, SALE_TO_LINKCODE,
+       SALE_TO_LINKTYPE, SALE_TO_DATE, HD_ORIGINE, STATUS, RECONDI
+FROM HARD_STOCK_DETAIL
+WHERE HD_SERIAL_NUMBER IN ('IMEI_ICI');
+
+-- Verification detaillee avec ligne associee
+SELECT SALE_TO_CUSTOMER, hd.HD_IMEI_NUMBER, HA_INTERNAL_NAME,
+       SALE_TO_DATE, SALE_TO_LINKCODE, TO_CHAR(STATUS), LAST_STOCK,
+       LINE_NO, l.LINE_MSISDN_ACTIVE, TO_CHAR(l.LINE_STATUS)
+FROM HARD_STOCK_DETAIL hd
+JOIN LINE l ON hd.SALE_TO_LINKCODE = TO_CHAR(l.LINE_NO)
+WHERE hd.HD_IMEI_NUMBER IN ('IMEI_ICI');
+```
+
+> **Interpretation :** Un IMEI a liberer est generalement en STATUS = 7 (verrouille) avec une LINE_STATUS = 37 (ligne resiliee). Apres liberation via le script, il passe en STATUS = 3 (disponible).
+
 ## Notes operationnelles
 
 - **IMEI fictif** : Le numero `100000000000528` est un IMEI generique utilise pour les activations sans terminal. Il apparait regulierement et doit etre libere apres chaque usage pour etre reutilise.
