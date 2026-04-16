@@ -1,6 +1,6 @@
 # Protocoles — Index
 
-**Total :** 35 protocoles | **Derniere MAJ :** 09/04/2026
+**Total :** 36 protocoles | **Derniere MAJ :** 16/04/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentes de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, etapes detaillees, requetes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -42,6 +42,10 @@
 
 - [P13 — Facturation mensuelle PEN PSO](p13-facturation-mensuelle.md) — Mandats simples/multiples, ventilation operateurs
 - [P30 — Facturation annuelle PEN](p30-facturation-annuelle-pen.md) — Bilan annuel, UNION simples/multiples
+
+## Automates / Supervision (1)
+
+- [P36 — Automates Back Office MasterCRM](p36-automates-mastercrm.md) — WATCHER, BASCULE_IN, EXPLOIT, LOGISTIQUE, RATP_OLN, TRACE
 
 ## Debug / Diagnostic (8)
 

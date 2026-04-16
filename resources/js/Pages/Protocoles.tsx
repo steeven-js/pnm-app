@@ -23,7 +23,7 @@ import { DashboardLayout } from 'src/layouts/dashboard/layout';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Category = 'liberation' | 'portabilite' | 'exploitation' | 'facturation' | 'debug';
+type Category = 'liberation' | 'portabilite' | 'exploitation' | 'facturation' | 'debug' | 'supervision';
 
 type Protocole = {
   id: string;
@@ -51,6 +51,7 @@ const CATEGORY_CONFIG: Record<Category, { label: string; color: string; icon: st
   exploitation: { label: 'Exploitation', color: '#3b82f6', icon: 'solar:settings-bold-duotone' },
   facturation: { label: 'Facturation', color: '#f97316', icon: 'solar:bill-list-bold-duotone' },
   debug: { label: 'Debug / Diagnostic', color: '#ef4444', icon: 'solar:bug-bold-duotone' },
+  supervision: { label: 'Supervision / Automates', color: '#06b6d4', icon: 'solar:monitor-bold-duotone' },
 };
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG) as Category[];
@@ -575,6 +576,48 @@ const PROTOCOLES: Protocole[] = [
       {
         title: 'Fermer le ticket RT',
         content: '"Bonjour,\nLe profil du point de vente [NOM PDV] (code agence [CODE]) a été désactivé et supprimé.\nJe ferme le ticket.\n--\nCdt,\n[Prénom NOM]\nEquipe Application"',
+      },
+    ],
+  },
+  // ── Automates MasterCRM ──
+  {
+    id: 'p36',
+    title: 'Automates Back Office MasterCRM',
+    category: 'supervision',
+    summary: 'Supervision des automates orchestrés par le WATCHER : BASCULE_IN, EXPLOIT, LOGISTIQUE, RATP_OLN, TRACE. Rapport quotidien par email.',
+    serveur: 'Serveur Back Office MasterCRM',
+    utilisateur: 'Supervision automates',
+    tags: ['WATCHER', 'BASCULE_IN', 'EXPLOIT', 'LOGISTIQUE', 'RATP_OLN', 'TRACE', 'automate', 'supervision'],
+    steps: [
+      {
+        title: 'WATCHER — Ordonnanceur',
+        content: 'Ordonnanceur principal des automates du Back Office MasterCRM. Il planifie et lance l\'exécution de tous les autres automates dans l\'ordre défini.',
+      },
+      {
+        title: 'BASCULE_IN — Bascule des lignes',
+        content: 'Exécution quotidienne à partir de 00h15. Traite les actions de changement d\'offre, changement de titulaire, ajout/suppression d\'option à date de cycle, et actions CCARE programmées (du 1er au 28). Les journées du 29/30/31, peu de modifications car pas de date de cycle de facturation.\n\nDurée moyenne : ~2h30.',
+      },
+      {
+        title: 'EXPLOIT — Libération des ressources',
+        content: 'Exécution quotidienne après BASCULE_IN (~02h45). Libère les ressources (IMEI, SIM, MSISDN), archive certaines transactions, et nettoie les Communautés (CUG sur lignes Flotte Entreprise).\n\nDurée moyenne : ~15 min.',
+      },
+      {
+        title: 'LOGISTIQUE — Interface SIT / MasterCRM',
+        content: 'Fait l\'interface entre le SIT (Outil Logistique de la PFL — Plateforme Logistique Geodis) et les bases de données MasterCRM/MasterLogistique. Reçoit les ordres de transfert internes et de réception/livraison des commandes.\n\nExécuté 6-7 fois par jour, ~40-50 min par exécution.',
+      },
+      {
+        title: 'RATP_OLN — Rattrapage activations',
+        content: 'Rattrapage automatique des lignes en échec d\'activation (statut technique 23 = Activation Rejetée). Quand un CDC signale une activation rejetée, cet automate tente un rattrapage. Si le rattrapage échoue, intervention manuelle nécessaire.',
+        warning: 'Si RATP_OLN n\'a pas tourné, les lignes en échec d\'activation ne seront pas rattrapées automatiquement. Vérifier dans le rapport quotidien.',
+      },
+      {
+        title: 'TRACE — Traces CCARE',
+        content: 'Met à jour les traces CCARE de l\'environnement fonctionnel. Historique des actions effectuées sur les lignes.',
+      },
+      {
+        title: 'Supervision — Rapport quotidien',
+        content: 'Un email "[PROD] Rapport d\'activité automates" est envoyé quotidiennement par supervision@digicelgroup.fr avec 3 PJ :\n• automates_activity_YYYY-MM-DD.csv (synthétique)\n• automates_detail_YYYY-MM-DD.csv (détaillé)\n• mgrntlog_global_YYYYMMDD.log (log complet)\n\nVérifier que tous les automates sont en SUCCESS. Si statut "A VERIFIER SI EN COURS", vérifier si l\'automate est encore actif.',
+        warning: 'En cas d\'échec, contacter Sarah Mogade. Si impact client immédiat (BASCULE_IN, RATP_OLN), escalader en urgence.',
       },
     ],
   },
