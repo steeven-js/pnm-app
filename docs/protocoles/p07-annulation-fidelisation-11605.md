@@ -161,6 +161,26 @@ Client 295393, MSISDN 0690833916 — annulation fidelisation + changement termin
 | 19/03 | CDC confirme : "Le changement de materiel a ete fait" |
 | 20/03 | Liberation nouvel IMEI + MAJ via APP_OCS 11605 : msisdn='0690833916', date_fin_abo=31/08/2025, date_ref_anciennete=10/09/2022, date_eligible_fid=10/09/2023 |
 
+## Exemple concret 3 (ticket #277081) — Annulation FID simple
+
+Client 2184709, MSISDN 0690979069 — annulation fidelisation sans changement de terminal.
+Demandeur : Sylvia GANOT. Repositionnement IMEI deja fait par le CDC.
+
+| Jour | Action |
+|------|--------|
+| 17/04 | Ticket recu. Sylvia demande annulation FID, date fin engagement initiale : 10/02/2025 |
+| 20/04 | Execution `Reengagement_whiptail_V2.sh` sur vmqprostdb01 : |
+
+Trace du script :
+```
+msisdn = '0690979069', date_fin_abo = 10/02/2025,
+date_ref_anciennete = 11/02/2023, date_eligible_fid = 10/02/2025,
+numero_rt = 277081, type_trace = MAJ_suite_a_une_annulation_FID,
+code_user_trace = SGANOT, code requete : 11605
+```
+
+> **Cas simple :** Quand le CDC a deja repositionne l'IMEI de depart et que seule l'annulation FID est demandee, le processus se fait en une seule etape sans allers-retours CDC.
+
 ## Notes operationnelles
 
 - Ce protocole est toujours couple a au moins une liberation IMEI (P01) et une MAJ FID (P06).
