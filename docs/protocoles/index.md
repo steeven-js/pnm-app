@@ -1,6 +1,6 @@
 # Protocoles — Index
 
-**Total :** 37 protocoles | **Derniere MAJ :** 20/04/2026
+**Total :** 38 protocoles | **Derniere MAJ :** 20/04/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentes de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, etapes detaillees, requetes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -58,4 +58,5 @@
 - [P28 — Extraction MSISDN temporaires E610](p28-extraction-msisdn-temporaires.md) — Logs Glassfish, conversion format
 - [P31 — Rattrapage de ligne appels entrants KO](p31-rattrapage-ligne.md) — Diagnostic MOBI/PortaDB, effets de bord, neutralisation
 - [P18 — Verification SIM SWAP WIZZEE](p18-sim-swap-wizzee.md) — Types erreurs, procedure retry, escalade @DEV
+- [P38 — Echec actions techniques apres changement SIM](p38-echec-actions-changement-sim.md) — ODL USIM, CUG, renvoi actions, escalade MOBI
 - [P35 — Anomalie connexion VPN a la DB](p35-anomalie-connexion-vpn-db.md) — PROVISOIRE — flush hosts MariaDB, ticket 276887
