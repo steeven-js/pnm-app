@@ -80,16 +80,11 @@ Utiliser un fichier PNMDATA recent avec des tickets du meme type comme modele.
 - `YYYYMMDDHHMMSS` : timestamp
 - `NNNNNN` : nombre total de lignes dans le fichier (en-tete + tickets + pied = N+2)
 
-### 4. Deposer le fichier
+### 4. Conserver le fichier pour envoi par email
 
-Deposer le fichier dans le dossier send/ de l'operateur concerne :
-
-```bash
-# Sur vmqproportasync01
-cp PNMDATA.02.01.YYYYMMDDHHMMSS.NNN /home/porta_pnmv3/PortaSync/pnmdata/01/send/
-```
-
-Le systeme enverra automatiquement le fichier a la prochaine vacation.
+Le fichier PNMDATA genere en mode degrade n'est **pas** depose dans send/.
+Il est envoye en **piece jointe** du mail de reponse a l'operateur (voir etape 8).
+C'est l'operateur qui l'integrera de son cote.
 
 ### 5. Mettre a jour le FNR
 
@@ -105,7 +100,17 @@ Modifier l'operateur associe au MSISDN si necessaire :
 
 http://172.24.119.72:8080/PortaWs/index.jsp?m=updateMsisdn
 
-### 7. Envoyer l'email de reponse
+### 7. Verifier les tickets 3430 dans PortaWs
+
+Si l'operateur signale aussi des 3430 en attente, verifier dans Admin-Portal (PortaWs)
+que les tickets 3430 ont bien ete generes et dans quel fichier PNMDATA ils se trouvent.
+Noter le nom du fichier pour l'inclure dans le mail de reponse.
+
+### 8. Envoyer l'email de reponse
+
+Joindre le fichier PNMDATA genere en mode degrade en piece jointe.
+Dans le corps du mail, preciser le nom du fichier PNMDATA contenant les 3430
+(si concernes) apres verification dans PortaWs.
 
 ```
 Bonjour,
@@ -124,7 +129,10 @@ Steeven JACQUES
 Equipe Application
 ```
 
-### 8. Resilier les lignes (si portabilite sortante)
+> **Important :** Le fichier PNMDATA en mode degrade est envoye en PJ du mail,
+> pas depose dans send/. C'est l'operateur qui l'integrera de son cote.
+
+### 9. Resilier les lignes (si portabilite sortante)
 
 Attendre le retour de l'operateur confirmant la reception du fichier, puis :
 
@@ -137,7 +145,7 @@ Attendre le retour de l'operateur confirmant la reception du fichier, puis :
 > **Attention MS_CLASS = 80 :** Les MSISDN avec MS_CLASS = 80 sont des lignes Wizzee.
 > Ne pas resilier directement, transmettre a l'equipe Wizzee.
 
-### 9. Fermer le dossier
+### 10. Fermer le dossier
 
 - Verifier que l'operateur a bien recu et traite le fichier
 - Verifier que les lignes sont resiliees
