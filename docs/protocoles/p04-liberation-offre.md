@@ -102,23 +102,23 @@ Quand un client souhaite se retracter d'une offre (ex: forfait bloque ne permett
 Pour une liberation simple :
 ```
 Bonjour,
-L'offre a ete liberee. Le changement d'offre peut maintenant etre effectue.
+L'offre a été libérée. Le changement d'offre peut maintenant être effectué.
 Je ferme le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 Pour une liberation combinee (offre + IMEI) :
 ```
 Bonjour,
-L'offre est disponible et l'IMEI a ete libere.
-Avertis-nous quand la ligne aura ete activee.
+L'offre est disponible et l'IMEI a été libéré.
+Avertis-nous quand la ligne aura été activée.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 Puis fermer le ticket (statut : resolu).

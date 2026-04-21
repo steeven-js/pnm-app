@@ -84,12 +84,12 @@ Liberer l'IMEI du client via APP_OCS (voir protocole P01 — Liberation IMEI).
 
 ```
 Bonjour,
-L'offre est disponible et l'IMEI a ete libere.
-Avertis-nous quand la ligne aura ete activee.
+L'offre est disponible et l'IMEI a été libéré.
+Avertis-nous quand la ligne aura été activée.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ### 6. Attendre activation par le CDC
@@ -135,12 +135,12 @@ PJ : `Trace_actions_bd_user.log`
 
 ```
 Bonjour,
-La mise a jour a ete effectuee.
+La mise a jour a été effectuée.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Exemple complet (ticket #276492)

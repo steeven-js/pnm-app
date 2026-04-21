@@ -82,12 +82,12 @@ Confirmer que `SIM_STATUS = 0` et `ST_SIM_ID = 0`.
 
 ```
 Bonjour,
-La carte SIM a ete liberee.
+La carte SIM a été libérée.
 Je ferme le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Notes operationnelles

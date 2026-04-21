@@ -144,12 +144,12 @@ Puis mettre a jour les dates de fin (etape 6) avec le bon ITEM_CODE (3807700 au 
 
 ```
 Bonjour,
-La remise a ete inseree.
+La remise a été insérée.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Tables impliquees

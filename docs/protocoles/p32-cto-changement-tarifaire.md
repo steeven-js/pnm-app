@@ -118,12 +118,12 @@ COMMIT;
 
 ```
 Bonjour,
-Le CTO est desormais possible vers l'offre [NOM_OFFRE_CIBLE].
-Tu peux proceder a la programmation.
+Le CTO est désormais possible vers l'offre [NOM_OFFRE_CIBLE].
+Tu peux procéder a la programmation.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ### 8. Fermer le ticket RT

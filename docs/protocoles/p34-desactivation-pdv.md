@@ -105,12 +105,12 @@ INFO_SCRIPT : Fin script
 
 ```
 Bonjour,
-Le profil du point de vente [NOM PDV] (code agence [CODE]) a ete desactive et supprime.
+Le profil du point de vente [NOM PDV] (code agence [CODE]) a été désactivé et supprimé.
 Je ferme le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Arborescence serveur

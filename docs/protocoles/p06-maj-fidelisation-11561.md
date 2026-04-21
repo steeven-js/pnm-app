@@ -142,12 +142,12 @@ PJ : `Trace_actions_bd_user.log`
 
 ```
 Bonjour,
-La mise a jour a ete effectuee.
+La mise a jour a été effectuée.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Exemples concrets

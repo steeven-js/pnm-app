@@ -158,8 +158,8 @@ Quand un MSISDN est remis en disponibilite, il apparait dans le **stock 211** de
 
 Pour une liberation combinee IMEI + MSISDN, repondre :
 ```
-Les ressources ont ete liberees.
-Le MSISDN est disponible en reaffectation dans le stock 211.
+Les ressources ont été libérées.
+Le MSISDN est disponible en réaffectation dans le stock 211.
 ```
 
 (Voir ticket #276421)
@@ -168,13 +168,13 @@ Le MSISDN est disponible en reaffectation dans le stock 211.
 
 ```
 Bonjour,
-Le numero a ete remis en disponibilite.
-Le commercial peut proceder a l'activation.
+Le numéro a été remis en disponibilité.
+Le commercial peut procéder a l'activation.
 Je ferme le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 Puis fermer le ticket (statut : resolu).

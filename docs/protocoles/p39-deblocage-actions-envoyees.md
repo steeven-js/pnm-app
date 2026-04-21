@@ -93,25 +93,25 @@ Si le rattrapage ne se fait pas dans les 2h, verifier :
 ```
 Bonjour,
 
-L'action bloquante a ete identifiee et corrigee.
+L'action bloquante a été identifiée et corrigée.
 Le rattrapage automatique est en cours, la ligne devrait
-etre pleinement fonctionnelle sous peu.
+être pleinement fonctionnelle sous peu.
 
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 **Apres resolution :**
 ```
 Bonjour,
 
-La ligne [MSISDN] est retablie.
+La ligne [MSISDN] est rétablie.
 Le client peut tester ses appels et sa data.
 
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Difference avec P38

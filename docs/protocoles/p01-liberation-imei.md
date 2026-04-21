@@ -119,23 +119,23 @@ Dans MasterCRM, la fiche client montre le champ MSISDN vide et le statut techniq
 
 ```
 Bonjour,
-L'IMEI a ete libere.
+L'IMEI a été libéré.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 Pour liberation multiple :
 ```
 Bonjour,
-Les IMEI ont ete liberes.
+Les IMEI ont été libérés.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 Puis fermer le ticket (statut : resolu).

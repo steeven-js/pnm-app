@@ -82,8 +82,8 @@ cd ~/script/LIBERATION/IMEI/
 
 Informer le CDC :
 ```
-L'ancien IMEI a ete libere.
-Tu peux proceder au changement de terminal.
+L'ancien IMEI a été libéré.
+Tu peux procéder au changement de terminal.
 Merci de confirmer quand ce sera fait.
 ```
 
@@ -132,12 +132,12 @@ La ligne "APP - Correction FID par Admin" apparait dans l'historique des requete
 
 ```
 Bonjour,
-La mise a jour de la fidelisation a ete effectuee suite au changement de materiel.
+La mise a jour de la fidélisation a été effectuée suite au changement de matériel.
 Je ferme donc le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Exemple concret 1 (tickets #276682 + #276770)

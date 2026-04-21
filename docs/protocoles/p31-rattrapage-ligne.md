@@ -120,13 +120,13 @@ Si la ligne est en "activation rejetee" et qu'une resiliation est necessaire pou
 
 ```
 Bonjour,
-Rattrapage de la ligne effectue cote reseau.
-Le client doit relancer son terminal (redemarrage).
+Rattrapage de la ligne effectué côté réseau.
+Le client doit relancer son terminal (redémarrage).
 Je ferme le ticket.
 --
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Notes operationnelles

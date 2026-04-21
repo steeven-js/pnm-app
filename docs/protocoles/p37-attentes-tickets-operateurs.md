@@ -115,18 +115,18 @@ Dans le corps du mail, preciser le nom du fichier PNMDATA contenant les 3430
 ```
 Bonjour,
 
-Suite a une incoherence, nous n'avons pas pu generer les tickets [CODE].
-Nous avons donc genere le fichier ci-joint en mode degrade.
+Suite a une incohérence, nous n'avons pas pu générer les tickets [CODE].
+Nous avons donc généré le fichier ci-joint en mode dégradé.
 
-[Si 3430 concernes :]
-Concernant les tickets 3430, ils sont bien presents dans le fichier
+[Si 3430 concernés :]
+Concernant les tickets 3430, ils sont bien présents dans le fichier
 PNMDATA.02.01.YYYYMMDDHHMMSS.NNN.
 
-Nous nous excusons de la gene occasionnee.
+Nous nous excusons de la gêne occasionnée.
 
 Cordialement,
 Steeven JACQUES
-Equipe Application
+Équipe Application
 ```
 
 > **Important :** Le fichier PNMDATA en mode degrade est envoye en PJ du mail,

@@ -59,16 +59,16 @@ Si les actions restent en "Rejetee" apres renvoi, transferer a l'equipe MOBI (Sa
 Bonjour Sarah,
 
 Suite a un changement de SIM sur la ligne [MSISDN] (client [NOM], [N° CLIENT]),
-les actions techniques suivantes restent en echec apres rattrapage RATP_OLN
+les actions techniques suivantes restent en échec après rattrapage RATP_OLN
 et renvoi manuel :
 
-- [Liste des actions rejetees]
+- [Liste des actions rejetées]
 
-Peux-tu verifier le provisioning reseau ?
+Peux-tu vérifier le provisioning réseau ?
 
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ### 5. Repondre au demandeur
@@ -78,27 +78,27 @@ Equipe Application
 Bonjour,
 
 Suite au changement de SIM du [DATE], certaines actions techniques
-sont en echec. Le rattrapage a ete effectue mais des actions reseau
+sont en échec. Le rattrapage a été effectué mais des actions réseau
 n'ont pas abouti.
 
-Nous avons escalade a l'equipe reseau pour le reprovisioning.
-Le ticket sera mis a jour des resolution.
+Nous avons escaladé a l'équipe réseau pour le reprovisioning.
+Le ticket sera mis a jour dès résolution.
 
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 **Apres resolution :**
 ```
 Bonjour,
 
-Le reprovisioning de la ligne [MSISDN] a ete effectue.
+Le reprovisioning de la ligne [MSISDN] a été effectué.
 Le client peut tester sa ligne.
 
 Cdt,
-[Prenom NOM]
-Equipe Application
+[Prénom NOM]
+Équipe Application
 ```
 
 ## Cas particulier : Client B2B avec CUG
