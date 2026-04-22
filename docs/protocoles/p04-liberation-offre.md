@@ -97,7 +97,31 @@ Quand un client souhaite se retracter d'une offre (ex: forfait bloque ne permett
 
 (Voir ticket #276470 — retractation forfait bloque vers offre debloquee)
 
-### 5. Fermer le ticket RT
+### 5. Cas particulier : Mise a disposition d'offre en reaffectation
+
+Quand un CDC demande de rendre une offre disponible pour une reaffectation exceptionnelle. L'offre n'est pas dans le catalogue du PDV mais existe dans le Catalogue Technique des Offres (PRODUCTION) sous le droit "DIGICEL REAFFECTATION".
+
+**Procedure :**
+
+1. Ouvrir le Catalogue Technique des Offres en production
+2. Rechercher l'offre demandee (ex: "LIFE Prem 2h-3Go bloque AM [24]")
+3. Verifier que l'offre existe bien dans l'onglet "Droit Offre" avec le droit "DIGICEL REAFFECTATION" (et non un droit PDV)
+4. Identifier le `pack_id` de l'offre dans MasterCRM (fiche client, historique des packages)
+5. Mettre a jour `pack_end_activation` a **J+2** pour laisser un delai au CDC
+
+```sql
+-- REAFFECTATION — Mise a disposition offre avec delai J+2
+UPDATE customer_package
+SET pack_end_activation = 'JJ/MM/AAAA'
+WHERE pack_id = XXXXX;
+COMMIT;
+```
+
+> **Important :** Toujours mettre la date a J+2 (2 jours ouvres) pour laisser le temps au CDC d'effectuer la reaffectation. Au-dela de cette date, l'offre ne sera plus disponible.
+
+(Voir ticket #277152 — LIFE Prem 2h-3Go bloque AM [24], client 611631, pack_id 13288)
+
+### 6. Fermer le ticket RT
 
 Pour une liberation simple :
 ```
@@ -115,6 +139,28 @@ Pour une liberation combinee (offre + IMEI) :
 Bonjour,
 L'offre est disponible et l'IMEI a été libéré.
 Avertis-nous quand la ligne aura été activée.
+--
+Cdt,
+[Prénom NOM]
+Équipe Application
+```
+
+Pour une mise a disposition en reaffectation (une offre) :
+```
+Bonjour,
+L'offre a été ouverte en réaffectation.
+Je ferme donc le ticket.
+--
+Cdt,
+[Prénom NOM]
+Équipe Application
+```
+
+Pour une mise a disposition en reaffectation (plusieurs offres) :
+```
+Bonjour,
+Les offres ont été ouvertes en réaffectation.
+Je ferme donc le ticket.
 --
 Cdt,
 [Prénom NOM]
