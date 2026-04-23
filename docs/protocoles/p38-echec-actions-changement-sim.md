@@ -42,16 +42,47 @@ Dans la fiche client MasterCRM :
 | B2B / Entreprise | Categorie B2B, CUG_XXXX | Ajout CUG rejetee = **normal** (CUG flotte necessite config reseau specifique) |
 | Wizzee | OPERATION_ID = 217, MS_CLASS = 80 | Transmettre equipe Wizzee |
 
-### 3. Tenter un renvoi des actions echouees
+### 3. Identifier et debloquer les actions via SQL (methode preferee)
 
-Dans MasterCRM, sur chaque action en statut "Rejetee" :
-1. Selectionner l'action
-2. Cliquer sur **"Renvoyer l'action"**
-3. Verifier le retour dans **"Detail action"**
+Utiliser Toad for Oracle sur vmqprotool01 (base PB@MCST). Script : `Mise_en statut_rejeté_action_bloquée.sql`.
+
+**Etape 1 : Recuperer le LINE_NO** dans MasterCRM (onglet Informations ou Techniques).
+
+**Etape 2 : Rechercher les actions bloquees** (statut "Envoyee" = 1 ou autre statut bloquant) :
+
+```sql
+SELECT record_no, action_code, line_no, execution_status, folow_up_status, log_date
+FROM send_actions
+WHERE line_no = #LINE_NO
+AND execution_status IN (1);
+```
+
+Colonnes utiles dans le resultat :
+
+| Colonne | Description |
+|---------|-------------|
+| `record_no` | Identifiant unique de l'action (pour l'UPDATE) |
+| `action_code` | Type d'action (ROAM = RoamingVoyage, USIM = ODL USIM, etc.) |
+| `execution_status` | 0 = Deposee, 1 = Envoyee (bloquee), 5 = Echec, 10 = Terminee |
+| `folow_up_status` | 14 = Rejetee (un seul L dans le nom du champ) |
+| `log_date` | Date de l'action — si ancienne, l'action est bloquee |
+
+**Etape 3 : Passer les actions bloquantes en echec** :
+
+```sql
+UPDATE send_actions
+SET execution_status = 5, folow_up_status = 14
+WHERE record_no IN (#RECORD_NO)
+AND line_no = #LINE_NO
+AND execution_status IN (1);
+COMMIT;
+```
 
 > **Attention CUG :** Pour les clients B2B avec CUG, ne pas renvoyer l'action "Ajout CUG niveau Client". Le CUG doit etre configure specifiquement par l'equipe reseau/MOBI.
 
-### 4. Si le renvoi echoue : escalader a MOBI
+**Etape 4 : Attendre le rattrapage RATP_OLN** qui relancera automatiquement les actions deposees.
+
+### 4. Si le rattrapage echoue : escalader a MOBI
 
 Si les actions restent en "Rejetee" apres renvoi, transferer a l'equipe MOBI (Sarah Mogade) pour reprovisioning manuel :
 

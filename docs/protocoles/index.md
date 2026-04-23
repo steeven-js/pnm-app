@@ -1,6 +1,6 @@
 # Protocoles — Index
 
-**Total :** 39 protocoles | **Derniere MAJ :** 21/04/2026
+**Total :** 40 protocoles | **Derniere MAJ :** 23/04/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentes de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, etapes detaillees, requetes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -23,7 +23,7 @@
 - [P33 — Reactivation forfait bloque SM](p33-reactivation-forfait-bloque.md) — Multi-etapes : restriction droits + liberation + FID
 - [P34 — Desactivation suppression Point de Vente](p34-desactivation-pdv.md) — Del_profil_Mobi, suppression items/packages/groups PDV
 
-## Portabilite (12)
+## Portabilite (13)
 
 - [P08 — Verification Bascule Porta MOBI](p08-verification-bascule.md) — EmaExtracter/EmmExtracter, emails verification, version CCA
 - [P09 — Verification Acquittements](p09-verification-acquittements.md) — PnmAckManager, fichiers .ACR, contacts operateurs
@@ -38,6 +38,7 @@
 - [P27 — Controle FNR post-bascule](p27-controle-fnr.md) — fnr_action_v3.bh, EMA, % commandes OK
 - [P20 — Gestion portabilite B2B vers Free](p20-porta-b2b-free.md) — RIO 02E%, blocage etat 15→17
 - [P37 — Attentes tickets operateurs (mode degrade)](p37-attentes-tickets-operateurs.md) — Creation PNMDATA manuelle, FNR, PortaWs, resiliation PSO
+- [P40 — Verification resiliations PSO non effectives](p40-verification-resiliations-pso.md) — Email automatique APP_OCS, verification PortaDB/FNR, resiliation SoapUI
 
 ## Facturation (2)
 
