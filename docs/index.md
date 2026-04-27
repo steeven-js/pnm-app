@@ -32,6 +32,10 @@
 
 | Document | Description |
 |----------|-------------|
+| [operations/index.md](operations/index.md) | **Index Operations en cours** — dossiers actifs (GPMAG, PILMEDIA) |
+| [operations/gpmag/gpmag-evolutions-arcep.md](operations/gpmag/gpmag-evolutions-arcep.md) | Suivi des evolutions ARCEP / migration prefixes routage Orange / dump FNR |
+| [operations/gpmag/sms-portes-orange-diagnostic.md](operations/gpmag/sms-portes-orange-diagnostic.md) | Diagnostic SMS non recus par les MSISDN Orange portes chez Digicel |
+| [operations/pilmedia/points-actuels.md](operations/pilmedia/points-actuels.md) | Points en cours PILMEDIA / Max Morawski |
 | debug-patterns.md | *(futur)* Patterns de debug et troubleshooting : erreurs frequentes, diagnostics, resolutions |
 | tickets-rt-knowledge-base.md | *(futur)* Base de connaissances tickets RT (historique Frederic Arduin, 7742 tickets) |
 
