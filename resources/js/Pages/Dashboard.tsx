@@ -45,13 +45,13 @@ const OPERATIONS_EN_COURS = [
   },
   {
     title: 'Migration anciens portages',
-    deadline: 'Nuit dim 03/05 → lun 04/05',
+    deadline: 'Ce soir lun 04/05 ~22h',
     description:
-      'Sarah migre les anciens portages vers les nouveaux préfixes OC sur les 3 départements. Monitoring lundi matin.',
+      'Kevin Renciot (CORE) migre les anciens portages vers les nouveaux préfixes OC sur les 3 départements. OAG suivra à partir du 11/05.',
     icon: 'solar:transfer-horizontal-bold-duotone',
     href: `${OPERATIONS_DOCS_BASE}/gpmag/gpmag-evolutions-arcep.md`,
-    status: 'PLANIFIE' as const,
-    color: '#00B8D9',
+    status: 'EN COURS' as const,
+    color: '#FFAB00',
   },
   {
     title: 'SMS portés Orange',
