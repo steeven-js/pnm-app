@@ -1,6 +1,6 @@
 # Protocoles — Index
 
-**Total :** 40 protocoles | **Derniere MAJ :** 23/04/2026
+**Total :** 41 protocoles | **Derniere MAJ :** 04/05/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentes de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, etapes detaillees, requetes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -48,6 +48,10 @@
 ## Automates / Supervision (1)
 
 - [P36 — Automates Back Office MasterCRM](p36-automates-mastercrm.md) — WATCHER, BASCULE_IN, EXPLOIT, LOGISTIQUE, RATP_OLN, TRACE
+
+## Maintenance / Exploitation (1)
+
+- [P41 — Création / modification d'un script PNM](p41-creation-modification-script.md) — Cheatsheet commandes, téléversement Filezilla/SCP, chmod, test, ajout `/etc/crontab`, rollback
 
 ## Debug / Diagnostic (8)
 
