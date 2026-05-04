@@ -1,11 +1,12 @@
 # Diagnostic — SMS non reçus par les MSISDN Orange portés chez Digicel
 
-**Période :** depuis le 31/03/2026
-**Dernière MAJ :** 17/04/2026
+**Statut :** RÉSOLU
+**Période impactée :** 31/03/2026 → résolution suite à la coordination des migrations de préfixes
+**Dernière MAJ :** 04/05/2026
 
-## Problème
+## Problème (résolu)
 
-Les MSISDN Orange portés chez Digicel ne reçoivent plus les SMS (P2P et A2P) depuis le 31/03/2026 (~2h-3h du matin).
+Les MSISDN Orange portés chez Digicel ne recevaient plus les SMS (P2P et A2P) depuis le 31/03/2026 (~2h-3h du matin). Routage SRI for SM corrigé entre Orange IC et BICS, les SMS arrivent à nouveau correctement.
 
 ## Chronologie
 

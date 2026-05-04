@@ -63,42 +63,53 @@
 
 ### Restant à faire
 
-- [ ] Résolution du problème SMS avec ancien RN (entre Orange IC et BICS)
-- [ ] Migration des anciens portages vers les nouveaux préfixes (actuellement seuls les nouveaux portages sont concernés)
+- [x] Résolution du problème SMS avec ancien RN (entre Orange IC et BICS) — **résolu**
+- [ ] Migration des anciens portages vers les nouveaux préfixes — **en cours ce soir 04/05/2026 22h** (Kevin Renciot)
 - [ ] Vérifier les préfixes de routage Digicel (nos propres RN)
 - [ ] Confirmer la date de bascule complète ancien → nouveau RN
 - [ ] Coordonner avec tous les opérateurs la fin de support de l'ancien RN
 
-### Planification migration des anciens portages (échange 27/04/2026)
+### Dump FNR (réalisé)
+
+- [x] **Dump FNR** complet → réalisé par l'équipe **CORE**
+  - Généré le 30/04/2026 après la bascule de 9h
+  - Disponibilité : 01/05/2026 — FNR post-bascule
+  - Périmètre : ensemble du routage FNR (3 départements)
+- [x] **Retraitement des données** → équipe **MIS** (réconciliation FNR vs PortaDB)
+
+### Planification migration des anciens portages (replanifications successives)
 
 - **Complexité côté Digicel :** faible
 - **Durée :** dépend du nombre de lignes à updater
 - **Point d'attention :** monitoring post-op en cas de problème service
 
-**Calendrier retenu :**
+**Historique des replanifications :**
 
-- Bascule du 30/04/2026 : 9h00 (jours ouvrés, `EmaExtracter.sh`)
-- Extraction : juste après la bascule du 30/04 (pas de modif prévue entre le 30/04 et le 04/05)
-- Migration : dans la nuit du dimanche 03/05 au lundi 04/05 (Sarah dimanche soir → effectif disponible lundi matin pour monitoring)
-- Périmètre : les 3 départements (Guadeloupe, Guyane, Martinique)
-- Réalisation : Sarah Mogade
+| Date | Événement |
+|------|-----------|
+| 25/03 | Proposition initiale Christophe Decaris (OAG) — 01/04, 07-08/04 |
+| 30/03 | Kevin pousse à 08/04 / 28-29/04 (S16-S17 absent) |
+| 08/04 | **Provisioning Digicel des nouveaux préfixes : FAIT** |
+| 13/04 | **Provisioning OAG des nouveaux préfixes : OPÉRATIONNEL** |
+| 27/04 | Kevin annonce migration historiques dimanche 03/05 22h |
+| 04/05 matin | Opération 03/05 non effectuée. Report annoncé au 10/05 22h |
+| 04/05 fin journée | **Retournement** : SI valide migration **ce soir lundi 04/05 ~22h** |
 
-**Contexte :** long week-end du 01/05, astreinte uniquement disponible — d'où le choix de la nuit dimanche/lundi.
+**Calendrier final retenu :**
+
+- Migration des préfixes historiques Orange : **lundi 04/05/2026 à partir de 22h**
+- Périmètre : les 3 départements (Guadeloupe, Guyane, Martinique) en une seule opération
+- Réalisation : **Kevin Renciot (CORE Network)**
+- Côté OAG : Christophe Decaris fera de même à partir du 11/05
+- Monitoring : mardi 05/05 matin pour observer la montée en charge
 
 ### Demande Kevin Renciot (CORE — 27/04/2026)
 
-Kevin a besoin de fichiers historiques juste après la bascule du 30/04 pour préparer son côté (pas le fichier de bascule qui n'a pas tous les numéros).
-
-Fichiers à fournir (Steeven) :
-
-- [ ] Fichier des MSISDN portés IN Digicel, depuis Orange (historique des portages entrants OC → Digicel)
-- [ ] Fichier des MSISDN portés OUT Digicel vers Orange (historique des portages sortants Digicel → OC)
-
-Antoine Martin (CORE Network) ajouté à la conversation Teams par Kevin pour suivi.
+Kevin avait besoin de fichiers historiques pour préparer la migration. **Décision finale** : utilisation directe du **dump FNR** plutôt qu'une extraction PortaDB.
 
 ### Point routage 27/04/2026 (Sarah / Frédéric / Kevin / Steeven)
 
-**Décision :** on travaillera avec le **FNR** plutôt qu'avec une extraction PortaDB.
+**Décision :** on travaille avec le **FNR** plutôt qu'avec une extraction PortaDB.
 
 **Justification :**
 
@@ -110,15 +121,6 @@ Antoine Martin (CORE Network) ajouté à la conversation Teams par Kevin pour su
 
 - L'extraction SQL préparée (`extraction_portes_orange_kevin.sql`) reste disponible mais n'est plus la source retenue
 - Source retenue : **dump FNR** (172.24.2.21)
-
-**Action retenue :**
-
-- [ ] **Dump FNR** complet → réalisé par l'équipe **CORE**
-  - Date génération : Jeudi 30/04/2026 (après la bascule de 9h)
-  - Disponibilité : Vendredi 01/05/2026 — FNR « frais » (état du routage post-bascule du jeudi)
-  - Périmètre : ensemble du routage FNR (3 départements)
-- [ ] **Retraitement des données** → équipe **MIS**
-  - Objectif : identifier les écarts, réconciliation possible entre FNR (état routage réel) et PortaDB (état PNM)
 
 ---
 
@@ -140,14 +142,18 @@ Sujet discuté au GPMAG du 16/04/2026.
 
 ## 3. Problème SMS numéros portés (lié au point 1)
 
-**Statut :** EN COURS — CRITIQUE
+**Statut :** RÉSOLU
 
-### Impact
+### Impact (historique)
 
 - SMS P2P et A2P non reçus par les MSISDN Orange portés chez Digicel
 - 13 tickets clients (team VAS) + 6 MSISDN signalés initialement
 - Problème identifié aussi avec UTS (ticket #277086)
 - Nombreuses plaintes clients (SMS bancaires, Certicode, etc.)
+
+### Résolution
+
+Routage SRI for SM corrigé entre Orange IC et BICS suite à la coordination des migrations de préfixes. Les SMS arrivent à nouveau correctement aux MSISDN portés.
 
 Voir :
 
@@ -155,13 +161,13 @@ Voir :
 - [Tickets SMS portés Orange](sms-portes-orange-tickets.md)
 - [Ticket #277086 SMS UTS](ticket-277086-sms-uts.md)
 
-### Restant à faire
+### Actions menées (closes)
 
-- [ ] Orange IC doit fournir trace de forwarding à BICS
-- [ ] BICS doit confirmer réception et routage
-- [ ] Correction du routage SRI for SM ancien RN
-- [ ] Vérifier le routage UTS pour les numéros portés
-- [ ] Tester la réception SMS après correction
+- [x] Orange IC a fourni trace de forwarding à BICS
+- [x] BICS a confirmé réception et routage
+- [x] Correction du routage SRI for SM ancien RN
+- [x] Vérification du routage UTS pour les numéros portés
+- [x] Réception SMS testée et confirmée OK
 
 ---
 

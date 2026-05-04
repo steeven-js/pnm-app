@@ -34,16 +34,6 @@ const OPERATIONS_DOCS_BASE =
 
 const OPERATIONS_EN_COURS = [
   {
-    title: 'Dump FNR Orange',
-    deadline: 'Jeudi 30/04 — après 9h',
-    description:
-      'Coordination CORE/MIS pour le dump FNR juste après la bascule, en vue de la migration des préfixes Orange.',
-    icon: 'solar:database-bold-duotone',
-    href: `${OPERATIONS_DOCS_BASE}/gpmag/gpmag-evolutions-arcep.md`,
-    status: 'EN COURS' as const,
-    color: '#FFAB00',
-  },
-  {
     title: 'Migration anciens portages',
     deadline: 'Ce soir lun 04/05 ~22h',
     description:
@@ -54,16 +44,6 @@ const OPERATIONS_EN_COURS = [
     color: '#FFAB00',
   },
   {
-    title: 'SMS portés Orange',
-    deadline: 'Depuis 31/03/2026',
-    description:
-      '13 tickets RT clients. Routage SRI for SM cassé entre Orange IC et BICS. Attente trace forwarding Orange IC.',
-    icon: 'solar:chat-square-arrow-bold-duotone',
-    href: `${OPERATIONS_DOCS_BASE}/gpmag/sms-portes-orange-diagnostic.md`,
-    status: 'CRITIQUE' as const,
-    color: '#FF5630',
-  },
-  {
     title: 'PILMEDIA / Max Morawski',
     deadline: 'À planifier avec Sarah',
     description:
@@ -72,6 +52,26 @@ const OPERATIONS_EN_COURS = [
     href: `${OPERATIONS_DOCS_BASE}/pilmedia/points-actuels.md`,
     status: 'A PLANIFIER' as const,
     color: '#00A76F',
+  },
+  {
+    title: 'Reporting mensuel 1510/1520',
+    deadline: 'Script à fiabiliser puis crontab',
+    description:
+      'Script Pnm_1510_1520_reporting_mensuel.sh : aligner sur le pattern Pnm_Facturation_Mensuelle_PSO.sh, valider envoi mail, puis ajouter dans /etc/crontab.',
+    icon: 'solar:document-text-bold-duotone',
+    href: `${OPERATIONS_DOCS_BASE}/`,
+    status: 'EN COURS' as const,
+    color: '#00B8D9',
+  },
+  {
+    title: 'Preuve d\'identité portabilités',
+    deadline: 'À cadrer (GPMAG)',
+    description:
+      'Décision ARCEP 22-2148 : définir les exigences de preuve d\'identité et l\'impact sur le ticket 1110 / Admin-Portal / PortaWS.',
+    icon: 'solar:shield-keyhole-bold-duotone',
+    href: `${OPERATIONS_DOCS_BASE}/gpmag/gpmag-evolutions-arcep.md`,
+    status: 'A PLANIFIER' as const,
+    color: '#637381',
   },
 ];
 
