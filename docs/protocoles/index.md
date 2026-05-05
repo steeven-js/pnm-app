@@ -1,6 +1,6 @@
 ﻿# Protocoles — Index
 
-**Total :** 41 protocoles | **Dernière MAJ :** 04/05/2026
+**Total :** 42 protocoles | **Dernière MAJ :** 05/05/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentés de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, étapes détaillées, requêtes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -52,6 +52,10 @@
 ## Maintenance / Exploitation (1)
 
 - [P41 — Création / modification d'un script PNM](p41-creation-modification-script.md) — Cheatsheet commandes, téléversement Filezilla/SCP, chmod, test, ajout `/etc/crontab`, rollback
+
+## Coordination inter-opérateurs (1)
+
+- [P42 — Migration d'un préfixe de routage inter-opérateur](p42-migration-prefixe-routage-inter-operateur.md) — 5 phases (cadrage, provisioning, carriers, bulk, décommissionnement), basé sur le cas Orange 31/03 → 04/05/2026
 
 ## Debug / Diagnostic (8)
 
