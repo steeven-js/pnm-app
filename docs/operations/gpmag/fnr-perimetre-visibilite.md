@@ -8,17 +8,19 @@ Note explicative sur **ce que contient** le FNR généré par Digicel, **qui le 
 
 ## 1. Périmètre du FNR Digicel
 
-Le FNR que **nous** générons (via `EmaExtracter` à 9h chaque jour ouvré) couvre **trois familles** de MSISDN :
+Le FNR contient **uniquement les exceptions de routage** (= les portages effectivement réalisés). Un MSISDN qui n'a jamais été porté n'a **pas besoin** d'entrée dans le FNR : il est routé par défaut via sa tranche d'attribution.
+
+Le FNR que **nous** générons (via `EmaExtracter` à 9h chaque jour ouvré) couvre donc :
 
 | Cas | Présent dans notre FNR ? | Pourquoi |
 |-----|--------------------------|----------|
-| MSISDN **attribué à Digicel** (notre tranche), encore chez Digicel | ✅ Oui | Routage local vers notre HLR |
+| MSISDN **attribué à Digicel** (OPA), encore chez Digicel, **jamais porté** | ❌ Non | Routage par défaut via la tranche/NDC, pas d'entrée FNR nécessaire |
 | MSISDN **attribué à Digicel**, porté chez un autre opérateur (PSO) | ✅ Oui | Stocke le RN de l'opérateur receveur (ex: `52303` pour OC Guadeloupe) |
-| MSISDN **attribué à un autre opérateur**, porté chez Digicel (PEN) | ✅ Oui | Permet à notre réseau interne de router localement (notre HLR connaît le sub) |
-| MSISDN **attribué à un autre opérateur**, encore chez lui | ❌ Non | Pas notre périmètre — c'est le FNR de l'opérateur attributaire qui le gère |
+| MSISDN **attribué à un autre opérateur**, porté chez Digicel (PEN) | ✅ Oui | Pour que notre réseau interne route localement vers notre HLR |
+| MSISDN **attribué à un autre opérateur**, encore chez lui | ❌ Non | Pas notre périmètre — FNR de l'opérateur attributaire |
 | Portage **entre deux tiers** (ex: Orange → SFR) | ❌ Non | Ne nous concerne pas pour le routage |
 
-→ Notre FNR n'est **pas** uniquement nos MSISDN portés : c'est l'**ensemble des MSISDN dont le routage nous concerne** (attribués Digicel ou hébergés par Digicel).
+→ Notre FNR contient les **portages effectifs** qui nous concernent : nos numéros sortis (PSO) + les numéros entrés chez nous (PEN). Les numéros « jamais portés » (chez nous ou ailleurs) ne sont pas dans le FNR.
 
 ---
 
@@ -152,15 +154,20 @@ sequenceDiagram
 ## 7. Synthèse à retenir
 
 ```
-FNR Digicel = base de routage pour TOUS les numeros qu'on attribue
-              + ceux qu'on heberge (PEN entrants)
+FNR Digicel = base des EXCEPTIONS de routage (= portages effectifs)
+              - PSO : nos numeros sortis (avec RN de l'operateur receveur)
+              - PEN : numeros d'autres operateurs entres chez nous
+
+              Les MSISDN "jamais portes" (chez nous ou ailleurs)
+              ne sont PAS dans le FNR — routage par defaut via la tranche
+
               ↓
               Publie vers les commutateurs Digicel (EMA)
               + Synchronise avec autres operateurs (PNMSYNC)
               + Interroge en temps reel via SS7 (HLR)
               ↓
               VISIBLE par tous les operateurs qui veulent
-              router vers un de nos numeros
+              router vers un numero porte
 
 PortaDB = vue complete de TOUS les portages tous operateurs
           (incluant les portages entre tiers via PNMSYNC)
