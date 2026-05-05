@@ -35,13 +35,13 @@ const OPERATIONS_DOCS_BASE =
 const OPERATIONS_EN_COURS = [
   {
     title: 'Migration anciens portages',
-    deadline: 'Réalisée 04/05 22h — monitoring',
+    deadline: 'Côté Digicel terminé — OAG dès 11/05',
     description:
-      'Migration côté Digicel faite par Kevin Renciot (71 684 MSISDN + 86 tranches). Monitoring en cours. OAG suivra à partir du 11/05.',
+      'Migration et monitoring côté Digicel terminés (71 684 MSISDN + 86 tranches). En attente de la migration côté OAG par Christophe Decaris à partir du 11/05.',
     icon: 'solar:transfer-horizontal-bold-duotone',
     href: `${OPERATIONS_DOCS_BASE}/gpmag/gpmag-evolutions-arcep.md`,
-    status: 'EN COURS' as const,
-    color: '#00B8D9',
+    status: 'EN ATTENTE' as const,
+    color: '#637381',
   },
   {
     title: 'PILMEDIA / Max Morawski',

@@ -104,7 +104,7 @@
 | Date | Événement | État |
 |------|-----------|------|
 | 04/05/2026 22h00 | Migration côté Digicel | ✅ **RÉALISÉE** |
-| 05/05/2026 matin | Monitoring de la montée en charge | En cours |
+| 05/05/2026 matin | Monitoring de la montée en charge | ✅ **RÉALISÉ** |
 | À partir du 11/05/2026 | Migration côté OAG par Christophe Decaris | Planifié |
 | Mi-mai 2026 | Clôture du ticket #276845 | À faire |
 
