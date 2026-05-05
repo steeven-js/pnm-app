@@ -64,10 +64,10 @@
 ### Restant à faire
 
 - [x] Résolution du problème SMS avec ancien RN (entre Orange IC et BICS) — **résolu**
-- [ ] Migration des anciens portages vers les nouveaux préfixes — **en cours ce soir 04/05/2026 22h** (Kevin Renciot)
+- [x] Migration des anciens portages vers les nouveaux préfixes — **côté Digicel réalisée le 04/05/2026 22h** par Kevin Renciot (71 684 MSISDN + 86 tranches MSISDN_SERIES). Côté OAG à partir du 11/05.
 - [ ] Vérifier les préfixes de routage Digicel (nos propres RN)
 - [ ] Confirmer la date de bascule complète ancien → nouveau RN
-- [ ] Coordonner avec tous les opérateurs la fin de support de l'ancien RN
+- [ ] Coordonner avec tous les opérateurs (SFR, DT, UTS, Free) la fin de support de l'ancien RN 60042
 
 ### Dump FNR (réalisé)
 
@@ -88,20 +88,25 @@
 | Date | Événement |
 |------|-----------|
 | 25/03 | Proposition initiale Christophe Decaris (OAG) — 01/04, 07-08/04 |
+| 25/03 | Frédéric Arduin signale que SI Porta pas encore prête (correctif PIL-MEDIA en attente) |
 | 30/03 | Kevin pousse à 08/04 / 28-29/04 (S16-S17 absent) |
 | 08/04 | **Provisioning Digicel des nouveaux préfixes : FAIT** |
+| 10/04 | Gérard Chenevier (OAG) demande de planifier les actions |
 | 13/04 | **Provisioning OAG des nouveaux préfixes : OPÉRATIONNEL** |
+| 20/04 | Steeven confirme à Christophe les préfixes Digicel (52301 / 52311 / 52331) — OK pour les nouveaux portages |
 | 27/04 | Kevin annonce migration historiques dimanche 03/05 22h |
 | 04/05 matin | Opération 03/05 non effectuée. Report annoncé au 10/05 22h |
-| 04/05 fin journée | **Retournement** : SI valide migration **ce soir lundi 04/05 ~22h** |
+| 04/05 fin journée | **Retournement** : SI valide migration lundi 04/05 ~22h |
+| **04/05 22h00** | **Migration côté Digicel réalisée par Kevin Renciot** (71 684 MSISDN + 86 tranches) |
 
-**Calendrier final retenu :**
+**Calendrier final :**
 
-- Migration des préfixes historiques Orange : **lundi 04/05/2026 à partir de 22h**
-- Périmètre : les 3 départements (Guadeloupe, Guyane, Martinique) en une seule opération
-- Réalisation : **Kevin Renciot (CORE Network)**
-- Côté OAG : Christophe Decaris fera de même à partir du 11/05
-- Monitoring : mardi 05/05 matin pour observer la montée en charge
+| Date | Événement | État |
+|------|-----------|------|
+| 04/05/2026 22h00 | Migration côté Digicel | ✅ **RÉALISÉE** |
+| 05/05/2026 matin | Monitoring de la montée en charge | En cours |
+| À partir du 11/05/2026 | Migration côté OAG par Christophe Decaris | Planifié |
+| Mi-mai 2026 | Clôture du ticket #276845 | À faire |
 
 ### Demande Kevin Renciot (CORE — 27/04/2026)
 

@@ -35,13 +35,13 @@ const OPERATIONS_DOCS_BASE =
 const OPERATIONS_EN_COURS = [
   {
     title: 'Migration anciens portages',
-    deadline: 'Ce soir lun 04/05 ~22h',
+    deadline: 'Réalisée 04/05 22h — monitoring',
     description:
-      'Kevin Renciot (CORE) migre les anciens portages vers les nouveaux préfixes OC sur les 3 départements. OAG suivra à partir du 11/05.',
+      'Migration côté Digicel faite par Kevin Renciot (71 684 MSISDN + 86 tranches). Monitoring en cours. OAG suivra à partir du 11/05.',
     icon: 'solar:transfer-horizontal-bold-duotone',
     href: `${OPERATIONS_DOCS_BASE}/gpmag/gpmag-evolutions-arcep.md`,
     status: 'EN COURS' as const,
-    color: '#FFAB00',
+    color: '#00B8D9',
   },
   {
     title: 'PILMEDIA / Max Morawski',
