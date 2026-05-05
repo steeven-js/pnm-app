@@ -7,6 +7,7 @@ Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 | Document | Statut | Description |
 |----------|--------|-------------|
 | [gpmag-evolutions-arcep.md](gpmag/gpmag-evolutions-arcep.md) | EN COURS | Suivi des évolutions ARCEP — migration préfixes (en cours 04/05 22h), preuve d'identité, MSISDN étendu |
+| [rn-routage-prefixes.md](gpmag/rn-routage-prefixes.md) | Réf. | **Référence RN** : anciens (60041-60048) et nouveaux préfixes territorialisés (52301-52333) par opérateur |
 | [cr-gpmag-2026-04-16.md](gpmag/cr-gpmag-2026-04-16.md) | Réf. | CR réunion GPMAG du 16/04/2026 |
 | [sms-portes-orange-diagnostic.md](gpmag/sms-portes-orange-diagnostic.md) | RÉSOLU | Diagnostic SMS non reçus par les MSISDN Orange portés chez Digicel (31/03 → 05/2026) |
 | [sms-portes-orange-tickets.md](gpmag/sms-portes-orange-tickets.md) | RÉSOLU | Tickets RT clients liés aux SMS bancaires non reçus |
