@@ -1,4 +1,4 @@
-# Schema Base de Donnees PortaDB — Porta v3.0.15
+﻿# Schema Base de Donnees PortaDB — Porta v3.0.15
 
 > Converti depuis Porta-v3.0.15 Database.pdf (diagramme schema BDD)
 > Auteur original : Willy.Laurencine@pil-medias.com
@@ -8,7 +8,7 @@
 
 ## Vue d'ensemble
 
-PortaDB est la base de donnees centrale du systeme de portabilite PNM. Elle stocke les tickets de portage, les dossiers, les fichiers echanges, les etats, les transitions et l'historique complet des MSISDN portes.
+PortaDB est la base de données centrale du système de portabilité PNM. Elle stocke les tickets de portage, les dossiers, les fichiers échanges, les etats, les transitions et l'historique complet des MSISDN portes.
 
 ### Relations principales
 
@@ -57,7 +57,7 @@ MSISDN_HISTORIQUE ──> PORTAGE (portage_id)
 
 ### PNMDATA — Tickets de portage
 
-Table centrale contenant tous les tickets echanges entre operateurs.
+Table centrale contenant tous les tickets échanges entre opérateurs.
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
@@ -65,7 +65,7 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | fichier_id | Integer | FK → FICHIER | Fichier source du ticket |
 | source | Byte[1] | NOT NULL, enum | `ticket_in`, `ticket_out`, `internal` |
 | code_ticket | String[4] | FK → CODE_TICKET | Type de ticket (1110, 1210, etc.) |
-| operateur_origine | Integer[2] | FK → OPERATEUR | Operateur emetteur |
+| operateur_origine | Integer[2] | FK → OPERATEUR | Operateur émetteur |
 | operateur_destination | Integer[2] | FK → OPERATEUR | Operateur destinataire |
 | OPR | Integer[2] | FK → OPERATEUR | Operateur Receveur |
 | OPD | Integer[2] | FK → OPERATEUR | Operateur Donneur |
@@ -101,7 +101,7 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | msisdn | MSISDN | FK, NOT NULL | Numero porte |
 | dossier_id | Integer | FK → DOSSIER, NOT NULL | Dossier de portage |
 | date_portage | Date | NOT NULL | Date de portage prevue |
-| date_debut | Date | NOT NULL | Date debut portage |
+| date_debut | Date | NOT NULL | Date début portage |
 | date_fin | Date | | Date fin portage (NULL si en cours) |
 | etat_id_actuel | Integer | FK → ETAT | Etat actuel du portage |
 
@@ -112,9 +112,9 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | msisdn | String[10] | NOT NULL | Format 06nnnnnnnn |
-| tranche_id | Integer | FK → TRANCHE | Tranche de numeros |
+| tranche_id | Integer | FK → TRANCHE | Tranche de numéros |
 | portage_id_actuel | Integer | FK → PORTAGE | Portage en cours (NULL si aucun) |
-| operateur_id_actuel | Integer | FK → OPERATEUR, NOT NULL | Operateur actuel du numero |
+| operateur_id_actuel | Integer | FK → OPERATEUR, NOT NULL | Operateur actuel du numéro |
 
 ---
 
@@ -137,10 +137,10 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
-| code | Integer[2] | PK, NOT NULL | Code operateur (01-06) |
+| code | Integer[2] | PK, NOT NULL | Code opérateur (01-06) |
 | is_active | Boolean | NOT NULL | Operateur actif |
-| is_actor | Boolean | NOT NULL | Acteur dans le systeme |
-| nom | String[32] | NOT NULL | Nom operateur |
+| is_actor | Boolean | NOT NULL | Acteur dans le système |
+| nom | String[32] | NOT NULL | Nom opérateur |
 | contact | String | | Contact principal |
 | email | String | | Email |
 | fax | String | | Fax |
@@ -158,7 +158,7 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | type | Byte[1] | NOT NULL | enum: normal, inverse, restitution |
 | direction | Byte[1] | NOT NULL | enum: entrante, sortante, etrangere |
 | classe | Byte[1] | NOT NULL | enum: saisi, encours, bascule, cloture, refuse, annule |
-| numero | Integer[1] | NOT NULL | Numero sequentiel |
+| numéro | Integer[1] | NOT NULL | Numero sequentiel |
 | label | String[150] | | Libelle |
 | description | String[150] | | Description |
 | is_begin | Boolean | NOT NULL, default: no | Etat initial |
@@ -198,9 +198,9 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | is_for_all | Boolean | NOT NULL | Applicable a tous |
 | etat_id_from | Integer | FK → ETAT, UNIQUE | Etat source |
 | etat_id_to | Integer | FK → ETAT | Etat destination |
-| evenement | Byte[1] | NOT NULL | enum: ticket_in, ticket_out, internal |
+| événement | Byte[1] | NOT NULL | enum: ticket_in, ticket_out, internal |
 | context_evenement | String | | Contexte additionnel |
-| ticket_id_evenement | Integer | FK → CODE_TICKET, UNIQUE | Ticket declencheur |
+| ticket_id_evenement | Integer | FK → CODE_TICKET, UNIQUE | Ticket déclencheur |
 | label | String[150] | | Libelle |
 
 ---
@@ -215,18 +215,18 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | context_transition | String | | Contexte additionnel |
 | data_id_transition | Integer | FK → DATA | Donnee associee |
 | etat_id_from | Integer | FK → ETAT, NOT NULL | Etat avant transition |
-| date_debut | Date | | Date debut |
+| date_debut | Date | | Date début |
 | date_fin | Date | | Date fin |
 
 ---
 
-### FICHIER — Fichiers PNMDATA/PNMSYNC echanges
+### FICHIER — Fichiers PNMDATA/PNMSYNC échanges
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | id | Integer | PK, AUTO | Identifiant unique |
 | header_nom_fichier | String[32] | NOT NULL | Nom du fichier |
-| header_emetteur | Integer[2] | FK → OPERATEUR, NOT NULL | Code emetteur (01-06) |
+| header_emetteur | Integer[2] | FK → OPERATEUR, NOT NULL | Code émetteur (01-06) |
 | header_date_debut_fichier | Date[14] | | AAAAMMJJHHMMSS |
 | footer_date_fin_fichier | Date[14] | | AAAAMMJJHHMMSS |
 | footer_nombre_de_lignes | Integer[4] | NOT NULL | Nombre de lignes (1-9999) |
@@ -238,7 +238,7 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | expediteur | Integer[2] | FK → OPERATEUR, NOT NULL | Code expediteur |
 | destinataire | Integer[2] | FK → OPERATEUR, NOT NULL | Code destinataire |
 | date | Date[14] | NOT NULL | AAAAMMJJHHMMSS |
-| sequence | Integer[3] | NOT NULL | Sequence (001-999) |
+| séquence | Integer[3] | NOT NULL | Sequence (001-999) |
 
 ---
 
@@ -260,7 +260,7 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 |---------|------|-------------|-------------|
 | id | Integer | PK, AUTO, NOT NULL | Identifiant unique |
 | date | Date | | Date |
-| is_conflict | Boolean | NOT NULL, default: no | Conflit detecte |
+| is_conflict | Boolean | NOT NULL, default: no | Conflit détecté |
 | sync_id | Integer | FK → SYNC, NOT NULL | Synchronisation concernee |
 | msisdn_historique_id_conflit | Integer | FK → MSISDN_HISTORIQUE | Historique en conflit |
 | msisdn_historique_id_resolution | Integer | FK → MSISDN_HISTORIQUE | Resolution du conflit |
@@ -280,25 +280,25 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 
 ---
 
-### TRANCHE — Tranches de numeros
+### TRANCHE — Tranches de numéros
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | id | Integer | PK, AUTO, NOT NULL | Identifiant unique |
 | is_active | Boolean | NOT NULL | Tranche active |
 | operateur_id | Integer | FK → OPERATEUR (OPA) | Operateur attributaire |
-| debut | String[10] | NOT NULL | Debut tranche (06nnnnnnnn) |
+| début | String[10] | NOT NULL | Debut tranche (06nnnnnnnn) |
 | fin | String[10] | NOT NULL | Fin tranche (06nnnnnnnn) |
 
 ---
 
-### FERRYDAY — Jours feries
+### FERRYDAY — Jours fériés
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | ferryday | Date | NOT NULL | Format AAAAMMJJ |
-| creation | Date | | AAAAMMJJHHMMSS |
-| is_active | Boolean | NOT NULL, default: 1 | Jour ferie actif |
+| création | Date | | AAAAMMJJHHMMSS |
+| is_active | Boolean | NOT NULL, default: 1 | Jour férié actif |
 
 ---
 
@@ -307,19 +307,19 @@ Table centrale contenant tous les tickets echanges entre operateurs.
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | portage_id | Integer | FK → PORTAGE | Portage associe |
-| creation_date | Date | default: CURRENT_TIMESTAMP | Date creation |
+| creation_date | Date | default: CURRENT_TIMESTAMP | Date création |
 | temporary_msisdn | String | | MSISDN temporaire (06nnnnnnnn) |
 | change_date | Date | default: NULL | Date changement |
 
 ---
 
-### MSISDN_HISTORIQUE — Historique des numeros
+### MSISDN_HISTORIQUE — Historique des numéros
 
 | Colonne | Type | Contraintes | Description |
 |---------|------|-------------|-------------|
 | id | Integer | PK, AUTO, NOT NULL | Identifiant unique |
 | msisdn | String[10] | FK → MSISDN, NOT NULL | Numero concerne |
 | operateur_id | Integer | FK → OPERATEUR, NOT NULL | Operateur |
-| date_debut | Date | NOT NULL | Date debut |
+| date_debut | Date | NOT NULL | Date début |
 | date_fin | Date | | Date fin (NULL si actuel) |
 | portage_id | Integer | FK → PORTAGE | Portage associe |

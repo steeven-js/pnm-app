@@ -1,4 +1,4 @@
-# P23 — Tickets en attente (tous operateurs)
+﻿# P23 — Tickets en attente (tous opérateurs)
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportawebdb01
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Script complet de surveillance des tickets en attente pour tous les operateurs. Verifie 3 types de tickets :
+Script complet de surveillance des tickets en attente pour tous les opérateurs. Verifie 3 types de tickets :
 - **1210** : acceptation portage (J+1)
 - **1430** : confirmation portage (S-1)
 - **3430** : confirmation restitution
@@ -31,11 +31,11 @@ Script complet de surveillance des tickets en attente pour tous les operateurs. 
 
 ### 1210 — Acceptation en attente
 
-Portages en etat 3 avec date_portage a J+1 sans ticket 1210 recu.
+Portages en etat 3 avec date_portage a J+1 sans ticket 1210 reçu.
 
 ### 1430 — Confirmation en attente
 
-Portages en etat 9 (portage effectue) entre S-1 et J-3 sans ticket 1430 recu.
+Portages en etat 9 (portage effectue) entre S-1 et J-3 sans ticket 1430 reçu.
 
 ```sql
 -- Exemple : portages OC sans 1430
@@ -58,6 +58,6 @@ Restitutions en attente de confirmation.
 ## Action requise
 
 Si des tickets sont en attente :
-1. Identifier l'operateur concerne
-2. Verifier si le ticket a ete envoye dans le dernier fichier PNMDATA
-3. Si non recu apres 2 vacations, contacter l'operateur
+1. Identifier l'opérateur concerne
+2. Verifier si le ticket a ete envoyé dans le dernier fichier PNMDATA
+3. Si non reçu après 2 vacations, contacter l'opérateur

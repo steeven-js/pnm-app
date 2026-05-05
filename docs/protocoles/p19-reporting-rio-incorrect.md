@@ -1,20 +1,20 @@
-# P19 — Reporting RIO incorrect (Refus R123)
+﻿# P19 — Reporting RIO incorrect (Refus R123)
 
 **Categorie :** Debug / Diagnostic
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** check_refus_porta_rio_incorrect.sh
-**Declencheur :** Automatique (jours ouvres) + suspicion de fraude
+**Declencheur :** Automatique (jours ouvrés) + suspicion de fraude
 
 ---
 
 ## Contexte
 
-Le code motif R123 = "RIO incorrect". Un nombre eleve de refus R123 peut indiquer une tentative de fraude en masse (portabilite avec des RIO falsifies).
+Le code motif R123 = "RIO incorrect". Un nombre eleve de refus R123 peut indiquer une tentative de fraude en masse (portabilité avec des RIO falsifies).
 
 ## Execution automatique
 
-Le script s'execute chaque jour ouvre et envoie un email :
+Le script s'exécute chaque jour ouvre et envoie un email :
 `[PNM] Reporting sur les cas de refus avec motif RIO incorrect`
 
 Destinataires : fwi_pnm_si + equipe fraude (linda.haustant, karine.bidoyet, audrey.dorwling-carter, teddy.moravie)
@@ -27,7 +27,7 @@ cd /home/porta_pnmv3/Scripts/
 ./check_refus_porta_rio_incorrect.sh
 ```
 
-## Requetes detaillees
+## Requetes détaillées
 
 ### Comptage refus porta entrante (R123)
 
@@ -41,7 +41,7 @@ AND date(date_creation_ticket) = 'YYYY-MM-DD'
 AND code_motif = 'R123';
 ```
 
-### Detail par operateur
+### Detail par opérateur
 
 ```sql
 SELECT upper(D.source), O.nom, count(*)
@@ -73,6 +73,6 @@ AND PD.temporary_msisdn IS NOT NULL;
 
 ## Interpretation
 
-- Lundi : le script verifie J-3 (couvre le week-end)
-- Autres jours : le script verifie J-1
+- Lundi : le script vérifié J-3 (couvre le week-end)
+- Autres jours : le script vérifié J-1
 - Si nb_refus eleve → alerter l'equipe fraude pour investigation

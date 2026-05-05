@@ -1,21 +1,21 @@
-# P04 — Liberation Offre (customer_package)
+﻿# P04 — Libération Offre (customer_package)
 
-**Categorie :** Liberation
+**Categorie :** Libération
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — offre bloquee empechant un changement d'offre ou une reaffectation
+**Declencheur :** Ticket RT — offre bloquée empechant un changement d'offre ou une reaffectation
 **Temps moyen :** 5 a 30 min
-**Frequence :** Moderee (~61 tickets/an categorie "Liberation Offre")
+**Frequence :** Moderee (~61 tickets/an catégorie "Libération Offre")
 
 ---
 
 ## Contexte
 
-Liberer une offre bloquee dans la table `customer_package` de la base Oracle MOBI pour permettre un changement d'offre ou une reaffectation. Tant que la date `pack_end_activation` n'est pas depassee, l'offre reste active et ne peut pas etre reaffectee a un autre client.
+Liberer une offre bloquée dans la table `customer_package` de la base Oracle MOBI pour permettre un changement d'offre ou une reaffectation. Tant que la date `pack_end_activation` n'est pas depassee, l'offre reste active et ne peut pas etre reaffectee a un autre client.
 
 Deux types de demandes :
-1. **Liberation simple** : mettre a jour `pack_end_activation` pour rendre l'offre disponible
-2. **Liberation avec restriction** : supprimer les droits du package (`package_right`) avant de liberer, necessaire pour les reactivations de forfait
+1. **Libération simple** : mettre a jour `pack_end_activation` pour rendre l'offre disponible
+2. **Libération avec restriction** : supprimer les droits du package (`package_right`) avant de liberer, nécessaire pour les reactivations de forfait
 
 ## Etapes
 
@@ -28,7 +28,7 @@ su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 
-### 2. Identifier le pack_id bloque
+### 2. Identifier le pack_id bloqué
 
 Rechercher les packages actifs du client.
 
@@ -50,7 +50,7 @@ AND CP.PACK_END_ACTIVATION IS NULL;
 
 > **Attention :** Verifier le PACK_ID avant de mettre a jour. Ne pas liberer un package actif legitime.
 
-### 3a. Liberation simple — Forcer la date de fin d'activation
+### 3a. Libération simple — Forcer la date de fin d'activation
 
 Mettre a jour `pack_end_activation` pour liberer l'offre. Utiliser la date du jour ou du lendemain.
 
@@ -66,9 +66,9 @@ Exemples de pack_id rencontres :
 - `13018` : Life 40Go Debloque AM 54.90EUR (ticket #276470)
 - `13291` : LIFE Premium 50Go Bloque AM 12 mois (ticket #276492)
 
-### 3b. Liberation avec restriction de droits (reactivation forfait)
+### 3b. Libération avec restriction de droits (réactivation forfait)
 
-Pour les demandes de reactivation d'un forfait bloque, il faut d'abord supprimer les droits du package avant de liberer l'offre :
+Pour les demandes de réactivation d'un forfait bloqué, il faut d'abord supprimer les droits du package avant de liberer l'offre :
 
 ```sql
 -- Etape 1 : Restriction des droits pour mise a disposition
@@ -86,16 +86,16 @@ COMMIT;
 
 > **Attention :** Les `pack_level_point` preserves (0, 1, 2, 3, 5999996-5999999) sont les niveaux de base. Ne PAS les supprimer.
 
-(Voir ticket #276492 — reactivation LIFE Premium 50Go)
+(Voir ticket #276492 — réactivation LIFE Premium 50Go)
 
 ### 4. Cas particulier : Retractation client
 
-Quand un client souhaite se retracter d'une offre (ex: forfait bloque ne permettant pas les appels internationaux) :
-1. Liberer l'offre actuelle (etape 3a)
+Quand un client souhaite se retracter d'une offre (ex: forfait bloqué ne permettant pas les appels internationaux) :
+1. Liberer l'offre actuelle (étape 3a)
 2. Liberer l'IMEI si demande (protocole P01)
 3. Le CDC pourra ensuite affecter la nouvelle offre
 
-(Voir ticket #276470 — retractation forfait bloque vers offre debloquee)
+(Voir ticket #276470 — retractation forfait bloqué vers offre debloquee)
 
 ### 5. Cas particulier : Mise a disposition d'offre en reaffectation
 
@@ -104,7 +104,7 @@ Quand un CDC demande de rendre une offre disponible pour une reaffectation excep
 **Procedure :**
 
 1. Ouvrir le Catalogue Technique des Offres en production
-2. Rechercher l'offre demandee (ex: "LIFE Prem 2h-3Go bloque AM [24]")
+2. Rechercher l'offre demandee (ex: "LIFE Prem 2h-3Go bloqué AM [24]")
 3. Verifier que l'offre existe bien dans l'onglet "Droit Offre" avec le droit "DIGICEL REAFFECTATION" (et non un droit PDV)
 4. Identifier le `pack_id` de l'offre dans MasterCRM (fiche client, historique des packages)
 5. Mettre a jour `pack_end_activation` a **J+2** pour laisser un delai au CDC
@@ -117,13 +117,13 @@ WHERE pack_id = XXXXX;
 COMMIT;
 ```
 
-> **Important :** Toujours mettre la date a J+2 (2 jours ouvres) pour laisser le temps au CDC d'effectuer la reaffectation. Au-dela de cette date, l'offre ne sera plus disponible.
+> **Important :** Toujours mettre la date a J+2 (2 jours ouvrés) pour laisser le temps au CDC d'effectuer la reaffectation. Au-dela de cette date, l'offre ne sera plus disponible.
 
-(Voir ticket #277152 — LIFE Prem 2h-3Go bloque AM [24], client 611631, pack_id 13288)
+(Voir ticket #277152 — LIFE Prem 2h-3Go bloqué AM [24], client 611631, pack_id 13288)
 
 ### 6. Fermer le ticket RT
 
-Pour une liberation simple :
+Pour une libération simple :
 ```
 Bonjour,
 L'offre a été libérée. Le changement d'offre peut maintenant être effectué.
@@ -134,7 +134,7 @@ Cdt,
 Équipe Application
 ```
 
-Pour une liberation combinee (offre + IMEI) :
+Pour une libération combinee (offre + IMEI) :
 ```
 Bonjour,
 L'offre est disponible et l'IMEI a été libéré.
@@ -167,12 +167,12 @@ Cdt,
 Équipe Application
 ```
 
-Puis fermer le ticket (statut : resolu).
+Puis fermer le ticket (statut : résolu).
 
 ## Tables impliquees
 
 | Table | Role |
 |-------|------|
 | `CUSTOMER_PACKAGE` | Packages (offres) attribues aux clients. `pack_end_activation` = date de fin. NULL = actif. |
-| `PACKAGE_RIGHT` | Droits associes a un package (niveaux de service). A supprimer avant reactivation. |
+| `PACKAGE_RIGHT` | Droits associes a un package (niveaux de service). A supprimer avant réactivation. |
 | `LINE` | Lignes clients. Lien via `LI_CUSTOMER_NO`. |

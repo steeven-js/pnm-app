@@ -1,4 +1,4 @@
-# Opérations en cours
+﻿# Opérations en cours
 
 Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 
@@ -6,9 +6,9 @@ Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 
 | Document | Statut | Description |
 |----------|--------|-------------|
-| [gpmag-evolutions-arcep.md](gpmag/gpmag-evolutions-arcep.md) | EN COURS | Suivi des évolutions ARCEP — migration préfixes (en cours 04/05 22h), preuve d'identité, MSISDN étendu |
+| [gpmag-évolutions-arcep.md](gpmag/gpmag-evolutions-arcep.md) | EN COURS | Suivi des évolutions ARCEP — migration préfixes (en cours 04/05 22h), preuve d'identité, MSISDN étendu |
 | [rn-routage-prefixes.md](gpmag/rn-routage-prefixes.md) | Réf. | **Référence RN** : anciens (60041-60048) et nouveaux préfixes territorialisés (52301-52333) par opérateur |
-| [fnr-perimetre-visibilite.md](gpmag/fnr-perimetre-visibilite.md) | Réf. | **FNR — périmètre, visibilité, fonctionnement** : ce que contient le FNR, distinction PortaDB vs FNR, schémas séquence (avec diagrammes Mermaid) |
+| [fnr-périmètre-visibilite.md](gpmag/fnr-perimetre-visibilite.md) | Réf. | **FNR — périmètre, visibilité, fonctionnement** : ce que contient le FNR, distinction PortaDB vs FNR, schémas séquence (avec diagrammes Mermaid) |
 | [cr-gpmag-2026-04-16.md](gpmag/cr-gpmag-2026-04-16.md) | Réf. | CR réunion GPMAG du 16/04/2026 |
 | [sms-portes-orange-diagnostic.md](gpmag/sms-portes-orange-diagnostic.md) | RÉSOLU | Diagnostic SMS non reçus par les MSISDN Orange portés chez Digicel (31/03 → 05/2026) |
 | [sms-portes-orange-tickets.md](gpmag/sms-portes-orange-tickets.md) | RÉSOLU | Tickets RT clients liés aux SMS bancaires non reçus |
@@ -20,5 +20,5 @@ Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 |----------|-------------|
 | [points-actuels.md](pilmedia/points-actuels.md) | Points en cours à discuter avec Sarah (fusion ACK, staging, SMS DAPI, emails DAPI) |
 | [processeurs-ack-staging.md](pilmedia/processeurs-ack-staging.md) | Détail fusion processeurs ACK (#5175) + plan de tests scripts staging |
-| [demande-sequence-orange-22042026.md](pilmedia/demande-sequence-orange-22042026.md) | Demande PILMEDIA — anomalie séquence PNMDATA Orange du 22/04 |
+| [demande-séquence-orange-22042026.md](pilmedia/demande-sequence-orange-22042026.md) | Demande PILMEDIA — anomalie séquence PNMDATA Orange du 22/04 |
 | [reponse-sauvegardes-pile.md](pilmedia/reponse-sauvegardes-pile.md) | Réponse à Max sur sauvegardes, IP vs DNS, pile logicielle, contact principal |

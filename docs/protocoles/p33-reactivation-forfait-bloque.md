@@ -1,26 +1,26 @@
-# P33 — Reactivation forfait bloque SM
+﻿# P33 — Reactivation forfait bloqué SM
 
 **Categorie :** Exploitation
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — forfait bloque SM[24] ou similaire
-**Temps moyen :** 2h a 1 jour (processus multi-etapes avec interaction CDC)
-**Frequence :** Moderee (~242 tickets/an categorie "Reengagement / Reactivation")
+**Declencheur :** Ticket RT — forfait bloqué SM[24] ou similaire
+**Temps moyen :** 2h a 1 jour (processus multi-étapes avec interaction CDC)
+**Frequence :** Moderee (~242 tickets/an catégorie "Reengagement / Reactivation")
 
 ---
 
 ## Contexte
 
-Un forfait peut etre bloque avec le code SM[24] (Souscription Minimale 24 mois), SM[12] ou autre code SM. Le client ne peut plus utiliser son forfait normalement. La reactivation est un processus en **plusieurs etapes** impliquant :
+Un forfait peut etre bloqué avec le code SM[24] (Souscription Minimale 24 mois), SM[12] ou autre code SM. Le client ne peut plus utiliser son forfait normalement. La réactivation est un processus en **plusieurs étapes** impliquant :
 
-1. Restriction des droits et liberation de l'offre (SQL)
-2. Liberation de l'IMEI (APP_OCS)
+1. Restriction des droits et libération de l'offre (SQL)
+2. Libération de l'IMEI (APP_OCS)
 3. Reactivation de la ligne par le CDC
 4. Mise a jour des dates de fidelisation (APP_OCS 11561)
 
 ## Symptomes
 
-- Forfait affiche comme "bloque" dans MasterCRM
+- Forfait affiche comme "bloqué" dans MasterCRM
 - Code blocage SM[24], SM[12], etc.
 - Client ne beneficie plus de son forfait
 
@@ -46,7 +46,7 @@ FROM LINE
 WHERE LINE_MSISDN_ACTIVE = '069XXXXXXX';
 ```
 
-Identifier le `pack_id` de l'offre bloquee :
+Identifier le `pack_id` de l'offre bloquée :
 ```sql
 SELECT PACK_ID, PACK_CODE, PACK_DESCRIPTION, PACK_START_ACTIVATION, PACK_END_ACTIVATION
 FROM CUSTOMER_PACKAGE
@@ -65,7 +65,7 @@ AND pack_level_point NOT IN (0, 1, 2, 3, 5999996, 5999997, 5999998, 5999999);
 COMMIT;
 ```
 
-> **Attention :** Les `pack_level_point` preserves (0, 1, 2, 3, 5999996-5999999) sont les niveaux de base du systeme. Ne JAMAIS les supprimer.
+> **Attention :** Les `pack_level_point` preserves (0, 1, 2, 3, 5999996-5999999) sont les niveaux de base du système. Ne JAMAIS les supprimer.
 
 ### 3. Mise a disposition de l'offre
 
@@ -76,9 +76,9 @@ WHERE pack_id IN ('XXXXX');
 COMMIT;
 ```
 
-### 4. Liberation IMEI
+### 4. Libération IMEI
 
-Liberer l'IMEI du client via APP_OCS (voir protocole P01 — Liberation IMEI).
+Liberer l'IMEI du client via APP_OCS (voir protocole P01 — Libération IMEI).
 
 ### 5. Informer le CDC
 
@@ -105,7 +105,7 @@ Acceder a APP_OCS :
 http://172.24.114.165/OCS/supervision/index.php
 ```
 
-Executer la requete **11561** (MAJ_date_FID) :
+Executer la requête **11561** (MAJ_date_FID) :
 - MSISDN du client
 - Numero de ticket RT
 - Type : MAJ_date_FID
@@ -126,7 +126,7 @@ Un commentaire automatique est poste sur le ticket RT :
 msisdn = '069XXXXXXX', date_fin_abo = null, date_ref_anciennete = DD/MM/YYYY,
 date_eligible_fid = DD/MM/YYYY, numero_rt = XXXXXX,
 type_trace = MAJ_date_FID, code_user_trace = BMXXXXXX,
-code requete : 11561
+code requête : 11561
 ```
 
 PJ : `Trace_actions_bd_user.log`
@@ -151,8 +151,8 @@ Forfait : LIFE Premium 50Go Bloque AM 12 mois (pack_id 13291)
 | Etape | Action | SQL/Outil |
 |-------|--------|-----------|
 | 1 | Restriction droits | `DELETE package_right WHERE pack_id IN (13291) AND pack_level_point NOT IN (0,1,2,3,5999996,5999997,5999998,5999999)` |
-| 2 | Liberation offre | `UPDATE customer_package SET pack_end_activation = '21/03/2026' WHERE pack_id IN ('13291')` |
-| 3 | Liberation IMEI | APP_OCS script oracle (liberation_imei_info_*.txt) |
+| 2 | Libération offre | `UPDATE customer_package SET pack_end_activation = '21/03/2026' WHERE pack_id IN ('13291')` |
+| 3 | Libération IMEI | APP_OCS script oracle (liberation_imei_info_*.txt) |
 | 4 | Reponse CDC | "L'offre est disponible et l'IMEI a ete libere." |
 | 5 | Attente | CDC reactive la ligne |
 | 6 | MAJ FID | APP_OCS 11561 : msisdn='0690077091', date_ref_anciennete=10/12/2024, date_eligible_fid=09/12/2025, type=MAJ_date_FID |
@@ -162,12 +162,12 @@ Forfait : LIFE Premium 50Go Bloque AM 12 mois (pack_id 13291)
 | Table | Role |
 |-------|------|
 | `CUSTOMER_PACKAGE` | Offres attribuees. `pack_end_activation` NULL = active. |
-| `PACKAGE_RIGHT` | Droits/niveaux de service du package. Suppression necessaire avant liberation. |
+| `PACKAGE_RIGHT` | Droits/niveaux de service du package. Suppression nécessaire avant libération. |
 | `LINE` | Lignes clients. Lien MSISDN ↔ LI_CUSTOMER_NO. |
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Ce processus est **multi-etapes** avec interaction CDC — prevoir 2h minimum, jusqu'a 1 jour.
-- La restriction des droits (`package_right`) est **obligatoire** avant la liberation de l'offre pour les forfaits bloques.
+- Ce processus est **multi-étapes** avec interaction CDC — prevoir 2h minimum, jusqu'a 1 jour.
+- La restriction des droits (`package_right`) est **obligatoire** avant la libération de l'offre pour les forfaits bloqués.
 - Si le CDC ne confirme pas l'activation rapidement, le ticket reste ouvert en attente.
 - Le code SM[24] signifie "Souscription Minimale 24 mois" — le forfait est engage pour 24 mois minimum.

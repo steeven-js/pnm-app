@@ -1,4 +1,4 @@
-# Architecture Applicative Porta — Body v3.0.15
+﻿# Architecture Applicative Porta — Body v3.0.15
 
 > Converti depuis Porta-v3.0.15 Body.pdf (pages 2-10 : APIs, fichiers, diagrammes d'etat)
 > Auteur original : Willy.Laurencine@pil-medias.com
@@ -9,23 +9,23 @@
 
 ### 1.1 DigicelFwiEsbWs4Porta — Interface ESB vers DAPI
 
-Interface appelee par DAPI pour communiquer avec le SI Digicel (ESB/MOBI).
+Interface appelée par DAPI pour communiquer avec le SI Digicel (ESB/MOBI).
 
 | Operation | Parametres entree | Retour | Description |
 |-----------|-------------------|--------|-------------|
 | **ChangeMsisdn** | msisdn, newMsisdn | Boolean | Changement de MSISDN dans le CRM (bascule) |
 | **TerminateLine** | msisdn | Boolean | Resiliation de ligne (portage sortant) |
-| **UpdateMsisdn** | msisdn, newOperator, newStatus | Boolean | Mise a jour operateur/statut MSISDN |
+| **UpdateMsisdn** | msisdn, newOperator, newStatus | Boolean | Mise a jour opérateur/statut MSISDN |
 | **SendSmsNotification** | msisdn, message | Boolean | Envoi notification SMS a l'abonne |
 | **CheckEligibility** | msisdnRio (MsisdnRio), dateSouscription (Date), datePortage (Date) | Boolean | Verification eligibilite portage via RIO |
-| **NotifyPortage** | idPortageMultiple (String/md5), msisdn (String), status (enum: ACCEPTE, REFUSE, ANNULE) | void | Notification d'evenement de portage |
+| **NotifyPortage** | idPortageMultiple (String/md5), msisdn (String), status (enum: ACCEPTE, REFUSE, ANNULE) | void | Notification d'événement de portage |
 | **NotifyDossier** | idPortageMultiple (String/md5), status (enum: TERMINE) | void | Notification de cloture de dossier |
 
 ---
 
 ### 1.2 DigicelFwiPortaWs4Esb — Interface DAPI pour le SI
 
-Interface exposee par DAPI, appelee par le SI (PortaWebUi, WebStore, etc.).
+Interface exposee par DAPI, appelée par le SI (PortaWebUi, WebStore, etc.).
 
 | Operation | Parametres entree | Retour | Description |
 |-----------|-------------------|--------|-------------|
@@ -47,7 +47,7 @@ Interface exposee par DAPI, utilisee par les scripts PortaSync pour la gestion d
 
 | Operation | Parametres entree | Retour | Description |
 |-----------|-------------------|--------|-------------|
-| **InitSession** | session_type (enum: ACK, DATA, SYNC, ANY), operateur (Integer[2]) | SessionInformations | Initialiser session d'echange |
+| **InitSession** | session_type (enum: ACK, DATA, SYNC, ANY), opérateur (Integer[2]) | SessionInformations | Initialiser session d'échange |
 | **CommitSession** | session_id | void | Valider la session |
 | **RollbackSession** | session_id | void | Annuler la session |
 | **GetSyncTickets** | session_id, origine, destination, begin_date, end_date | Tickets | Recuperer tickets synchro |
@@ -74,15 +74,15 @@ Interface exposee par DAPI, utilisee par les scripts PortaSync pour la gestion d
 |-------|------|-------------|
 | code-ticket | String[10] | Identifiant header : `0123456789` |
 | nom-fichier | String[32] | Nom complet du fichier |
-| emetteur | Integer[2] | Code operateur emetteur (01-06) |
-| date-debut-fichier | Date[14] | AAAAMMJJHHMMSS |
+| émetteur | Integer[2] | Code opérateur émetteur (01-06) |
+| date-début-fichier | Date[14] | AAAAMMJJHHMMSS |
 
 ### 2.3 Structure Footer
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | code-ticket | String[10] | Identifiant footer : `9876543210` |
-| emetteur | Integer[2] | Code operateur emetteur |
+| émetteur | Integer[2] | Code opérateur émetteur |
 | date-fin-fichier | Date[14] | AAAAMMJJHHMMSS |
 | nombre-de-lignes | Integer[6] | Nombre de tickets dans le fichier |
 
@@ -91,7 +91,7 @@ Interface exposee par DAPI, utilisee par les scripts PortaSync pour la gestion d
 | Champ | Type | Description |
 |-------|------|-------------|
 | code-ticket | `0000` | Code acquittement |
-| date-creation-ticket | Date[14] | AAAAMMJJHHMMSS |
+| date-création-ticket | Date[14] | AAAAMMJJHHMMSS |
 | code-erreur | String[4] | `E000` = OK, `E001..E999` = erreur |
 | nombre-de-lignes | Integer[6] | Nombre de lignes traitees |
 | commentaire | String[150] | Commentaire (si erreur) |
@@ -100,7 +100,7 @@ Interface exposee par DAPI, utilisee par les scripts PortaSync pour la gestion d
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| operateur-receveur | Integer[2] | Code operateur receveur |
+| opérateur-receveur | Integer[2] | Code opérateur receveur |
 | msisdn | String[10] | Numero mobile porte |
 | date-portage | Date[14] | Date du portage |
 
@@ -115,14 +115,14 @@ Interface exposee par DAPI, utilisee par les scripts PortaSync pour la gestion d
 | Champ | Type | Description |
 |-------|------|-------------|
 | code-ticket | Integer[4] | 1nnn |
-| operateur-origine | Integer[2] | 01-99 |
-| operateur-destination | Integer[2] | 01-99 |
+| opérateur-origine | Integer[2] | 01-99 |
+| opérateur-destination | Integer[2] | 01-99 |
 | OPR | Integer[2] | Operateur Receveur |
 | OPD | Integer[2] | Operateur Donneur |
 | date-souscription | Date[14] | AAAAMMJJHHMMSS |
 | msisdn | String[10] | 06nnnnnnnn |
 | id-portage | String[32] | MD5 |
-| numero-de-ligne | Integer[6] | Sequentiel |
+| numéro-de-ligne | Integer[6] | Sequentiel |
 
 #### DP (1110) — Demande portage particulier
 
@@ -131,11 +131,11 @@ Emetteur : OPR → Destinataire : OPD
 | Champ supplementaire | Type |
 |---------------------|------|
 | rio | String[12] (OOTRRRRRRCCC) |
-| date-creation-ticket | Date[14] |
+| date-création-ticket | Date[14] |
 | date-portage | Date[14] |
 | id-portage-multiple | String[32] |
 | nb-lignes-portage-multiple | Integer[3] |
-| code-postal-emetteur | Integer[5] |
+| code-postal-émetteur | Integer[5] |
 | date-demande-portage | Date[8] (AAAAMMJJ) |
 
 #### DE (1120) — Demande portage entreprise
@@ -148,7 +148,7 @@ Emetteur : OPD → Destinataire : OPR
 | Champ supplementaire | Type |
 |---------------------|------|
 | code-acceptation-ou-refus | String[4] (Annn) |
-| date-creation-ticket | Date[14] |
+| date-création-ticket | Date[14] |
 | id-portage-multiple | String[32] |
 | commentaire | String[150] |
 
@@ -156,13 +156,13 @@ Emetteur : OPD → Destinataire : OPR
 
 Meme structure que 1210 avec `code-acceptation-ou-refus = Rnnn`.
 
-#### EP (1410) — Envoi donnees portage (a tous)
+#### EP (1410) — Envoi données portage (a tous)
 
 Emetteur : OPR → Destinataire : 00 (tous)
 
 | Champ supplementaire | Type |
 |---------------------|------|
-| date-creation-ticket | Date[14] |
+| date-création-ticket | Date[14] |
 | date-portage | Date[14] |
 | id-portage-multiple | String[32] |
 
@@ -176,7 +176,7 @@ Emetteur : OPR → Destinataire : OPD
 
 | Champ supplementaire | Type |
 |---------------------|------|
-| date-creation-ticket | Date[14] |
+| date-création-ticket | Date[14] |
 | id-portage-multiple | String[32] |
 | code-motif-annulation | String[4] (C001) |
 
@@ -268,7 +268,7 @@ Actions a la bascule :
 - UpdateMsisdn() → mise a jour statut
 - NotifyPortage(ACCEPTE) a l'acceptation
 - SendSmsNotification(CLOTURE) a la cloture
-- NotifyDossier(TERMINE) quand tous les numeros du dossier sont traites
+- NotifyDossier(TERMINE) quand tous les numéros du dossier sont traites
 ```
 
 ### 4.2 Portage Normal Sortante (Digicel = OPD)
@@ -334,7 +334,7 @@ ETRANGERE :
 
 ## 5. Resume des appels WS par type de portage
 
-| Evenement | WS appele | Direction |
+| Evenement | WS appelé | Direction |
 |-----------|-----------|-----------|
 | Bascule entrante | ChangeMsisdn() | DAPI → ESB → CRM |
 | Bascule sortante | TerminateLine() | DAPI → ESB → CRM |

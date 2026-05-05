@@ -1,4 +1,4 @@
-# P10 — Verification Generation PNMDATA
+﻿# P10 — Verification Generation PNMDATA
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportawebdb01 / vmqproportasync01
@@ -10,13 +10,13 @@
 
 ## Contexte
 
-Le PnmDataManager genere les fichiers PNMDATA contenant les tickets de portabilite a transmettre aux autres operateurs du GPMAG. Les fichiers sont generes a chaque vacation (10H, 14H, 19H) et deposes sur le sFTP inter-operateurs.
+Le PnmDataManager généré les fichiers PNMDATA contenant les tickets de portabilité a transmettre aux autres opérateurs du GPMAG. Les fichiers sont generes a chaque vacation (10H, 14H, 19H) et déposés sur le sFTP inter-opérateurs.
 
-Chaque fichier contient les tickets de portabilite (1110, 1210, 1410, 1430, etc.) a destination d'un operateur specifique.
+Chaque fichier contient les tickets de portabilité (1110, 1210, 1410, 1430, etc.) a destination d'un opérateur spécifique.
 
 ## Horaires des vacations
 
-| Vacation | Heure generation | Heure envoi sFTP | Heure check |
+| Vacation | Heure génération | Heure envoi sFTP | Heure check |
 |----------|-----------------|-------------------|-------------|
 | V1 | 10H00 | ~10H15 | 11H35 |
 | V2 | 14H00 | ~14H15 | 15H35 |
@@ -27,10 +27,10 @@ Chaque fichier contient les tickets de portabilite (1110, 1210, 1410, 1430, etc.
 ```
 PNMDATA.02.XX.YYYYMMDD.VN
 ```
-- `02` : code Digicel (emetteur)
-- `XX` : code operateur destinataire (01, 03, 04, 05, 06)
+- `02` : code Digicel (émetteur)
+- `XX` : code opérateur destinataire (01, 03, 04, 05, 06)
 - `YYYYMMDD` : date du jour
-- `VN` : numero de vacation (V1, V2, V3)
+- `VN` : numéro de vacation (V1, V2, V3)
 
 ## Etapes
 
@@ -41,9 +41,9 @@ ssh porta_pnmv3@vmqproportawebdb01
 tail -50 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log
 ```
 
-### 2. Verifier la generation par operateur
+### 2. Verifier la génération par opérateur
 
-Pour chaque operateur (01, 03, 04, 05, 06), verifier :
+Pour chaque opérateur (01, 03, 04, 05, 06), vérifier :
 - `Generation du fichier PNMDATA.02.XX.YYYYMMDD.VN` avec le nombre de tickets
 - `Fin de Traitement` sans erreur
 
@@ -57,7 +57,7 @@ Exemple de log normal :
 [INFO] Fin de Traitement
 ```
 
-> **Note :** 0 tickets pour un operateur est normal si aucune portabilite n'est en cours avec cet operateur.
+> **Note :** 0 tickets pour un opérateur est normal si aucune portabilité n'est en cours avec cet opérateur.
 
 ### 3. Verifier les fichiers generes sur le serveur
 
@@ -67,9 +67,9 @@ Les fichiers PNMDATA sont stockes dans l'arborescence suivante sur vmqproportasy
 /home/porta_pnmv3/PortaSync/pnmdata/
 ├── 01/          (Orange Caraibe)
 │   ├── send/        ← fichiers PNMDATA a envoyer
-│   ├── recv/        ← fichiers PNMDATA recus
-│   ├── arch_send/   ← archives des fichiers envoyes
-│   └── arch_recv/   ← archives des fichiers recus
+│   ├── recv/        ← fichiers PNMDATA reçus
+│   ├── arch_send/   ← archives des fichiers envoyés
+│   └── arch_recv/   ← archives des fichiers reçus
 ├── 02/          (Digicel — fichiers internes)
 ├── 03/          (SFR)
 ├── 04/          (Dauphin Telecom)
@@ -79,17 +79,17 @@ Les fichiers PNMDATA sont stockes dans l'arborescence suivante sur vmqproportasy
 ```
 
 ```bash
-# Verifier les fichiers du jour envoyes a Orange (01)
+# Verifier les fichiers du jour envoyés a Orange (01)
 ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/send/
 
 # Verifier les archives du jour
 ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/arch_send/ | tail -5
 
-# Verifier les fichiers recus d'Orange
+# Verifier les fichiers reçus d'Orange
 ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/recv/
 ```
 
-### 4. Verifier les fichiers sur le sFTP inter-operateurs
+### 4. Verifier les fichiers sur le sFTP inter-opérateurs
 
 ```bash
 sftp pnm_02@193.251.160.208
@@ -98,9 +98,9 @@ ls -la /home/pnm_02/out/
 
 Verifier que les fichiers PNMDATA du jour sont bien presents pour la vacation en cours.
 
-### 4. En cas d'erreur de generation
+### 4. En cas d'erreur de génération
 
-Si le PnmDataManager n'a pas genere les fichiers :
+Si le PnmDataManager n'a pas généré les fichiers :
 
 1. Verifier le log pour identifier l'erreur :
    ```bash
@@ -112,20 +112,20 @@ Si le PnmDataManager n'a pas genere les fichiers :
    mysql -e "SELECT 1;"
    ```
 
-3. Relancer manuellement si necessaire :
+3. Relancer manuellement si nécessaire :
    ```bash
    ssh porta_pnmv3@vmqproportasync01
    cd /home/porta_pnmv3/PortaSync/
    ./PnmDataManager.sh
    ```
 
-4. Verifier le check_envoi_vacation pour confirmer que les fichiers ont ete envoyes sur le sFTP
+4. Verifier le check_envoi_vacation pour confirmer que les fichiers ont ete envoyés sur le sFTP
 
 ## Regle de cutoff — Affectation des demandes aux vacations
 
-Les demandes de portabilite recues sont affectees a la prochaine vacation disponible :
+Les demandes de portabilité reçues sont affectees a la prochaine vacation disponible :
 
-| Heure de reception | Vacation | Jour |
+| Heure de réception | Vacation | Jour |
 |---|---|---|
 | Avant 10H | V1 (10H) | Meme jour |
 | 10H - 14H | V2 (14H) | Meme jour |
@@ -134,9 +134,9 @@ Les demandes de portabilite recues sont affectees a la prochaine vacation dispon
 
 > Les demandes du week-end s'accumulent et sont traitees le lundi matin a 10H (V1).
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Les fichiers PNMDATA sont generes **uniquement les jours ouvres** (lundi-vendredi).
-- Le PnmDataManager est planifie dans la crontab de vmqproportasync01 (voir pnm-crontab-scripts.md).
-- Apres la generation, le script check_envoi_vacation verifie que les fichiers ont bien ete envoyes sur le sFTP.
-- Les jours feries sont exclus via modification de la crontab (voir P17).
+- Les fichiers PNMDATA sont generes **uniquement les jours ouvrés** (lundi-vendredi).
+- Le PnmDataManager est planifié dans la crontab de vmqproportasync01 (voir pnm-crontab-scripts.md).
+- Apres la génération, le script check_envoi_vacation vérifié que les fichiers ont bien ete envoyés sur le sFTP.
+- Les jours fériés sont exclus via modification de la crontab (voir P17).

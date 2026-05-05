@@ -1,4 +1,4 @@
-# P12 — Export PortaDB vers CSV (MIS)
+﻿# P12 — Export PortaDB vers CSV (MIS)
 
 **Categorie :** Exploitation
 **Serveur :** vmqproportawebdb01
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Export quotidien automatique de 16 tables PortaDB en CSV vers le serveur EMM pour le reporting MIS (Management Information System). Cet export alimente les tableaux de bord de suivi de la portabilite.
+Export quotidien automatique de 16 tables PortaDB en CSV vers le serveur EMM pour le reporting MIS (Management Information System). Cet export alimente les tableaux de bord de suivi de la portabilité.
 
 ## Tables exportees (16)
 
@@ -19,27 +19,27 @@ Export quotidien automatique de 16 tables PortaDB en CSV vers le serveur EMM pou
 | ACK | Acquittements fichiers PNMDATA |
 | CODE_REPONSE | Codes reponse (acceptation, refus, annulation) |
 | CODE_TICKET | Types de tickets (1110, 1210, 1410, etc.) |
-| DATA | Donnees des tickets de portabilite |
+| DATA | Donnees des tickets de portabilité |
 | DOSSIER | Dossiers de portage |
 | ETAT | Etats des portages (machine a etats) |
-| FERRYDAY | Jours feries (exclusion crontab) |
-| FICHIER | Fichiers PNMDATA/PNMSYNC echanges |
-| MSISDN | Numeros et operateur actuel |
-| MSISDN_HISTORIQUE | Historique des changements d'operateur |
-| OPERATEUR | Operateurs du GPMAG (6 operateurs) |
+| FERRYDAY | Jours fériés (exclusion crontab) |
+| FICHIER | Fichiers PNMDATA/PNMSYNC échanges |
+| MSISDN | Numeros et opérateur actuel |
+| MSISDN_HISTORIQUE | Historique des changements d'opérateur |
+| OPERATEUR | Operateurs du GPMAG (6 opérateurs) |
 | PORTAGE | Portages en cours et termines |
-| PORTAGE_DATA | Donnees detaillees des portages |
+| PORTAGE_DATA | Donnees détaillées des portages |
 | PORTAGE_HISTORIQUE | Historique des portages |
-| TRANCHE | Tranches de numeros par operateur |
+| TRANCHE | Tranches de numéros par opérateur |
 | TRANSITION | Transitions d'etat possibles |
 
 ## Execution automatique
 
-Le script s'execute tous les jours a 00H00 via crontab sur vmqproportawebdb01.
+Le script s'exécute tous les jours a 00H00 via crontab sur vmqproportawebdb01.
 
 ## Execution manuelle
 
-En cas d'echec du cron, relancer manuellement :
+En cas d'échec du cron, relancer manuellement :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -61,8 +61,8 @@ Verifier :
 - Les dates de modification correspondent au jour courant
 - Les tailles de fichier sont coherentes (pas de fichier vide)
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- L'export est **quotidien** (y compris week-end et jours feries).
+- L'export est **quotidien** (y compris week-end et jours fériés).
 - Les fichiers CSV sont ecrases chaque jour (pas d'historique cumule sur EMM).
-- Si le serveur EMM est inaccessible, l'export est perdu pour la journee — relancer manuellement apres retablissement.
+- Si le serveur EMM est inaccessible, l'export est perdu pour la journee — relancer manuellement après retablissement.

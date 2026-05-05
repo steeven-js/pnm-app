@@ -1,10 +1,10 @@
-# P28 — Extraction MSISDN temporaires (erreur E610)
+﻿# P28 — Extraction MSISDN temporaires (erreur E610)
 
 **Categorie :** Debug / Diagnostic
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** find_temporary_msisdn.sh
-**Declencheur :** Manuel (apres erreur E610)
+**Declencheur :** Manuel (après erreur E610)
 
 ---
 
@@ -34,7 +34,7 @@ vi Id_portage.txt
 Pour chaque id_portage dans `Id_portage.txt` :
 
 1. Recherche dans les logs Glassfish : `grep "R220.*$ID_PORTAGE\|E610.*$ID_PORTAGE"`
-2. Identification du fichier log et du numero de ligne
+2. Identification du fichier log et du numéro de ligne
 3. Extraction du MSISDN temporaire dans les 100 lignes suivantes (balise `<msisdn>`)
 4. Conversion format international → national : `590690XXXXXX` → `0690XXXXXX`
 

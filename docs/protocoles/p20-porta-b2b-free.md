@@ -1,4 +1,4 @@
-# P20 — Gestion portabilite B2B vers Free
+﻿# P20 — Gestion portabilité B2B vers Free
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportawebdb01
@@ -10,11 +10,11 @@
 
 ## Contexte
 
-Les demandes de portabilite B2B (entreprise) vers Free Caraibe sont identifiees par un RIO commencant par `02E`. Ces demandes doivent etre bloquees automatiquement dans PortaDB (etat 15 → 17).
+Les demandes de portabilité B2B (entreprise) vers Free Caraibe sont identifiees par un RIO commencant par `02E`. Ces demandes doivent etre bloquées automatiquement dans PortaDB (etat 15 → 17).
 
 ## Execution automatique
 
-Le script detecte les nouvelles demandes et les bloque :
+Le script détecté les nouvelles demandes et les bloqué :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -22,7 +22,7 @@ cd /home/porta_pnmv3/Scripts/
 ./refus_porta_free_b2b.sh
 ```
 
-Email envoye : `[PNM] Gestion des portabilites B2B vers Free Caraibe`
+Email envoyé : `[PNM] Gestion des portabilités B2B vers Free Caraibe`
 Destinataires : fwi_pnm_si + elisabeth.ozierlafontaine
 
 ## Logique du script
@@ -56,5 +56,5 @@ COMMIT;
 
 - `rio LIKE '02E%'` : les RIO commencant par 02E sont des lignes B2B Digicel
 - `etat_id_actuel = 15` : portage en attente de traitement
-- `etat_id_actuel = 17` : portage bloque
+- `etat_id_actuel = 17` : portage bloqué
 - `operateur_origine = 6` : Free Caraibes

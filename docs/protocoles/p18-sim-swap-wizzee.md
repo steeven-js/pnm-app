@@ -1,4 +1,4 @@
-# P18 — Verification SIM_SWAP WIZZEE (Astreinte)
+﻿# P18 — Verification SIM_SWAP WIZZEE (Astreinte)
 
 **Categorie :** Debug / Diagnostic
 **Serveur :** Aucune intervention directe sur la plateforme
@@ -8,24 +8,24 @@
 
 ## Contexte
 
-WIZZEE est le systeme de facturation/echange qui gere les operations de provisioning (SIM swap, billing, network exchange, resiliation). Pendant l'astreinte du week-end, l'equipe Application releve les codes erreurs WIZZEE et les transmet aux equipes concernees.
+WIZZEE est le système de facturation/échange qui gere les operations de provisioning (SIM swap, billing, network exchange, résiliation). Pendant l'astreinte du week-end, l'equipe Application releve les codes erreurs WIZZEE et les transmet aux equipes concernees.
 
-> **Important :** L'equipe Application n'a **pas d'action directe** sur la plateforme WIZZEE. On identifie les erreurs et on les adresse a l'equipe VAS ou a l'equipe DEV.
+> **Important :** L'equipe Application n'a **pas d'action directe** sur la plateforme WIZZEE. On identifié les erreurs et on les adresse a l'equipe VAS ou a l'equipe DEV.
 
 ## Types d'erreurs WIZZEE
 
 | Code erreur | Type | Description | Equipe a contacter |
 |-------------|------|-------------|-------------------|
 | Change resource SIM_SWAP problem | Provisioning | Echec du changement de ressource SIM | Equipe DEV |
-| createChargesAndDueBalances_1=204 | Billing | Erreur de creation de charges WIZZEE | Equipe VAS |
-| createNetworkExchange_1=408 | Network | Timeout sur l'echange reseau | Equipe VAS |
-| Termination on EMA failed | Resiliation | Echec de la resiliation dans EMA | Equipe VAS |
+| createChargesAndDueBalances_1=204 | Billing | Erreur de création de charges WIZZEE | Equipe VAS |
+| createNetworkExchange_1=408 | Network | Timeout sur l'échange réseau | Equipe VAS |
+| Termination on EMA failed | Resiliation | Echec de la résiliation dans EMA | Equipe VAS |
 
 ## Etapes
 
 ### 1. Relever les erreurs WIZZEE
 
-Consulter les alertes/emails recus pendant le week-end pour identifier les erreurs WIZZEE.
+Consulter les alertes/emails reçus pendant le week-end pour identifier les erreurs WIZZEE.
 
 ### 2. Identifier chaque cas en erreur
 
@@ -68,7 +68,7 @@ Dimanche JJ/MM :
 | Erreurs billing / network / termination | Equipe VAS |
 | Probleme systemique (> 5 erreurs meme type) | fwi_pnm_si + management |
 
-## Notes operationnelles
+## Notes opérationnelles
 
 - L'equipe Application **n'intervient pas** directement sur la plateforme WIZZEE.
 - Notre role est de **relever et adresser** les erreurs aux bonnes equipes (VAS ou DEV).

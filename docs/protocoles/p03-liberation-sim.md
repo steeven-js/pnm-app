@@ -1,6 +1,6 @@
-# P03 — Liberation SIM (Carte SIM)
+﻿# P03 — Libération SIM (Carte SIM)
 
-**Categorie :** Liberation
+**Categorie :** Libération
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
 **Declencheur :** Ticket RT — carte SIM a detacher pour reaffectation
@@ -53,7 +53,7 @@ FROM LINE
 WHERE LINE_SIM_NO = '8959620XXXXXXXXXXXX';
 ```
 
-> **Attention :** Si une ligne active est associee, NE PAS liberer. Informer le demandeur : "La SIM est encore rattachee a une ligne active (069XXXXXXX). Merci de confirmer la resiliation avant liberation."
+> **Attention :** Si une ligne active est associee, NE PAS liberer. Informer le demandeur : "La SIM est encore rattachee a une ligne active (069XXXXXXX). Merci de confirmer la résiliation avant libération."
 
 ### 4. Liberer la SIM
 
@@ -68,7 +68,7 @@ WHERE SIM_NO = '8959620XXXXXXXXXXXX';
 COMMIT;
 ```
 
-### 5. Verifier la liberation
+### 5. Verifier la libération
 
 ```sql
 SELECT SIM_NO, SIM_STATUS, ST_SIM_ID, SIM_CHANGE
@@ -90,8 +90,8 @@ Cdt,
 Équipe Application
 ```
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Toujours verifier qu'aucune ligne active n'est associee a la SIM avant liberation.
-- Le prefixe ICCID Digicel est `8959620` — si le format est different, verifier qu'il s'agit bien d'une SIM Digicel.
-- La liberation SIM est moins frequente que la liberation IMEI ou MSISDN.
+- Toujours vérifier qu'aucune ligne active n'est associee a la SIM avant libération.
+- Le prefixe ICCID Digicel est `8959620` — si le format est différent, vérifier qu'il s'agit bien d'une SIM Digicel.
+- La libération SIM est moins frequente que la libération IMEI ou MSISDN.

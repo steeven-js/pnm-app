@@ -1,15 +1,15 @@
-# P14 — Verification appartenance d'un numero
+﻿# P14 — Verification appartenance d'un numéro
 
 **Categorie :** Debug / Diagnostic
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
-**Declencheur :** Besoin de verifier chez quel operateur se trouve un MSISDN
+**Declencheur :** Besoin de vérifier chez quel opérateur se trouve un MSISDN
 
 ---
 
 ## Contexte
 
-Verifier chez quel operateur se trouve un MSISDN dans PortaDB. Cette verification est un pre-requis pour de nombreuses operations (liberation MSISDN, portabilite, restitution, debug).
+Verifier chez quel opérateur se trouve un MSISDN dans PortaDB. Cette vérification est un pre-requis pour de nombreuses operations (libération MSISDN, portabilité, restitution, debug).
 
 ## Etapes
 
@@ -19,9 +19,9 @@ Verifier chez quel operateur se trouve un MSISDN dans PortaDB. Cette verificatio
 ssh porta_pnmv3@vmqproportawebdb01
 ```
 
-### 2. Requete de verification
+### 2. Requete de vérification
 
-Interroger la table MSISDN pour connaitre l'operateur actuel.
+Interroger la table MSISDN pour connaitre l'opérateur actuel.
 
 ```bash
 mysql -e "SELECT M.msisdn, M.operateur_id_actuel, O.nom
@@ -30,7 +30,7 @@ INNER JOIN PortaDB.OPERATEUR O ON M.operateur_id_actuel = O.code
 WHERE M.msisdn = '069XXXXXXX';"
 ```
 
-### 3. Interpreter le resultat
+### 3. Interpreter le résultat
 
 | Code | Operateur | Observation |
 |------|-----------|-------------|
@@ -38,12 +38,12 @@ WHERE M.msisdn = '069XXXXXXX';"
 | 2 | Digicel AFG | Operateur "maison" |
 | 3 | Outremer Telecom / SFR | |
 | 4 | Dauphin Telecom | |
-| 5 | UTS Caraibe | Mode degrade (pas de PNMDATA standard) |
+| 5 | UTS Caraibe | Mode dégradé (pas de PNMDATA standard) |
 | 6 | Free Caraibes | Attention B2B si RIO commence par 02E |
 
 ### 4. Verification etendue (optionnel)
 
-Pour avoir plus de details sur l'historique du numero :
+Pour avoir plus de détails sur l'historique du numéro :
 
 ```sql
 -- Verifier si un portage est en cours
@@ -55,25 +55,25 @@ LIMIT 5;"
 ```
 
 ```sql
--- Verifier la tranche d'origine du numero
-mysql -e "SELECT M.msisdn, M.operateur_id_actuel, T.operateur_id, T.debut, T.fin
+-- Verifier la tranche d'origine du numéro
+mysql -e "SELECT M.msisdn, M.operateur_id_actuel, T.operateur_id, T.début, T.fin
 FROM PortaDB.MSISDN M
-INNER JOIN PortaDB.TRANCHE T ON M.msisdn BETWEEN T.debut AND T.fin
+INNER JOIN PortaDB.TRANCHE T ON M.msisdn BETWEEN T.début AND T.fin
 WHERE M.msisdn = '069XXXXXXX';"
 ```
 
-La tranche indique l'**operateur d'origine** du numero (celui qui possede la plage de numeros), tandis que `operateur_id_actuel` indique l'operateur **actuel** (apres portage eventuel).
+La tranche indique l'**opérateur d'origine** du numéro (celui qui possede la plage de numéros), tandis que `operateur_id_actuel` indique l'opérateur **actuel** (après portage eventuel).
 
 ## Cas d'usage
 
 | Situation | Ce qu'on cherche |
 |-----------|-----------------|
-| Liberation MSISDN (P02) | Verifier operateur_id_actuel = 2 (Digicel) avant de liberer |
-| Debug "numero non attribue" | Verifier si le numero est porte et chez quel operateur |
-| Demande CDC | "Est-ce que ce numero est bien chez nous ?" |
-| Pre-portabilite | Verifier l'operateur donneur avant demande |
+| Libération MSISDN (P02) | Verifier operateur_id_actuel = 2 (Digicel) avant de liberer |
+| Debug "numéro non attribue" | Verifier si le numéro est porte et chez quel opérateur |
+| Demande CDC | "Est-ce que ce numéro est bien chez nous ?" |
+| Pre-portabilité | Verifier l'opérateur donneur avant demande |
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Cette verification est un **pre-requis** pour le protocole P02 (Liberation MSISDN).
-- Si le numero n'existe pas dans PortaDB, il n'a jamais ete enregistre dans le systeme de portabilite — verifier la tranche pour connaitre l'operateur d'origine.
+- Cette vérification est un **pre-requis** pour le protocole P02 (Libération MSISDN).
+- Si le numéro n'existe pas dans PortaDB, il n'a jamais ete enregistré dans le système de portabilité — vérifier la tranche pour connaitre l'opérateur d'origine.

@@ -1,16 +1,16 @@
-# P34 — Desactivation / Suppression Point de Vente (PDV)
+﻿# P34 — Desactivation / Suppression Point de Vente (PDV)
 
 **Categorie :** Exploitation
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle (puis script sous /dbs01/bcd/production/script/)
 **Script :** Del_profil_Mobi_ss_validation.sh
-**Declencheur :** Ticket RT — Demande de desactivation code agence
+**Declencheur :** Ticket RT — Demande de désactivation code agence
 
 ---
 
 ## Contexte
 
-Quand un point de vente (PDV / boutique Digicel) ferme ou est desactive, il faut supprimer son profil dans la base MOBI (MasterCRM). Le script supprime les droits (items_right, package_right, group_users) associes au code agence.
+Quand un point de vente (PDV / boutique Digicel) ferme ou est désactivé, il faut supprimer son profil dans la base MOBI (MasterCRM). Le script supprimé les droits (items_right, package_right, group_users) associes au code agence.
 
 ## Ticket de reference
 
@@ -19,7 +19,7 @@ Quand un point de vente (PDV / boutique Digicel) ferme ou est desactive, il faut
 ## Prerequis
 
 - Acces SSH au serveur vmqprostdb01 (utilisateur oracle)
-- Code agence du PDV a desactiver (ex: 7140003)
+- Code agence du PDV a désactiver (ex: 7140003)
 - Numero de ticket RT
 
 ## Etapes
@@ -55,7 +55,7 @@ Exemple :
 
 ### 4. Verifier les informations affichees
 
-Le script affiche les verifications suivantes avant suppression :
+Le script affiche les vérifications suivantes avant suppression :
 
 **a) USERS MOBI PDV** — Identite du point de vente :
 ```
@@ -86,11 +86,11 @@ PACK_LEVEL_POINT = 7140003  (ex: 273 packages)
 ITEM_LEVEL_POINT = 7140003  COUNT = 8347
 ```
 
-**f) USERS CRM PDV** — Verification utilisateurs CRM (doit etre vide si desactive).
+**f) USERS CRM PDV** — Verification utilisateurs CRM (doit etre vide si désactivé).
 
 ### 5. Suppression automatique
 
-Apres les verifications, le script execute automatiquement :
+Apres les vérifications, le script exécute automatiquement :
 - Suppression des ITEMS_RIGHT du PDV
 - Suppression des PACKAGE_RIGHT du PDV
 - Suppression des GROUP_USERS du PDV
@@ -121,13 +121,13 @@ vmqprostdb01 (oracle)
 +-- /dbs01/bcd/production/script/
     +-- Del_profil_Mobi_ss_validation.sh  <- suppression sans validation
     +-- Del_profil_Mobi.sh                <- suppression avec validation
-    +-- Desactiver_compte.sh              <- desactivation compte
-    +-- log/                              <- logs d'execution
+    +-- Desactiver_compte.sh              <- désactivation compte
+    +-- log/                              <- logs d'exécution
 ```
 
 ## Points d'attention
 
-- Le script `Del_profil_Mobi_ss_validation.sh` supprime **sans demander confirmation**. Verifier le code agence avant execution.
-- Si le SPOOL echoue (`SP2-0606`), le script continue mais le log ne sera pas cree dans `/u/home/bcd/production/script/log/`. Ce n'est pas bloquant.
+- Le script `Del_profil_Mobi_ss_validation.sh` supprimé **sans demander confirmation**. Verifier le code agence avant exécution.
+- Si le SPOOL échoué (`SP2-0606`), le script continue mais le log ne sera pas créé dans `/u/home/bcd/production/script/log/`. Ce n'est pas bloquant.
 - Verifier que le USER_PROFI est bien "DESACTIVE" avant de supprimer. Si le PDV est encore actif, ne pas supprimer sans confirmation du demandeur.
 - La suppression des ITEMS_RIGHT peut prendre plusieurs minutes si le PDV a beaucoup d'items (ex: 8347 items).

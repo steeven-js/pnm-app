@@ -1,4 +1,4 @@
-# FNR — Périmètre, visibilité et fonctionnement
+﻿# FNR — Périmètre, visibilité et fonctionnement
 
 **Dernière MAJ :** 05/05/2026
 
@@ -93,7 +93,7 @@ flowchart TD
 |-----------|---------|---------------|
 | **Fichiers PNMSYNC** (synchronisation quotidienne) | Delta des portages : nouveaux + restitutions | Tous les opérateurs GPMAG |
 | **PNMDATA tickets 1410** (ordre de portage) | Diffusé à tous les opérateurs lors d'un nouveau portage | OPR + OPD + autres |
-| **Interrogation SS7 / SRI for SM** | Quand un appel/SMS arrive vers un de nos numéros, l'opérateur appelant interroge notre HLR/FNR | Tout réseau qui veut router vers Digicel |
+| **Interrogation SS7 / SRI for SM** | Quand un appel/SMS arrive vers un de nos numéros, l'opérateur appelant interrogé notre HLR/FNR | Tout réseau qui veut router vers Digicel |
 | **EMA / EMM extracts** | Fichiers de routage transmis à nos commutateurs et à EMM | Réseau Digicel + carrier (BICS) |
 
 **Important :** un autre opérateur ne fait **pas** un `SELECT *` direct sur notre PortaDB. L'interrogation passe par les protocoles standards SS7/IMSI/HLR ou par les fichiers échangés via le **Guichet Unique GPMAG** (sFTP).
@@ -184,7 +184,7 @@ PortaDB = vue complète de TOUS les portages tous opérateurs
 ## Documents liés
 
 - [rn-routage-prefixes.md](rn-routage-prefixes.md) — Référence des RN anciens et nouveaux
-- [gpmag-evolutions-arcep.md](gpmag-evolutions-arcep.md) — Suivi global des évolutions ARCEP
+- [gpmag-évolutions-arcep.md](gpmag-evolutions-arcep.md) — Suivi global des évolutions ARCEP
 - [sms-portes-orange-diagnostic.md](sms-portes-orange-diagnostic.md) — Diagnostic du bug SMS résolu
 - [P15 — Interrogation FNR](../../protocoles/p15-interrogation-fnr.md) — Comment interroger / mettre à jour le FNR
 - [P16 — Rollback DAPI suite FNR EMA EMM KO](../../protocoles/p16-rollback-dapi-fnr.md) — Procédure de rollback

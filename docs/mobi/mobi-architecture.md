@@ -1,7 +1,7 @@
-# Architecture CRM MOBI / MasterCRM — Digicel Antilles-Guyane
+﻿# Architecture CRM MOBI / MasterCRM — Digicel Antilles-Guyane
 
 > Document de reference pour le domaine MOBI/MasterCRM.
-> Distille a partir de la session BMAD du 2026-03-13 (analyse morphologique, 61 sous-elements).
+> Distille a partir de la session BMAD du 2026-03-13 (analyse morphologique, 61 sous-éléments).
 > Ce document sera enrichi au fur et a mesure de l'apprentissage.
 
 ---
@@ -10,7 +10,7 @@
 
 ### 1.1 Qu'est-ce que MOBI / MasterCRM ?
 
-MOBI est le systeme CRM (Customer Relationship Management) de Digicel. MasterCRM est la base de donnees et l'application backend qui gere les informations clients, lignes, facturation et provisioning. Dans le contexte PNM, MOBI est le systeme qui recoit les notifications de portabilite (bascule, resiliation, changement MSISDN) via les microservices et les web services SOAP.
+MOBI est le système CRM (Customer Relationship Management) de Digicel. MasterCRM est la base de données et l'application backend qui gere les informations clients, lignes, facturation et provisioning. Dans le contexte PNM, MOBI est le système qui reçoit les notifications de portabilité (bascule, résiliation, changement MSISDN) via les microservices et les web services SOAP.
 
 ### 1.2 Architecture en 4 couches
 
@@ -26,15 +26,15 @@ Microservices (MSLine, MSPorta, MSCustomer, DCAPI, eSIF, MSBilling, MSProvisioni
   vmqpromsbox01/02 — port :3002, :3003, etc.
         |
         v
-Backends (MasterCRM DB, Charging Gateway, ESB, systemes facturation)
+Backends (MasterCRM DB, Charging Gateway, ESB, systèmes facturation)
   vmqprombdb01
 ```
 
 ### 1.3 Lien avec PNM/DAPI
 
 DAPI (Digicel Application Portability Interface) communique avec MOBI via :
-- **MSLine** (:3002) — `checkEligibility` : verification RIO pour eligibilite au portage
-- **MSPorta** (:3003) — `notifyPorta` : notification quand portabilite sortante acceptee ou cloturee
+- **MSLine** (:3002) — `checkEligibility` : vérification RIO pour eligibilite au portage
+- **MSPorta** (:3003) — `notifyPorta` : notification quand portabilité sortante acceptee ou cloturee
 
 ---
 
@@ -42,7 +42,7 @@ DAPI (Digicel Application Portability Interface) communique avec MOBI via :
 
 | # | Composant | Role | Statut connaissance |
 |---|-----------|------|:---:|
-| 2.1 | DataPower Proxy (Spring Boot) | Aiguilleur : routage requetes vers le bon microservice, config, logs | Partiellement connu |
+| 2.1 | DataPower Proxy (Spring Boot) | Aiguilleur : routage requêtes vers le bon microservice, config, logs | Partiellement connu |
 | 2.2 | XToolWS (Java/Glassfish) | Intermediaire, logs via Graylog | Inconnu |
 | 2.3 | Protocole REST/JSON | Utilise par certaines apps clientes | Partiellement connu |
 | 2.4 | Protocole SOAP/XML | Utilise par les backends, structure WSDL, enveloppes | Partiellement connu |
@@ -58,18 +58,18 @@ Deployes sur **vmqpromsbox01** et **vmqpromsbox02**.
 
 | # | Service | Endpoint | Role | Statut |
 |---|---------|----------|------|:---:|
-| 3.1 | MSLine | :3002 | checkEligibility (verification RIO) | Connu |
-| 3.2 | MSPorta | :3003 | notifyPorta (notification portabilite) | Connu |
-| 3.3 | MSCustomer | ? | Acces SQL BDD CRM, donnees client | Inconnu |
-| 3.4 | DCAPI | ? | API donnees client (difference avec MSCustomer a clarifier) | Inconnu |
+| 3.1 | MSLine | :3002 | checkEligibility (vérification RIO) | Connu |
+| 3.2 | MSPorta | :3003 | notifyPorta (notification portabilité) | Connu |
+| 3.3 | MSCustomer | ? | Acces SQL BDD CRM, données client | Inconnu |
+| 3.4 | DCAPI | ? | API données client (différence avec MSCustomer a clarifier) | Inconnu |
 | 3.5 | eSIF | ? | Info facturation, tables accedees | Inconnu |
 | 3.6 | MSBilling | ? | Lien ESB-Billing WS, flux facturation | Inconnu |
-| 3.7 | MSProvisioning | ? | Charging Gateway, activation/desactivation | Inconnu |
+| 3.7 | MSProvisioning | ? | Charging Gateway, activation/désactivation | Inconnu |
 | 3.8 | MSNotif | ? | Envoi SMS/notifications | Inconnu |
 
 ### Deploiement et administration
 - Serveurs : vmqpromsbox01, vmqpromsbox02
-- Procedure deploiement, redemarrage : **Inconnu**
+- Procedure déploiement, redémarrage : **Inconnu**
 - Logs par microservice : **Inconnu**
 - Health check (UP/DOWN) : **Inconnu**
 
@@ -94,14 +94,14 @@ Deployes sur **vmqpromsbox01** et **vmqpromsbox02**.
 
 ---
 
-## 5. Base de donnees MasterCRM
+## 5. Base de données MasterCRM
 
 | # | Element | Detail | Statut |
 |---|---------|--------|:---:|
-| 5.1 | Serveur | vmqprombdb01 — type BDD, connexion, acces | Inconnu |
-| 5.2 | Tables portabilite | Tables liees aux operations de portage | Inconnu |
-| 5.3 | Tables client/ligne | Structure donnees client | Inconnu |
-| 5.4 | Tables facturation | Structure donnees facturation | Inconnu |
+| 5.1 | Serveur | vmqprombdb01 — type BDD, connexion, accès | Inconnu |
+| 5.2 | Tables portabilité | Tables liees aux operations de portage | Inconnu |
+| 5.3 | Tables client/ligne | Structure données client | Inconnu |
+| 5.4 | Tables facturation | Structure données facturation | Inconnu |
 | 5.5 | Requetes diagnostiques | Requetes SQL pour diagnostic | Inconnu |
 | 5.6 | Requetes de correction | Requetes SQL pour corrections manuelles | Inconnu |
 | 5.7 | Relation PortaDB / MasterCRM | Lien direct ou via WS ? | Partiellement connu |
@@ -112,11 +112,11 @@ Deployes sur **vmqpromsbox01** et **vmqpromsbox02**.
 
 | # | Flux | Detail | Statut |
 |---|------|--------|:---:|
-| 6.1 | Bascule entrante | Sequence complete | Connu |
-| 6.2 | Bascule sortante | Sequence complete | Connu |
+| 6.1 | Bascule entrante | Sequence complète | Connu |
+| 6.2 | Bascule sortante | Sequence complète | Connu |
 | 6.3 | Incident CRM | Detection bascules non traitees (CP#6), relance | Connu |
 | 6.4 | checkEligibility | Qui appelle, quand, contexte | Inconnu |
-| 6.5 | notifyPorta | Payload exact, sequence complete | Inconnu |
+| 6.5 | notifyPorta | Payload exact, séquence complète | Inconnu |
 | 6.6 | Gestion des erreurs | Retry, timeout, alertes | Inconnu |
 | 6.7 | Logs d'interaction | Ou voir les traces (PortaSync, MOBI, Graylog) | Inconnu |
 
@@ -149,7 +149,7 @@ Applications qui passent par le DataPower Proxy pour acceder aux services MOBI :
 | 8.4 | DigimobillmobiI0 | FrontEnd Soap | Inconnu |
 | 8.5 | 172.24.4.136 | WSDL MOBI PROD | Connu (SoapUI) |
 | 8.6 | 172.24.119.36 | MSLine :3002 + MSPorta :3003 | Connu |
-| 8.7 | Graylog | Centralisation logs, acces, interface | Inconnu |
+| 8.7 | Graylog | Centralisation logs, accès, interface | Inconnu |
 | 8.8 | Supervision / Monitoring | Outils, dashboards | Inconnu |
 
 ---
@@ -160,11 +160,11 @@ Applications qui passent par le DataPower Proxy pour acceder aux services MOBI :
 |---|-----------|--------|:---:|
 | 9.1 | Incident CRM — bascules non traitees | Detection CP#6, relance | Connu |
 | 9.2 | Relance manuelle traitements CRM | Procedure exacte | Inconnu |
-| 9.3 | Diagnostic ligne client apres bascule | Verification BDD + WS | Inconnu |
+| 9.3 | Diagnostic ligne client après bascule | Verification BDD + WS | Inconnu |
 | 9.4 | Escalade equipe MOBI | Contacts, infos a fournir | Partiellement connu |
 | 9.5 | Incidents SoapUI / WS down | Detection, contournement | Inconnu |
 | 9.6 | Incidents microservices | Restart, logs, diagnostic | Inconnu |
-| 9.7 | Procedure de provisioning | Activation/desactivation services | Inconnu |
+| 9.7 | Procedure de provisioning | Activation/désactivation services | Inconnu |
 | 9.8 | Flashinfo / Communication incidents | Canaux, processus | Partiellement connu |
 
 ---
@@ -191,21 +191,21 @@ Applications qui passent par le DataPower Proxy pour acceder aux services MOBI :
 ## 11. Roadmap d'apprentissage
 
 ### Niveau 1 — Fondations
-- Suivre une portabilite entrante de bout en bout (DAPI → MOBI → BDD)
+- Suivre une portabilité entrante de bout en bout (DAPI → MOBI → BDD)
 - Comprendre l'architecture 4 couches (Apps → Proxy → MS → Backend)
 - Maitriser les 2 operations critiques PNM : ExecuteChangeMSISDNPe + ExecuteResiliationPs
 - Savoir ou trouver les logs (PNM, MOBI, Graylog)
 
 ### Niveau 2 — Approfondissement
-- BDD MasterCRM : type, connexion, tables, requetes diagnostiques
-- Microservices en detail : MSLine, MSPorta, MSCustomer, DCAPI, etc.
-- Web Services SOAP : WSDL, requetes/reponses, codes erreur
-- Gestion des erreurs : retry, timeout, detection ecarts
+- BDD MasterCRM : type, connexion, tables, requêtes diagnostiques
+- Microservices en détail : MSLine, MSPorta, MSCustomer, DCAPI, etc.
+- Web Services SOAP : WSDL, requêtes/reponses, codes erreur
+- Gestion des erreurs : retry, timeout, détection ecarts
 
 ### Niveau 3 — Maitrise
 - Procedures de relance CRM (manuelle, SoapUI, equipe MOBI)
 - Infrastructure & Monitoring (Graylog, supervision, HA)
-- Applications clientes (impact portabilite sur chaque app)
+- Applications clientes (impact portabilité sur chaque app)
 - Cas pratiques MOBI (incidents, diagnostics, corrections)
 
 ---
@@ -222,9 +222,9 @@ Applications qui passent par le DataPower Proxy pour acceder aux services MOBI :
 
 ### Microservices
 7. Comment acceder aux microservices sur vmqpromsbox01/02 ?
-8. Comment verifier si un microservice est UP/DOWN ?
-9. Comment redemarrer un microservice individuel ?
-10. MSCustomer vs DCAPI — quelle difference ?
+8. Comment vérifier si un microservice est UP/DOWN ?
+9. Comment redémarrer un microservice individuel ?
+10. MSCustomer vs DCAPI — quelle différence ?
 
 ### Interactions DAPI-MOBI
 11. notifyPorta (:3003) — payload exact ?
@@ -233,7 +233,7 @@ Applications qui passent par le DataPower Proxy pour acceder aux services MOBI :
 14. Ou voir les traces des appels DAPI → MOBI ?
 
 ### Infrastructure
-15. URL et acces Graylog ?
+15. URL et accès Graylog ?
 16. Filtres Graylog pour appels DAPI → MOBI ?
 17. Si vmqpromsbox01 tombe, failover automatique ?
 18. Monitoring existant (Nagios, Zabbix, Prometheus) ?

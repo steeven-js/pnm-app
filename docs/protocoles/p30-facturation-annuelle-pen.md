@@ -1,4 +1,4 @@
-# P30 — Facturation annuelle PEN
+﻿# P30 — Facturation annuelle PEN
 
 **Categorie :** Facturation
 **Serveur :** vmqproportawebdb01
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Bilan annuel des portabilites entrantes (PEN) facturees a Digicel, ventile par operateur donneur. Utilise pour le reporting financier de la portabilite.
+Bilan annuel des portabilités entrantes (PEN) facturees a Digicel, ventile par opérateur donneur. Utilise pour le reporting financier de la portabilité.
 
 ## Email
 

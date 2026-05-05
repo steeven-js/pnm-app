@@ -1,21 +1,21 @@
-# P02 — Liberation MSISDN (Reaffectation numero)
+﻿# P02 — Libération MSISDN (Reaffectation numéro)
 
-**Categorie :** Liberation
+**Categorie :** Libération
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
 **Declencheur :** Ticket RT — MSISDN a remettre en disponibilite
-**Temps moyen :** 10 min a 3h (selon verification necessaire)
-**Frequence :** Elevee (~248 tickets/an categorie "Recuperation Numero")
+**Temps moyen :** 10 min a 3h (selon vérification nécessaire)
+**Frequence :** Elevee (~248 tickets/an catégorie "Recuperation Numero")
 
 ---
 
 ## Contexte
 
-Remettre un numero MSISDN en disponibilite (statut 7) pour reaffectation. Le CDC ne trouve pas le numero dans la liste des numeros reaffectables, ou le numero est bloque apres resiliation/portabilite. L'operation se fait soit par script automatise, soit par requete SQL manuelle sur la base Oracle MOBI.
+Remettre un numéro MSISDN en disponibilite (statut 7) pour reaffectation. Le CDC ne trouve pas le numéro dans la liste des numéros reaffectables, ou le numéro est bloqué après résiliation/portabilité. L'operation se fait soit par script automatisé, soit par requête SQL manuelle sur la base Oracle MOBI.
 
 ## Pre-requis : Verification PortaDB
 
-**Avant toute action**, verifier que le numero est bien chez Digicel dans PortaDB :
+**Avant toute action**, vérifier que le numéro est bien chez Digicel dans PortaDB :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -25,9 +25,9 @@ mysql -e "SELECT msisdn, operateur_id_actuel FROM PortaDB.MSISDN WHERE msisdn = 
 | operateur_id_actuel | Signification |
 |---------------------|---------------|
 | 2 | Digicel — OK, on peut proceder |
-| 1, 3, 4, 5, 6 | Autre operateur — NE PAS liberer, informer le demandeur |
+| 1, 3, 4, 5, 6 | Autre opérateur — NE PAS liberer, informer le demandeur |
 
-> **Attention :** Si operateur_id_actuel != 2, le numero n'est plus chez Digicel. Informer le demandeur : "Le numero ne fait pas partie des numeros reaffectables car il n'est plus chez Digicel."
+> **Attention :** Si operateur_id_actuel != 2, le numéro n'est plus chez Digicel. Informer le demandeur : "Le numéro ne fait pas partie des numéros reaffectables car il n'est plus chez Digicel."
 
 ## Etapes
 
@@ -39,7 +39,7 @@ Se connecter en SSH au serveur de production via mRemoteNG (en root), puis bascu
 su - oracle
 ```
 
-### 2. Option A — Script automatise
+### 2. Option A — Script automatisé
 
 Naviguer vers le repertoire et lancer le script.
 
@@ -50,7 +50,7 @@ cd ~/script/LIBERATION/
 
 ### 3. Option B — SQL manuel : Verifier l'etat
 
-Se connecter a Oracle MOBI et verifier l'etat du MSISDN.
+Se connecter a Oracle MOBI et vérifier l'etat du MSISDN.
 
 ```sql
 sqlplus pb/gaston@MCST50A.BTC.COM
@@ -65,11 +65,11 @@ WHERE MSISDN_NO = '069XXXXXXX';
 | Champ | Valeur | Signification |
 |-------|--------|---------------|
 | ST_MSISDN_ID | 0 | Disponible |
-| ST_MSISDN_ID | 7 | Porte (chez un autre operateur) |
+| ST_MSISDN_ID | 7 | Porte (chez un autre opérateur) |
 | MSISDN_STATUS | 7 | Reaffectable |
 | MSISDN_STATUS | 0 ou 1 | Inactif / Actif |
 | MS_CLASS | 0 | Classe normale (client Digicel standard) |
-| MS_CLASS | 72 | Classe numero or (masque dans MasterCRM) |
+| MS_CLASS | 72 | Classe numéro or (masque dans MasterCRM) |
 | MS_CLASS | 73 | Classe collaborateur (interne Digicel) |
 
 ### 4. Option B — SQL manuel : Remettre en disponibilite
@@ -85,7 +85,7 @@ WHERE MSISDN_NO = '069XXXXXXX';
 COMMIT;
 ```
 
-> **Attention MS_CLASS :** Avant la mise a jour, verifier la valeur actuelle de MS_CLASS. Si le MSISDN est un numero collaborateur (MS_CLASS = 73), conserver cette valeur au lieu de mettre 0. Exemple pour un collaborateur :
+> **Attention MS_CLASS :** Avant la mise a jour, vérifier la valeur actuelle de MS_CLASS. Si le MSISDN est un numéro collaborateur (MS_CLASS = 73), conserver cette valeur au lieu de mettre 0. Exemple pour un collaborateur :
 > ```sql
 > UPDATE MSISDN
 > SET ST_MSISDN_ID = '0', MSISDN_STATUS = '7'
@@ -119,9 +119,9 @@ COMMIT;
 
 ### 6. Cas particulier : Numero or (MS_CLASS = 72)
 
-Les numeros or (MS_CLASS = 72) n'apparaissent pas dans la liste des MSISDN reaffectables sur MasterCRM. Il faut temporairement changer la classe pour permettre au CDC de faire la manipulation, puis la restaurer.
+Les numéros or (MS_CLASS = 72) n'apparaissent pas dans la liste des MSISDN reaffectables sur MasterCRM. Il faut temporairement changer la classe pour permettre au CDC de faire la manipulation, puis la restaurer.
 
-**Etape 1** — Passer MS_CLASS de 72 a 0 pour rendre le numero visible dans MasterCRM :
+**Etape 1** — Passer MS_CLASS de 72 a 0 pour rendre le numéro visible dans MasterCRM :
 ```sql
 UPDATE MSISDN
 SET ST_MSISDN_ID = '0', MSISDN_STATUS = '7', MS_CLASS = '0'
@@ -131,7 +131,7 @@ COMMIT;
 
 **Etape 2** — Informer le CDC : "Le MSISDN est disponible en reaffectation dans le stock 211. Tu peux proceder."
 
-**Etape 3** — Une fois que le CDC a effectue sa tache, remettre MS_CLASS a 72 :
+**Etape 3** — Une fois que le CDC a effectue sa tâche, remettre MS_CLASS a 72 :
 ```sql
 UPDATE MSISDN
 SET MS_CLASS = '72'
@@ -139,24 +139,24 @@ WHERE MSISDN_NO = '069XXXXXXX';
 COMMIT;
 ```
 
-> **Important :** Ne pas oublier de remettre MS_CLASS a 72 apres l'intervention du CDC, sinon le numero perd son statut de numero or.
+> **Important :** Ne pas oublier de remettre MS_CLASS a 72 après l'intervention du CDC, sinon le numéro perd son statut de numéro or.
 
 (Voir ticket #276942 — SARL CAV ISLE, client 2222173)
 
-### 7. Cas particulier : Erreur de portabilite
+### 7. Cas particulier : Erreur de portabilité
 
-Quand le MSISDN est bloque suite a une erreur de portabilite (mauvais numero provisoire saisi sur le HUB) :
-1. Passer le MSISDN porte en statut reaffectable (meme requete etape 4)
+Quand le MSISDN est bloqué suite a une erreur de portabilité (mauvais numéro provisoire saisi sur le HUB) :
+1. Passer le MSISDN porte en statut reaffectable (meme requête étape 4)
 2. Informer le CDC : "Le MSISDN est disponible en reaffectation. Tu peux proceder au changement de MSISDN."
-3. Le CDC effectue le changement de MSISDN vers le bon numero provisoire
+3. Le CDC effectue le changement de MSISDN vers le bon numéro provisoire
 
 (Voir ticket #276089 — erreur de saisie PDV sur le HUB)
 
 ### 8. Le "stock 211"
 
-Quand un MSISDN est remis en disponibilite, il apparait dans le **stock 211** de MasterCRM. C'est le stock de numeros reaffectables visible par le CDC.
+Quand un MSISDN est remis en disponibilite, il apparait dans le **stock 211** de MasterCRM. C'est le stock de numéros reaffectables visible par le CDC.
 
-Pour une liberation combinee IMEI + MSISDN, repondre :
+Pour une libération combinee IMEI + MSISDN, répondre :
 ```
 Les ressources ont été libérées.
 Le MSISDN est disponible en réaffectation dans le stock 211.
@@ -177,4 +177,4 @@ Cdt,
 Équipe Application
 ```
 
-Puis fermer le ticket (statut : resolu).
+Puis fermer le ticket (statut : résolu).

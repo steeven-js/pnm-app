@@ -1,4 +1,4 @@
-# PILMEDIA — Points à discuter avec Sarah
+﻿# PILMEDIA — Points à discuter avec Sarah
 
 **Date :** 23/04/2026
 
@@ -41,7 +41,7 @@ Pas prioritaire. À voir avec Sarah pour la planification, après la correction 
 
 Voir avec Sarah : garder l'email de l'équipe ou mettre uniquement celui de Steeven pour les emails DAPI d'intégration.
 
-**Config actuelle :** http://172.24.114.86:8080/PortaWs/index.jsp?m=operateur (page Admin Portal — Liste des opérateurs, champ « email »).
+**Config actuelle :** http://172.24.114.86:8080/PortaWs/index.jsp?m=opérateur (page Admin Portal — Liste des opérateurs, champ « email »).
 
 ## Actions
 

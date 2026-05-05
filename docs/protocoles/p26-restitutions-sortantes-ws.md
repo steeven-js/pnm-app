@@ -1,4 +1,4 @@
-# P26 — Restitutions sortantes (tickets WS)
+﻿# P26 — Restitutions sortantes (tickets WS)
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportawebdb01
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Ce script cree les tickets de restitution sortante (3400) dans PortaDB en appelant le Web Service Porta `CreatePortaRestitution`. Il extrait les MSISDN a restituer depuis MOBI Oracle, calcule les dates, et effectue un appel SOAP pour chaque numero.
+Ce script créé les tickets de restitution sortante (3400) dans PortaDB en appelant le Web Service Porta `CreatePortaRestitution`. Il extrait les MSISDN a restituer depuis MOBI Oracle, calcule les dates, et effectue un appel SOAP pour chaque numéro.
 
 ## Web Service
 
@@ -21,16 +21,16 @@ Ce script cree les tickets de restitution sortante (3400) dans PortaDB en appela
 
 ### 1. Calcul des dates
 
-- **date_demande** : aujourd'hui (ou prochain jour ouvre si jour ferie)
-- **date_portage** : date_demande + 4 jours ouvres
+- **date_demande** : aujourd'hui (ou prochain jour ouvre si jour férié)
+- **date_portage** : date_demande + 4 jours ouvrés
 
-Les jours feries sont verifies dans la table `PortaDB.FERRYDAY`.
+Les jours fériés sont verifies dans la table `PortaDB.FERRYDAY`.
 
 ### 2. Extraction MSISDN depuis MOBI
 
-Le fichier SQL `~/Sql/MOBI-Extract-Restitutions_Sortantes.sql` extrait les MSISDN a restituer avec leur code operateur.
+Le fichier SQL `~/Sql/MOBI-Extract-Restitutions_Sortantes.sql` extrait les MSISDN a restituer avec leur code opérateur.
 
-### 3. Mapping operateurs MOBI → Porta
+### 3. Mapping opérateurs MOBI → Porta
 
 | Code MOBI | Operateur | Code Porta |
 |-----------|-----------|------------|

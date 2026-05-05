@@ -1,7 +1,7 @@
-# P40 — Verification des resiliations PSO non effectives
+﻿# P40 — Verification des résiliations PSO non effectives
 
 **Categorie :** Portabilite
-**Declencheur :** Email automatique "[PNM] Verification des resiliations pour PSO du JJ/MM/AAAA" de oracle@vmqprostdb01
+**Declencheur :** Email automatique "[PNM] Verification des résiliations pour PSO du JJ/MM/AAAA" de oracle@vmqprostdb01
 **Serveur :** vmqproportaweb01 (SoapUI), vmqproportawebdb01 (PortaDB), vmqprostdb01 (Oracle MOBI)
 **Temps moyen :** 10 a 30 min (selon nombre de MSISDN)
 **Frequence :** Extremement rare
@@ -10,18 +10,18 @@
 
 ## Contexte
 
-Lors d'une portabilite sortante (PSO), la resiliation de la ligne chez Digicel s'effectue automatiquement apres la bascule. Un script de verification (`Pnm_pso_lignes_non_resiliees.sh`) tourne sur vmqprostdb01 et envoie un email automatique s'il detecte des MSISDN qui n'ont pas ete resilies.
+Lors d'une portabilité sortante (PSO), la résiliation de la ligne chez Digicel s'effectue automatiquement après la bascule. Un script de vérification (`Pnm_pso_lignes_non_resiliees.sh`) tourne sur vmqprostdb01 et envoie un email automatique s'il détecté des MSISDN qui n'ont pas ete resilies.
 
-L'email est envoye a rt-appli@ticket.digicelgroup.fr et cree automatiquement un ticket RT dans la file APPLICATIONS.
+L'email est envoyé a rt-appli@ticket.digicelgroup.fr et créé automatiquement un ticket RT dans la file APPLICATIONS.
 
-Si les MSISDN ne sont pas resilies rapidement, ils restent actifs chez Digicel alors qu'ils sont deja portes chez un autre operateur, ce qui peut generer des facturations indues.
+Si les MSISDN ne sont pas resilies rapidement, ils restent actifs chez Digicel alors qu'ils sont déjà portes chez un autre opérateur, ce qui peut generer des facturations indues.
 
 ## Format de l'email
 
 ```
 Bonjour,
 
-Il y a N resiliation(s) non effective(s) pour la bascule du JJ/MM/AAAA.
+Il y a N résiliation(s) non effective(s) pour la bascule du JJ/MM/AAAA.
 
 Veuillez trouver ci-dessous le(s) MSISDN concerne(s):
 
@@ -49,13 +49,13 @@ ORDER BY P.date_portage DESC;
 
 Verifier :
 - `etat_id_actuel` : doit etre en etat cloture (portage effectue)
-- `operateur_id_actuel` : doit etre != 2 (le numero n'est plus chez Digicel)
+- `operateur_id_actuel` : doit etre != 2 (le numéro n'est plus chez Digicel)
 
 > **Attention :** Ne JAMAIS resilier un MSISDN dont le portage n'est pas confirme dans PortaDB.
 
 ### 2. Verifier le FNR
 
-Confirmer dans le FNR que les MSISDN sont bien chez l'autre operateur :
+Confirmer dans le FNR que les MSISDN sont bien chez l'autre opérateur :
 
 http://172.24.2.21/apis/porta/fnr-get-info.html
 
@@ -76,7 +76,7 @@ FROM LINE
 WHERE LINE_MSISDN_ACTIVE IN ('069XXXXXXX', '069XXXXXXX');
 ```
 
-Si `LINE_STATUS` indique que la ligne est encore active, la resiliation automatique a bien echoue et une resiliation manuelle est necessaire.
+Si `LINE_STATUS` indique que la ligne est encore active, la résiliation automatique a bien échoué et une résiliation manuelle est nécessaire.
 
 ### 4. Resilier manuellement via SoapUI
 
@@ -97,9 +97,9 @@ Suivre le protocole P11 (Resiliation manuelle PSO) pour chaque MSISDN :
 </soapenv:Envelope>
 ```
 
-### 5. Verifier la resiliation dans MOBI
+### 5. Verifier la résiliation dans MOBI
 
-Apres chaque appel SoapUI, verifier que la ligne est bien resiliee :
+Apres chaque appel SoapUI, vérifier que la ligne est bien résiliée :
 
 ```sql
 SELECT LINE_NO, LINE_MSISDN_ACTIVE, LINE_STATUS
@@ -107,7 +107,7 @@ FROM LINE
 WHERE LINE_MSISDN_ACTIVE IN ('069XXXXXXX', '069XXXXXXX');
 ```
 
-Le `LINE_STATUS` doit indiquer "resilie".
+Le `LINE_STATUS` doit indiquer "résilié".
 
 ### 6. Cas particulier : MSISDN Wizzee (MS_CLASS = 80)
 
@@ -119,7 +119,7 @@ FROM MSISDN
 WHERE MSISDN_no IN ('069XXXXXXX', '069XXXXXXX');
 ```
 
-Si `OPERATION_ID = 217` ou `MS_CLASS = 80` : ne pas resilier via SoapUI. Transmettre a l'equipe Wizzee par email pour la resiliation.
+Si `OPERATION_ID = 217` ou `MS_CLASS = 80` : ne pas resilier via SoapUI. Transmettre a l'equipe Wizzee par email pour la résiliation.
 
 ### 7. Fermer le ticket RT
 
@@ -145,12 +145,12 @@ Cdt,
 - 0696869984
 - 0696976911
 
-Bascule du 23/02/2026 — 2 resiliations non effectives detectees par le script automatique. Resiliation manuelle effectuee via SoapUI (P11).
+Bascule du 23/02/2026 — 2 résiliations non effectives detectees par le script automatique. Resiliation manuelle effectuee via SoapUI (P11).
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Cet email est extremement rare — la plupart du temps la resiliation automatique fonctionne
-- Le script de detection tourne sur vmqprostdb01 (oracle) : `Pnm_pso_lignes_non_resiliees.sh`
-- Toujours verifier PortaDB et FNR AVANT de resilier — ne jamais resilier un MSISDN dont le portage n'est pas confirme
-- Voir P11 pour la procedure detaillee SoapUI avec captures d'ecran
-- Voir P37 pour le cas ou la resiliation est necessaire apres un traitement d'attentes de tickets operateurs
+- Cet email est extremement rare — la plupart du temps la résiliation automatique fonctionne
+- Le script de détection tourne sur vmqprostdb01 (oracle) : `Pnm_pso_lignes_non_resiliees.sh`
+- Toujours vérifier PortaDB et FNR AVANT de resilier — ne jamais resilier un MSISDN dont le portage n'est pas confirme
+- Voir P11 pour la procédure détaillée SoapUI avec captures d'ecran
+- Voir P37 pour le cas ou la résiliation est nécessaire après un traitement d'attentes de tickets opérateurs

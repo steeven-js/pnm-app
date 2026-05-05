@@ -1,4 +1,4 @@
-# PILMEDIA — Processeurs ACK & scripts PortaSync staging
+﻿# PILMEDIA — Processeurs ACK & scripts PortaSync staging
 
 **Date :** 23/04/2026
 **Participants :** Sarah Mogade, Steeven Jacques, Max Morawski
@@ -12,7 +12,7 @@ Max a identifié 3 catégories de processeurs ACK avec une incohérence dans la 
 - **`PnmAckManager`** → traite PNMDATA + PNMSYNC ensemble (session type : `ACK`)
 - **`PnmSyncAckManager`** → traite PNMSYNC uniquement (session type : `ACK_SYNC`)
 - **`PnmDataAckManager`** → traite PNMDATA uniquement
-  **`PnmDataAckGenerator`** → se synchronise avec le serveur (session type : `ACK_DATA`)
+  **`PnmDataAckGenerator`** → se synchronisé avec le serveur (session type : `ACK_DATA`)
 
 Le cas DATA est divisé en 2 scripts alors que les deux autres n'en utilisent qu'un seul chacun.
 

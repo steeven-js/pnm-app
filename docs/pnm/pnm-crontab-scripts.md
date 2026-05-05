@@ -1,7 +1,7 @@
-# Documentation des Scripts Crontab - PORTA PNMV3
+﻿# Documentation des Scripts Crontab - PORTA PNMV3
 
 > Serveur : `vmqproportawebdb01`
-> Utilisateur systeme : `porta_pnmv3`
+> Utilisateur système : `porta_pnmv3`
 > Repertoire scripts : `/home/porta_pnmv3/Scripts/`
 > Repertoire logs : `/home/porta_pnmv3/Log/`
 > Source : `/etc/crontab`
@@ -10,7 +10,7 @@
 
 ## Vue d'ensemble
 
-Les taches cron du projet PORTA PNMV3 assurent l'automatisation des operations de portabilite des numeros mobiles : export de donnees, verification des bascules, gestion des restitutions, facturation et controles divers.
+Les tâches cron du projet PORTA PNMV3 assurent l'automatisation des operations de portabilité des numéros mobiles : export de données, vérification des bascules, gestion des restitutions, facturation et contrôles divers.
 
 ---
 
@@ -25,13 +25,13 @@ Les taches cron du projet PORTA PNMV3 assurent l'automatisation des operations d
 | **Cron** | `00 00 * * 1-7` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `PortaDB-export-csv.log` |
-| **Description** | Export des tables de la base PortaDB au format CSV sur le serveur EMM pour alimentation du systeme MIS (Management Information System). |
+| **Description** | Export des tables de la base PortaDB au format CSV sur le serveur EMM pour alimentation du système MIS (Management Information System). |
 
 ---
 
 ### 2. Verification Bascule Porta MOBI
 
-Verification que les bascules de portabilite mobile se sont correctement executees.
+Verification que les bascules de portabilité mobile se sont correctement executees.
 
 #### 2a. Execution du lundi
 
@@ -53,7 +53,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `15 09 * * 2-5` |
 | **Utilisateur** | `root` |
 | **Log** | `Pnm-Verif-Bascule-MOBI.sh.log` |
-| **Description** | Premiere verification quotidienne des bascules du matin. |
+| **Description** | Premiere vérification quotidienne des bascules du matin. |
 
 #### 2c. Execution mardi a vendredi - fin de matinee
 
@@ -64,7 +64,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `54 10 * * 2-5` |
 | **Utilisateur** | `root` |
 | **Log** | `Pnm-Verif-Bascule-MOBI.sh.log` |
-| **Description** | Seconde verification quotidienne des bascules. Permet de detecter les bascules traitees apres la premiere verification. |
+| **Description** | Seconde vérification quotidienne des bascules. Permet de détecter les bascules traitees après la première vérification. |
 
 ---
 
@@ -77,7 +77,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `30 12 * * 1-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `Pnm-Restitutions-Sortantes-Bascule.sh.log` |
-| **Description** | Bascule des restitutions sortantes (statut Saisi vers Dossier de restitution initie). Concerne les numeros que Digicel restitue a un autre operateur. |
+| **Description** | Bascule des restitutions sortantes (statut Saisi vers Dossier de restitution initie). Concerne les numéros que Digicel restitue a un autre opérateur. |
 
 ---
 
@@ -90,7 +90,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `25 21 * * 1-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `Pnm-Restitutions-Entrantes-Bascule.sh.log` |
-| **Description** | Bascule des restitutions entrantes. Concerne les numeros restitues a Digicel par un autre operateur. Execution en soiree pour integration nocturne. |
+| **Description** | Bascule des restitutions entrantes. Concerne les numéros restitues a Digicel par un autre opérateur. Execution en soiree pour intégration nocturne. |
 
 ---
 
@@ -107,7 +107,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 
 ---
 
-### 6. Facturation mensuelle PEN inter-operateurs
+### 6. Facturation mensuelle PEN inter-opérateurs
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -116,11 +116,11 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `05 00 1 * *` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | Sortie standard (pas de redirection) |
-| **Description** | Generation des fichiers de facturation mensuelle pour les portages entrants (PEN) inter-operateurs. **Execution obligatoire le 1er de chaque mois.** |
+| **Description** | Generation des fichiers de facturation mensuelle pour les portages entrants (PEN) inter-opérateurs. **Execution obligatoire le 1er de chaque mois.** |
 
 ---
 
-### 7. Facturation mensuelle PSO inter-operateurs
+### 7. Facturation mensuelle PSO inter-opérateurs
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -129,7 +129,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `10 00 1 * *` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | Sortie standard (pas de redirection) |
-| **Description** | Generation des fichiers de facturation mensuelle pour les portages sortants (PSO) inter-operateurs. **Execution obligatoire le 1er de chaque mois.** |
+| **Description** | Generation des fichiers de facturation mensuelle pour les portages sortants (PSO) inter-opérateurs. **Execution obligatoire le 1er de chaque mois.** |
 
 ---
 
@@ -142,7 +142,7 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `30 11 * * 2-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `Pnm_1210_awaiting.log` |
-| **Description** | Verification des tickets de type 1210 recus pour les portages prevus a J+1. Le ticket 1210 correspond a l'accuse de reception de la demande de portage. |
+| **Description** | Verification des tickets de type 1210 reçus pour les portages prevus a J+1. Le ticket 1210 correspond a l'accuse de réception de la demande de portage. |
 
 ---
 
@@ -155,11 +155,11 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `30 11 * * 1` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `Pnm_tickets_awaiting.log` |
-| **Description** | Verification elargie du lundi : tickets 1210 pour portages a J+1 et tickets 1430/3430 recus a S-1 (semaine precedente). Couvre le rattrapage du week-end. |
+| **Description** | Verification elargie du lundi : tickets 1210 pour portages a J+1 et tickets 1430/3430 reçus a S-1 (semaine precedente). Couvre le rattrapage du week-end. |
 
 ---
 
-### 10. Verification tickets 1110 transmis a UTS (mode degrade)
+### 10. Verification tickets 1110 transmis a UTS (mode dégradé)
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -168,11 +168,11 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `30 11,15,20 * * 1-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `Pnm_1110_DC_vers_UTS.log` |
-| **Description** | Verification des tickets 1110 transmis a l'operateur UTS. Detecte les cas necessitant la creation d'un ticket 1210 a integrer en mode degrade (procedure de secours). Trois executions par jour pour un suivi rapproche. |
+| **Description** | Verification des tickets 1110 transmis a l'opérateur UTS. Detecte les cas necessitant la création d'un ticket 1210 a intégrer en mode dégradé (procédure de secours). Trois executions par jour pour un suivi rapproche. |
 
 ---
 
-### 11. Gestion portabilites B2B vers Free Caraibe
+### 11. Gestion portabilités B2B vers Free Caraibe
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -181,11 +181,11 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `30 09,11,15,20 * * 1-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `refus_porta_free_b2b.log` |
-| **Description** | Gestion des cas de portabilite B2B (Business to Business) vers Free Caraibe. Quatre executions quotidiennes pour traiter les demandes en temps quasi-reel. |
+| **Description** | Gestion des cas de portabilité B2B (Business to Business) vers Free Caraibe. Quatre executions quotidiennes pour traiter les demandes en temps quasi-reel. |
 
 ---
 
-### 12. Reporting refus de portabilite - RIO incorrect
+### 12. Reporting refus de portabilité - RIO incorrect
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -194,11 +194,11 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `00 09 * * 1-5` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | `check_refus_porta_rio_incorrect.log` |
-| **Description** | Generation d'un rapport sur les cas de refus de portabilite avec motif "RIO incorrect". Permet de detecter les problemes de saisie ou de synchronisation des RIO. |
+| **Description** | Generation d'un rapport sur les cas de refus de portabilité avec motif "RIO incorrect". Permet de détecter les problèmes de saisie ou de synchronisation des RIO. |
 
 ---
 
-### 13. Facturation annuelle PEN inter-operateurs
+### 13. Facturation annuelle PEN inter-opérateurs
 
 | Parametre | Valeur |
 |-----------|--------|
@@ -207,26 +207,26 @@ Verification que les bascules de portabilite mobile se sont correctement execute
 | **Cron** | `@yearly` |
 | **Utilisateur** | `porta_pnmv3` |
 | **Log** | Sortie standard (pas de redirection) |
-| **Description** | Generation du mail de facturation annuelle pour les portages entrants (PEN) inter-operateurs. **Execution automatique une fois par an.** |
+| **Description** | Generation du mail de facturation annuelle pour les portages entrants (PEN) inter-opérateurs. **Execution automatique une fois par an.** |
 
 ---
 
 ## Taches desactivees (commentees)
 
-Les taches suivantes sont presentes dans le crontab mais desactivees :
+Les tâches suivantes sont presentes dans le crontab mais desactivees :
 
 | Script | Ancienne planification | Description | Raison probable |
 |--------|----------------------|-------------|-----------------|
 | `PortaDB-export-csv.sh` | 12h00, tous les jours | Second export CSV quotidien | Doublon - un seul export a minuit est suffisant |
 | `Pnm-Verif-Bascule-MOBI_CCA.sh` | 10h30, lun-ven | Verification bascule - envoi CCARE | Fonctionnalite transferee ou obsolete |
 | `Pnm-Restitutions-Sortantes-Tickets-ratp.sh` | 12h00, lun-ven | Tickets restitutions sortantes RATP en masse | Traitement ponctuel (RT#254708) termine |
-| `Pnm_Stats_Bascule_ESB.sh` | 09h55, lun-ven | Rapports statistiques ESB du jour | Reporting ESB desactive |
+| `Pnm_Stats_Bascule_ESB.sh` | 09h55, lun-ven | Rapports statistiques ESB du jour | Reporting ESB désactivé |
 
 ---
 
 ## Planification horaire recapitulative
 
-### Jours ouvres (lundi a vendredi)
+### Jours ouvrés (lundi a vendredi)
 
 | Heure | Script | Frequence |
 |-------|--------|-----------|
@@ -291,10 +291,10 @@ Les taches suivantes sont presentes dans le crontab mais desactivees :
 
 ---
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- **Tous les scripts actifs** utilisent l'option `-v` (mode verbose) pour un suivi detaille dans les logs.
+- **Tous les scripts actifs** utilisent l'option `-v` (mode verbose) pour un suivi détaillé dans les logs.
 - **Les logs** sont en mode append (`>>`) : ils grossissent continuellement et doivent etre purges regulierement (rotation de logs recommandee).
-- **Les scripts de facturation** (PEN et PSO mensuels) n'ont pas de redirection de log explicite - verifier si les scripts gerent eux-memes leur sortie.
-- **Les verifications de bascule** tournent sous l'utilisateur `root` (necessite des privileges eleves), tandis que la plupart des autres scripts tournent sous `porta_pnmv3`.
-- **Ordre d'execution critique** : les tickets de restitution sortante (11h15) sont generes avant la bascule (12h30), ce qui est coherent avec le workflow.
+- **Les scripts de facturation** (PEN et PSO mensuels) n'ont pas de redirection de log explicite - vérifier si les scripts gerent eux-memes leur sortie.
+- **Les vérifications de bascule** tournent sous l'utilisateur `root` (necessite des privileges eleves), tandis que la plupart des autres scripts tournent sous `porta_pnmv3`.
+- **Ordre d'exécution critique** : les tickets de restitution sortante (11h15) sont generes avant la bascule (12h30), ce qui est cohérent avec le workflow.

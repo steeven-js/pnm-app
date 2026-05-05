@@ -1,4 +1,4 @@
-# P05 — Remise offre famille non appliquee
+﻿# P05 — Remise offre famille non appliquee
 
 **Categorie :** Debug / Diagnostic
 **Serveur :** vmqprostdb01
@@ -13,7 +13,7 @@
 
 Corriger une remise offre famille qui n'apparait pas sur la facture malgre l'activation. Cela concerne les items de remise (ex: 3920854 pour offre famille, 3807700 pour remise -10,01EUR/mois) qui sont absents de la table `LINE_ACTIVE_ITEM`.
 
-Ce probleme survient frequemment dans deux situations :
+Ce problème survient frequemment dans deux situations :
 1. **Remise non propagee** : l'item est dans `RATP_ITEM` mais n'a pas ete propage dans la LAI (Ligne Active Item)
 2. **Remise annulee suite a un changement de titulaire (CTI)** : lors d'un CTI, les remises de la ligne source sont automatiquement supprimees et doivent etre reinserees manuellement
 
@@ -43,9 +43,9 @@ FROM LINE
 WHERE LINE_MSISDN_ACTIVE = '069XXXXXXX';
 ```
 
-> **Attention :** Noter le LINE_NO, il sera necessaire pour l'etape 4.
+> **Attention :** Noter le LINE_NO, il sera nécessaire pour l'étape 4.
 
-### 3. Verifier si l'item est deja present dans LINE_ACTIVE_ITEM
+### 3. Verifier si l'item est déjà present dans LINE_ACTIVE_ITEM
 
 ```sql
 SELECT LINE_NO, ITEM_CODE, LI_START_BILL_DATE, LI_END_BILL_DATE
@@ -54,12 +54,12 @@ WHERE LINE_NO = 'XXXXXXX'
 AND ITEM_CODE = '3920854';
 ```
 
-Si aucun resultat : l'item est absent, il faut le reinserer.
+Si aucun résultat : l'item est absent, il faut le reinserer.
 Si present avec LI_END_BILL_DATE dans le passe : l'item a expire, il faut le reinitialiser.
 
 ### 4. Supprimer l'item existant (nettoyage)
 
-Inserer une demande de suppression dans RATP_ITEM puis executer la procedure.
+Inserer une demande de suppression dans RATP_ITEM puis executer la procédure.
 
 ```sql
 -- Suppression item existant
@@ -70,7 +70,7 @@ FROM LINE
 WHERE line_msisdn_active IN ('069XXXXXXX');
 COMMIT;
 
--- Execution procedure de suppression
+-- Execution procédure de suppression
 BEGIN
   PB.SUPP_ITEM_MASSE;
   COMMIT;
@@ -79,7 +79,7 @@ END;
 
 ### 5. Reinserer l'item offre famille
 
-Inserer l'item et executer la procedure d'insertion dans la LAI.
+Inserer l'item et executer la procédure d'insertion dans la LAI.
 
 ```sql
 -- Ajout item offre famille
@@ -90,7 +90,7 @@ FROM LINE li
 WHERE li.line_msisdn_active IN ('069XXXXXXX');
 COMMIT;
 
--- Execution procedure d'insertion dans la LAI
+-- Execution procédure d'insertion dans la LAI
 BEGIN
   PB.RATP_ITEM_MANQUANT_2;
   COMMIT;
@@ -98,7 +98,7 @@ END;
 ```
 
 **Procedures stockees :**
-- `PB.SUPP_ITEM_MASSE` : supprime les items marques 'SUPPRESSION' dans RATP_ITEM
+- `PB.SUPP_ITEM_MASSE` : supprimé les items marques 'SUPPRESSION' dans RATP_ITEM
 - `PB.RATP_ITEM_MANQUANT_2` : propage les items marques 'AJOUT' depuis RATP_ITEM vers LINE_ACTIVE_ITEM (la LAI)
 
 ### 6. Mettre a jour les dates dans LINE_ACTIVE_ITEM
@@ -109,12 +109,12 @@ Mettre les dates de fin a 31/12/2050 pour que la remise reste active indefinimen
 UPDATE LINE_ACTIVE_ITEM
 SET LI_END_BILL_DATE = '31/12/2050',
     LI_END_LINKAFTER = '31/12/2050'
-WHERE LINE_NO = 'XXXXXXX'     -- le line_no du client (etape 2)
+WHERE LINE_NO = 'XXXXXXX'     -- le line_no du client (étape 2)
 AND ITEM_CODE = '3920854';     -- l'item offre famille
 COMMIT;
 ```
 
-> **Attention :** Recuperer le LINE_NO correct a l'etape 2 avant d'executer.
+> **Attention :** Recuperer le LINE_NO correct a l'étape 2 avant d'executer.
 
 ### 7. Cas particulier : Remise perdue suite a un changement de titulaire (CTI)
 
@@ -136,7 +136,7 @@ BEGIN
 END;
 ```
 
-Puis mettre a jour les dates de fin (etape 6) avec le bon ITEM_CODE (3807700 au lieu de 3920854).
+Puis mettre a jour les dates de fin (étape 6) avec le bon ITEM_CODE (3807700 au lieu de 3920854).
 
 (Voir ticket #276220 — remise annulee suite CTI, client 2318525)
 
@@ -156,6 +156,6 @@ Cdt,
 
 | Table | Role |
 |-------|------|
-| `RATP_ITEM` | File d'attente des modifications d'items (ajout/suppression). Traitee par les procedures PB. |
+| `RATP_ITEM` | File d'attente des modifications d'items (ajout/suppression). Traitee par les procédures PB. |
 | `LINE_ACTIVE_ITEM` | Items actifs sur chaque ligne. Contient les remises, options, services. |
 | `LINE` | Lignes clients. Lien entre MSISDN et LINE_NO/DOSSIER_NO/LI_CUSTOMER_NO. |

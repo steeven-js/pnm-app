@@ -1,20 +1,20 @@
-# P09 — Verification Acquittements PNMDATA
+﻿# P09 — Verification Acquittements PNMDATA
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportasync01
 **Utilisateur :** porta_pnmv3
 **Script :** PnmDataAckGenerator.sh (automatique)
-**Declencheur :** Verification apres chaque vacation (11H15, 15H15, 20H15)
+**Declencheur :** Verification après chaque vacation (11H15, 15H15, 20H15)
 
 ---
 
 ## Contexte
 
-Apres chaque vacation (10H, 14H, 19H), Digicel genere des fichiers PNMDATA contenant les tickets de portabilite a transmettre aux autres operateurs. Les operateurs doivent ensuite envoyer un **fichier d'acquittement** (.ACR) confirmant la bonne reception du fichier PNMDATA.
+Apres chaque vacation (10H, 14H, 19H), Digicel généré des fichiers PNMDATA contenant les tickets de portabilité a transmettre aux autres opérateurs. Les opérateurs doivent ensuite envoyer un **fichier d'acquittement** (.ACR) confirmant la bonne réception du fichier PNMDATA.
 
-Le script `PnmDataAckGenerator.sh` verifie automatiquement la presence de ces acquittements a 11H15, 15H15 et 20H15 (soit environ 1H15 apres chaque vacation).
+Le script `PnmDataAckGenerator.sh` vérifié automatiquement la presence de ces acquittements a 11H15, 15H15 et 20H15 (soit environ 1H15 après chaque vacation).
 
-## Operateurs a verifier
+## Operateurs a vérifier
 
 | Code | Operateur | Fichier attendu |
 |------|-----------|-----------------|
@@ -24,7 +24,7 @@ Le script `PnmDataAckGenerator.sh` verifie automatiquement la presence de ces ac
 | 05 | UTS Caraibe | PNMDATA.02.05.YYYYMMDD.VX.ACR |
 | 06 | Free Caraibes | PNMDATA.02.06.YYYYMMDD.VX.ACR |
 
-(VX = numero de vacation : V1, V2, V3)
+(VX = numéro de vacation : V1, V2, V3)
 
 ## Etapes
 
@@ -35,9 +35,9 @@ ssh porta_pnmv3@vmqproportasync01
 tail -50 /home/porta_pnmv3/PortaSync/log/PnmAckManager.log
 ```
 
-### 2. Verifier chaque operateur
+### 2. Verifier chaque opérateur
 
-Chaque operateur doit afficher `Check success` dans le log :
+Chaque opérateur doit afficher `Check success` dans le log :
 
 ```
 [INFO] Operateur 01 (Orange Caraibe) : Check success
@@ -54,16 +54,16 @@ La mention "Fin de Traitement" doit etre presente a la fin.
 
 Si un fichier ACR n'est pas trouve :
 
-1. **Verifier sur le serveur** que le fichier .ACR a ete recu :
+1. **Verifier sur le serveur** que le fichier .ACR a ete reçu :
    ```bash
-   # Fichiers recus de Orange (01)
+   # Fichiers reçus de Orange (01)
    ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/recv/
-   # Fichiers recus de SFR (03)
+   # Fichiers reçus de SFR (03)
    ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/03/recv/
    # etc. pour 04, 05, 06
    ```
 
-   Ou verifier directement sur le sFTP :
+   Ou vérifier directement sur le sFTP :
    ```bash
    sftp pnm_02@193.251.160.208
    ls -la /home/pnm_02/in/
@@ -78,7 +78,7 @@ Si un fichier ACR n'est pas trouve :
    # Relancer le check d'acquittement
    ```
 
-4. **Contacter l'operateur** si le fichier .ACR n'a pas ete depose :
+4. **Contacter l'opérateur** si le fichier .ACR n'a pas ete déposé :
    - Orange : oag.pnm-si@orange.com
    - SFR : pnm@outremer-telecom.fr
    - Dauphin : latifa.annachachibi@dauphintelecom.com
@@ -87,10 +87,10 @@ Si un fichier ACR n'est pas trouve :
 
 ### 4. Fichiers .ERR
 
-Si un fichier .ERR est present sur le sFTP au lieu d'un .ACR, cela signifie que l'operateur a rejete le fichier PNMDATA. Analyser le contenu du .ERR pour identifier le code erreur (voir docs/reglementaire/annexes-inter-operateurs.md pour les codes E000-E999).
+Si un fichier .ERR est present sur le sFTP au lieu d'un .ACR, cela signifie que l'opérateur a rejete le fichier PNMDATA. Analyser le contenu du .ERR pour identifier le code erreur (voir docs/reglementaire/annexes-inter-opérateurs.md pour les codes E000-E999).
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Les acquittements sont verifies 3 fois par jour (apres chaque vacation).
-- Dauphin Telecom est l'operateur le plus susceptible d'avoir des retards d'acquittement.
-- Si un operateur ne repond pas apres 2 vacations, escalader vers fwi_pnm_si.
+- Les acquittements sont verifies 3 fois par jour (après chaque vacation).
+- Dauphin Telecom est l'opérateur le plus susceptible d'avoir des retards d'acquittement.
+- Si un opérateur ne repond pas après 2 vacations, escalader vers fwi_pnm_si.

@@ -1,23 +1,23 @@
-# P06 — MAJ Fidelisation / Reengagement (APP_OCS 11561)
+﻿# P06 — MAJ Fidelisation / Reengagement (APP_OCS 11561)
 
 **Categorie :** Exploitation
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
 **Declencheur :** Ticket RT — mise a jour date fidelisation, reengagement, ou report de mois
 **Temps moyen :** 5 a 15 min
-**Frequence :** Elevee (~124 tickets/an categorie "Fidelisation" + partie "Reengagement")
+**Frequence :** Elevee (~124 tickets/an catégorie "Fidelisation" + partie "Reengagement")
 
 ---
 
 ## Contexte
 
-Mettre a jour la date de fidelisation ou reengager une ligne via APP_OCS requete 11561. Cette operation couvre plusieurs cas d'usage :
+Mettre a jour la date de fidelisation ou reengager une ligne via APP_OCS requête 11561. Cette operation couvre plusieurs cas d'usage :
 
 | Cas d'usage | Type de trace | Description |
 |-------------|---------------|-------------|
-| Reengagement 24 mois | MAJ_date_engagement | Reengager une ligne pour 24 mois en echange d'une remise |
+| Reengagement 24 mois | MAJ_date_engagement | Reengager une ligne pour 24 mois en échange d'une remise |
 | Report de mois FID | MAJ_date_engagement_et_FID | Transferer les mois de fidelisation d'un ancien dossier vers un nouveau |
-| MAJ date FID seule | MAJ_date_FID | Mise a jour date eligibilite fidelisation apres reactivation |
+| MAJ date FID seule | MAJ_date_FID | Mise a jour date eligibilite fidelisation après réactivation |
 
 ## Champs mis a jour par APP_OCS 11561
 
@@ -34,9 +34,9 @@ Il existe deux manieres d'executer cette operation :
 | Methode | Outil | Quand l'utiliser |
 |---------|-------|-----------------|
 | **A — Script shell** | `Reengagement_whiptail_V2.sh` sur vmqprostdb01 | Methode principale, en ligne de commande via mRemoteNG |
-| **B — Interface web** | APP_OCS supervision (navigateur) | Alternative si acces web disponible |
+| **B — Interface web** | APP_OCS supervision (navigateur) | Alternative si accès web disponible |
 
-Les deux methodes executent la meme requete 11561 et produisent le meme resultat (MAJ en base + trace automatique sur le ticket RT).
+Les deux methodes executent la meme requête 11561 et produisent le meme résultat (MAJ en base + trace automatique sur le ticket RT).
 
 ---
 
@@ -83,16 +83,16 @@ Le script demande successivement (interface whiptail) :
 | 6 | Numero de ticket RT | 276770 |
 | 7 | Libelle (type de trace) | MAJ_date_engagement_et_FID |
 | 8 | Code utilisateur | SJ623255 |
-| 9 | Type de requete | Mise a jour des trois dates |
+| 9 | Type de requête | Mise a jour des trois dates |
 
 ### 4. Verification
 
-Le script execute la procedure PL/SQL et affiche :
+Le script exécute la procédure PL/SQL et affiche :
 ```
-Procedure PL/SQL terminee avec succes.
+Procedure PL/SQL terminee avec succès.
 ```
 
-Un mail est automatiquement envoye en commentaire sur le ticket RT avec la trace + PJ `Trace_actions_bd_user.log`.
+Un mail est automatiquement envoyé en commentaire sur le ticket RT avec la trace + PJ `Trace_actions_bd_user.log`.
 
 **Regles de calcul des dates :**
 - **Reengagement 24 mois** : `date_fin_abo` = date du jour + 24 mois
@@ -111,7 +111,7 @@ Ouvrir l'interface web APP_OCS supervision dans un navigateur.
 http://172.24.114.165/OCS/supervision/index.php
 ```
 
-### 2. Executer la requete 11561
+### 2. Executer la requête 11561
 
 Renseigner les champs suivants :
 - **MSISDN** du client
@@ -121,7 +121,7 @@ Renseigner les champs suivants :
 
 ### 3. Verifier la trace automatique
 
-APP_OCS envoie automatiquement un commentaire sur le ticket RT avec la trace complete :
+APP_OCS envoie automatiquement un commentaire sur le ticket RT avec la trace complète :
 
 ```
 msisdn = '069XXXXXXX',
@@ -131,7 +131,7 @@ date_eligible_fid = DD/MM/YYYY,
 numero_rt = XXXXXX,
 type_trace = MAJ_date_engagement_et_FID,
 code_user_trace = XXXXXXXX,
-code requete : 11561
+code requête : 11561
 ```
 
 PJ : `Trace_actions_bd_user.log`
@@ -154,7 +154,7 @@ Cdt,
 
 ### Exemple 1 : Reengagement 24 mois (ticket #276434)
 
-Client 1299542, reduction 5EUR a vie accordee en echange d'un reengagement :
+Client 1299542, reduction 5EUR a vie accordee en échange d'un reengagement :
 - msisdn = '0690082299'
 - date_fin_abo = 18/03/2028 (date du jour + 24 mois)
 - type_trace = MAJ_date_engagement
@@ -164,7 +164,7 @@ Reponse : "La ligne a ete reengagee jusqu'au 18/03/2028."
 
 ### Exemple 2 : Report de mois de fidelisation (ticket #276432)
 
-Client dont la ligne a ete resiliee puis reattribuee sur un nouveau dossier suite a un incident de prelevement :
+Client dont la ligne a ete résiliée puis reattribuee sur un nouveau dossier suite a un incident de prelevement :
 - msisdn = '0696770464'
 - date_fin_abo = 14/05/2025
 - date_ref_anciennete = 15/05/2024
@@ -172,26 +172,26 @@ Client dont la ligne a ete resiliee puis reattribuee sur un nouveau dossier suit
 - type_trace = MAJ_date_engagement_et_FID
 - code_user_trace = JJ608576
 
-### Exemple 3 : MAJ FID apres reactivation forfait (ticket #276492)
+### Exemple 3 : MAJ FID après réactivation forfait (ticket #276492)
 
-Apres reactivation d'un forfait bloque, mise a jour des dates de fidelisation :
+Apres réactivation d'un forfait bloqué, mise a jour des dates de fidelisation :
 - msisdn = '0690077091'
 - date_fin_abo = null (pas de reengagement)
 - date_ref_anciennete = 10/12/2024
 - date_eligible_fid = 09/12/2025
 - type_trace = MAJ_date_FID
 
-### Exemple 4 : Reattribution points FID apres changement materiel (ticket #276770)
+### Exemple 4 : Reattribution points FID après changement materiel (ticket #276770)
 
-Suite au ticket #276682 (liberation IMEI + changement materiel), reattribution des points de fidelite :
+Suite au ticket #276682 (libération IMEI + changement materiel), reattribution des points de fidelite :
 - Script : `./Reengagement_whiptail_V2.sh`
 - Choix : "Mise a jour des trois dates"
 - code_user_trace = SJ623255
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- Le code requete **11561** est utilise pour les mises a jour de fidelisation (ajout/report). Pour les **annulations** de fidelisation, utiliser le code **11605** (voir protocole P07).
+- Le code requête **11561** est utilise pour les mises a jour de fidelisation (ajout/report). Pour les **annulations** de fidelisation, utiliser le code **11605** (voir protocole P07).
 - Le `code_user_trace` est le code employe du demandeur (format XX + 6 chiffres, ex: BM615558, SJ623255).
-- Le script shell et l'interface web produisent le **meme resultat** : MAJ en base + trace automatique postee sur le ticket RT.
+- Le script shell et l'interface web produisent le **meme résultat** : MAJ en base + trace automatique postee sur le ticket RT.
 - APP_OCS poste automatiquement la trace en commentaire + PJ sur le ticket RT.
-- Le script `Reengagement_whiptail_V2.sh` permet de traiter **plusieurs MSISDN** en une seule execution.
+- Le script `Reengagement_whiptail_V2.sh` permet de traiter **plusieurs MSISDN** en une seule exécution.

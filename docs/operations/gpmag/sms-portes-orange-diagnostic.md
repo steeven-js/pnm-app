@@ -1,4 +1,4 @@
-# Diagnostic — SMS non reçus par les MSISDN Orange portés chez Digicel
+﻿# Diagnostic — SMS non reçus par les MSISDN Orange portés chez Digicel
 
 **Statut :** RÉSOLU
 **Période impactée :** 31/03/2026 → résolution suite à la coordination des migrations de préfixes
@@ -19,7 +19,7 @@ Les MSISDN Orange portés chez Digicel ne recevaient plus les SMS (P2P et A2P) d
 | 13/04/2026 | Antoine Martin (Digicel) : SRI for SM non reçus depuis le 31/03 — demande si changement côté Orange (nouveaux RN ?) |
 | 13/04/2026 | JP Victoire (VAS) demande escalade côté Orange |
 | 14/04/2026 | Pascal Bastaraud demande à Christophe Decaris (Orange) de vérifier le lien avec la migration des nouveaux RN |
-| 14/04/2026 | Christophe Decaris identifie 3 types de SRI for SM (voir ci-dessous) |
+| 14/04/2026 | Christophe Decaris identifié 3 types de SRI for SM (voir ci-dessous) |
 | 15/04/2026 | Antoine Martin (Digicel) : SRI sans RN OK / SRI avec nouveau RN pas de trace côté Digicel / SRI avec ancien RN plus rien depuis le 31/03. Josy-Anne Leno ouvre ticket Orange IC : `TT 2604Z42280` |
 | 15/04/2026 | Antoine Martin sollicite BICS (carrier Digicel) |
 | 16/04/2026 | BICS : *« received no SMS related messages »* — demande trace Orange IC. Ticket BICS : `SC5148552` |
@@ -27,7 +27,7 @@ Les MSISDN Orange portés chez Digicel ne recevaient plus les SMS (P2P et A2P) d
 
 ## Analyse technique
 
-**SRI for SM** = *Send Routing Info for Short Message*. Quand Orange veut envoyer un SMS à un numéro porté chez Digicel, son SMSC interroge le HLR Digicel via SRI for SM pour localiser l'abonné et router le SMS.
+**SRI for SM** = *Send Routing Info for Short Message*. Quand Orange veut envoyer un SMS à un numéro porté chez Digicel, son SMSC interrogé le HLR Digicel via SRI for SM pour localiser l'abonné et router le SMS.
 
 ### 3 types de SRI for SM identifiés
 
@@ -52,7 +52,7 @@ Le problème se situe entre Orange IC et BICS :
 - BICS dit ne rien recevoir
 - → Problème de routage/transit entre les deux carriers
 
-**Lien avec le GPMAG :** sujet #1 « Migration des nouveaux préfixes de routage » — voir [gpmag-evolutions-arcep.md](gpmag-evolutions-arcep.md).
+**Lien avec le GPMAG :** sujet #1 « Migration des nouveaux préfixes de routage » — voir [gpmag-évolutions-arcep.md](gpmag-evolutions-arcep.md).
 
 ### Migration des préfixes — état côté Digicel (08/04/2026)
 

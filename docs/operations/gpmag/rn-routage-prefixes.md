@@ -1,4 +1,4 @@
-# Préfixes de routage (RN) — Référence
+﻿# Préfixes de routage (RN) — Référence
 
 **Dernière MAJ :** 05/05/2026
 
@@ -8,7 +8,7 @@ Document de référence sur les **Routing Numbers (RN)** utilisés pour le routa
 
 ## Contexte
 
-Quand un MSISDN est porté d'un opérateur A vers un opérateur B, le **FNR** (Fichier National de Routage) de l'opérateur attributaire stocke un RN indiquant chez quel opérateur se trouve actuellement le numéro. Lors d'un appel ou d'un SMS, le HLR/SMSC interroge ce FNR pour router vers la bonne destination.
+Quand un MSISDN est porté d'un opérateur A vers un opérateur B, le **FNR** (Fichier National de Routage) de l'opérateur attributaire stocke un RN indiquant chez quel opérateur se trouve actuellement le numéro. Lors d'un appel ou d'un SMS, le HLR/SMSC interrogé ce FNR pour router vers la bonne destination.
 
 **Évolution ARCEP 2024** : passage d'un RN unique par opérateur à un RN **par opérateur ET par territoire** (Guadeloupe, Guyane, Martinique), pour améliorer le routage SMS A2P, la lutte contre la fraude, et la traçabilité.
 
@@ -80,7 +80,7 @@ Principe : **chaque opérateur stocke le RN de l'autre** dans son FNR pour route
 | **Digicel** (receveur — OPR) | Numéro local — pas de RN externe |
 
 Quand un appelant tiers compose le numéro :
-1. Le SMSC/HLR de l'appelant interroge le FNR Orange (numéro de tranche Orange)
+1. Le SMSC/HLR de l'appelant interrogé le FNR Orange (numéro de tranche Orange)
 2. Le FNR Orange répond : « routé vers RN Digicel »
 3. Le routage SS7 dirige l'appel/SMS vers Digicel via le RN
 
@@ -156,7 +156,7 @@ UPDATE PortaDB.FNR_CONFIG SET code_fnr='52333' WHERE idFNR_CONFIG='8';
 
 ## Documents liés
 
-- [gpmag-evolutions-arcep.md](gpmag-evolutions-arcep.md) — Suivi global des évolutions ARCEP, planning de migration
+- [gpmag-évolutions-arcep.md](gpmag-evolutions-arcep.md) — Suivi global des évolutions ARCEP, planning de migration
 - [sms-portes-orange-diagnostic.md](sms-portes-orange-diagnostic.md) — Diagnostic complet du problème SMS résolu suite à la migration
 - [P15 — Interrogation FNR](../../protocoles/p15-interrogation-fnr.md) — Comment interroger / mettre à jour le FNR
 - [P16 — Rollback DAPI suite FNR EMA EMM KO](../../protocoles/p16-rollback-dapi-fnr.md) — Procédure de rollback

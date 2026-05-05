@@ -1,24 +1,24 @@
-# P11 — Resiliation manuelle PSO (SoapUI)
+﻿# P11 — Resiliation manuelle PSO (SoapUI)
 
 **Categorie :** Portabilite
 **Serveur :** vmqproportaweb01 (DAPI)
 **Utilisateur :** porta_pnmv3
-**Declencheur :** MSISDN en portabilite sortante non resilie automatiquement
-**Script detection :** Pnm_pso_lignes_non_resiliees.sh
+**Declencheur :** MSISDN en portabilité sortante non résilié automatiquement
+**Script détection :** Pnm_pso_lignes_non_resiliees.sh
 
 ---
 
 ## Contexte
 
-Lors d'une portabilite sortante (PSO), la resiliation de la ligne chez Digicel doit s'effectuer automatiquement apres la bascule. Si le processus automatique echoue, le MSISDN reste actif chez Digicel alors qu'il est deja porte chez un autre operateur. La resiliation doit alors etre effectuee manuellement via SoapUI en appelant le Web Service DAPI.
+Lors d'une portabilité sortante (PSO), la résiliation de la ligne chez Digicel doit s'effectuer automatiquement après la bascule. Si le processus automatique échoué, le MSISDN reste actif chez Digicel alors qu'il est déjà porte chez un autre opérateur. La résiliation doit alors etre effectuee manuellement via SoapUI en appelant le Web Service DAPI.
 
 ## Detection
 
-Le script `Pnm_pso_lignes_non_resiliees.sh` detecte automatiquement les MSISDN PSO non resilies et envoie une alerte par email. Le monitoring de l'application PNM App peut egalement les signaler.
+Le script `Pnm_pso_lignes_non_resiliees.sh` détecté automatiquement les MSISDN PSO non resilies et envoie une alerte par email. Le monitoring de l'application PNM App peut egalement les signaler.
 
 ## Pre-requis : Verifier dans PortaDB
 
-Avant de resilier, verifier que le portage sortant est bien confirme :
+Avant de resilier, vérifier que le portage sortant est bien confirme :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -35,8 +35,8 @@ LIMIT 1;"
 ```
 
 Verifier :
-- `etat_id_actuel` : doit etre en etat 9 (portage effectue) ou superieur
-- `operateur_id_actuel` : doit etre != 2 (le numero n'est plus chez Digicel)
+- `etat_id_actuel` : doit etre en etat 9 (portage effectue) ou supérieur
+- `operateur_id_actuel` : doit etre != 2 (le numéro n'est plus chez Digicel)
 
 > **Attention :** Ne JAMAIS resilier un MSISDN dont le portage n'est pas confirme dans PortaDB.
 
@@ -53,7 +53,7 @@ URL du Web Service DAPI :
 http://172.24.119.72:8080/PortaWs/DigicelFwiPortaWs4Esb
 ```
 
-### 3. Preparer la requete de resiliation
+### 3. Preparer la requête de résiliation
 
 Utiliser l'operation `ExecuteResiliationPs` du Web Service :
 
@@ -68,15 +68,15 @@ Utiliser l'operation `ExecuteResiliationPs` du Web Service :
 </soapenv:Envelope>
 ```
 
-### 4. Executer la resiliation
+### 4. Executer la résiliation
 
-Envoyer la requete SOAP pour chaque MSISDN PSO non resilie.
+Envoyer la requête SOAP pour chaque MSISDN PSO non résilié.
 
-Verifier la reponse : le code retour doit confirmer la resiliation.
+Verifier la reponse : le code retour doit confirmer la résiliation.
 
 ### 5. Verifier dans MOBI
 
-Apres l'appel WS, confirmer que la ligne est bien resiliee dans MasterCRM :
+Apres l'appel WS, confirmer que la ligne est bien résiliée dans MasterCRM :
 
 ```bash
 su - oracle
@@ -89,21 +89,21 @@ FROM LINE
 WHERE LINE_MSISDN_ACTIVE = '069XXXXXXX';
 ```
 
-Le `LINE_STATUS` doit indiquer "resilie".
+Le `LINE_STATUS` doit indiquer "résilié".
 
 ### 6. Documenter
 
-Si la resiliation a ete effectuee pendant l'astreinte ou suite a un ticket :
-- Mettre a jour le ticket RT d'astreinte ou creer un ticket RT specifique
-- Indiquer le(s) MSISDN resilie(s) et la raison
+Si la résiliation a ete effectuee pendant l'astreinte ou suite a un ticket :
+- Mettre a jour le ticket RT d'astreinte ou créer un ticket RT spécifique
+- Indiquer le(s) MSISDN résilié(s) et la raison
 
 ## Reference
 
-- Voir Cas Pratique #18 dans l'application PNM App pour la procedure detaillee SoapUI avec captures d'ecran.
-- Image de reference : `public/images/soapui-execute-resiliation-ps.png`
+- Voir Cas Pratique #18 dans l'application PNM App pour la procédure détaillée SoapUI avec captures d'ecran.
+- Image de reference : `public/images/soapui-exécute-résiliation-ps.png`
 
-## Notes operationnelles
+## Notes opérationnelles
 
-- La resiliation manuelle est necessaire quand le processus automatique echoue (erreur WS, timeout, etc.).
-- Verifier dans la file APPLICATIONS s'il y a un ticket de verification PSO associe : `[PNM] Verification des resiliations pour PSO du JJ/MM/AAAA`.
+- La résiliation manuelle est nécessaire quand le processus automatique échoué (erreur WS, timeout, etc.).
+- Verifier dans la file APPLICATIONS s'il y a un ticket de vérification PSO associe : `[PNM] Verification des résiliations pour PSO du JJ/MM/AAAA`.
 - Les MSISDN PSO non resilies sont critiques : ils consomment des ressources et peuvent generer des facturations indues.

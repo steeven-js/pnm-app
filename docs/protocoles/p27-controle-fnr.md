@@ -1,15 +1,15 @@
-# P27 — Controle FNR post-bascule
+﻿# P27 — Controle FNR post-bascule
 
 **Categorie :** Portabilite
 **Serveur EMA :** EMA15-Digicel (connexion via batchuser)
-**Script :** Pnm-FNR_presence_V3.sh (execute depuis vmqprostdb01 par oracle)
-**Planification :** Quotidien (apres bascule)
+**Script :** Pnm-FNR_presence_V3.sh (exécute depuis vmqprostdb01 par oracle)
+**Planification :** Quotidien (après bascule)
 
 ---
 
 ## Contexte
 
-Apres la bascule quotidienne, le fichier `fnr_action_v3.bh` contenant les commandes NPSUB est envoye sur EMA pour mettre a jour le FNR (routage reseau). Ce script verifie que le fichier est present et que les commandes ont ete executees correctement.
+Apres la bascule quotidienne, le fichier `fnr_action_v3.bh` contenant les commandes NPSUB est envoyé sur EMA pour mettre a jour le FNR (routage réseau). Ce script vérifié que le fichier est present et que les commandes ont ete executees correctement.
 
 ## Connexion au serveur EMA
 
@@ -27,10 +27,10 @@ Arborescence :
 ```
 /var/sog/BatchHandler/Users/batchuser/
 ├── BatchJob/       ← fichier fnr_action_v3.bh (commandes NPSUB)
-├── LogFiles/       ← logs d'execution (.log, .nok)
+├── LogFiles/       ← logs d'exécution (.log, .nok)
 ├── ErrorFiles/     ← fichiers en erreur
 ├── script/         ← scripts utilitaires
-└── VerifiedFiles/  ← fichiers deja traites
+└── VerifiedFiles/  ← fichiers déjà traites
 ```
 
 ## Email
@@ -48,11 +48,11 @@ ssh batchuser@EMA15-Digicel
 find /var/sog/BatchHandler/Users/batchuser/BatchJob -name 'fnr_action_v3.bh' -type f -mtime 0
 ```
 
-> **Note :** Si pas de resultat = le fichier a deja ete traite et supprime par le BatchHandler. C'est normal. Verifier le log du jour a l'etape 2.
+> **Note :** Si pas de résultat = le fichier a déjà ete traite et supprimé par le BatchHandler. C'est normal. Verifier le log du jour a l'étape 2.
 
 Le script Pnm-FNR_presence_V3.sh retente 15 fois (toutes les 30 secondes) si le fichier n'est pas encore present.
 
-### 2. Verifier le log d'execution
+### 2. Verifier le log d'exécution
 
 Lister les derniers logs FNR (methode recommandee) :
 
@@ -60,14 +60,14 @@ Lister les derniers logs FNR (methode recommandee) :
 ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action* | tail -5
 ```
 
-> **Note :** Ne pas utiliser `$(date +%Y-%m-%d)` car le shell EMA peut ne pas l'evaluer. Utiliser `tail -5` pour voir les derniers logs et verifier que la date du jour est presente.
+> **Note :** Ne pas utiliser `$(date +%Y-%m-%d)` car le shell EMA peut ne pas l'evaluer. Utiliser `tail -5` pour voir les derniers logs et vérifier que la date du jour est presente.
 
 ### 3. Calcul du pourcentage de commandes OK
 
-Copier le nom du log du jour affiche a l'etape 2 et l'utiliser dans la commande :
+Copier le nom du log du jour affiche a l'étape 2 et l'utiliser dans la commande :
 
 ```bash
-# Reperer le nom du log du jour dans le resultat de l'etape 2 :
+# Reperer le nom du log du jour dans le résultat de l'étape 2 :
 # Exemple : 2026-04-09_09.10.06_fnr_action_v3.bh.log
 #
 # Puis copier-coller le nom dans la commande :
@@ -79,7 +79,7 @@ Exemple reel :
 cat 2026-04-09_09.10.06_fnr_action_v3.bh.log | grep Totally
 ```
 
-Le resultat affiche 2 lignes "Totally" :
+Le résultat affiche 2 lignes "Totally" :
 - Ligne 1 : nombre de commandes OK
 - Ligne 2 : nombre de commandes KO
 
@@ -87,29 +87,29 @@ Le resultat affiche 2 lignes "Totally" :
 pourcentage_ok = (OK * 100) / (OK + KO)
 ```
 
-### 4. Lire le detail des commandes CAI executees
+### 4. Lire le détail des commandes CAI executees
 
 Le log contient les commandes CAI (CREATE, SET, DELETE) avec les MSISDN :
 
 ```bash
-# Lire le log complet du jour (copier-coller le nom du log de l'etape 2)
+# Lire le log complet du jour (copier-coller le nom du log de l'étape 2)
 cat XXXX-XX-XX_XX.XX.XX_fnr_action_v3.bh.log
 ```
 
 > **Note :** Le fichier `fnr_action_v3.bh` original n'est PAS archive.
-> Il est supprime apres execution. Le log est le seul endroit ou
+> Il est supprimé après exécution. Le log est le seul endroit ou
 > le contenu des commandes est conserve.
 
 Format des commandes dans le log :
 
 ```
-CREATE:NPSUB:MSISDN,590XXXXXXXXX:NP,XXXXX;   ← Portabilite ENTRANTE (numero arrive)
+CREATE:NPSUB:MSISDN,590XXXXXXXXX:NP,XXXXX;   ← Portabilite ENTRANTE (numéro arrive)
 RESP:0;                                         ← Succes
 
 SET:NPSUB:MSISDN,590XXXXXXXXX:NP,XXXXX;       ← MODIFICATION routage
 RESP:0;
 
-DELETE:NPSUB:MSISDN,590XXXXXXXXX;              ← Portabilite SORTANTE (numero repart)
+DELETE:NPSUB:MSISDN,590XXXXXXXXX;              ← Portabilite SORTANTE (numéro repart)
 RESP:0;
 ```
 
@@ -126,7 +126,7 @@ Digicel (anciens prefixes, migration en stand-by) :
 - `52331` = Digicel Guyane (nouveau, pas encore actif)
 - `60042` = Digicel (ancien prefixe, toujours actif)
 
-Autres operateurs (anciens prefixes, migration en stand-by) :
+Autres opérateurs (anciens prefixes, migration en stand-by) :
 - `60043` = Dauphin Telecom (ancien) / `52304` = DT Guadeloupe (nouveau)
 - `60044` = SFR / Outremer Telecom (ancien) / `52300/52310/52330` = SFRC (nouveau)
 - `60045` = UTS Caraibe
@@ -134,7 +134,7 @@ Autres operateurs (anciens prefixes, migration en stand-by) :
 
 `RESP:0` = commande OK. Toute autre valeur = erreur.
 
-### 5. Verification du fichier .nok (commandes en echec)
+### 5. Verification du fichier .nok (commandes en échec)
 
 ```bash
 ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -5
@@ -144,7 +144,7 @@ ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*.nok | tail -
 
 - **> 50% OK** : email normal avec pourcentage et lien vers le log
 - **< 50% OK** : email d'alerte + fichier .nok en piece jointe
-- **Fichier absent** : email d'alerte demandant de verifier le transfert
+- **Fichier absent** : email d'alerte demandant de vérifier le transfert
 
 ## Verification manuelle sur EMA
 
@@ -158,27 +158,27 @@ cd /var/sog/BatchHandler/Users/batchuser/LogFiles
 
 ### Verifier si le fichier FNR du jour a ete traite
 
-Le fichier `fnr_action_v3.bh` est **supprime de BatchJob/** apres execution par le BatchHandler.
-Il n'est donc plus present si tout s'est bien passe. Le seul moyen de confirmer l'execution
-est de verifier la presence du log du jour dans `LogFiles/`.
+Le fichier `fnr_action_v3.bh` est **supprimé de BatchJob/** après exécution par le BatchHandler.
+Il n'est donc plus present si tout s'est bien passe. Le seul moyen de confirmer l'exécution
+est de vérifier la presence du log du jour dans `LogFiles/`.
 
 ```bash
 # Verifier dans BatchJob (present = pas encore traite)
 ls -la /var/sog/BatchHandler/Users/batchuser/BatchJob/fnr_action_v3.bh
 
-# Si absent de BatchJob, verifier le log du jour dans LogFiles
+# Si absent de BatchJob, vérifier le log du jour dans LogFiles
 # Format : YYYY-MM-DD_HH.MM.SS_fnr_action_v3.bh.log
 ls -lrt /var/sog/BatchHandler/Users/batchuser/LogFiles/*fnr_action*$(date +%Y-%m-%d)*
 ```
 
-### Lire le log du jour pour verifier le pourcentage OK
+### Lire le log du jour pour vérifier le pourcentage OK
 
 ```bash
 # Exemple pour le 08/04/2026
 cat 2026-04-08_09.10.06_fnr_action_v3.bh.log | grep Totally
 ```
 
-### Verifier s'il y a eu des commandes en echec (.nok)
+### Verifier s'il y a eu des commandes en échec (.nok)
 
 ```bash
 # Lister les derniers .nok (s'il en existe)
@@ -198,10 +198,10 @@ Format : YYYY-MM-DD_HH.MM.SS_fnr_action_v3.bh.log
 Exemples reels :
   2026-04-08_09.10.06_fnr_action_v3.bh.log  (11 Ko — normal)
   2026-03-24_09.10.06_fnr_action_v3.bh.nok  (44 octets — erreur)
-  2026-04-01_10.27.55_fnr_action_v3.bh.log  (execute a 10h27 au lieu de 9h10)
+  2026-04-01_10.27.55_fnr_action_v3.bh.log  (exécute a 10h27 au lieu de 9h10)
 ```
 
-> **Note :** L'execution normale est a 09:10. Si l'heure est differente (ex: 10:27 le 01/04), cela signifie que le fichier FNR a ete genere en retard par EmaExtracter.
+> **Note :** L'exécution normale est a 09:10. Si l'heure est differente (ex: 10:27 le 01/04), cela signifie que le fichier FNR a ete généré en retard par EmaExtracter.
 
 ## Scripts utilitaires disponibles sur EMA
 
@@ -214,7 +214,7 @@ ls /var/sog/BatchHandler/Users/batchuser/*.sh
 | verif_synchro.sh | Verification synchronisation generique |
 | verif_synchro_imsi.sh | Verification synchro IMSI |
 | verif_synchro_msisdn.sh | Verification synchro MSISDN |
-| verif_synchro_msisdn_porta.sh | Verification synchro MSISDN portabilite |
+| verif_synchro_msisdn_porta.sh | Verification synchro MSISDN portabilité |
 | verif_hss_msisdn.sh | Verification HSS par MSISDN |
 | verify_hss.sh | Verification HSS generique |
 | verify_hss_msisdn.sh | Verification HSS par MSISDN (v2) |
@@ -225,9 +225,9 @@ ls /var/sog/BatchHandler/Users/batchuser/*.sh
 | verif_hlr_caw.sh | Verification HLR/CAW |
 | verif_np.sh | Verification Number Portability |
 
-## En cas de probleme
+## En cas de problème
 
-1. Verifier que EmaExtracter a bien genere le fichier FNR (log sur vmqproportasync01)
+1. Verifier que EmaExtracter a bien généré le fichier FNR (log sur vmqproportasync01)
 2. Verifier la connexion SSH vers EMA15-Digicel
 3. Si commandes KO elevees, analyser le fichier .nok pour identifier les MSISDN en erreur
 4. Corriger manuellement via les interfaces FNR DAPI (voir protocole P15)

@@ -1,10 +1,10 @@
-# GPMAG — Évolutions ARCEP : restant à faire
+﻿# GPMAG — Évolutions ARCEP : restant à faire
 
 **Date :** 20/04/2026 (MAJ 27/04/2026)
 
 **Référence :** Décisions ARCEP 2022-2023
 **Source :** `APP-OCS_EvolutionsARCEP.pptx` (25/01/2024)
-**Dossier :** `S:\DRSI\DSI\APPLICATION\Domaines\Portabilité\04_Projet Portabilite PNMv3\01_Documentation\ARCEP\decisions arcep\2022-2024`
+**Dossier :** `S:\DRSI\DSI\APPLICATION\Domaines\Portabilité\04_Projet Portabilite PNMv3\01_Documentation\ARCEP\décisions arcep\2022-2024`
 
 ---
 
