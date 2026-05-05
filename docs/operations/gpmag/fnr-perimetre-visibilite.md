@@ -28,15 +28,15 @@ Le FNR que **nous** générons (via `EmaExtracter` à 9h chaque jour ouvré) cou
 
 ```mermaid
 flowchart TD
-    subgraph "Echanges inter-operateurs"
-        OC[Orange Caraibe]
-        SFR[SFR Caraibe]
+    subgraph "Échanges inter-opérateurs"
+        OC[Orange Caraïbe]
+        SFR[SFR Caraïbe]
         DT[Dauphin Telecom]
-        UTS[UTS Caraibe]
-        FREE[Free Caraibes]
+        UTS[UTS Caraïbe]
+        FREE[Free Caraïbes]
     end
 
-    PNMSYNC[Fichiers PNMSYNC<br/>echange quotidien GPMAG]
+    PNMSYNC[Fichiers PNMSYNC<br/>échange quotidien GPMAG]
 
     OC -->|portages OC| PNMSYNC
     SFR -->|portages SFR| PNMSYNC
@@ -46,18 +46,18 @@ flowchart TD
 
     PNMSYNC -->|tous les portages| PortaDB
 
-    subgraph "Cote Digicel"
-        PortaDB[(PortaDB<br/>TOUS portages<br/>tous operateurs)]
-        EmaExtracter[EmaExtracter.sh<br/>9h00 jours ouvres]
-        FNR[FNR Digicel<br/>perimetre Digicel<br/>uniquement]
+    subgraph "Côté Digicel"
+        PortaDB[(PortaDB<br/>TOUS portages<br/>tous opérateurs)]
+        EmaExtracter[EmaExtracter.sh<br/>9h00 jours ouvrés]
+        FNR[FNR Digicel<br/>périmètre Digicel<br/>uniquement]
         EMA[Commutateurs<br/>EMA / EMM]
 
-        PortaDB -->|filtrage<br/>nos attributions<br/>+ nos heberges| EmaExtracter
+        PortaDB -->|filtrage<br/>nos attributions<br/>+ nos hébergés| EmaExtracter
         EmaExtracter --> FNR
         FNR --> EMA
     end
 
-    Reseau[Reseau Digicel<br/>routage interne]
+    Reseau[Réseau Digicel<br/>routage interne]
     EMA --> Reseau
 
     Carrier[Carriers SS7<br/>BICS / autres]
@@ -104,17 +104,17 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant Appelant as Appelant<br/>(reseau tiers)
+    participant Appelant as Appelant<br/>(réseau tiers)
     participant FNR_OC as FNR Orange<br/>(attributaire)
     participant FNR_DC as FNR Digicel
     participant HLR_DC as HLR Digicel
 
-    Note over Appelant,HLR_DC: SMS / appel vers MSISDN Orange porte chez Digicel
+    Note over Appelant,HLR_DC: SMS / appel vers MSISDN Orange porté chez Digicel
 
-    Appelant->>FNR_OC: Interrogation routage<br/>(numero appartient a tranche Orange)
-    FNR_OC-->>Appelant: "porte chez Digicel<br/>RN = 52301 (Guadeloupe)"
+    Appelant->>FNR_OC: Interrogation routage<br/>(numéro appartient à tranche Orange)
+    FNR_OC-->>Appelant: "porté chez Digicel<br/>RN = 52301 (Guadeloupe)"
     Appelant->>HLR_DC: Routage SS7 via RN<br/>52301
-    HLR_DC->>FNR_DC: Verification interne<br/>(numero heberge ?)
+    HLR_DC->>FNR_DC: Vérification interne<br/>(numéro hébergé ?)
     FNR_DC-->>HLR_DC: OK, sub local
     HLR_DC-->>Appelant: ACK + delivery
 ```
@@ -139,12 +139,12 @@ sequenceDiagram
     BICS->>Digicel: SRI for SM
     Digicel-->>Orange: ACK + delivery
 
-    Note over Orange,Digicel: APRES 31/03 : migration carrier Orange IC<br/>routage RN=60042 casse
+    Note over Orange,Digicel: APRÈS 31/03 : migration carrier Orange IC<br/>routage RN=60042 cassé
 
     Orange->>OrangeIC: SRI for SM<br/>RN=60042
     OrangeIC--xBICS: forward perdu en transit
     Note over BICS: "received no SMS<br/>related messages"
-    Note over Digicel: SMS jamais arrives
+    Note over Digicel: SMS jamais arrivés
 ```
 
 **Résolution** : passage progressif aux nouveaux RN territorialisés (`52301/52311/52331` côté Digicel). La migration historique du 04/05/2026 a basculé tous les anciens portages encore actifs.
@@ -155,21 +155,21 @@ sequenceDiagram
 
 ```
 FNR Digicel = base des EXCEPTIONS de routage (= portages effectifs)
-              - PSO : nos numeros sortis (avec RN de l'operateur receveur)
-              - PEN : numeros d'autres operateurs entres chez nous
+              - PSO : nos numéros sortis (avec RN de l'opérateur receveur)
+              - PEN : numéros d'autres opérateurs entrés chez nous
 
-              Les MSISDN "jamais portes" (chez nous ou ailleurs)
-              ne sont PAS dans le FNR — routage par defaut via la tranche
+              Les MSISDN « jamais portés » (chez nous ou ailleurs)
+              ne sont PAS dans le FNR — routage par défaut via la tranche
 
               ↓
-              Publie vers les commutateurs Digicel (EMA)
-              + Synchronise avec autres operateurs (PNMSYNC)
-              + Interroge en temps reel via SS7 (HLR)
+              Publié vers les commutateurs Digicel (EMA)
+              + Synchronisé avec autres opérateurs (PNMSYNC)
+              + Interrogé en temps réel via SS7 (HLR)
               ↓
-              VISIBLE par tous les operateurs qui veulent
-              router vers un numero porte
+              VISIBLE par tous les opérateurs qui veulent
+              router vers un numéro porté
 
-PortaDB = vue complete de TOUS les portages tous operateurs
+PortaDB = vue complète de TOUS les portages tous opérateurs
           (incluant les portages entre tiers via PNMSYNC)
 ```
 
