@@ -1,26 +1,41 @@
 ﻿# FNR — Périmètre, visibilité et fonctionnement
 
-**Dernière MAJ :** 05/05/2026
+**Dernière MAJ :** 06/05/2026
 
-Note explicative sur **ce que contient** le FNR généré par Digicel, **qui le voit**, et comment il s'articule avec PortaDB et les autres opérateurs.
+Note explicative sur **ce que contient** le fichier EMA/FNR généré par Digicel, **qui le voit**, et comment il s'articule avec PortaDB et les autres opérateurs.
+
+> ⚠️ **Correction du 06/05/2026** : la version initiale du document disait que les portages entre deux tiers (ex: Orange → SFR) n'étaient pas dans notre FNR. **C'est inexact** — analyse du fichier `ema_YYYYMMDDHHMMSS.txt` généré par `EmaExtracter`. Le fichier EMA est la **table de routage globale du réseau Digicel** et contient **tous les MSISDN portés** (peu importe l'OPA/OPR/OPD), pour que nos commutateurs puissent aiguiller correctement les appels et SMS sortants.
 
 ---
 
-## 1. Périmètre du FNR Digicel
+## 1. Périmètre du fichier EMA / FNR Digicel
 
-Le FNR contient **uniquement les exceptions de routage** (= les portages effectivement réalisés). Un MSISDN qui n'a jamais été porté n'a **pas besoin** d'entrée dans le FNR : il est routé par défaut via sa tranche d'attribution.
+Le fichier EMA contient **uniquement les exceptions de routage** (= les MSISDN portés effectivement). Un MSISDN qui n'a jamais été porté n'a **pas besoin** d'entrée dans le FNR : il est routé par défaut via sa tranche d'attribution.
 
-Le FNR que **nous** générons (via `EmaExtracter` à 9h chaque jour ouvré) couvre donc :
+Le fichier que **nous** générons (via `EmaExtracter` à 9h chaque jour ouvré) couvre donc :
 
-| Cas | Présent dans notre FNR ? | Pourquoi |
+| Cas | Présent dans notre EMA ? | Pourquoi |
 |-----|--------------------------|----------|
-| MSISDN **attribué à Digicel** (OPA), encore chez Digicel, **jamais porté** | ❌ Non | Routage par défaut via la tranche/NDC, pas d'entrée FNR nécessaire |
-| MSISDN **attribué à Digicel**, porté chez un autre opérateur (PSO) | ✅ Oui | Stocke le RN de l'opérateur receveur (ex: `52303` pour OC Guadeloupe) |
-| MSISDN **attribué à un autre opérateur**, porté chez Digicel (PEN) | ✅ Oui | Pour que notre réseau interne route localement vers notre HLR |
-| MSISDN **attribué à un autre opérateur**, encore chez lui | ❌ Non | Pas notre périmètre — FNR de l'opérateur attributaire |
-| Portage **entre deux tiers** (ex: Orange → SFR) | ❌ Non | Ne nous concerne pas pour le routage |
+| MSISDN **attribué à Digicel** (OPA), encore chez Digicel, **jamais porté** | ❌ Non | Routage par défaut via la tranche/NDC |
+| MSISDN **attribué à Digicel**, porté chez un autre opérateur (PSO) | ✅ Oui | Stocke le **RN du receveur** (ex: `60044` SFR, `60048` Free) — notre réseau saura où envoyer les appels reçus pour ce numéro |
+| MSISDN **attribué à un autre opérateur**, porté chez Digicel (PEN) | ✅ Oui | Stocke notre **RN Digicel** (`52301`/`52311`/`52331` ou ancien `60042`) — pour les requêtes SS7 externes qui passent par notre carrier |
+| MSISDN **attribué à un autre opérateur**, encore chez lui | ❌ Non | Pas d'exception, routage par défaut |
+| Portage **entre deux tiers** (ex: Orange → SFR, Orange → Free) | ✅ **Oui** | Notre réseau a besoin de savoir aiguiller un appel/SMS sortant vers le **bon receveur**, même quand Digicel n'est pas OPA/OPR/OPD |
 
-→ Notre FNR contient les **portages effectifs** qui nous concernent : nos numéros sortis (PSO) + les numéros entrés chez nous (PEN). Les numéros « jamais portés » (chez nous ou ailleurs) ne sont pas dans le FNR.
+→ Le fichier EMA contient **tous les portages effectifs** dont notre réseau a besoin pour router correctement, **y compris les portages entre tiers**. Les numéros « jamais portés » sont absents (routage par défaut suffit).
+
+### Exemple concret (extrait `ema_20260506090108.txt`)
+
+```
+CREATE:NPSUB:MSISDN,590690000201:NP,52303;   ← 0690 (tranche Orange) → Digicel Guadeloupe
+CREATE:NPSUB:MSISDN,590690009621:NP,60048;   ← 0690 (tranche Orange) → Free
+CREATE:NPSUB:MSISDN,590690083952:NP,60044;   ← 0690 (tranche Orange) → SFR
+CREATE:NPSUB:MSISDN,594694042332:NP,60048;   ← 0694 (tranche Orange) → Free
+DELETE:NPSUB:MSISDN,590690062014;             ← Restitution : retour chez l'OPA, on retire l'entrée
+SET:NPSUB:MSISDN,590690068232:NP,52303;       ← Mise à jour d'une entrée existante
+```
+
+Les lignes `60044` (SFR) et `60048` (Free) sont des **portabilités étrangères** : Digicel n'est ni OPA, ni OPR, ni OPD. Elles sont présentes pour permettre à nos commutateurs de router correctement les appels sortants émis par nos clients vers ces numéros.
 
 ---
 
@@ -68,20 +83,20 @@ flowchart TD
 
 ---
 
-## 3. Distinction PortaDB vs FNR
+## 3. Distinction PortaDB vs fichier EMA
 
 À ne pas confondre :
 
 | Système | Périmètre | Source | Usage |
 |---------|-----------|--------|-------|
-| **PortaDB** (base PNM) | **Tous** les portages tous opérateurs (Orange↔SFR, DT↔Free, etc.) | Synchronisé via PNMSYNC quotidien | Référence métier, requêtes, facturation |
-| **FNR Digicel** (fichier de routage) | Uniquement nos attributions + nos hébergés | Extrait de PortaDB par `EmaExtracter` | Routage du réseau Digicel |
+| **PortaDB** (base PNM) | **Tous** les portages tous opérateurs (Orange↔SFR, DT↔Free, etc.) | Synchronisé via PNMSYNC quotidien | Référence métier, requêtes, facturation, audit |
+| **Fichier EMA** (table de routage) | **Tous les portages effectifs** (= portages encore actifs, restitutions exclues) | Extrait de PortaDB par `EmaExtracter` à 9h | Routage SS7 du réseau Digicel + carrier (BICS) |
 
 **Exemple :**
 
-- `0596123456` attribué à Orange, porté chez SFR
+- `590690009621` attribué à Orange, porté chez Free
 - → ✅ Dans notre **PortaDB** (info complète via PNMSYNC)
-- → ❌ Pas dans notre **FNR** (ne nous concerne pas pour le routage)
+- → ✅ Aussi dans notre **EMA** : `CREATE:NPSUB:MSISDN,590690009621:NP,60048;` — pour que nos commutateurs sachent envoyer un éventuel appel/SMS sortant chez Free
 
 ---
 
@@ -154,23 +169,28 @@ sequenceDiagram
 ## 7. Synthèse à retenir
 
 ```
-FNR Digicel = base des EXCEPTIONS de routage (= portages effectifs)
-              - PSO : nos numéros sortis (avec RN de l'opérateur receveur)
-              - PEN : numéros d'autres opérateurs entrés chez nous
+Fichier EMA = TABLE DE ROUTAGE GLOBALE du reseau Digicel
+              = tous les EXCEPTIONS de routage (portages effectifs)
 
-              Les MSISDN « jamais portés » (chez nous ou ailleurs)
-              ne sont PAS dans le FNR — routage par défaut via la tranche
+              Inclus :
+              - PEN Digicel  (numeros entres chez nous)
+              - PSO Digicel  (numeros sortis vers ailleurs)
+              - Portages ENTRE TIERS (Orange→Free, Orange→SFR, etc.)
+                pour que nos commutateurs sachent aiguiller les
+                appels sortants emis par nos clients
+
+              EXCLUS :
+              - MSISDN jamais portes (chez Digicel ou ailleurs)
+                → routage par defaut via la tranche/NDC
 
               ↓
-              Publié vers les commutateurs Digicel (EMA)
-              + Synchronisé avec autres opérateurs (PNMSYNC)
-              + Interrogé en temps réel via SS7 (HLR)
-              ↓
-              VISIBLE par tous les opérateurs qui veulent
-              router vers un numéro porté
+              Publie vers les commutateurs Digicel (EMA)
+              + Synchronise avec autres operateurs (PNMSYNC)
+              + Interroge en temps reel via SS7 (HLR)
 
-PortaDB = vue complète de TOUS les portages tous opérateurs
-          (incluant les portages entre tiers via PNMSYNC)
+PortaDB = vue complete de TOUS les portages tous operateurs
+          (synchronisee via PNMSYNC quotidien)
+          + métadonnées (états, dates, dossier, plateforme kaizen/mastercrm)
 ```
 
 **Principe clé : un opérateur attributaire = un seul FNR autoritaire**
