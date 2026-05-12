@@ -163,6 +163,58 @@ Cordialement,
 Steeven JACQUES - Chargé d'application
 ```
 
+### 6. Mail à la facturation pour régularisation
+
+Une fois toutes les résiliations effectuées, prévenir l'équipe Facturation pour qu'elle vérifie les facturations indues sur la période concernée.
+
+**Destinataires types** : Teddy Moravie, Linda Haustant, Audrey Dorwling-Carter (Facturation) — Cc : Richard Delice, FWI_PNM_SI.
+
+**Exemple réel envoyé le 12/05/2026 (Outlook)** :
+
+```
+Objet : [PNM] Lignes en porta sortante non résiliées à la date de portage
+
+Bonjour,
+
+Suite à un incident le 01 Avril 2026, certains portages ont pris du
+retard, et nous avons constaté qu'ils n'ont pas été résiliés à la
+date de portage.
+
+Client 1   0690152968   date de portage le 02/04/2026
+N° Client MasterCRM: 1531793   Cycle: 09
+N° Dossier MasterCRM: 2203682
+Ligne 7021104 - Offre 13293 LIFE Premium 50Go bloqué SM[24]
+  => Résiliée le 12/05/2026
+
+Client 2   0694243002 (Client Wizzee)
+Email: xiongalice@yahoo.fr, MSISDN 0694243002 - Mode Off
+Résiliation demandée : RT 277560
+
+Client 3   0694257800   date de portage le 02/04/2026
+N° Client MasterCRM: 2170731   Cycle: 26
+N° Dossier MasterCRM: 2665924
+Ligne 7002846 - Offre 13293 LIFE Premium 50Go bloqué SM[24]
+  => Résiliée le 12/05/2026
+
+Pouvez-vous vérifier si ces clients ont été facturés à tort
+du mois en cours ?
+
+Cordialement,
+Steeven JACQUES
+Chargé d'applications (DSI) | Application Team
+Digicel Antilles-Guyane
++596 696 307 631
+```
+
+**Informations à inclure pour chaque client** :
+- MSISDN
+- Date du portage effectif (pour calcul de la période litigieuse)
+- N° Client + N° Dossier MasterCRM (pour la Facturation)
+- N° Ligne MOBI + offre souscrite
+- Date de résiliation effective Digicel
+- Pour les clients Wizzee : email + statut + référence RT
+
+
 ## Prévention et amélioration
 
 ### Détection proactive en base PortaDB
