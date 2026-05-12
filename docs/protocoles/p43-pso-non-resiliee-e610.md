@@ -32,11 +32,11 @@ Suite à une opération de maintenance sur la plateforme PortaWs fin mars 2026, 
 | MSISDN | Département | Statut |
 |---|---|---|
 | 0696701813 | Martinique | ✅ Traité 11/05/2026 |
-| 0690152968 | Guadeloupe | À traiter |
-| 0694243002 | Guyane (RT 277560 Wizzee) | À traiter |
-| 0694257800 | Guyane | À traiter |
+| 0690152968 | Guadeloupe | ✅ Traité 12/05/2026 |
+| 0694243002 | Guyane (RT 277560 Wizzee) | ✅ Traité 12/05/2026 |
+| 0694257800 | Guyane | ✅ Traité 12/05/2026 |
 
-Tous PSO Digicel → OC (OPD=2, OPR=1).
+Tous PSO Digicel → OC (OPD=2, OPR=1). **Incident clos côté résiliation manuelle ; bug applicatif à corriger côté DEV (PILMEDIA).**
 
 ## Pré-requis : Vérifier dans PortaDB
 
