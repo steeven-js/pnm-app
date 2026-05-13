@@ -223,7 +223,7 @@ OPR -> Tous : Mise a jour réseau (PNMDATA)
 | **vmqproportasync01** | Scripts PortaSync, bascule, valorisation |
 | **vmqproportawebdb01** | Base PortaDB, scripts de restitution, exports CSV |
 | **vmqproportaweb01** | PortaWebUi (interface web), DAPI |
-| **BTCTF** | Synchronisation sFTP inter-opérateurs |
+| **BTCTF** | Bouygues Telecom Caraïbe Transfert File — système hérité de Bouygues Telecom Caraïbe, repris par le GPMAG Caraïbe pour la portabilité actuelle. Synchronisation sFTP inter-opérateurs Antilles-Guyane. |
 
 ### 5.3 Interfaces (Web Services)
 
@@ -269,7 +269,10 @@ Dossier : `/home/porta_pnmv3/PortaSync`
 | **PnmMerger.sh** | Merge de fichier (non utilise) | - |
 | **PnmSpliter.sh** | Split de fichier (non utilise) | - |
 
-### 6.2 Script de synchronisation sFTP (BTCTF)
+### 6.2 Script de synchronisation sFTP (BTCTF — Bouygues Telecom Caraïbe Transfert File)
+
+> **Note historique** : le BTCTF est un système hérité de **Bouygues Telecom Caraïbe** qui a été repris par le **GPMAG Caraïbe** (Groupement Portabilité Mobile Antilles-Guyane) pour la gestion de la portabilité actuelle. Il n'a rien à voir avec la Métropole — c'est une plateforme régionale Antilles-Guyane.
+
 
 | Script | Action | Planification |
 |--------|--------|---------------|

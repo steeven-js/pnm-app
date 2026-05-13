@@ -98,12 +98,12 @@
   <rect x="632" y="146" width="4" height="1.5" rx="0.5" fill="#8b5cf6"/>
   <text class="svg-server-name" x="650" y="148">BTCTF</text>
   <line x1="630" y1="156" x2="775" y2="156" stroke="#8b5cf6" stroke-width="0.5" opacity="0.4"/>
-  <text class="svg-component" x="636" y="174">Bureau Technique Central</text>
-  <text class="svg-component" x="636" y="192">Référentiel national</text>
-  <text class="svg-component" x="636" y="210">numéros portés</text>
+  <text class="svg-component" x="636" y="174">Bouygues Telecom Caraibe</text>
+  <text class="svg-component" x="636" y="192">Transfert File (hérité BTC,</text>
+  <text class="svg-component" x="636" y="210">repris par GPMAG Caraïbe)</text>
   <!-- Role badge -->
-  <rect x="630" y="225" width="112" height="18" rx="9" fill="#8b5cf6" opacity="0.12"/>
-  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#8b5cf6;" x="641" y="238">Plateforme nationale</text>
+  <rect x="630" y="225" width="120" height="18" rx="9" fill="#8b5cf6" opacity="0.12"/>
+  <text style="font-family:system-ui,sans-serif;font-size:9px;font-weight:600;fill:#8b5cf6;" x="641" y="238">Plateforme régionale GPMAG</text>
 
   <!-- ====== sFTP Partenaires (bottom-right) ====== -->
   <rect class="svg-box" x="545" y="355" width="200" height="80" rx="6" fill="#fef2f2" stroke="#ef4444"/>
@@ -172,13 +172,14 @@
     <li><strong>Supervision</strong> : monitoring des connexions sFTP, espace disque, et processus PortaSync</li>
 </ul>
 
-<h3>BTCTF — Bureau Technique Central</h3>
-<p>Plateforme externe nationale de référence pour la portabilité.</p>
+<h3>BTCTF — Bouygues Telecom Caraïbe Transfert File</h3>
+<p>Plateforme de synchronisation sFTP <strong>régionale Antilles-Guyane</strong> pour la portabilité. <strong>Système hérité</strong> de Bouygues Telecom Caraïbe (BTC), repris par le <strong>GPMAG Caraïbe</strong> (Groupement Portabilité Mobile Antilles-Guyane) pour la gestion actuelle de la portabilité.</p>
 <ul>
-    <li><strong>Rôle</strong> : référentiel national des numéros portés, géré au niveau métropolitain</li>
-    <li><strong>Interaction</strong> : PortaSync communique avec le BTCTF pour les synchronisations nationales et les cas de portage inter-zones</li>
-    <li><strong>Connexion</strong> : liaison sécurisée dédiée depuis vmqproportasync01</li>
-    <li><strong>Fréquence</strong> : échanges quotidiens pour les mises à jour incrémentales, synchronisation complète hebdomadaire</li>
+    <li><strong>Origine</strong> : ancien système BTC réutilisé par le GPMAG Caraïbe — pas de lien avec la Métropole</li>
+    <li><strong>Rôle</strong> : plateforme de transfert sFTP des fichiers PNMDATA/PNMSYNC entre opérateurs régionaux</li>
+    <li><strong>Interaction</strong> : exécute le script <code>synchro-pnmv3.sh</code> qui copie les fichiers depuis/vers <code>vmqproportasync01</code> et les transmet aux opérateurs partenaires (OC, SFR, DT, UTS, Free)</li>
+    <li><strong>Connexion</strong> : liaison sécurisée dédiée avec <code>vmqproportasync01</code></li>
+    <li><strong>Fréquence</strong> : toutes les 10 minutes pendant les fenêtres de vacation [10h-12h] [14h-16h] [19h-21h] en semaine + [22h-24h] le dimanche</li>
 </ul>
 
 <h3>Réseau inter-serveurs</h3>
