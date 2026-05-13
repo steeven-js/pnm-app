@@ -1,6 +1,6 @@
 ﻿# Protocoles — Index
 
-**Total :** 43 protocoles | **Dernière MAJ :** 12/05/2026
+**Total :** 44 protocoles | **Dernière MAJ :** 13/05/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentés de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, étapes détaillées, requêtes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -40,6 +40,7 @@
 - [P37 — Attentes tickets opérateurs (mode dégradé)](p37-attentes-tickets-operateurs.md) — Creation PNMDATA manuelle, FNR, PortaWs, résiliation PSO
 - [P40 — Verification résiliations PSO non effectives](p40-verification-resiliations-pso.md) — Email automatique APP_OCS, vérification PortaDB/FNR, résiliation SoapUI
 - [P43 — PSO non résiliée suite au bug PortaWs (E610)](p43-pso-non-resiliee-e610.md) — Bug auto-annulation 01/04/2026, double facturation, résiliation SoapUI avec DateEffet rétroactive
+- [P44 — PSO clôturée mais ligne fantôme côté opérateur receveur](p44-pso-ligne-fantome-cote-receveur.md) — Cycle PNM complet mais provisioning échoué chez l'opérateur receveur (ex: SFR 0690446343), contact opérateur pour correction
 
 ## Facturation (2)
 
