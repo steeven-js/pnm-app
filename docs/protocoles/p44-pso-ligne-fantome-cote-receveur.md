@@ -134,9 +134,41 @@ Trois issues possibles après leur retour :
 |---|---|
 | « Ligne finalisée chez nous » | Informer le CDC, le client peut utiliser sa ligne |
 | « Problème identifié, correction en cours » | Attendre, relancer si pas de retour sous 48-72h |
-| « Restitution du numéro vers Digicel » | Suivre la procédure de restitution standard, puis libérer côté MOBI (cf. [P02](p02-liberation-msisdn.md)) |
+| « Ligne non active sur nos plateformes » | Demander une **restitution du numéro vers Digicel** (cf. étape 5) |
 
-### 5. Fermer le ticket
+### 5. Demander la restitution du numéro
+
+Si l'opérateur receveur confirme que la ligne n'est pas active chez eux, demander la restitution du MSISDN vers Digicel pour pouvoir le remettre à disposition.
+
+> **Note réglementaire (interne, ne pas mentionner dans le mail)** : avant **40 jours** suivant la date de portabilité, l'opérateur receveur n'est **pas obligé** de procéder à la restitution. La demande est alors une **restitution de bon vouloir** — formuler poliment et ne pas insister sur le caractère obligatoire.
+
+Mail type à envoyer (en réponse au fil existant avec l'opérateur receveur) :
+
+```
+Bonjour <Prénom>,
+
+Merci pour ton retour rapide.
+
+Étant donné que le numéro n'est plus actif sur vos plateformes,
+la cliente souhaiterait pouvoir le récupérer chez Digicel.
+
+Serait-il possible de procéder à une restitution du MSISDN
+069XXXXXXX vers Digicel afin que nous puissions le remettre
+à disposition ?
+
+Merci d'avance pour ton aide.
+
+Cordialement,
+
+Steeven JACQUES
+Chargé d'applications (DSI) | Application Team
+Digicel Antilles-Guyane
++596 696 307 631
+```
+
+Une fois la restitution effectuée par l'opérateur receveur (visible dans le FNR via DELETE NPSUB du MSISDN), procéder à la libération côté MOBI selon le protocole [P02](p02-liberation-msisdn.md).
+
+### 6. Fermer le ticket
 
 Une fois la situation résolue côté opérateur receveur (ou restitution effectuée), fermer le ticket avec un message de clôture explicitant l'action prise.
 
@@ -160,7 +192,9 @@ Une fois la situation résolue côté opérateur receveur (ou restitution effect
   Clôturé   29/04/2026
   ```
 - **Diagnostic** : provisioning échoué côté SFR
-- **Action** : mail SFR pour vérification routage FNR + état ligne
+- **Action 1** : mail SFR pour vérification routage FNR + état ligne (13/05/2026 14:47)
+- **Réponse SFR** (Gilles HONORE, 13/05/2026 15:12) : *« Ce numéro n'est plus actif sur nos plateformes. »*
+- **Action 2** : demande de **restitution anticipée** à SFR pour récupérer le MSISDN, **avant le délai réglementaire de 40 jours** (portabilité du 29/04, demande le 13/05 = J+14). Restitution de bon vouloir formulée sans mention du délai.
 - **Décision** : validée avec Sarah Mogade (lead Application)
 
 ## Références
@@ -177,3 +211,9 @@ Une fois la situation résolue côté opérateur receveur (ou restitution effect
 - La règle absolue : Digicel ne doit jamais agir unilatéralement sur un MSISDN routé chez un autre opérateur dans le FNR.
 - Documenter chaque cas dans le RT et noter le délai de réponse de l'opérateur receveur pour suivre les tendances.
 - En cas de réponse silencieuse de l'opérateur receveur > 1 semaine, escalader auprès de leur Legal & Regulatory team.
+
+### Délai réglementaire de restitution (40 jours)
+
+- En cas de demande de restitution **avant 40 jours** suivant la date de portabilité, l'opérateur receveur n'est **pas obligé** d'accepter — c'est une **restitution de bon vouloir**.
+- Au-delà de 40 jours, la restitution devient opposable (GPMAG / ARCEP).
+- **Dans tous les cas**, ne jamais mentionner ce délai dans le mail à l'opérateur — formuler la demande comme une suite logique du constat de ligne inactive chez eux.
