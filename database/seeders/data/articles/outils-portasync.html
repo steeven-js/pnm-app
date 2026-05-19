@@ -20,11 +20,12 @@
 </ul>
 
 <h3>Connexion au BTCTF</h3>
-<p>PortaSync interagit avec le <strong>BTCTF</strong> (Bureau Technique Central des Télécommunications Françaises), la plateforme nationale de référence pour la portabilité :</p>
+<p>PortaSync interagit avec le <strong>BTCTF</strong> (Bouygues Telecom Caraïbe Transfert File), plateforme régionale Antilles-Guyane reprise par le GPMAG Caraïbe — système hérité de Bouygues Telecom Caraïbe, sans lien avec la Métropole :</p>
 <ul>
-    <li>Transmission périodique des données de portage de la zone Antilles-Guyane vers le référentiel national</li>
-    <li>Récupération des mises à jour nationales impactant les numéros portés inter-zones (cas d'un numéro métropolitain porté en outre-mer)</li>
-    <li>Synchronisation des tables de routage nationales</li>
+    <li>Transmission des fichiers PNMDATA/PNMSYNC produits dans <code>pnmdata/{op}/send/</code> vers les opérateurs partenaires régionaux (OC, SFR, DT, UTS, Free)</li>
+    <li>Collecte des fichiers déposés par ces opérateurs et dépose dans <code>pnmdata/{op}/recv/</code> pour intégration par <code>PnmDataAckManager.sh</code></li>
+    <li>Orchestration assurée par le script <code>synchro-pnmv3.sh</code> hébergé côté BTCTF, exécuté en fenêtres de vacation (lun-ven toutes les 10 min [10h-12h] [14h-16h] [19h-21h] + dim [22h-24h])</li>
+    <li>Transport sFTP sur port 22, authentification par clés SSH (<code>~/.ssh/authorized_keys2</code> côté vmqproportasync01)</li>
 </ul>
 
 <h3>Scripts principaux</h3>
@@ -70,7 +71,7 @@ graph TD
     PULL --> IMPORT
     IMPORT -->|Tickets reçus| PORTADB
     IMPORT --> ACR_GEN
-    PORTASYNC <-->|Synchro nationale| BTCTF
+    PORTASYNC <-->|Synchro régionale Antilles-Guyane| BTCTF
 </pre>
 
 <h3>Logs et diagnostic</h3>
