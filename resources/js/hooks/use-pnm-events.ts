@@ -8,19 +8,23 @@ function parseTimeToMinutes(time: string): number {
     return h * 60 + m;
 }
 
-export function usePnmEvents(dbEvents: MonitoringEvent[], nowHHmm: string) {
+export function usePnmEvents(dbEvents: MonitoringEvent[], nowHHmm: string, dayOfWeek?: number) {
     return useMemo(() => {
         const eventMap = new Map<string, MonitoringEvent>();
         for (const ev of dbEvents) {
             eventMap.set(ev.event_type, ev);
         }
 
+        const filteredConfig = dayOfWeek === undefined
+            ? pnmEventsConfig
+            : pnmEventsConfig.filter((c) => !c.daysOfWeek || c.daysOfWeek.includes(dayOfWeek));
+
         const nowMinutes = parseTimeToMinutes(nowHHmm);
 
-        return pnmEventsConfig.map((config, index): EnrichedPnmEvent => {
+        return filteredConfig.map((config, index): EnrichedPnmEvent => {
             const dbEvent = eventMap.get(config.key) ?? null;
             const eventMinutes = parseTimeToMinutes(config.scheduledTime);
-            const nextEvent = pnmEventsConfig[index + 1];
+            const nextEvent = filteredConfig[index + 1];
             const nextMinutes = nextEvent ? parseTimeToMinutes(nextEvent.scheduledTime) : 24 * 60;
 
             return {
@@ -32,5 +36,5 @@ export function usePnmEvents(dbEvents: MonitoringEvent[], nowHHmm: string) {
                 dbEvent,
             };
         });
-    }, [dbEvents, nowHHmm]);
+    }, [dbEvents, nowHHmm, dayOfWeek]);
 }

@@ -171,6 +171,30 @@ export const pnmEventsConfig: PnmEventConfig[] = [
             'Traiter les tickets les plus anciens en priorité',
         ],
     },
+    // ── 11:20 ── (lundi uniquement)
+    {
+        key: 'verif_pnmsync_lundi',
+        label: 'Vérif PNMSYNC (lundi)',
+        description:
+            'Vérification hebdomadaire des logs PnmSyncManager.log. Le cron PNMSYNC tourne le dimanche à 23h ; le lundi matin il faut contrôler que la génération s\'est bien passée et qu\'aucune erreur (.ERR.tmp vide, stdClass::$ticket undefined, etc.) n\'a empêché l\'envoi aux 5 opérateurs.',
+        scheduledTime: '11:20',
+        icon: 'solar:refresh-circle-bold-duotone',
+        category: 'supervision',
+        checkType: 'server',
+        daysOfWeek: [1],
+        sshCommands: [
+            'tail -n 60 /home/porta_pnmv3/PortaSync/log/PnmSyncManager.log',
+            'ls -la /home/porta_pnmv3/PortaSync/pnmdata/0*/send/*.ERR.tmp 2>/dev/null',
+        ],
+        checklist: [
+            'PnmSyncManager.log : exécution du dimanche 23h présente',
+            'Aucune erreur PHP "Undefined property: stdClass::$ticket"',
+            'Aucune erreur "Code Error pour notification" (vide)',
+            'Aucun .ERR.tmp (4 octets) bloqué dans pnmdata/<op>/send/',
+            'Fichiers PNMSYNC.02.<op>.<TS>.001 (~3 Mo) générés pour les 5 opérateurs',
+            'ACR PNMSYNC reçus dans arch_recv/ le matin même',
+        ],
+    },
     // ── 11:35 ──
     {
         key: 'vacation_1',

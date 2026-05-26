@@ -57,7 +57,8 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
     const [dbEvents, setDbEvents] = useState<MonitoringEvent[]>(monitoring.events);
     const currentTimeForEnrichment = isToday ? now.format('HH:mm') : '23:59';
     const activeDbEvents = isToday ? dbEvents : historyEvents;
-    const enrichedEvents = usePnmEvents(activeDbEvents, currentTimeForEnrichment);
+    const dayOfWeek = dayjs(displayDate).tz(TZ).day();
+    const enrichedEvents = usePnmEvents(activeDbEvents, currentTimeForEnrichment, dayOfWeek);
 
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
@@ -228,7 +229,7 @@ export function MonitoringTimeline({ monitoring }: MonitoringTimelineProps) {
                     </Box>
                 ) : (
                     <>
-                        <Box sx={{ overflow: 'auto', pb: 1 }}>
+                        <Box sx={{ overflow: 'auto', py: 1.5 }}>
                             <Box sx={{ minWidth: 700 }}>
                                 <TimelineTrack events={enrichedEvents} selectedKey={selectedKey} onSelect={handleSelect} />
                             </Box>

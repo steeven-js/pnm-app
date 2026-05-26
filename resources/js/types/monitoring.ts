@@ -44,6 +44,11 @@ export type PnmEventConfig = {
     emailSubjects?: EmailSubject[];
     sshCommands?: string[];
     hasAttachment?: boolean;
+    /**
+     * Jours de la semaine où l'événement s'affiche (0=dim, 1=lun, ..., 6=sam).
+     * Omis = tous les jours.
+     */
+    daysOfWeek?: number[];
 };
 
 export type EnrichedPnmEvent = PnmEventConfig & {
