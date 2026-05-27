@@ -39,18 +39,46 @@ La solution consiste a passer l'action bloquante en statut "Echec" pour debloque
 |----------------|---------------|
 | 14 | Rejetee (force manuellement) |
 
+## Verification globale (a faire en priorite)
+
+Avant de plonger sur un LINE_NO precis, deux requetes a executer sur **vmqprotool01** (Toad for Oracle, base PB@MCST) pour avoir une vue d'ensemble :
+
+```sql
+-- (a) Toutes les actions en statut "Envoye" (bloquantes) sur les 3 derniers jours
+SELECT *
+FROM send_actions
+WHERE execution_status IN (1)
+  AND log_date BETWEEN trunc(sysdate - 3) AND trunc(sysdate)
+ORDER BY record_no;
+
+-- (b) Repartition par statut des actions de provisioning du jour
+SELECT execution_status, COUNT(*)
+FROM send_actions
+WHERE log_date = trunc(sysdate)
+GROUP BY execution_status;
+```
+
+USAGE :
+- La requete (a) liste l'ensemble des actions bloquantes recentes : si la file
+  est saine, on n'en attend qu'un volume tres faible (proche de 0). Une
+  remontee anormale = file engorgee, plusieurs lignes potentiellement
+  impactees.
+- La requete (b) donne la photo du jour par statut (0=Deposee, 1=Envoyee,
+  5=Echec, 10=Terminee). Une part importante de 1 sans transition vers 10 =
+  blocage en cours.
+
 ## Etapes
 
 ### 1. Identifier le LINE_NO
 
 Dans MasterCRM, ouvrir la fiche client et noter le **LINE_NO** de la ligne concernee (visible dans l'onglet Informations ou Techniques).
 
-### 2. Rechercher les actions bloquantes
+### 2. Rechercher les actions bloquantes pour ce LINE_NO
 
 Sur vmqprotool01 (Toad for Oracle, base PB@MCST) :
 
 ```sql
--- Recuperation des actions en statut "Envoye" (bloquantes)
+-- Recuperation des actions en statut "Envoye" (bloquantes) pour la ligne ciblee
 SELECT *
 FROM send_actions
 WHERE line_no = #LINE_NO
