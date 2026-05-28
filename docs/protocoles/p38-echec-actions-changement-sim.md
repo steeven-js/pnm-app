@@ -63,7 +63,7 @@ Colonnes utiles dans le résultat :
 |---------|-------------|
 | `record_no` | Identifiant unique de l'action (pour l'UPDATE) |
 | `action_code` | Type d'action (ROAM = RoamingVoyage, USIM = ODL USIM, etc.) |
-| `execution_status` | 0 = Deposee, 1 = Envoyee (bloquée), 2 = Programmee (date d'exec future, normal), 5 = Echec, 10 = Terminee |
+| `execution_status` | 0 = Déposée, 1 = Envoyée (bloquée), 2 = Programmée (date d'exécution future, normal), 5 = Échec, 10 = Terminée |
 | `folow_up_status` | 14 = Rejetee (un seul L dans le nom du champ) |
 | `log_date` | Date de l'action — si ancienne, l'action est bloquée |
 

@@ -37,6 +37,26 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.6.0',
+    date: '28 Mai 2026',
+    changes: [
+      { type: 'new', description: 'P41 — Création / modification d\'un script PNM (téléversement, chmod, crontab, rollback)' },
+      { type: 'new', description: 'P42 — Migration d\'un préfixe de routage inter-opérateur (5 phases, cas Orange 31/03 → 04/05)' },
+      { type: 'new', description: 'P43 — PSO non résiliée suite au bug PortaWs (E610), résiliation manuelle SoapUI' },
+      { type: 'new', description: 'P44 — PSO clôturée mais ligne fantôme côté opérateur receveur (provisioning KO)' },
+      { type: 'new', description: 'Doc référence : préfixes de routage RN — anciens (60041-60048) et nouveaux territorialisés (52301-52333)' },
+      { type: 'new', description: 'Doc FNR — périmètre, visibilité et fonctionnement (diagrammes Mermaid)' },
+      { type: 'new', description: 'GPMAG — suivi des tests inter-opérateurs (extrait du fichier de suivi v2.7)' },
+      { type: 'new', description: 'Timeline monitoring : vérification PNMSYNC le lundi (logs PnmSyncManager) — événements planifiables par jour de la semaine' },
+      { type: 'improvement', description: 'P38/P39 : ajout du statut execution_status=2 (Programmée — date d\'exécution future) + verification globale prioritaire send_actions' },
+      { type: 'improvement', description: 'Correction périmètre EMA : portages entre tiers inclus dans le routage' },
+      { type: 'improvement', description: 'Correction périmètre FNR : seulement les portages effectifs' },
+      { type: 'fix', description: 'Correction documentation BTCTF : système régional GPMAG Antilles-Guyane (Bouygues Telecom Caraïbe Transfert File), pas un bureau central métropolitain' },
+      { type: 'fix', description: 'Padding vertical de la timeline monitoring : icône du nœud sélectionné qui n\'est plus tronquée' },
+      { type: 'fix', description: 'Restauration des accents dans tous les .md du repo docs/' },
+    ],
+  },
+  {
     version: '2.5.0',
     date: '11 Mars 2026',
     changes: [

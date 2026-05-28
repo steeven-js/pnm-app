@@ -30,31 +30,31 @@ La solution consiste a passer l'action bloquante en statut "Echec" pour debloque
 
 | execution_status | Signification |
 |-----------------|---------------|
-| 0 | Deposee (en attente) |
-| 1 | **Envoyee** (en cours d'envoi — si bloquée, c'est le problème) |
-| 2 | Programmee (action planifiee avec une date d'execution future, proche ou lointaine) |
+| 0 | Déposée (en attente) |
+| 1 | **Envoyée** (en cours d'envoi — si bloquée, c'est le problème) |
+| 2 | Programmée (action planifiée avec une date d'exécution future, proche ou lointaine) |
 | 5 | En échec |
-| 10 | Terminee |
+| 10 | Terminée |
 
-> Note : un statut **2 (Programmee)** est normal — l'action est en attente de sa date d'exécution prévue, ce n'est pas un blocage. Ne pas la forcer en échec.
+> Note : un statut **2 (Programmée)** est normal — l'action est en attente de sa date d'exécution prévue, ce n'est pas un blocage. Ne pas la forcer en échec.
 
 | folow_up_status | Signification |
 |----------------|---------------|
 | 14 | Rejetee (force manuellement) |
 
-## Verification globale (a faire en priorite)
+## Vérification globale (à faire en priorité)
 
-Avant de plonger sur un LINE_NO precis, deux requetes a executer sur **vmqprotool01** (Toad for Oracle, base PB@MCST) pour avoir une vue d'ensemble :
+Avant de plonger sur un LINE_NO précis, deux requêtes à exécuter sur **vmqprotool01** (Toad for Oracle, base PB@MCST) pour avoir une vue d'ensemble :
 
 ```sql
--- (a) Toutes les actions en statut "Envoye" (bloquantes) sur les 3 derniers jours
+-- (a) Toutes les actions en statut "Envoyé" (bloquantes) sur les 3 derniers jours
 SELECT *
 FROM send_actions
 WHERE execution_status IN (1)
   AND log_date BETWEEN trunc(sysdate - 3) AND trunc(sysdate)
 ORDER BY record_no;
 
--- (b) Repartition par statut des actions de provisioning du jour
+-- (b) Répartition par statut des actions de provisioning du jour
 SELECT execution_status, COUNT(*)
 FROM send_actions
 WHERE log_date = trunc(sysdate)
@@ -62,12 +62,12 @@ GROUP BY execution_status;
 ```
 
 USAGE :
-- La requete (a) liste l'ensemble des actions bloquantes recentes : si la file
-  est saine, on n'en attend qu'un volume tres faible (proche de 0). Une
-  remontee anormale = file engorgee, plusieurs lignes potentiellement
-  impactees.
-- La requete (b) donne la photo du jour par statut (0=Deposee, 1=Envoyee,
-  5=Echec, 10=Terminee). Une part importante de 1 sans transition vers 10 =
+- La requête (a) liste l'ensemble des actions bloquantes récentes : si la file
+  est saine, on n'en attend qu'un volume très faible (proche de 0). Une
+  remontée anormale = file engorgée, plusieurs lignes potentiellement
+  impactées.
+- La requête (b) donne la photo du jour par statut (0=Déposée, 1=Envoyée,
+  5=Échec, 10=Terminée). Une part importante de 1 sans transition vers 10 =
   blocage en cours.
 
 ## Etapes
