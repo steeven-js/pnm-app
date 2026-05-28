@@ -32,8 +32,11 @@ La solution consiste a passer l'action bloquante en statut "Echec" pour debloque
 |-----------------|---------------|
 | 0 | Deposee (en attente) |
 | 1 | **Envoyee** (en cours d'envoi — si bloquée, c'est le problème) |
+| 2 | Programmee (action planifiee avec une date d'execution future, proche ou lointaine) |
 | 5 | En échec |
 | 10 | Terminee |
+
+> Note : un statut **2 (Programmee)** est normal — l'action est en attente de sa date d'exécution prévue, ce n'est pas un blocage. Ne pas la forcer en échec.
 
 | folow_up_status | Signification |
 |----------------|---------------|
