@@ -1,6 +1,6 @@
 ﻿# P25 — Restitutions sortantes (bascule)
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm-Restitutions-Sortantes-Bascule.sh
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Une restitution sortante = un numéro qui quitte Digicel pour retourner chez son opérateur d'origine. Lors de la bascule, le statut du MSISDN dans MOBI doit etre mis a jour pour refleter le depart.
+Une restitution sortante = un numéro qui quitte Digicel pour retourner chez son opérateur d'origine. Lors de la bascule, le statut du MSISDN dans MOBI doit être mis à jour pour refléter le départ.
 
 ## Logique
 
@@ -26,7 +26,7 @@ AND DATA.code_ticket = 3400                     -- ticket restitution
 AND DATA.OPR = 2;                               -- Digicel est l'opérateur receveur
 ```
 
-### 2. Mise a jour dans MOBI (Oracle)
+### 2. Mise à jour dans MOBI (Oracle)
 
 ```sql
 UPDATE MSISDN
@@ -37,9 +37,9 @@ WHERE msisdn_no IN (...);
 COMMIT;
 ```
 
-Le numéro passe en statut 7 (disponible/restitue).
+Le numéro passe en statut 7 (disponible/restitué).
 
-## Execution manuelle
+## Exécution manuelle
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01

@@ -1,9 +1,9 @@
-﻿# P35 — Anomalie connexion VPN a la base de données PortaDB (PROVISOIRE)
+﻿# P35 — Anomalie connexion VPN à la base de données PortaDB (PROVISOIRE)
 
-**Categorie :** Debug / Diagnostic
+**Catégorie :** Debug / Diagnostic
 **Serveur :** vmqproportawebdb01 (172.24.119.68)
 **Utilisateur :** root (via su depuis porta_pnmv3)
-**Declencheur :** Erreur "Cannot Connect to Database Server" depuis MySQL Workbench en VPN
+**Déclencheur :** Erreur "Cannot Connect to Database Server" depuis MySQL Workbench en VPN
 **Ticket RT :** 276887 — [APP-OCS] Anomalie lors de la connexion en VPN sur la base de donnée DAPI
 **Statut :** PROVISOIRE — ticket en cours de résolution
 
@@ -11,8 +11,8 @@
 
 ## Contexte
 
-Lors de la connexion en VPN a la base PortaDB (MariaDB) via MySQL Workbench,
-l'erreur suivante apparait :
+Lors de la connexion en VPN à la base PortaDB (MariaDB) via MySQL Workbench,
+l'erreur suivante apparaît :
 
 ```
 Cannot Connect to Database Server
@@ -22,8 +22,8 @@ Lost connection to MySQL server at 'reading initial communication packet',
 system error: 0
 ```
 
-Cette erreur est causee par un depassement du nombre de connexions echouees
-depuis un host. MariaDB bloqué temporairement les connexions de ce host.
+Cette erreur est causée par un dépassement du nombre de connexions échouées
+depuis un host. MariaDB bloque temporairement les connexions de ce host.
 
 ## Solution temporaire : flush hosts
 
@@ -39,19 +39,19 @@ ssh porta_pnmv3@vmqproportawebdb01
 su - root
 ```
 
-### 3. Se connecter a MariaDB
+### 3. Se connecter à MariaDB
 
 ```bash
 mysql
 ```
 
-### 4. Executer flush hosts
+### 4. Exécuter flush hosts
 
 ```sql
 flush hosts;
 ```
 
-Resultat attendu :
+Résultat attendu :
 ```
 Query OK, 0 rows affected (0.008 sec)
 ```
@@ -71,14 +71,14 @@ Retenter la connexion depuis MySQL Workbench :
 
 ## Cause probable
 
-Le parametre `max_connect_errors` de MariaDB est atteint.
-Quand un host depasse ce nombre de connexions echouees, MariaDB
-bloqué toutes les connexions depuis ce host.
+Le paramètre `max_connect_errors` de MariaDB est atteint.
+Quand un host dépasse ce nombre de connexions échouées, MariaDB
+bloque toutes les connexions depuis ce host.
 
-Le `flush hosts` reinitialise le compteur de connexions echouees
+Le `flush hosts` réinitialise le compteur de connexions échouées
 pour tous les hosts.
 
-## Verifications complementaires
+## Vérifications complémentaires
 
 ```sql
 -- Verifier la valeur de max_connect_errors
@@ -88,7 +88,7 @@ SHOW VARIABLES LIKE 'max_connect_errors';
 SELECT * FROM performance_schema.host_cache WHERE SUM_CONNECT_ERRORS > 0;
 ```
 
-## Solution definitive (a faire dans le ticket 276887)
+## Solution définitive (à faire dans le ticket 276887)
 
 Augmenter la valeur de `max_connect_errors` dans la configuration MariaDB :
 
@@ -104,14 +104,14 @@ systemctl restart mariadb
 ```
 
 > **Attention :** Le redémarrage de MariaDB coupe temporairement toutes
-> les connexions a PortaDB (scripts PNM inclus). A faire en dehors
+> les connexions à PortaDB (scripts PNM inclus). À faire en dehors
 > des heures de vacation.
 
 ## Notes
 
-- Ce protocole est PROVISOIRE. La solution definitive sera implementee
+- Ce protocole est PROVISOIRE. La solution définitive sera implémentée
   via le ticket RT 276887.
-- Le `flush hosts` est une solution temporaire qui doit etre refaite
-  a chaque fois que le problème se reproduit.
+- Le `flush hosts` est une solution temporaire qui doit être refaite
+  à chaque fois que le problème se reproduit.
 - Le problème survient principalement en VPN car les connexions sont
-  moins stables et generent plus de tentatives echouees.
+  moins stables et génèrent plus de tentatives échouées.

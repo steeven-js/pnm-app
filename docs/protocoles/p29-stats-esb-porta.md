@@ -1,6 +1,6 @@
 ﻿# P29 — Stats ESB Porta
 
-**Categorie :** Exploitation
+**Catégorie :** Exploitation
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm_Stats_Bascule_ESB.sh
@@ -18,7 +18,7 @@ Collecte quotidienne des statistiques d'appels Web Services Porta sur l'ESB. Le 
 
 ## Logique
 
-### Requete sur la base ESB LOGGER
+### Requête sur la base ESB LOGGER
 
 ```sql
 SELECT PWS_ACTION, IS_SUCCESS, COUNT(*) AS "NB CALL"
@@ -37,11 +37,11 @@ GROUP BY PWS_ACTION, IS_SUCCESS;
 
 ### Fichier de sortie
 
-`Log/Pnm_Stats_ESB_YYYYMMDD.xls` envoyé en piece jointe de l'email.
+`Log/Pnm_Stats_ESB_YYYYMMDD.xls` envoyé en pièce jointe de l'email.
 
 ## Jours fériés
 
-Le script détecté les jours fériés via :
+Le script détecte les jours fériés via :
 
 ```sql
 SELECT COUNT(*) FROM PortaDB.FERRYDAY WHERE ferryday = CURDATE();
@@ -49,7 +49,7 @@ SELECT COUNT(*) FROM PortaDB.FERRYDAY WHERE ferryday = CURDATE();
 
 Si jour férié, l'email le mentionne : "il s'agit d'un jour férié, il n'y aura donc pas de portabilité."
 
-## Execution manuelle
+## Exécution manuelle
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01

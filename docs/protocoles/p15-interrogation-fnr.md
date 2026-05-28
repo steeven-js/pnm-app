@@ -1,18 +1,18 @@
 ﻿# P15 — Interrogation / Gestion FNR
 
-**Categorie :** Debug / Diagnostic
-**Serveur :** digimqapi01 (172.24.2.21) — serveur VAS gere par le pole CORE
+**Catégorie :** Debug / Diagnostic
+**Serveur :** digimqapi01 (172.24.2.21) — serveur VAS géré par le pôle CORE
 **Utilisateur :** N/A (interface web) — pas de SSH nécessaire
-**Declencheur :** Besoin de vérifier ou modifier le routage FNR d'un MSISDN
+**Déclencheur :** Besoin de vérifier ou modifier le routage FNR d'un MSISDN
 
 ---
 
 ## Contexte
 
-Le FNR (Forward Number Routing) est le fichier national de routage qui contient **uniquement les numéros portes**. Il determine vers quel réseau un appel est achemine. Si un numéro est absent du FNR, l'appel est route vers l'opérateur d'origine (celui qui possede la tranche de numéros).
+Le FNR (Forward Number Routing) est le fichier national de routage qui contient **uniquement les numéros portés**. Il détermine vers quel réseau un appel est acheminé. Si un numéro est absent du FNR, l'appel est routé vers l'opérateur d'origine (celui qui possède la tranche de numéros).
 
-Les operations FNR sont nécessaires dans plusieurs situations :
-- Verification du routage d'un numéro (debug appels entrants KO)
+Les opérations FNR sont nécessaires dans plusieurs situations :
+- Vérification du routage d'un numéro (debug appels entrants KO)
 - Correction manuelle après une bascule KO (voir P16)
 - Ajout/suppression manuelle après portabilité/restitution
 
@@ -20,17 +20,17 @@ Le FNR utilise des commandes **NPSUB** envoyées sur EMA via le fichier `fnr_act
 
 ## Codes réseau FNR — MAJ 08/04/2026
 
-Orange Caraibe — nouveaux prefixes actifs depuis le 08/04/2026 :
+Orange Caraibe — nouveaux préfixes actifs depuis le 08/04/2026 :
 
-| Code FNR | Operateur | Territoire |
+| Code FNR | Opérateur | Territoire |
 |----------|-----------|------------|
 | 52303 | Orange Caraibe | Guadeloupe |
 | 52313 | Orange Caraibe | Martinique |
 | 52333 | Orange Caraibe | Guyane |
 
-Autres opérateurs (anciens prefixes, toujours actifs) :
+Autres opérateurs (anciens préfixes, toujours actifs) :
 
-| Code FNR | Operateur |
+| Code FNR | Opérateur |
 |----------|-----------|
 | 60042 | Digicel AFG |
 | 60043 | Dauphin Telecom |
@@ -42,7 +42,7 @@ Autres opérateurs (anciens prefixes, toujours actifs) :
 
 ### 1. Interroger un MSISDN dans le FNR
 
-Verifier le routage actuel d'un numéro.
+Vérifier le routage actuel d'un numéro.
 
 ```
 http://172.24.2.21/apis/porta/fnr-get-info.html
@@ -50,11 +50,11 @@ http://172.24.2.21/apis/porta/fnr-get-info.html
 
 Renseigner le MSISDN au format international (ex: 590690XXXXXX) ou national (069XXXXXXX).
 
-**Resultat :**
+**Résultat :**
 - Si le numéro est dans le FNR : affiche le code réseau de routage (60041, 60042, etc.)
-- Si le numéro n'est PAS dans le FNR : le numéro est route par defaut vers l'opérateur de la tranche
+- Si le numéro n'est PAS dans le FNR : le numéro est routé par défaut vers l'opérateur de la tranche
 
-### 2. Creer un MSISDN dans le FNR
+### 2. Créer un MSISDN dans le FNR
 
 Ajouter un nouveau numéro au FNR (après portabilité entrante, si la bascule automatique a échoué).
 
@@ -82,18 +82,18 @@ Retirer un numéro du FNR (après portabilité sortante / restitution : le numé
 http://172.24.2.21/apis/porta/fnr-delete.html
 ```
 
-## Cas d'usage frequents
+## Cas d'usage fréquents
 
 | Situation | Action FNR | Interface |
 |-----------|------------|-----------|
-| Client injoignable après portabilité entrante | Verifier si le numéro est dans le FNR avec le bon code réseau | fnr-get-info → fnr-create/update |
-| Bascule KO (voir P16) | Creer ou corriger le routage des numéros en erreur | fnr-create / fnr-update |
+| Client injoignable après portabilité entrante | Vérifier si le numéro est dans le FNR avec le bon code réseau | fnr-get-info → fnr-create/update |
+| Bascule KO (voir P16) | Créer ou corriger le routage des numéros en erreur | fnr-create / fnr-update |
 | Restitution : numéro revient chez l'opérateur d'origine | Supprimer le numéro du FNR | fnr-delete |
-| Debug "numéro non attribue" | Verifier le routage actuel | fnr-get-info |
+| Debug "numéro non attribué" | Vérifier le routage actuel | fnr-get-info |
 
-## Coherence FNR / PortaDB
+## Cohérence FNR / PortaDB
 
-Apres toute modification manuelle du FNR, vérifier la cohérence avec PortaDB :
+Après toute modification manuelle du FNR, vérifier la cohérence avec PortaDB :
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -110,6 +110,6 @@ Le routage FNR doit correspondre a l'opérateur actuel dans PortaDB :
 
 ## Notes opérationnelles
 
-- Le FNR ne contient que les numéros **portes**. Un numéro Digicel qui n'a jamais ete porte n'est pas dans le FNR.
-- Les modifications manuelles du FNR sont rares (la bascule automatique gere 95%+ des cas).
-- Pour des corrections en masse, utiliser le rollback via P16 plutot que les interfaces individuelles.
+- Le FNR ne contient que les numéros **portés**. Un numéro Digicel qui n'a jamais été porté n'est pas dans le FNR.
+- Les modifications manuelles du FNR sont rares (la bascule automatique gère 95%+ des cas).
+- Pour des corrections en masse, utiliser le rollback via P16 plutôt que les interfaces individuelles.

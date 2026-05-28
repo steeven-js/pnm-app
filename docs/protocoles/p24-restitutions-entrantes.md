@@ -1,6 +1,6 @@
 ﻿# P24 — Restitutions entrantes (bascule J-21)
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm-Restitutions-Entrantes-Bascule.sh
@@ -10,11 +10,11 @@
 
 ## Contexte
 
-Une restitution entrante = un numéro qui revient chez Digicel après avoir ete porte chez un autre opérateur. Le delai est de J-21 (21 jours après la date de portage) pour laisser le temps a tous les opérateurs de confirmer.
+Une restitution entrante = un numéro qui revient chez Digicel après avoir été porté chez un autre opérateur. Le délai est de J-21 (21 jours après la date de portage) pour laisser le temps à tous les opérateurs de confirmer.
 
-## Execution automatique
+## Exécution automatique
 
-Le script s'exécute chaque jour ouvre a 21H00 via crontab.
+Le script s'exécute chaque jour ouvré à 21H00 via crontab.
 
 ## Logique
 
@@ -31,9 +31,9 @@ GROUP BY DATA.msisdn
 HAVING COUNT(DISTINCT(CONCAT(DATA.code_ticket, DATA.operateur_origine))) = 5;
 ```
 
-La condition `HAVING ... = 5` garantit que les 5 opérateurs ont confirme la restitution.
+La condition `HAVING ... = 5` garantit que les 5 opérateurs ont confirmé la restitution.
 
-### 2. Mise a jour dans MOBI (Oracle)
+### 2. Mise à jour dans MOBI (Oracle)
 
 ```sql
 UPDATE MSISDN
@@ -47,9 +47,9 @@ AND OPERATION_ID IN ('1','2','3');
 COMMIT;
 ```
 
-Le numéro passe de statut 7 (disponible chez l'autre opérateur) a statut 0 (inactif, de retour chez Digicel).
+Le numéro passe de statut 7 (disponible chez l'autre opérateur) à statut 0 (inactif, de retour chez Digicel).
 
-### 3. Securite
+### 3. Sécurité
 
 Le script ne s'exécute que sur le serveur de production (IP 172.24.119.68). Sur tout autre serveur, il affiche "No Mobi update from Porta Perf System".
 

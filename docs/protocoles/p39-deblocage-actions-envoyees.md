@@ -1,30 +1,30 @@
-﻿# P39 — Deblocage actions bloquantes en statut "Envoye" (send_actions)
+﻿# P39 — Déblocage actions bloquantes en statut "Envoyé" (send_actions)
 
-**Categorie :** Debug / Diagnostic
-**Declencheur :** Ticket RT — Client ne peut pas utiliser sa ligne, actions techniques bloquées en statut "Envoye"
+**Catégorie :** Debug / Diagnostic
+**Déclencheur :** Ticket RT — Client ne peut pas utiliser sa ligne, actions techniques bloquées en statut "Envoyé"
 **Serveur :** vmqprotool01 (Toad for Oracle, PB@MCST)
 **Temps moyen :** 15 min (+ attente rattrapage RATP_OLN)
-**Frequence :** Occasionnelle
-**Source :** Procedure Sarah Mogade
+**Fréquence :** Occasionnelle
+**Source :** Procédure Sarah Mogade
 
 ---
 
 ## Contexte
 
-Il arrive qu'une action technique reste bloquée en statut "Envoye" (execution_status = 1) dans la table `send_actions`. Cette action bloquante empeche les actions suivantes de s'executer, ce qui laisse la ligne dans un etat inutilisable (pas d'appels, pas de data, etc.).
+Il arrive qu'une action technique reste bloquée en statut "Envoyé" (execution_status = 1) dans la table `send_actions`. Cette action bloquante empêche les actions suivantes de s'exécuter, ce qui laisse la ligne dans un état inutilisable (pas d'appels, pas de data, etc.).
 
 Ce cas se produit typiquement après :
 - Une portabilité entrante (changement de MSISDN)
 - Un changement de SIM
 - Un changement d'offre
 
-La solution consiste a passer l'action bloquante en statut "Echec" pour debloquer la file, puis laisser l'automate RATP_OLN (voir P36) relancer les actions deposees.
+La solution consiste à passer l'action bloquante en statut "Échec" pour débloquer la file, puis laisser l'automate RATP_OLN (voir P36) relancer les actions déposées.
 
-## Symptomes
+## Symptômes
 
 - Client ne peut pas utiliser sa ligne (appels, data, SMS)
-- MasterCRM : Ligne Active mais actions techniques en statut "Envoyee" depuis longtemps (pas de progression)
-- Les actions suivantes restent en statut "Deposee" car bloquées par l'action "Envoyee"
+- MasterCRM : Ligne Active mais actions techniques en statut "Envoyée" depuis longtemps (pas de progression)
+- Les actions suivantes restent en statut "Déposée" car bloquées par l'action "Envoyée"
 
 ## Statuts de la table send_actions
 
@@ -40,7 +40,7 @@ La solution consiste a passer l'action bloquante en statut "Echec" pour debloque
 
 | folow_up_status | Signification |
 |----------------|---------------|
-| 14 | Rejetee (force manuellement) |
+| 14 | Rejetée (forcé manuellement) |
 
 ## Vérification globale (à faire en priorité)
 
@@ -70,11 +70,11 @@ USAGE :
   5=Échec, 10=Terminée). Une part importante de 1 sans transition vers 10 =
   blocage en cours.
 
-## Etapes
+## Étapes
 
 ### 1. Identifier le LINE_NO
 
-Dans MasterCRM, ouvrir la fiche client et noter le **LINE_NO** de la ligne concernee (visible dans l'onglet Informations ou Techniques).
+Dans MasterCRM, ouvrir la fiche client et noter le **LINE_NO** de la ligne concernée (visible dans l'onglet Informations ou Techniques).
 
 ### 2. Rechercher les actions bloquantes pour ce LINE_NO
 
@@ -102,23 +102,23 @@ AND execution_status IN (1);
 COMMIT;
 ```
 
-> **Attention :** Ne modifier que les actions identifiees en statut 1 (Envoyee). Ne pas toucher aux actions en statut 0 (Deposee) ou 10 (Terminee).
+> **Attention :** Ne modifier que les actions identifiées en statut 1 (Envoyée). Ne pas toucher aux actions en statut 0 (Déposée) ou 10 (Terminée).
 
-### 4. Verifier dans MasterCRM
+### 4. Vérifier dans MasterCRM
 
-Apres l'UPDATE, vérifier dans l'onglet Techniques de MasterCRM :
-- L'action bloquante doit apparaitre en **"Rejetee"**
-- Les actions en attente (Deposee) doivent rester en l'etat
+Après l'UPDATE, vérifier dans l'onglet Techniques de MasterCRM :
+- L'action bloquante doit apparaître en **"Rejetée"**
+- Les actions en attente (Déposée) doivent rester en l'état
 
 ### 5. Attendre le rattrapage RATP_OLN
 
-L'automate RATP_OLN (voir P36) va automatiquement relancer les actions deposees maintenant que l'action bloquante a ete retiree de la file.
+L'automate RATP_OLN (voir P36) va automatiquement relancer les actions déposées maintenant que l'action bloquante a été retirée de la file.
 
 Si le rattrapage ne se fait pas dans les 2h, vérifier :
-- Que RATP_OLN a bien tourne (rapport automates quotidien)
+- Que RATP_OLN a bien tourné (rapport automates quotidien)
 - Si nécessaire, relancer manuellement les actions depuis MasterCRM (bouton "Renvoyer l'action")
 
-### 6. Repondre au demandeur
+### 6. Répondre au demandeur
 
 **En attente de rattrapage :**
 ```
@@ -133,7 +133,7 @@ Cdt,
 Équipe Application
 ```
 
-**Apres résolution :**
+**Après résolution :**
 ```
 Bonjour,
 
@@ -145,14 +145,14 @@ Cdt,
 Équipe Application
 ```
 
-## Difference avec P38
+## Différence avec P38
 
-- **P38** : Actions en statut **"Rejetee"** après changement de SIM → renvoi ou escalade MOBI
-- **P39** : Action en statut **"Envoyee"** bloquée indefiniment → passage force en échec via SQL pour debloquer la file
+- **P38** : Actions en statut **"Rejetée"** après changement de SIM → renvoi ou escalade MOBI
+- **P39** : Action en statut **"Envoyée"** bloquée indéfiniment → passage forcé en échec via SQL pour débloquer la file
 
 ## Notes opérationnelles
 
-- Cette procédure a ete fournie par Sarah Mogade
+- Cette procédure a été fournie par Sarah Mogade
 - Le champ s'appelle bien `folow_up_status` (un seul L) dans la table
 - Toujours vérifier que l'action est bien bloquée (en statut 1 depuis longtemps) avant de la forcer en échec
 - Si plusieurs actions sont en statut 1, les passer toutes en échec

@@ -1,6 +1,6 @@
 ﻿# P26 — Restitutions sortantes (tickets WS)
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm-Restitutions-Sortantes-Tickets.sh
@@ -10,7 +10,7 @@
 
 ## Contexte
 
-Ce script créé les tickets de restitution sortante (3400) dans PortaDB en appelant le Web Service Porta `CreatePortaRestitution`. Il extrait les MSISDN a restituer depuis MOBI Oracle, calcule les dates, et effectue un appel SOAP pour chaque numéro.
+Ce script crée les tickets de restitution sortante (3400) dans PortaDB en appelant le Web Service Porta `CreatePortaRestitution`. Il extrait les MSISDN à restituer depuis MOBI Oracle, calcule les dates, et effectue un appel SOAP pour chaque numéro.
 
 ## Web Service
 
@@ -21,18 +21,18 @@ Ce script créé les tickets de restitution sortante (3400) dans PortaDB en appe
 
 ### 1. Calcul des dates
 
-- **date_demande** : aujourd'hui (ou prochain jour ouvre si jour férié)
+- **date_demande** : aujourd'hui (ou prochain jour ouvré si jour férié)
 - **date_portage** : date_demande + 4 jours ouvrés
 
-Les jours fériés sont verifies dans la table `PortaDB.FERRYDAY`.
+Les jours fériés sont vérifiés dans la table `PortaDB.FERRYDAY`.
 
 ### 2. Extraction MSISDN depuis MOBI
 
-Le fichier SQL `~/Sql/MOBI-Extract-Restitutions_Sortantes.sql` extrait les MSISDN a restituer avec leur code opérateur.
+Le fichier SQL `~/Sql/MOBI-Extract-Restitutions_Sortantes.sql` extrait les MSISDN à restituer avec leur code opérateur.
 
 ### 3. Mapping opérateurs MOBI → Porta
 
-| Code MOBI | Operateur | Code Porta |
+| Code MOBI | Opérateur | Code Porta |
 |-----------|-----------|------------|
 | 211, 215, 217 | Orange | 01 |
 | 212 | Dauphin | 04 |
@@ -45,7 +45,7 @@ Le fichier SQL `~/Sql/MOBI-Extract-Restitutions_Sortantes.sql` extrait les MSISD
 Pour chaque MSISDN, le script recherche l'ancien id_portage :
 1. D'abord dans PNMV3 (`PortaDB.PORTAGE`)
 2. Puis dans POM V2 (`PortaDB.HIST_POM_PORTAGE`)
-3. Sinon, valeur par defaut : `62b6c108bea0c972d0bbace581beb924`
+3. Sinon, valeur par défaut : `62b6c108bea0c972d0bbace581beb924`
 
 ### 5. Appel SOAP
 
@@ -64,7 +64,7 @@ Pour chaque MSISDN, le script recherche l'ancien id_portage :
 </soapenv:Envelope>
 ```
 
-## Execution manuelle
+## Exécution manuelle
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01

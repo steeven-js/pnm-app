@@ -1,31 +1,32 @@
 ﻿# P03 — Libération SIM (Carte SIM)
 
-**Categorie :** Libération
+**Catégorie :** Libération
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — carte SIM a detacher pour reaffectation
-**Temps moyen :** 10 a 15 min
+**Déclencheur :** Ticket RT — carte SIM à détacher pour réaffectation
+**Temps moyen :** 10 à 15 min
 
 ---
 
 ## Contexte
 
-Detacher une carte SIM d'une ligne ou d'un stock pour permettre sa reaffectation. L'operation se fait directement en SQL sur la base Oracle MOBI.
+Détacher une carte SIM d'une ligne ou d'un stock pour permettre sa réaffectation. L'opération se fait directement en SQL sur la base Oracle MOBI.
 
-Le format ICCID Digicel est : `8959620XXXXXXXXXXXX` (19-20 chiffres, prefixe 8959620).
+Le format ICCID Digicel est : `8959620XXXXXXXXXXXX` (19-20 chiffres, préfixe 8959620).
 
-## Etapes
+## Étapes
 
 ### 1. Connexion au serveur
 
 Se connecter en SSH au serveur de production via mRemoteNG (en root), basculer vers oracle, puis ouvrir Oracle MOBI.
+
 
 ```bash
 su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 
-### 2. Verifier l'etat de la SIM
+### 2. Vérifier l'état de la SIM
 
 ```sql
 SELECT SIM_NO, SIM_STATUS, ST_SIM_ID, SIM_STOCK_CODE, SIM_CHANGE
@@ -33,19 +34,19 @@ FROM SIM
 WHERE SIM_NO = '8959620XXXXXXXXXXXX';
 ```
 
-**Interpretation des champs :**
+**Interprétation des champs :**
 
 | Champ | Valeur | Signification |
 |-------|--------|---------------|
 | SIM_STATUS | 0 | Disponible |
 | SIM_STATUS | 7 | Active (sur une ligne) |
 | ST_SIM_ID | 0 | Libre |
-| ST_SIM_ID | 7 | Attribuee |
+| ST_SIM_ID | 7 | Attribuée |
 | SIM_STOCK_CODE | — | Stock actuel de la SIM |
 
-### 3. Verifier que la SIM n'est pas sur une ligne active
+### 3. Vérifier que la SIM n'est pas sur une ligne active
 
-**Important : ne PAS liberer une SIM associee a une ligne active.**
+**Important : ne PAS libérer une SIM associée à une ligne active.**
 
 ```sql
 SELECT LINE_NO, LINE_MSISDN_ACTIVE, LINE_STATUS
@@ -53,9 +54,9 @@ FROM LINE
 WHERE LINE_SIM_NO = '8959620XXXXXXXXXXXX';
 ```
 
-> **Attention :** Si une ligne active est associee, NE PAS liberer. Informer le demandeur : "La SIM est encore rattachee a une ligne active (069XXXXXXX). Merci de confirmer la résiliation avant libération."
+> **Attention :** Si une ligne active est associée, NE PAS libérer. Informer le demandeur : "La SIM est encore rattachée à une ligne active (069XXXXXXX). Merci de confirmer la résiliation avant libération."
 
-### 4. Liberer la SIM
+### 4. Libérer la SIM
 
 Remettre la SIM en stock disponible.
 
@@ -68,7 +69,7 @@ WHERE SIM_NO = '8959620XXXXXXXXXXXX';
 COMMIT;
 ```
 
-### 5. Verifier la libération
+### 5. Vérifier la libération
 
 ```sql
 SELECT SIM_NO, SIM_STATUS, ST_SIM_ID, SIM_CHANGE
@@ -92,6 +93,6 @@ Cdt,
 
 ## Notes opérationnelles
 
-- Toujours vérifier qu'aucune ligne active n'est associee a la SIM avant libération.
-- Le prefixe ICCID Digicel est `8959620` — si le format est différent, vérifier qu'il s'agit bien d'une SIM Digicel.
-- La libération SIM est moins frequente que la libération IMEI ou MSISDN.
+- Toujours vérifier qu'aucune ligne active n'est associée à la SIM avant libération.
+- Le préfixe ICCID Digicel est `8959620` — si le format est différent, vérifier qu'il s'agit bien d'une SIM Digicel.
+- La libération SIM est moins fréquente que la libération IMEI ou MSISDN.

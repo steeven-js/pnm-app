@@ -1,54 +1,54 @@
-﻿# P38 — Echec actions techniques après changement de SIM
+﻿# P38 — Échec actions techniques après changement de SIM
 
-**Categorie :** Debug / Diagnostic
-**Declencheur :** Ticket RT — Client ne peut plus utiliser sa ligne après changement de SIM
+**Catégorie :** Debug / Diagnostic
+**Déclencheur :** Ticket RT — Client ne peut plus utiliser sa ligne après changement de SIM
 **Serveur :** MasterCRM (vmqprotool01)
-**Temps moyen :** 15 min a 1h (selon nombre d'actions en échec)
-**Frequence :** Reguliere (~2-3 tickets/semaine)
+**Temps moyen :** 15 min à 1h (selon nombre d'actions en échec)
+**Fréquence :** Régulière (~2-3 tickets/semaine)
 
 ---
 
 ## Contexte
 
-Apres un changement de carte SIM en boutique (PDV), certaines actions techniques peuvent echouer lors du reprovisioning de la ligne sur le réseau. La ligne apparait comme "Active" dans MasterCRM mais les services ne fonctionnent pas (appels, data, roaming, etc.).
+Après un changement de carte SIM en boutique (PDV), certaines actions techniques peuvent échouer lors du reprovisioning de la ligne sur le réseau. La ligne apparaît comme "Active" dans MasterCRM mais les services ne fonctionnent pas (appels, data, roaming, etc.).
 
-Le rattrapage automatique (automate RATP_OLN, voir P36) tente de relancer les actions echouees. Si le rattrapage échoué egalement, une intervention manuelle est nécessaire.
+Le rattrapage automatique (automate RATP_OLN, voir P36) tente de relancer les actions échouées. Si le rattrapage échoue également, une intervention manuelle est nécessaire.
 
-## Symptomes
+## Symptômes
 
 - Client ne peut plus utiliser sa ligne après changement de SIM
-- MasterCRM : Ligne Active mais actions techniques en statut "Rejetee"
-- Actions concernees typiquement :
-  - **ODL USIM illimite** : Rejetee
-  - **Activation RoamingVoyage** : Rejetee
-  - **Activation Double appel** : Terminee ou Rejetee
-  - **Ajout CUG niveau Client** : Rejetee (normal pour les clients B2B avec CUG flotte)
-  - **Reset du profil client TOTAL** : Terminee
+- MasterCRM : Ligne Active mais actions techniques en statut "Rejetée"
+- Actions concernées typiquement :
+  - **ODL USIM illimité** : Rejetée
+  - **Activation RoamingVoyage** : Rejetée
+  - **Activation Double appel** : Terminée ou Rejetée
+  - **Ajout CUG niveau Client** : Rejetée (normal pour les clients B2B avec CUG flotte)
+  - **Reset du profil client TOTAL** : Terminée
 
-## Etapes
+## Étapes
 
-### 1. Verifier l'historique des actions techniques dans MasterCRM
+### 1. Vérifier l'historique des actions techniques dans MasterCRM
 
 Dans la fiche client MasterCRM :
 - Onglet **Techniques** → **Historique du statut**
-- Identifier les actions en statut **Rejetee**
-- Verifier si l'automate RATP_OLN a tente un rattrapage (plusieurs series d'actions a quelques minutes d'intervalle)
+- Identifier les actions en statut **Rejetée**
+- Vérifier si l'automate RATP_OLN a tenté un rattrapage (plusieurs séries d'actions à quelques minutes d'intervalle)
 
 ### 2. Identifier le type de client
 
-| Type | Indicateur | Particularite |
+| Type | Indicateur | Particularité |
 |------|-----------|---------------|
-| Grand public (GP) | Categorie client Defaut | Actions standard |
-| B2B / Entreprise | Categorie B2B, CUG_XXXX | Ajout CUG rejetee = **normal** (CUG flotte necessite config réseau spécifique) |
-| Wizzee | OPERATION_ID = 217, MS_CLASS = 80 | Transmettre equipe Wizzee |
+| Grand public (GP) | Catégorie client Défaut | Actions standard |
+| B2B / Entreprise | Catégorie B2B, CUG_XXXX | Ajout CUG rejetée = **normal** (CUG flotte nécessite config réseau spécifique) |
+| Wizzee | OPERATION_ID = 217, MS_CLASS = 80 | Transmettre équipe Wizzee |
 
-### 3. Identifier et debloquer les actions via SQL (methode preferee)
+### 3. Identifier et débloquer les actions via SQL (méthode préférée)
 
 Utiliser Toad for Oracle sur vmqprotool01 (base PB@MCST). Script : `Mise_en statut_rejeté_action_bloquée.sql`.
 
-**Etape 1 : Recuperer le LINE_NO** dans MasterCRM (onglet Informations ou Techniques).
+**Étape 1 : Récupérer le LINE_NO** dans MasterCRM (onglet Informations ou Techniques).
 
-**Etape 2 : Rechercher les actions bloquées** (statut "Envoyee" = 1 ou autre statut bloquant) :
+**Étape 2 : Rechercher les actions bloquées** (statut "Envoyée" = 1 ou autre statut bloquant) :
 
 ```sql
 SELECT record_no, action_code, line_no, execution_status, folow_up_status, log_date
@@ -64,10 +64,10 @@ Colonnes utiles dans le résultat :
 | `record_no` | Identifiant unique de l'action (pour l'UPDATE) |
 | `action_code` | Type d'action (ROAM = RoamingVoyage, USIM = ODL USIM, etc.) |
 | `execution_status` | 0 = Déposée, 1 = Envoyée (bloquée), 2 = Programmée (date d'exécution future, normal), 5 = Échec, 10 = Terminée |
-| `folow_up_status` | 14 = Rejetee (un seul L dans le nom du champ) |
+| `folow_up_status` | 14 = Rejetée (un seul L dans le nom du champ) |
 | `log_date` | Date de l'action — si ancienne, l'action est bloquée |
 
-**Etape 3 : Passer les actions bloquantes en échec** :
+**Étape 3 : Passer les actions bloquantes en échec** :
 
 ```sql
 UPDATE send_actions
@@ -78,13 +78,13 @@ AND execution_status IN (1);
 COMMIT;
 ```
 
-> **Attention CUG :** Pour les clients B2B avec CUG, ne pas renvoyer l'action "Ajout CUG niveau Client". Le CUG doit etre configure specifiquement par l'equipe réseau/MOBI.
+> **Attention CUG :** Pour les clients B2B avec CUG, ne pas renvoyer l'action "Ajout CUG niveau Client". Le CUG doit être configuré spécifiquement par l'équipe réseau/MOBI.
 
-**Etape 4 : Attendre le rattrapage RATP_OLN** qui relancera automatiquement les actions deposees.
+**Étape 4 : Attendre le rattrapage RATP_OLN** qui relancera automatiquement les actions déposées.
 
-### 4. Si le rattrapage échoué : escalader a MOBI
+### 4. Si le rattrapage échoue : escalader à MOBI
 
-Si les actions restent en "Rejetee" après renvoi, transferer a l'equipe MOBI (Sarah Mogade) pour reprovisioning manuel :
+Si les actions restent en "Rejetée" après renvoi, transférer à l'équipe MOBI (Sarah Mogade) pour reprovisioning manuel :
 
 ```
 Bonjour Sarah,
@@ -102,7 +102,7 @@ Cdt,
 Équipe Application
 ```
 
-### 5. Repondre au demandeur
+### 5. Répondre au demandeur
 
 **En attente d'intervention MOBI :**
 ```
@@ -120,7 +120,7 @@ Cdt,
 Équipe Application
 ```
 
-**Apres résolution :**
+**Après résolution :**
 ```
 Bonjour,
 
@@ -134,36 +134,36 @@ Cdt,
 
 ## Cas particulier : Client B2B avec CUG
 
-Pour les clients B2B (flotte entreprise), l'action "Ajout CUG niveau Client" est systematiquement rejetee lors d'un changement de SIM. C'est un comportement connu :
-- Le CUG (Closed User Group) est un groupe de numéros ferme pour les flottes entreprise
-- La configuration CUG necessite une intervention spécifique de l'equipe MOBI/réseau
-- L'automate EXPLOIT (voir P36) gere le nettoyage des CUG mais pas leur reconfiguration après changement de SIM
+Pour les clients B2B (flotte entreprise), l'action "Ajout CUG niveau Client" est systématiquement rejetée lors d'un changement de SIM. C'est un comportement connu :
+- Le CUG (Closed User Group) est un groupe de numéros fermé pour les flottes entreprise
+- La configuration CUG nécessite une intervention spécifique de l'équipe MOBI/réseau
+- L'automate EXPLOIT (voir P36) gère le nettoyage des CUG mais pas leur reconfiguration après changement de SIM
 
-## Exemple reel — Ticket du 20/04/2026
+## Exemple réel — Ticket du 20/04/2026
 
 **Client :** SARL J 2 (2016796) — B2B CUG_9352, Baie Mahault
 **MSISDN :** 0690201376
-**Ligne :** 7043049 — LIFE PRO 20Go Bloque ANT SM 24
+**Ligne :** 7043049 — LIFE PRO 20Go Bloqué ANT SM 24
 **Changement SIM :** 15/04/2026
-**Demandeur :** Stephanie Laday
+**Demandeur :** Stéphanie Laday
 
 Actions techniques du 16/04/2026 (rattrapage RATP_OLN x2) :
 
 | Action | 14:45 | 14:50 |
 |--------|-------|-------|
-| Reset du profil client TOTAL | Terminee | Terminee |
-| ODL USIM illimite | Rejetee | Rejetee |
-| Activation Double appel | Terminee | Terminee |
-| Activation RoamingVoyage | Rejetee | Rejetee |
-| Ajout CUG niveau Client | Rejetee | Rejetee |
+| Reset du profil client TOTAL | Terminée | Terminée |
+| ODL USIM illimité | Rejetée | Rejetée |
+| Activation Double appel | Terminée | Terminée |
+| Activation RoamingVoyage | Rejetée | Rejetée |
+| Ajout CUG niveau Client | Rejetée | Rejetée |
 
-Ligne passee en "Active" a 14:55:47 mais services incomplets.
-→ Escalade equipe MOBI pour reprovisioning ODL USIM + RoamingVoyage + CUG.
+Ligne passée en "Active" à 14:55:47 mais services incomplets.
+→ Escalade équipe MOBI pour reprovisioning ODL USIM + RoamingVoyage + CUG.
 
 ## Notes opérationnelles
 
-- Le changement de SIM declenche automatiquement un reprovisioning complet de la ligne
+- Le changement de SIM déclenche automatiquement un reprovisioning complet de la ligne
 - L'automate RATP_OLN tente le rattrapage sous 24h (voir P36)
-- Si après 2 tentatives RATP_OLN les actions sont toujours rejetees, le rattrapage automatique ne suffira pas
-- Les tickets lies : #277038 (activation rejetee après changement SIM), SARL J 2 (20/04/2026)
-- Demandeurs frequents : CDC boutique, equipes Business
+- Si après 2 tentatives RATP_OLN les actions sont toujours rejetées, le rattrapage automatique ne suffira pas
+- Les tickets liés : #277038 (activation rejetée après changement SIM), SARL J 2 (20/04/2026)
+- Demandeurs fréquents : CDC boutique, équipes Business

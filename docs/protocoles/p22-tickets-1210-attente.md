@@ -1,16 +1,16 @@
 ﻿# P22 — Tickets 1210 en attente
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm_1210_awaiting.sh
-**Declencheur :** Apres 1ere vacation (automatique)
+**Déclencheur :** Après 1ère vacation (automatique)
 
 ---
 
 ## Contexte
 
-Le ticket 1210 est la reponse d'acceptation de l'opérateur donneur. Si un portage est prevu a J+1 et que le 1210 n'a pas ete reçu, il y a un risque de blocage de la portabilité. Le script alerte par opérateur.
+Le ticket 1210 est la réponse d'acceptation de l'opérateur donneur. Si un portage est prévu à J+1 et que le 1210 n'a pas été reçu, il y a un risque de blocage de la portabilité. Le script alerte par opérateur.
 
 ## Email
 
@@ -18,9 +18,9 @@ Le ticket 1210 est la reponse d'acceptation de l'opérateur donneur. Si un porta
 
 ## Logique
 
-Le script vérifié les portages en etat 3 (en cours) avec date_portage = J+1 (ou J+3 le vendredi) pour chaque opérateur donneur (OC, SFRC, DT, UTS, FREEC).
+Le script vérifie les portages en état 3 (en cours) avec date_portage = J+1 (ou J+3 le vendredi) pour chaque opérateur donneur (OC, SFRC, DT, UTS, FREEC).
 
-### Requete type (Orange Caraibe)
+### Requête type (Orange Caraïbe)
 
 ```sql
 SELECT DISTINCT(D.msisdn), P.id_portage,
@@ -38,6 +38,6 @@ Le vendredi, `INTERVAL 1 DAY` devient `INTERVAL 3 DAY` (pour couvrir le lundi).
 ## Action requise
 
 Si des tickets 1210 sont en attente :
-1. Contacter l'opérateur donneur concerne
+1. Contacter l'opérateur donneur concerné
 2. Relancer la demande si nécessaire
-3. Si pas de reponse, le portage sera reporte
+3. Si pas de réponse, le portage sera reporté

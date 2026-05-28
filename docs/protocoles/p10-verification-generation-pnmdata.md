@@ -1,18 +1,18 @@
-﻿# P10 — Verification Generation PNMDATA
+﻿# P10 — Vérification Génération PNMDATA
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01 / vmqproportasync01
 **Utilisateur :** porta_pnmv3
 **Script :** PnmDataManager.sh (automatique)
-**Declencheur :** Verification aux horaires de vacation (10H, 14H, 19H)
+**Déclencheur :** Vérification aux horaires de vacation (10H, 14H, 19H)
 
 ---
 
 ## Contexte
 
-Le PnmDataManager généré les fichiers PNMDATA contenant les tickets de portabilité a transmettre aux autres opérateurs du GPMAG. Les fichiers sont generes a chaque vacation (10H, 14H, 19H) et déposés sur le sFTP inter-opérateurs.
+Le PnmDataManager génère les fichiers PNMDATA contenant les tickets de portabilité à transmettre aux autres opérateurs du GPMAG. Les fichiers sont générés à chaque vacation (10H, 14H, 19H) et déposés sur le sFTP inter-opérateurs.
 
-Chaque fichier contient les tickets de portabilité (1110, 1210, 1410, 1430, etc.) a destination d'un opérateur spécifique.
+Chaque fichier contient les tickets de portabilité (1110, 1210, 1410, 1430, etc.) à destination d'un opérateur spécifique.
 
 ## Horaires des vacations
 
@@ -32,7 +32,7 @@ PNMDATA.02.XX.YYYYMMDD.VN
 - `YYYYMMDD` : date du jour
 - `VN` : numéro de vacation (V1, V2, V3)
 
-## Etapes
+## Étapes
 
 ### 1. Consulter le log PnmDataManager
 
@@ -41,7 +41,7 @@ ssh porta_pnmv3@vmqproportawebdb01
 tail -50 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log
 ```
 
-### 2. Verifier la génération par opérateur
+### 2. Vérifier la génération par opérateur
 
 Pour chaque opérateur (01, 03, 04, 05, 06), vérifier :
 - `Generation du fichier PNMDATA.02.XX.YYYYMMDD.VN` avec le nombre de tickets
@@ -59,9 +59,9 @@ Exemple de log normal :
 
 > **Note :** 0 tickets pour un opérateur est normal si aucune portabilité n'est en cours avec cet opérateur.
 
-### 3. Verifier les fichiers generes sur le serveur
+### 3. Vérifier les fichiers générés sur le serveur
 
-Les fichiers PNMDATA sont stockes dans l'arborescence suivante sur vmqproportasync01 :
+Les fichiers PNMDATA sont stockés dans l'arborescence suivante sur vmqproportasync01 :
 
 ```
 /home/porta_pnmv3/PortaSync/pnmdata/
@@ -89,25 +89,25 @@ ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/arch_send/ | tail -5
 ls -lrt /home/porta_pnmv3/PortaSync/pnmdata/01/recv/
 ```
 
-### 4. Verifier les fichiers sur le sFTP inter-opérateurs
+### 4. Vérifier les fichiers sur le sFTP inter-opérateurs
 
 ```bash
 sftp pnm_02@193.251.160.208
 ls -la /home/pnm_02/out/
 ```
 
-Verifier que les fichiers PNMDATA du jour sont bien presents pour la vacation en cours.
+Vérifier que les fichiers PNMDATA du jour sont bien présents pour la vacation en cours.
 
 ### 4. En cas d'erreur de génération
 
 Si le PnmDataManager n'a pas généré les fichiers :
 
-1. Verifier le log pour identifier l'erreur :
+1. Vérifier le log pour identifier l'erreur :
    ```bash
    tail -100 /home/porta_pnmv3/PortaSync/log/PnmDataManager.log
    ```
 
-2. Verifier la connexion a PortaDB :
+2. Vérifier la connexion à PortaDB :
    ```bash
    mysql -e "SELECT 1;"
    ```
@@ -119,24 +119,24 @@ Si le PnmDataManager n'a pas généré les fichiers :
    ./PnmDataManager.sh
    ```
 
-4. Verifier le check_envoi_vacation pour confirmer que les fichiers ont ete envoyés sur le sFTP
+4. Vérifier le check_envoi_vacation pour confirmer que les fichiers ont été envoyés sur le sFTP
 
-## Regle de cutoff — Affectation des demandes aux vacations
+## Règle de cutoff — Affectation des demandes aux vacations
 
-Les demandes de portabilité reçues sont affectees a la prochaine vacation disponible :
+Les demandes de portabilité reçues sont affectées à la prochaine vacation disponible :
 
 | Heure de réception | Vacation | Jour |
 |---|---|---|
-| Avant 10H | V1 (10H) | Meme jour |
-| 10H - 14H | V2 (14H) | Meme jour |
-| 14H - 19H | V3 (19H) | Meme jour |
-| **Apres 19H** | **V1 (10H)** | **Jour ouvre suivant** |
+| Avant 10H | V1 (10H) | Même jour |
+| 10H - 14H | V2 (14H) | Même jour |
+| 14H - 19H | V3 (19H) | Même jour |
+| **Après 19H** | **V1 (10H)** | **Jour ouvré suivant** |
 
-> Les demandes du week-end s'accumulent et sont traitees le lundi matin a 10H (V1).
+> Les demandes du week-end s'accumulent et sont traitées le lundi matin à 10H (V1).
 
 ## Notes opérationnelles
 
-- Les fichiers PNMDATA sont generes **uniquement les jours ouvrés** (lundi-vendredi).
+- Les fichiers PNMDATA sont générés **uniquement les jours ouvrés** (lundi-vendredi).
 - Le PnmDataManager est planifié dans la crontab de vmqproportasync01 (voir pnm-crontab-scripts.md).
-- Apres la génération, le script check_envoi_vacation vérifié que les fichiers ont bien ete envoyés sur le sFTP.
+- Après la génération, le script check_envoi_vacation vérifie que les fichiers ont bien été envoyés sur le sFTP.
 - Les jours fériés sont exclus via modification de la crontab (voir P17).

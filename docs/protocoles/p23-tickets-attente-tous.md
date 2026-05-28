@@ -1,16 +1,16 @@
 ﻿# P23 — Tickets en attente (tous opérateurs)
 
-**Categorie :** Portabilite
+**Catégorie :** Portabilité
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm_tickets_awaiting.sh
-**Declencheur :** Quotidien (automatique)
+**Déclencheur :** Quotidien (automatique)
 
 ---
 
 ## Contexte
 
-Script complet de surveillance des tickets en attente pour tous les opérateurs. Verifie 3 types de tickets :
+Script complet de surveillance des tickets en attente pour tous les opérateurs. Vérifie 3 types de tickets :
 - **1210** : acceptation portage (J+1)
 - **1430** : confirmation portage (S-1)
 - **3430** : confirmation restitution
@@ -19,23 +19,23 @@ Script complet de surveillance des tickets en attente pour tous les opérateurs.
 
 `[PNM] Ticket(s) en attente` → fwi_pnm_si
 
-## Operateurs verifies
+## Opérateurs vérifiés
 
-- Orange Caraibe (OPD = 1)
+- Orange Caraïbe (OPD = 1)
 - Outremer Telecom / SFR (OPD = 3)
 - Dauphin Telecom (OPD = 4)
-- UTS Caraibe (OPD = 5)
-- Free Caraibes (OPD = 6)
+- UTS Caraïbe (OPD = 5)
+- Free Caraïbes (OPD = 6)
 
-## Tickets surveilles
+## Tickets surveillés
 
 ### 1210 — Acceptation en attente
 
-Portages en etat 3 avec date_portage a J+1 sans ticket 1210 reçu.
+Portages en état 3 avec date_portage à J+1 sans ticket 1210 reçu.
 
 ### 1430 — Confirmation en attente
 
-Portages en etat 9 (portage effectue) entre S-1 et J-3 sans ticket 1430 reçu.
+Portages en état 9 (portage effectué) entre S-1 et J-3 sans ticket 1430 reçu.
 
 ```sql
 -- Exemple : portages OC sans 1430
@@ -58,6 +58,6 @@ Restitutions en attente de confirmation.
 ## Action requise
 
 Si des tickets sont en attente :
-1. Identifier l'opérateur concerne
-2. Verifier si le ticket a ete envoyé dans le dernier fichier PNMDATA
+1. Identifier l'opérateur concerné
+2. Vérifier si le ticket a été envoyé dans le dernier fichier PNMDATA
 3. Si non reçu après 2 vacations, contacter l'opérateur

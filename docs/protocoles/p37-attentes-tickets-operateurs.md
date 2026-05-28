@@ -1,33 +1,33 @@
 ﻿# P37 — Traitement des attentes de tickets opérateurs (mode dégradé)
 
-**Categorie :** Portabilite
-**Declencheur :** Email "[PNM] INCIDENT : Les attentes de tickets" d'un opérateur
+**Catégorie :** Portabilité
+**Déclencheur :** Email "[PNM] INCIDENT : Les attentes de tickets" d'un opérateur
 **Serveur :** vmqproportasync01 (fichiers), vmqprotool01 (SQL MOBI), 172.24.2.21 (FNR), 172.24.119.72 (PortaWs)
-**Temps moyen :** 1h a 2h (selon nombre de MSISDN et complexite)
-**Frequence :** Occasionnelle
+**Temps moyen :** 1h à 2h (selon nombre de MSISDN et complexité)
+**Fréquence :** Occasionnelle
 
 ---
 
 ## Contexte
 
-Un opérateur (generalement Orange Caraibe) envoie un email signalant des tickets en attente (1430, 3430, etc.) qu'il n'a pas reçus. Cela arrive quand :
-- Un portage a ete annule (OPD) mais le ticket de confirmation n'a pas ete émis
+Un opérateur (généralement Orange Caraibe) envoie un email signalant des tickets en attente (1430, 3430, etc.) qu'il n'a pas reçus. Cela arrive quand :
+- Un portage a été annulé (OPD) mais le ticket de confirmation n'a pas été émis
 - Des erreurs E610 ("ID portage existe déjà mais réception d'un flux non attendu") ont bloqué le traitement
-- Le système n'a pas pu generer automatiquement les tickets attendus
+- Le système n'a pas pu générer automatiquement les tickets attendus
 
 Il faut alors créer manuellement un fichier PNMDATA en mode dégradé contenant les tickets manquants.
 
-## Etapes
+## Étapes
 
 ### 1. Analyser les attentes
 
-Ouvrir la piece jointe Excel de l'email et vérifier chaque MSISDN dans Admin-Portal :
+Ouvrir la pièce jointe Excel de l'email et vérifier chaque MSISDN dans Admin-Portal :
 - Type de ticket attendu (1430, 3430, etc.)
-- Statut du portage (Annule, Cloture, En cours)
+- Statut du portage (Annulé, Clôturé, En cours)
 - Historique des tickets émis/reçus
-- Presence d'erreurs E610
+- Présence d'erreurs E610
 
-### 2. Verifier les MSISDN dans MOBI (vmqprotool01)
+### 2. Vérifier les MSISDN dans MOBI (vmqprotool01)
 
 ```sql
 SELECT operation_id, msisdn_no, ST_MSISDN_ID, MSISDN_STATUS, MS_CLASS, MSISDN_CHANGE
@@ -35,14 +35,14 @@ FROM MSISDN
 WHERE MSISDN_no IN ('069XXXXXXX', '069XXXXXXX');
 ```
 
-Verifier le statut des lignes :
-- MSISDN_STATUS = 1 : Actif (ligne encore active, résiliation peut-etre nécessaire)
-- MSISDN_STATUS = 7 : Reaffectable
+Vérifier le statut des lignes :
+- MSISDN_STATUS = 1 : Actif (ligne encore active, résiliation peut-être nécessaire)
+- MSISDN_STATUS = 7 : Réaffectable
 - OPERATION_ID : 1 = Digicel GP, 2 = Digicel MQ, 217 = Wizzee
 
-### 3. Creer le fichier PNMDATA en mode dégradé
+### 3. Créer le fichier PNMDATA en mode dégradé
 
-Utiliser un fichier PNMDATA recent avec des tickets du meme type comme modèle.
+Utiliser un fichier PNMDATA récent avec des tickets du même type comme modèle.
 
 **Structure du fichier :**
 
@@ -52,11 +52,11 @@ Utiliser un fichier PNMDATA recent avec des tickets du meme type comme modèle.
 9876543210|02|YYYYMMDDHHMMSS|NNNNNN
 ```
 
-**En-tete :**
+**En-tête :**
 - `0123456789` : marqueur début
 - `PNMDATA.02.XX` : 02 = Digicel (source), XX = opérateur destinataire
 - `YYYYMMDDHHMMSS` : timestamp du fichier
-- `.NNN` : numéro de séquence (incrementer après le dernier fichier émis)
+- `.NNN` : numéro de séquence (incrémenter après le dernier fichier émis)
 
 **Tickets (exemple 1430) :**
 ```
@@ -64,13 +64,13 @@ Utiliser un fichier PNMDATA recent avec des tickets du meme type comme modèle.
 ```
 - Col.1 : Code ticket (1430, 3430, etc.)
 - Col.2 : OPX (02 = Digicel)
-- Col.3 : Resultat (01 = OK)
+- Col.3 : Résultat (01 = OK)
 - Col.4 : OPR (opérateur receveur)
 - Col.5 : OPD (opérateur donneur, 02 = Digicel)
 - Col.6 : Date du portage d'origine
 - Col.7 : MSISDN
-- Col.8 : Hash MD5 (ID portage — recuperer depuis Admin-Portal)
-- Col.9 : Sequence dans le fichier (0001, 0002, etc.)
+- Col.8 : Hash MD5 (ID portage — récupérer depuis Admin-Portal)
+- Col.9 : Séquence dans le fichier (0001, 0002, etc.)
 - Col.10 : Date de sync
 - Col.11 : Date cible
 
@@ -78,39 +78,39 @@ Utiliser un fichier PNMDATA recent avec des tickets du meme type comme modèle.
 - `9876543210` : marqueur fin
 - `02` : code opérateur
 - `YYYYMMDDHHMMSS` : timestamp
-- `NNNNNN` : nombre total de lignes dans le fichier (en-tete + tickets + pied = N+2)
+- `NNNNNN` : nombre total de lignes dans le fichier (en-tête + tickets + pied = N+2)
 
 ### 4. Conserver le fichier pour envoi par email
 
 Le fichier PNMDATA généré en mode dégradé n'est **pas** déposé dans send/.
-Il est envoyé en **piece jointe** du mail de reponse a l'opérateur (voir étape 8).
-C'est l'opérateur qui l'integrera de son cote.
+Il est envoyé en **pièce jointe** du mail de réponse à l'opérateur (voir étape 8).
+C'est l'opérateur qui l'intégrera de son côté.
 
-### 5. Mettre a jour le FNR
+### 5. Mettre à jour le FNR
 
-Si les MSISDN ont ete portes (portabilité sortante annulee mais bascule effectuee) :
+Si les MSISDN ont été portés (portabilité sortante annulée mais bascule effectuée) :
 
-- Verifier le FNR : http://172.24.2.21/apis/porta/fnr-get-info.html
-- Creer une entree FNR si nécessaire : http://172.24.2.21/apis/porta/fnr-create.php
-- Mettre a jour le FNR : http://172.24.2.21/apis/porta/fnr-update.php
+- Vérifier le FNR : http://172.24.2.21/apis/porta/fnr-get-info.html
+- Créer une entrée FNR si nécessaire : http://172.24.2.21/apis/porta/fnr-create.php
+- Mettre à jour le FNR : http://172.24.2.21/apis/porta/fnr-update.php
 
-### 6. Mettre a jour PortaWs
+### 6. Mettre à jour PortaWs
 
-Modifier l'opérateur associe au MSISDN si nécessaire :
+Modifier l'opérateur associé au MSISDN si nécessaire :
 
 http://172.24.119.72:8080/PortaWs/index.jsp?m=updateMsisdn
 
-### 7. Verifier les tickets 3430 dans PortaWs
+### 7. Vérifier les tickets 3430 dans PortaWs
 
 Si l'opérateur signale aussi des 3430 en attente, vérifier dans Admin-Portal (PortaWs)
-que les tickets 3430 ont bien ete generes et dans quel fichier PNMDATA ils se trouvent.
-Noter le nom du fichier pour l'inclure dans le mail de reponse.
+que les tickets 3430 ont bien été générés et dans quel fichier PNMDATA ils se trouvent.
+Noter le nom du fichier pour l'inclure dans le mail de réponse.
 
-### 8. Envoyer l'email de reponse
+### 8. Envoyer l'email de réponse
 
-Joindre le fichier PNMDATA généré en mode dégradé en piece jointe.
-Dans le corps du mail, preciser le nom du fichier PNMDATA contenant les 3430
-(si concernes) après vérification dans PortaWs.
+Joindre le fichier PNMDATA généré en mode dégradé en pièce jointe.
+Dans le corps du mail, préciser le nom du fichier PNMDATA contenant les 3430
+(si concernés) après vérification dans PortaWs.
 
 ```
 Bonjour,
@@ -130,39 +130,39 @@ Steeven JACQUES
 ```
 
 > **Important :** Le fichier PNMDATA en mode dégradé est envoyé en PJ du mail,
-> pas déposé dans send/. C'est l'opérateur qui l'integrera de son cote.
+> pas déposé dans send/. C'est l'opérateur qui l'intégrera de son côté.
 
-### 9. Resilier les lignes (si portabilité sortante)
+### 9. Résilier les lignes (si portabilité sortante)
 
 Attendre le retour de l'opérateur confirmant la réception du fichier, puis :
 
 **Pour les lignes Digicel (OPERATION_ID = 1 ou 2) :**
-- Resilier via SoapUI (voir protocole P11 — Resiliation manuelle PSO)
+- Résilier via SoapUI (voir protocole P11 — Résiliation manuelle PSO)
 
 **Pour les lignes Wizzee (OPERATION_ID = 217) :**
-- Avertir l'equipe Wizzee par email pour la résiliation des MSISDN Wizzee
+- Avertir l'équipe Wizzee par email pour la résiliation des MSISDN Wizzee
 
 > **Attention MS_CLASS = 80 :** Les MSISDN avec MS_CLASS = 80 sont des lignes Wizzee.
-> Ne pas resilier directement, transmettre a l'equipe Wizzee.
+> Ne pas résilier directement, transmettre à l'équipe Wizzee.
 
 ### 10. Fermer le dossier
 
-- Verifier que l'opérateur a bien reçu et traite le fichier
-- Verifier que les lignes sont résiliées
-- Verifier la cohérence FNR / PortaDB / MOBI
+- Vérifier que l'opérateur a bien reçu et traité le fichier
+- Vérifier que les lignes sont résiliées
+- Vérifier la cohérence FNR / PortaDB / MOBI
 
-## Exemple reel — Ticket du 20/04/2026 (Orange Caraibe)
+## Exemple réel — Ticket du 20/04/2026 (Orange Caraibe)
 
-Orange signale 6 tickets en attente dont 4 x 1430 (portages annules OPD).
+Orange signale 6 tickets en attente dont 4 x 1430 (portages annulés OPD).
 
-**MSISDN concernes :**
+**MSISDN concernés :**
 
 | MSISDN | OPERATION_ID | MS_CLASS | Action |
 |--------|-------------|----------|--------|
-| 0696701813 | 1 (Digicel GP) | 0 | Resiliation SoapUI |
-| 0694243002 | 217 (Wizzee) | 80 | Transmettre equipe Wizzee |
-| 0694257800 | 217 (Wizzee) | 0 | Resiliation SoapUI |
-| 0690152968 | 2 (Digicel MQ) | 0 | Resiliation SoapUI |
+| 0696701813 | 1 (Digicel GP) | 0 | Résiliation SoapUI |
+| 0694243002 | 217 (Wizzee) | 80 | Transmettre équipe Wizzee |
+| 0694257800 | 217 (Wizzee) | 0 | Résiliation SoapUI |
+| 0690152968 | 2 (Digicel MQ) | 0 | Résiliation SoapUI |
 
 **Fichier généré :**
 ```
@@ -176,8 +176,8 @@ Orange signale 6 tickets en attente dont 4 x 1430 (portages annules OPD).
 
 ## Notes opérationnelles
 
-- Toujours utiliser un fichier PNMDATA recent comme modèle pour le format
-- Le numéro de séquence (.005, .006, etc.) doit etre supérieur au dernier fichier émis
-- Le nombre total de lignes dans le pied de page inclut l'en-tete et le pied (tickets + 2)
-- Verifier la cohérence des hash MD5 (ID portage) avec Admin-Portal
+- Toujours utiliser un fichier PNMDATA récent comme modèle pour le format
+- Le numéro de séquence (.005, .006, etc.) doit être supérieur au dernier fichier émis
+- Le nombre total de lignes dans le pied de page inclut l'en-tête et le pied (tickets + 2)
+- Vérifier la cohérence des hash MD5 (ID portage) avec Admin-Portal
 - Les tickets 3430 (restitution) sont différents des 1430 (portage) — vérifier le contexte

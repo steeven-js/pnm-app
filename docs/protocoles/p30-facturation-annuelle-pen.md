@@ -1,6 +1,6 @@
 ﻿# P30 — Facturation annuelle PEN
 
-**Categorie :** Facturation
+**Catégorie :** Facturation
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** Pnm_Facturation_Annuelle_PEN.sh
@@ -10,13 +10,13 @@
 
 ## Contexte
 
-Bilan annuel des portabilités entrantes (PEN) facturees a Digicel, ventile par opérateur donneur. Utilise pour le reporting financier de la portabilité.
+Bilan annuel des portabilités entrantes (PEN) facturées à Digicel, ventilé par opérateur donneur. Utilisé pour le reporting financier de la portabilité.
 
 ## Email
 
 `[PNMV3] Facturation PEN globale sur l'annee YYYY` → fwi_pnm_si
 
-## Requete
+## Requête
 
 ```sql
 SELECT OPERATEUR_DONNEUR, SUM(NOMBRE) AS NOMBRE FROM (
@@ -57,7 +57,7 @@ GROUP BY OPERATEUR_DONNEUR
 ORDER BY NOMBRE DESC;
 ```
 
-## Execution manuelle
+## Exécution manuelle
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01

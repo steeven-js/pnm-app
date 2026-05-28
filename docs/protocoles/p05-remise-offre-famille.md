@@ -1,32 +1,32 @@
-﻿# P05 — Remise offre famille non appliquee
+﻿# P05 — Remise offre famille non appliquée
 
-**Categorie :** Debug / Diagnostic
+**Catégorie :** Debug / Diagnostic
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — remise offre famille absente sur la facture
-**Temps moyen :** 15 a 30 min
-**Frequence :** Moderee
+**Déclencheur :** Ticket RT — remise offre famille absente sur la facture
+**Temps moyen :** 15 à 30 min
+**Fréquence :** Modérée
 
 ---
 
 ## Contexte
 
-Corriger une remise offre famille qui n'apparait pas sur la facture malgre l'activation. Cela concerne les items de remise (ex: 3920854 pour offre famille, 3807700 pour remise -10,01EUR/mois) qui sont absents de la table `LINE_ACTIVE_ITEM`.
+Corriger une remise offre famille qui n'apparaît pas sur la facture malgré l'activation. Cela concerne les items de remise (ex: 3920854 pour offre famille, 3807700 pour remise -10,01EUR/mois) qui sont absents de la table `LINE_ACTIVE_ITEM`.
 
-Ce problème survient frequemment dans deux situations :
-1. **Remise non propagee** : l'item est dans `RATP_ITEM` mais n'a pas ete propage dans la LAI (Ligne Active Item)
-2. **Remise annulee suite a un changement de titulaire (CTI)** : lors d'un CTI, les remises de la ligne source sont automatiquement supprimees et doivent etre reinserees manuellement
+Ce problème survient fréquemment dans deux situations :
+1. **Remise non propagée** : l'item est dans `RATP_ITEM` mais n'a pas été propagé dans la LAI (Ligne Active Item)
+2. **Remise annulée suite à un changement de titulaire (CTI)** : lors d'un CTI, les remises de la ligne source sont automatiquement supprimées et doivent être réinsérées manuellement
 
 ## Items de remise courants
 
 | Code item | Description | Montant |
 |-----------|-------------|---------|
 | 3920854 | Remise offre famille | Variable |
-| 3807700 | Remise -10,01EUR/mois a VIE | -10,01 EUR/mois |
+| 3807700 | Remise -10,01EUR/mois à VIE | -10,01 EUR/mois |
 
-## Etapes
+## Étapes
 
-### 1. Connexion a Oracle MOBI
+### 1. Connexion à Oracle MOBI
 
 Se connecter au serveur via mRemoteNG (en root), basculer vers oracle, puis ouvrir Oracle MOBI.
 
@@ -35,7 +35,7 @@ su - oracle
 sqlplus pb/gaston@MCST50A.BTC.COM
 ```
 
-### 2. Recuperer le LINE_NO du client
+### 2. Récupérer le LINE_NO du client
 
 ```sql
 SELECT LINE_NO, LINE_MSISDN_ACTIVE, LI_CUSTOMER_NO
@@ -45,7 +45,7 @@ WHERE LINE_MSISDN_ACTIVE = '069XXXXXXX';
 
 > **Attention :** Noter le LINE_NO, il sera nécessaire pour l'étape 4.
 
-### 3. Verifier si l'item est déjà present dans LINE_ACTIVE_ITEM
+### 3. Vérifier si l'item est déjà présent dans LINE_ACTIVE_ITEM
 
 ```sql
 SELECT LINE_NO, ITEM_CODE, LI_START_BILL_DATE, LI_END_BILL_DATE
@@ -54,12 +54,12 @@ WHERE LINE_NO = 'XXXXXXX'
 AND ITEM_CODE = '3920854';
 ```
 
-Si aucun résultat : l'item est absent, il faut le reinserer.
-Si present avec LI_END_BILL_DATE dans le passe : l'item a expire, il faut le reinitialiser.
+Si aucun résultat : l'item est absent, il faut le réinsérer.
+Si présent avec LI_END_BILL_DATE dans le passé : l'item a expiré, il faut le réinitialiser.
 
 ### 4. Supprimer l'item existant (nettoyage)
 
-Inserer une demande de suppression dans RATP_ITEM puis executer la procédure.
+Insérer une demande de suppression dans RATP_ITEM puis exécuter la procédure.
 
 ```sql
 -- Suppression item existant
@@ -77,9 +77,9 @@ BEGIN
 END;
 ```
 
-### 5. Reinserer l'item offre famille
+### 5. Réinsérer l'item offre famille
 
-Inserer l'item et executer la procédure d'insertion dans la LAI.
+Insérer l'item et exécuter la procédure d'insertion dans la LAI.
 
 ```sql
 -- Ajout item offre famille
@@ -97,13 +97,13 @@ BEGIN
 END;
 ```
 
-**Procedures stockees :**
-- `PB.SUPP_ITEM_MASSE` : supprimé les items marques 'SUPPRESSION' dans RATP_ITEM
-- `PB.RATP_ITEM_MANQUANT_2` : propage les items marques 'AJOUT' depuis RATP_ITEM vers LINE_ACTIVE_ITEM (la LAI)
+**Procédures stockées :**
+- `PB.SUPP_ITEM_MASSE` : supprime les items marqués 'SUPPRESSION' dans RATP_ITEM
+- `PB.RATP_ITEM_MANQUANT_2` : propage les items marqués 'AJOUT' depuis RATP_ITEM vers LINE_ACTIVE_ITEM (la LAI)
 
-### 6. Mettre a jour les dates dans LINE_ACTIVE_ITEM
+### 6. Mettre à jour les dates dans LINE_ACTIVE_ITEM
 
-Mettre les dates de fin a 31/12/2050 pour que la remise reste active indefiniment.
+Mettre les dates de fin à 31/12/2050 pour que la remise reste active indéfiniment.
 
 ```sql
 UPDATE LINE_ACTIVE_ITEM
@@ -114,11 +114,11 @@ AND ITEM_CODE = '3920854';     -- l'item offre famille
 COMMIT;
 ```
 
-> **Attention :** Recuperer le LINE_NO correct a l'étape 2 avant d'executer.
+> **Attention :** Récupérer le LINE_NO correct à l'étape 2 avant d'exécuter.
 
-### 7. Cas particulier : Remise perdue suite a un changement de titulaire (CTI)
+### 7. Cas particulier : Remise perdue suite à un changement de titulaire (CTI)
 
-Lors d'un CTI (changement de titulaire), les remises sont automatiquement annulees. Pour les reinserer :
+Lors d'un CTI (changement de titulaire), les remises sont automatiquement annulées. Pour les réinsérer :
 
 ```sql
 -- Insertion remise -10,01EUR/mois (code item 3807700)
@@ -136,9 +136,9 @@ BEGIN
 END;
 ```
 
-Puis mettre a jour les dates de fin (étape 6) avec le bon ITEM_CODE (3807700 au lieu de 3920854).
+Puis mettre à jour les dates de fin (étape 6) avec le bon ITEM_CODE (3807700 au lieu de 3920854).
 
-(Voir ticket #276220 — remise annulee suite CTI, client 2318525)
+(Voir ticket #276220 — remise annulée suite CTI, client 2318525)
 
 ### 8. Fermer le ticket RT
 
@@ -152,10 +152,10 @@ Cdt,
 Équipe Application
 ```
 
-## Tables impliquees
+## Tables impliquées
 
-| Table | Role |
+| Table | Rôle |
 |-------|------|
-| `RATP_ITEM` | File d'attente des modifications d'items (ajout/suppression). Traitee par les procédures PB. |
+| `RATP_ITEM` | File d'attente des modifications d'items (ajout/suppression). Traitée par les procédures PB. |
 | `LINE_ACTIVE_ITEM` | Items actifs sur chaque ligne. Contient les remises, options, services. |
 | `LINE` | Lignes clients. Lien entre MSISDN et LINE_NO/DOSSIER_NO/LI_CUSTOMER_NO. |

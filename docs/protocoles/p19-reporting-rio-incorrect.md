@@ -1,25 +1,25 @@
 ﻿# P19 — Reporting RIO incorrect (Refus R123)
 
-**Categorie :** Debug / Diagnostic
+**Catégorie :** Debug / Diagnostic
 **Serveur :** vmqproportawebdb01
 **Utilisateur :** porta_pnmv3
 **Script :** check_refus_porta_rio_incorrect.sh
-**Declencheur :** Automatique (jours ouvrés) + suspicion de fraude
+**Déclencheur :** Automatique (jours ouvrés) + suspicion de fraude
 
 ---
 
 ## Contexte
 
-Le code motif R123 = "RIO incorrect". Un nombre eleve de refus R123 peut indiquer une tentative de fraude en masse (portabilité avec des RIO falsifies).
+Le code motif R123 = "RIO incorrect". Un nombre élevé de refus R123 peut indiquer une tentative de fraude en masse (portabilité avec des RIO falsifiés).
 
-## Execution automatique
+## Exécution automatique
 
-Le script s'exécute chaque jour ouvre et envoie un email :
+Le script s'exécute chaque jour ouvré et envoie un email :
 `[PNM] Reporting sur les cas de refus avec motif RIO incorrect`
 
-Destinataires : fwi_pnm_si + equipe fraude (linda.haustant, karine.bidoyet, audrey.dorwling-carter, teddy.moravie)
+Destinataires : fwi_pnm_si + équipe fraude (linda.haustant, karine.bidoyet, audrey.dorwling-carter, teddy.moravie)
 
-## Execution manuelle
+## Exécution manuelle
 
 ```bash
 ssh porta_pnmv3@vmqproportawebdb01
@@ -27,7 +27,7 @@ cd /home/porta_pnmv3/Scripts/
 ./check_refus_porta_rio_incorrect.sh
 ```
 
-## Requetes détaillées
+## Requêtes détaillées
 
 ### Comptage refus porta entrante (R123)
 
@@ -41,7 +41,7 @@ AND date(date_creation_ticket) = 'YYYY-MM-DD'
 AND code_motif = 'R123';
 ```
 
-### Detail par opérateur
+### Détail par opérateur
 
 ```sql
 SELECT upper(D.source), O.nom, count(*)
@@ -54,7 +54,7 @@ AND code_motif = 'R123'
 GROUP BY source, operateur_origine;
 ```
 
-### Identification des MSISDN provisoires concernes
+### Identification des MSISDN provisoires concernés
 
 ```sql
 SELECT PD.temporary_msisdn AS msisdn_provisoire, P.msisdn AS msisdn_a_porter
@@ -71,8 +71,8 @@ AND P.id_portage IN (
 AND PD.temporary_msisdn IS NOT NULL;
 ```
 
-## Interpretation
+## Interprétation
 
-- Lundi : le script vérifié J-3 (couvre le week-end)
-- Autres jours : le script vérifié J-1
-- Si nb_refus eleve → alerter l'equipe fraude pour investigation
+- Lundi : le script vérifie J-3 (couvre le week-end)
+- Autres jours : le script vérifie J-1
+- Si nb_refus élevé → alerter l'équipe fraude pour investigation

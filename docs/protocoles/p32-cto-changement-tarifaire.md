@@ -1,21 +1,21 @@
 ﻿# P32 — CTO / Changement Tarifaire d'Offre
 
-**Categorie :** Exploitation
+**Catégorie :** Exploitation
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — erreur CTO "L'offre selectionnee n'est pas permise pour un changement de type d'offre"
-**Temps moyen :** 30 min a 3 jours (selon clarification offres)
-**Frequence :** Moderee (~264 tickets/an catégorie "Offre / Forfait")
+**Déclencheur :** Ticket RT — erreur CTO "L'offre sélectionnée n'est pas permise pour un changement de type d'offre"
+**Temps moyen :** 30 min à 3 jours (selon clarification offres)
+**Fréquence :** Modérée (~264 tickets/an catégorie "Offre / Forfait")
 
 ---
 
 ## Contexte
 
-Le CTO (Changement Tarifaire d'Offre) permet de changer l'offre d'un client sans résiliation. Quand le CDC tente un CTO dans MasterCRM, il peut obtenir l'erreur : *"L'offre selectionnee n'est pas permise pour un changement de type d'offre... Veuillez en choisir une autre !"*
+Le CTO (Changement Tarifaire d'Offre) permet de changer l'offre d'un client sans résiliation. Quand le CDC tente un CTO dans MasterCRM, il peut obtenir l'erreur : *"L'offre sélectionnée n'est pas permise pour un changement de type d'offre... Veuillez en choisir une autre !"*
 
 Cela signifie que l'**item de transition** (item CTO) entre l'offre source et l'offre cible n'existe pas dans la base. Il faut le créer manuellement via un script SQL.
 
-## Regle metier importante
+## Règle métier importante
 
 > **Pas de CTO cross-territoire : Antilles ↔ Guyane est interdit.**
 >
@@ -28,14 +28,14 @@ Exemples d'identifiants territoriaux dans les noms d'offres :
 
 (Voir ticket #276330 — règle cross-territoire bloquant un CTO)
 
-## Tickets de reference
+## Tickets de référence
 
 | Ticket | Offre source | Offre cible | Client |
 |--------|-------------|-------------|--------|
 | #276514 | 13429 (LIFE Pro 240Go Bloque G/IDN AM 24) | 13091 (LIFE PRO 1h-1Go Bloque GUYIDN AM 24) | B2B 2157497 |
 | #276330 | 13429 (LIFE Pro 240Go Bloque G/IDN AM 24) | 13092 (LIFE PRO 1h-1Go Bloque GUYIDN SM 24) | B2B 2157497 |
 
-## Etapes
+## Étapes
 
 ### 1. Clarifier les offres source et cible
 
@@ -44,9 +44,9 @@ Avant toute intervention, vérifier avec le CDC :
 - Le **pack_code** ou nom exact de l'offre cible
 - Le territoire (Antilles vs Guyane)
 
-> **Attention :** Les captures d'ecran du CDC peuvent etre illisibles. Demander les codes offres exacts si nécessaire.
+> **Attention :** Les captures d'écran du CDC peuvent être illisibles. Demander les codes offres exacts si nécessaire.
 
-### 2. Connexion a Oracle MOBI
+### 2. Connexion à Oracle MOBI
 
 ```bash
 su - oracle
@@ -70,7 +70,7 @@ WHERE PACK_DESCRIPTION LIKE '%LIFE PRO%1h-1Go%';
 
 > **Note :** La table `PACKAGE_DEF` n'existe pas dans Oracle MOBI. Rechercher les offres via `CUSTOMER_PACKAGE`.
 
-### 4. Verifier l'historique CTO du client
+### 4. Vérifier l'historique CTO du client
 
 ```sql
 -- Verifier les CTO déjà effectues pour ce client
@@ -82,15 +82,15 @@ ORDER BY CTO_DATE DESC;
 
 > **Note :** La table de trace CTO est `TRACE_CTO` (pas `CTO_TRANSITION` qui n'existe pas).
 
-### 5. Creer l'item CTO
+### 5. Créer l'item CTO
 
-Le script SQL de création est **spécifique a chaque cas** et generalement fourni en piece jointe du ticket RT.
+Le script SQL de création est **spécifique à chaque cas** et généralement fourni en pièce jointe du ticket RT.
 
 Format de nommage du script SQL : `RT#XXXXXX-CTO_[source]_vers_[cible].sql`
 
 Exemple : `RT#276514-CTO_LP72M24 vers L1BAMG2.sql`
 
-Forme generale de la création :
+Forme générale de la création :
 ```sql
 -- Creation de l'item de transition CTO
 -- Offre source : XXXX (description)
@@ -100,11 +100,11 @@ VALUES ('XXXX', 'YYYY', ...);
 COMMIT;
 ```
 
-> **Attention :** Chaque CTO est unique. Utiliser le script SQL joint au ticket RT ou le generer selon les spécifications du cas.
+> **Attention :** Chaque CTO est unique. Utiliser le script SQL joint au ticket RT ou le générer selon les spécifications du cas.
 
 ### 6. Cas particulier : CTO bloqué (item actif)
 
-Si le CTO est déjà configure mais bloqué (item CTO actif dans `customer_package`) :
+Si le CTO est déjà configuré mais bloqué (item CTO actif dans `customer_package`) :
 
 ```sql
 -- Liberer l'item CTO bloqué
@@ -132,7 +132,7 @@ Fermer le ticket (statut : résolu).
 
 ## Notes opérationnelles
 
-- **Delai** : le CTO peut prendre 1-3 jours si les offres doivent etre clarifiees avec le CDC (captures illisibles, noms d'offres ambigus).
-- **Clients B2B** : les CTO B2B sont plus frequents car les entreprises changent souvent de forfait pour plusieurs lignes.
-- **Script SQL en PJ** : le script SQL de création de l'item CTO est souvent généré et attache en PJ du ticket RT. Toujours le vérifier avant exécution.
-- **Meme client, plusieurs lignes** : un meme client B2B peut demander le CTO sur plusieurs lignes simultanement. Creer les items CTO pour toutes les transitions nécessaires en une seule intervention.
+- **Délai** : le CTO peut prendre 1-3 jours si les offres doivent être clarifiées avec le CDC (captures illisibles, noms d'offres ambigus).
+- **Clients B2B** : les CTO B2B sont plus fréquents car les entreprises changent souvent de forfait pour plusieurs lignes.
+- **Script SQL en PJ** : le script SQL de création de l'item CTO est souvent généré et attaché en PJ du ticket RT. Toujours le vérifier avant exécution.
+- **Même client, plusieurs lignes** : un même client B2B peut demander le CTO sur plusieurs lignes simultanément. Créer les items CTO pour toutes les transitions nécessaires en une seule intervention.

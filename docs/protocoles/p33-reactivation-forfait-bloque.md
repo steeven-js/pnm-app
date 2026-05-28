@@ -1,39 +1,39 @@
-﻿# P33 — Reactivation forfait bloqué SM
+﻿# P33 — Réactivation forfait bloqué SM
 
-**Categorie :** Exploitation
+**Catégorie :** Exploitation
 **Serveur :** vmqprostdb01
 **Utilisateur :** oracle
-**Declencheur :** Ticket RT — forfait bloqué SM[24] ou similaire
-**Temps moyen :** 2h a 1 jour (processus multi-étapes avec interaction CDC)
-**Frequence :** Moderee (~242 tickets/an catégorie "Reengagement / Reactivation")
+**Déclencheur :** Ticket RT — forfait bloqué SM[24] ou similaire
+**Temps moyen :** 2h à 1 jour (processus multi-étapes avec interaction CDC)
+**Fréquence :** Modérée (~242 tickets/an catégorie "Réengagement / Réactivation")
 
 ---
 
 ## Contexte
 
-Un forfait peut etre bloqué avec le code SM[24] (Souscription Minimale 24 mois), SM[12] ou autre code SM. Le client ne peut plus utiliser son forfait normalement. La réactivation est un processus en **plusieurs étapes** impliquant :
+Un forfait peut être bloqué avec le code SM[24] (Souscription Minimale 24 mois), SM[12] ou autre code SM. Le client ne peut plus utiliser son forfait normalement. La réactivation est un processus en **plusieurs étapes** impliquant :
 
 1. Restriction des droits et libération de l'offre (SQL)
 2. Libération de l'IMEI (APP_OCS)
-3. Reactivation de la ligne par le CDC
-4. Mise a jour des dates de fidelisation (APP_OCS 11561)
+3. Réactivation de la ligne par le CDC
+4. Mise à jour des dates de fidélisation (APP_OCS 11561)
 
-## Symptomes
+## Symptômes
 
-- Forfait affiche comme "bloqué" dans MasterCRM
+- Forfait affiché comme "bloqué" dans MasterCRM
 - Code blocage SM[24], SM[12], etc.
-- Client ne beneficie plus de son forfait
+- Client ne bénéficie plus de son forfait
 
-## Tickets de reference
+## Tickets de référence
 
 | Ticket | Forfait | Client | Pack_id |
 |--------|---------|--------|---------|
 | #276492 | LIFE Premium 50Go Bloque AM 12 mois | 1988854 | 13291 |
 | #275916 | LIFE Premium 100Go Bloque SM[24] | 2315747 | — |
 
-## Etapes
+## Étapes
 
-### 1. Verifier l'etat du forfait dans MOBI
+### 1. Vérifier l'état du forfait dans MOBI
 
 ```bash
 su - oracle
@@ -56,7 +56,7 @@ AND PACK_END_ACTIVATION IS NULL;
 
 ### 2. Restriction des droits (package_right)
 
-Supprimer les droits du package pour permettre la mise a disposition de l'offre en reaffectation.
+Supprimer les droits du package pour permettre la mise à disposition de l'offre en réaffectation.
 
 ```sql
 DELETE package_right
@@ -65,9 +65,9 @@ AND pack_level_point NOT IN (0, 1, 2, 3, 5999996, 5999997, 5999998, 5999999);
 COMMIT;
 ```
 
-> **Attention :** Les `pack_level_point` preserves (0, 1, 2, 3, 5999996-5999999) sont les niveaux de base du système. Ne JAMAIS les supprimer.
+> **Attention :** Les `pack_level_point` préservés (0, 1, 2, 3, 5999996-5999999) sont les niveaux de base du système. Ne JAMAIS les supprimer.
 
-### 3. Mise a disposition de l'offre
+### 3. Mise à disposition de l'offre
 
 ```sql
 UPDATE customer_package
@@ -78,7 +78,7 @@ COMMIT;
 
 ### 4. Libération IMEI
 
-Liberer l'IMEI du client via APP_OCS (voir protocole P01 — Libération IMEI).
+Libérer l'IMEI du client via APP_OCS (voir protocole P01 — Libération IMEI).
 
 ### 5. Informer le CDC
 
@@ -94,33 +94,33 @@ Cdt,
 
 ### 6. Attendre activation par le CDC
 
-Le CDC reactive la ligne du client dans MasterCRM/Hub. Attendre sa confirmation.
+Le CDC réactive la ligne du client dans MasterCRM/Hub. Attendre sa confirmation.
 
-### 7. MAJ dates fidelisation via APP_OCS 11561
+### 7. MAJ dates fidélisation via APP_OCS 11561
 
-Apres confirmation de l'activation par le CDC, mettre a jour les dates de fidelisation.
+Après confirmation de l'activation par le CDC, mettre à jour les dates de fidélisation.
 
-Acceder a APP_OCS :
+Accéder à APP_OCS :
 ```
 http://172.24.114.165/OCS/supervision/index.php
 ```
 
-Executer la requête **11561** (MAJ_date_FID) :
+Exécuter la requête **11561** (MAJ_date_FID) :
 - MSISDN du client
-- Numero de ticket RT
+- Numéro de ticket RT
 - Type : MAJ_date_FID
-- date_fin_abo : null (sauf si reengagement)
+- date_fin_abo : null (sauf si réengagement)
 - date_ref_anciennete : date d'origine du contrat
-- date_eligible_fid : date d'eligibilite calculee
+- date_eligible_fid : date d'éligibilité calculée
 
-APP_OCS met a jour automatiquement :
+APP_OCS met à jour automatiquement :
 - `date_fin_abo`
 - `date_ref_anciennete`
 - `date_eligible_fid`
 
-### 8. Verifier la trace APP_OCS
+### 8. Vérifier la trace APP_OCS
 
-Un commentaire automatique est poste sur le ticket RT :
+Un commentaire automatique est posté sur le ticket RT :
 
 ```
 msisdn = '069XXXXXXX', date_fin_abo = null, date_ref_anciennete = DD/MM/YYYY,
@@ -148,26 +148,26 @@ Cdt,
 Client CHARLES CHRISTELLE, 1988854, MSISDN 0690077091, IMEI 351199557969685
 Forfait : LIFE Premium 50Go Bloque AM 12 mois (pack_id 13291)
 
-| Etape | Action | SQL/Outil |
+| Étape | Action | SQL/Outil |
 |-------|--------|-----------|
 | 1 | Restriction droits | `DELETE package_right WHERE pack_id IN (13291) AND pack_level_point NOT IN (0,1,2,3,5999996,5999997,5999998,5999999)` |
 | 2 | Libération offre | `UPDATE customer_package SET pack_end_activation = '21/03/2026' WHERE pack_id IN ('13291')` |
 | 3 | Libération IMEI | APP_OCS script oracle (liberation_imei_info_*.txt) |
-| 4 | Reponse CDC | "L'offre est disponible et l'IMEI a ete libere." |
-| 5 | Attente | CDC reactive la ligne |
+| 4 | Réponse CDC | "L'offre est disponible et l'IMEI a été libéré." |
+| 5 | Attente | CDC réactive la ligne |
 | 6 | MAJ FID | APP_OCS 11561 : msisdn='0690077091', date_ref_anciennete=10/12/2024, date_eligible_fid=09/12/2025, type=MAJ_date_FID |
 
-## Tables impliquees
+## Tables impliquées
 
 | Table | Role |
 |-------|------|
-| `CUSTOMER_PACKAGE` | Offres attribuees. `pack_end_activation` NULL = active. |
+| `CUSTOMER_PACKAGE` | Offres attribuées. `pack_end_activation` NULL = active. |
 | `PACKAGE_RIGHT` | Droits/niveaux de service du package. Suppression nécessaire avant libération. |
 | `LINE` | Lignes clients. Lien MSISDN ↔ LI_CUSTOMER_NO. |
 
 ## Notes opérationnelles
 
-- Ce processus est **multi-étapes** avec interaction CDC — prevoir 2h minimum, jusqu'a 1 jour.
+- Ce processus est **multi-étapes** avec interaction CDC — prévoir 2h minimum, jusqu'à 1 jour.
 - La restriction des droits (`package_right`) est **obligatoire** avant la libération de l'offre pour les forfaits bloqués.
 - Si le CDC ne confirme pas l'activation rapidement, le ticket reste ouvert en attente.
-- Le code SM[24] signifie "Souscription Minimale 24 mois" — le forfait est engage pour 24 mois minimum.
+- Le code SM[24] signifie "Souscription Minimale 24 mois" — le forfait est engagé pour 24 mois minimum.
