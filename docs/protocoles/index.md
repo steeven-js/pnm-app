@@ -12,7 +12,7 @@
 - [P03 — Libération SIM](p03-liberation-sim.md) — SQL MOBI, vérification ligne active, format ICCID
 - [P04 — Libération Offre](p04-liberation-offre.md) — customer_package + package_right, libération simple/avec restriction
 
-## Exploitation (8)
+## Exploitation (9)
 
 - [P06 — MAJ Fidelisation APP_OCS 11561](p06-maj-fidelisation-11561.md) — Reengagement 24 mois, report mois FID, MAJ date
 - [P07 — Annulation Fidelisation APP_OCS 11605](p07-annulation-fidelisation-11605.md) — Multi-étapes 2-3 jours, interaction CDC
@@ -22,6 +22,7 @@
 - [P32 — CTO Changement tarifaire bloqué](p32-cto-changement-tarifaire.md) — Item CTO, règle cross-territoire Antilles/Guyane
 - [P33 — Reactivation forfait bloqué SM](p33-reactivation-forfait-bloque.md) — Multi-étapes : restriction droits + libération + FID
 - [P34 — Desactivation suppression Point de Vente](p34-desactivation-pdv.md) — Del_profil_Mobi, suppression items/packages/groups PDV
+- [P45 — Création d'un compte MasterCRM (nouveau collaborateur)](p45-creation-compte-mastercrm.md) — Clone profil compte source, Creation_compte_CRM_USER.sh, confirmer en O majuscule
 
 ## Portabilite (13)
 
