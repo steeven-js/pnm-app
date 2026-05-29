@@ -45,6 +45,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: 'P43 — PSO non résiliée suite au bug PortaWs (E610), résiliation manuelle SoapUI' },
       { type: 'new', description: 'P44 — PSO clôturée mais ligne fantôme côté opérateur receveur (provisioning KO)' },
       { type: 'new', description: 'P45 — Création d\'un compte MasterCRM pour nouveau collaborateur (clone profil, Creation_compte_CRM_USER.sh)' },
+      { type: 'new', description: 'P46 — DAPI : Portail(s) PortaWebUi/PortaWs indisponible(s) (Manager Tomcat recharger, redémarrage CLI Tomcat/MySQL, escalade SYS/BASES)' },
       { type: 'new', description: 'Doc référence : préfixes de routage RN — anciens (60041-60048) et nouveaux territorialisés (52301-52333)' },
       { type: 'new', description: 'Doc FNR — périmètre, visibilité et fonctionnement (diagrammes Mermaid)' },
       { type: 'new', description: 'GPMAG — suivi des tests inter-opérateurs (extrait du fichier de suivi v2.7)' },

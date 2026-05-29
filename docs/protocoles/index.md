@@ -52,9 +52,10 @@
 
 - [P36 — Automates Back Office MasterCRM](p36-automates-mastercrm.md) — WATCHER, BASCULE_IN, EXPLOIT, LOGISTIQUE, RATP_OLN, TRACE
 
-## Maintenance / Exploitation (1)
+## Maintenance / Exploitation (2)
 
 - [P41 — Création / modification d'un script PNM](p41-creation-modification-script.md) — Cheatsheet commandes, téléversement Filezilla/SCP, chmod, test, ajout `/etc/crontab`, rollback
+- [P46 — DAPI : Portail(s) indisponible(s)](p46-dapi-portails-indisponibles.md) — Manager Tomcat (recharger), redémarrage CLI Tomcat / MySQL, escalade SYS/BASES
 
 ## Coordination inter-opérateurs (1)
 
