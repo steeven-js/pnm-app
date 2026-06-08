@@ -19,6 +19,7 @@ Quand on te pose une question sur l'architecture Digicel, les operations PNM, le
 
 ### MOBI / MasterCRM
 - `docs/mobi/mobi-architecture.md` — Architecture CRM MOBI : 8 dimensions (architecture technique, microservices, WS SOAP, BDD MasterCRM, interactions DAPI-MOBI, applications clientes, infrastructure, procedures). Matrice de 61 sous-elements avec statuts connu/inconnu. Roadmap d'apprentissage 3 niveaux.
+- `docs/mobi/mobi-options-reengageantes.md` — Projet « Options reengageantes » (anti-churn) : option de reengagement en fin d'engagement, avenant legal PDF (email = avenant), ajout `OPTION_ID` via WS<->DB MasterCRM en INT (172.24.114.205). Perimetre test Steeven + matrice de scenarios (A-G) + questions ouvertes. Document vivant.
 
 ### Reglementaire
 - `docs/reglementaire/annexes-inter-operateurs.md` — Cadre GPMAG/ARCEP consolide (4 annexes) : references ARCEP, delais detailles, motifs refus (codes R/A), motifs annulation (codes C), codes erreurs fichiers (E000-E999), qualite de service, gestion incidents inter-OP, securite sFTP/SSH, tests.

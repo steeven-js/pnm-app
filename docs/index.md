@@ -19,6 +19,7 @@
 | Document | Description |
 |----------|-------------|
 | mobi-architecture.md | *(à créer)* Architecture CRM MOBI : microservices, WS SOAP, BDD MasterCRM, interactions DAPI-MOBI, infrastructure — base : matrice 61 éléments session BMAD 03-13 |
+| [mobi-options-reengageantes.md](mobi/mobi-options-reengageantes.md) | **Projet « Options réengageantes »** (anti-churn) : avenant légal PDF, ajout option `OPTION_ID` via WS↔DB MasterCRM (INT), périmètre test Steeven + matrice de scénarios — *document vivant* |
 | mobi-cas-pratiques.md | *(futur)* Cas pratiques MOBI/MasterCRM : scénarios opérationnels, workflows métier |
 | mobi-sql-queries.md | *(futur)* Requêtes SQL diagnostiques MasterCRM |
 
