@@ -112,15 +112,36 @@ WHERE ST_MSISDN_ID = 0 AND MSISDN_STATUS = 7 AND MS_CLASS = 0
 
 > ⚠️ `MCST50A` = MasterCRM **production**. Pour un test **INT**, si l'environnement a son propre stock, prendre un numéro libre dans **MasterCRM INT (`MCSTINT`, `172.24.114.205`)** pour que le provisioning à la bascule réussisse. Rester en `SELECT` (ne rien réserver/écrire).
 
-3. Vérifier en base INT : portage créé, état **En cours (3)**, et noter l'**`id_portage`** (MD5) :
+3. Valider → message **« Votre demande a été prise en compte avec succès ! »**
+
+![Demande prise en compte — état initial du portage](images/p47-portawebui-int-demande-acceptee.png)
+
+4. **Relever la date de souscription exacte** affichée (ex. `12/06/2026 14:27:43` → `20260612142743`) : elle conditionne l'`id_portage` MD5 du 1210 (étape 4).
+5. Vérifier en base INT : portage créé, état **En cours (3)**, et noter l'**`id_portage`** (MD5) :
 
 ```sql
 SELECT P.id_portage, P.etat_id_actuel, P.date_portage, D.msisdn
 FROM PORTAGE P JOIN DATA D ON P.id_portage = D.id_portage
-WHERE D.msisdn = '069XXXXXXX';
+WHERE D.msisdn = '0696301129';
 ```
 
-4. Le 1110 part dans le fichier `PNMDATA.02.01.<horodatage>.<seq>` à la vacation suivante (10H/14H/19H). En INT, il n'est lu par personne — c'est normal.
+6. Le 1110 part dans le fichier `PNMDATA.02.01.<horodatage>.<seq>` à la vacation suivante (10H/14H/19H). En INT, il n'est lu par personne — c'est normal.
+
+> ⚠️ **Alerte profil du numéro provisoire.** Si PortaWebUi affiche un avertissement type *« Client B2B / BOX 4G »* à côté de la ligne, c'est que le **numéro provisoire** choisi porte un profil résiduel dans le CRM (cas typique d'un numéro pris dans le stock **production** au lieu de l'INT). Pour un test GP propre, prendre un provisoire au **profil neutre / grand public** libre côté INT. L'avertissement n'est pas bloquant pour la saisie, mais peut fausser le provisioning à la bascule.
+
+### Adapter selon le territoire / la tranche
+
+Le RIO reste préfixé `01P` quel que soit le territoire (code opérateur + type client). Ce qui change par île :
+
+| Territoire | Code postal émetteur | Tranches Orange (n° à porter) | Provisoire Digicel | Préfixe FNR Orange |
+|-----------|----------------------|-------------------------------|--------------------|--------------------|
+| Guadeloupe | `971xx` | `0690`, `0691` | `0694` / `0695` libre | `52303` (anc. `60041`) |
+| Martinique | `972xx` | `0696`, `0697` | `0696` / `0694` libre | `52313` |
+| Guyane | `973xx` | `0694` (sous-tranches Orange) | `0694` libre | `52333` |
+
+- Le **numéro à porter** doit tomber dans une **tranche Orange active du même territoire** (étape 1, table `TRANCHE`).
+- Le **numéro provisoire** doit être un Digicel **libre** du même territoire (étape « stock 211 »).
+- Le **code postal émetteur** doit correspondre au territoire (971/972/973).
 
 ## Étape 4 — Simuler le 1210 d'Orange
 
@@ -146,7 +167,17 @@ Champs du ticket 1210 (RP Accept, OPD → OPR) :
 | code-acceptation-ou-refus | `A001` (demande éligible) |
 | date-création-ticket | horodatage du fichier |
 
-> Le générateur **pnm-app → Outils → PnmDataGenerator** construit ce fichier (header/footer, MD5 id-portage selon Annexe 4).
+> Le générateur **pnm-app → Outils → PnmDataGenerator** construit ce fichier (header/footer, MD5 id-portage selon Annexe 4). Script CLI équivalent : `tests-int/gen_1210.py`.
+
+**Exemple concret (test du 12/06/2026, MSISDN `0696301129`, souscription `20260612142743`) :**
+
+```
+0123456789|PNMDATA.01.02.20260612145429.001|01|20260612145429
+1210|01|02|02|01|20260612142743|0696301129|2edf2f024ad3bd81a8add0ef9de3a97d|0001|A001|20260612145429||
+9876543210|01|20260612145429|000003
+```
+
+> `id-portage = md5("02"+"01"+"20260612142743"+"0696301129") = 2edf2f024ad3bd81a8add0ef9de3a97d`.
 
 **Injection :** déposer le fichier dans le répertoire de réception PortaSync INT (équivalent INT de `PortaSync/pnmdata/01/`), puis lancer le traitement de réception (PnmDataManager) ou attendre la vacation.
 
