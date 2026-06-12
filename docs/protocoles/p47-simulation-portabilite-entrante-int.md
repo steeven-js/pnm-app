@@ -47,7 +47,9 @@ SELECT * FROM MSISDN WHERE msisdn = '0696301129';
 -- (aucune ligne = OK ; si une ligne existe, vérifier operateur_id_actuel = 1 et portage_id_actuel IS NULL)
 ```
 
-> Sans accès DB, les préfixes Orange documentés (`06900-06903`, `06910`, `06960-06963`, `06970-06971`) sont dans `resources/js/lib/pnm-utils.ts` (`MSISDN_FINE_PREFIXES`).
+> ⚠️ **Piège (vérifié le 12/06/2026)** : les préfixes « documentés » (`MSISDN_FINE_PREFIXES` dans `pnm-utils.ts`) sont **trop grossiers** — le découpage réel par `TRANCHE.operateur_id` est plus fin. Ex. `0696018834` semble Orange par préfixe mais tombe en réalité dans la tranche 208 (`0696010000-0696019999`) = **opérateur 3 (SFR/OMT)**. **Toujours valider le numéro à porter contre la vraie table `TRANCHE` (operateur_id = 1)**, sinon le HUB/DAPI rejette : si Wizzee appelle `/v1/createPorta` avec Orange comme donneur sur un numéro non-Orange → **HTTP 412 `DAPI_RECIPIENT_IS_NOT_SUBSCRIPTION_OPERATOR_OF_MSISDN`**.
+>
+> Tranches Orange MQ actives confirmées (extrait) : 147 `0696200000-…`, 157 `0696300000-…`, 162 `0696370000-…`, 177 `0696800000-…` ; GP : 95 `0690300000-…`.
 > Contrôle croisé possible avec P14 (vérification appartenance numéro).
 
 ## Étape 2 — Générer le faux RIO Orange
