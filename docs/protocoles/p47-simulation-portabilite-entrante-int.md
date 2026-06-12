@@ -23,22 +23,30 @@ Seul le **1210 est simulé**. Une fois le portage en état *Accepté*, la chaîn
 
 ---
 
-## Étape 1 — Choisir un MSISDN Orange (tranche attributaire = 01)
+## Étape 1 — Choisir un MSISDN compatible portabilité entrante Orange (tranche attributaire = 01)
 
-Le MSISDN doit appartenir à une **tranche Orange** (OPA = 01) et ne pas être déjà connu de la table `MSISDN` (jamais porté, donc toujours réputé Orange).
+Le numéro **à porter** doit appartenir à une **tranche Orange** (OPA = 01) et ne pas être déjà connu de la table `MSISDN` (jamais porté, donc toujours réputé Orange).
+
+**Accès :** PortaDB sur `vmqproportawebdb01` (clé `porta_pnmv3`, MySQL sans mot de passe).
+
+```bash
+ssh -i ~/.ssh/vmqproportawebdb01_porta porta_pnmv3@172.24.119.68 \
+  "mysql -N -e \"USE PortaDB; <requête> \""
+```
 
 ```sql
--- Tranches Orange actives
+-- (a) Tranches attributaires Orange actives → bornes des numéros portables
 SELECT id, debut, fin
 FROM TRANCHE
 WHERE operateur_id = 1 AND is_active = 1
 ORDER BY debut;
 
--- Vérifier qu'un candidat pris dans une tranche est inconnu de PortaDB
-SELECT * FROM MSISDN WHERE msisdn = '069XXXXXXX';
+-- (b) Vérifier qu'un candidat pris dans une tranche est inconnu de PortaDB
+SELECT * FROM MSISDN WHERE msisdn = '0696301129';
 -- (aucune ligne = OK ; si une ligne existe, vérifier operateur_id_actuel = 1 et portage_id_actuel IS NULL)
 ```
 
+> Sans accès DB, les préfixes Orange documentés (`06900-06903`, `06910`, `06960-06963`, `06970-06971`) sont dans `resources/js/lib/pnm-utils.ts` (`MSISDN_FINE_PREFIXES`).
 > Contrôle croisé possible avec P14 (vérification appartenance numéro).
 
 ## Étape 2 — Générer le faux RIO Orange
@@ -74,12 +82,36 @@ def rio(op, typ, ref6, msisdn10):
 
 ## Étape 3 — Saisir la demande (1110) dans PortaWebUi INT
 
-Admin Portal INT (`http://172.24.114.86:8080/PortaWebUi/`) → **Demande de portage** :
+Admin Portal INT (`http://<hôte-INT>:8080/PortaWebUi/` — _URL exacte à confirmer_) → **Demande de portage** :
 
 ![Demande de portage — Admin Portal INT](images/p47-portawebui-int-demande-portage.png)
 
 1. **Opérateur donneur** : Orange Caraïbes — **Type de demande** : GP (3 numéros max.).
-2. Renseigner : **date de portage** (J+2 ouvrés min, 08:00:00), **code postal émetteur** (97x), nom/prénom client, puis par ligne : **numéro à porter** (`069…`, étape 1) et **RIO Orange Caraïbes** (`01P…`, étape 2). Le numéro provisoire est attribué côté Wizzee/Digicel.
+2. Renseigner : **date de portage** (J+2 ouvrés min, 08:00:00), **code postal émetteur** (97x), nom/prénom client, puis par ligne : **numéro provisoire** (libre côté Digicel/Wizzee, voir ci-dessous), **numéro à porter** (`069…`, étape 1) et **RIO Orange Caraïbes** (`01P…`, étape 2).
+
+### Trouver un numéro provisoire (numéro Digicel libre — « stock 211 »)
+
+Le numéro provisoire est un MSISDN **Digicel réaffectable** sur lequel la ligne est créée avant bascule. Les numéros libres sont dans MasterCRM `PB.MSISDN` (`ST_MSISDN_ID = 0`, `MSISDN_STATUS = 7`, `MS_CLASS = 0`).
+
+**Accès :** pas de connexion directe à MasterCRM → via le serveur de scheduling `vmqprostdb01` (compte `oracle`, SSH RSA legacy) et un **DB link** vers MasterCRM. Encoder le script distant en base64 et le décoder avec `openssl enc -base64 -d -A | bash`.
+
+```bash
+ssh -i ~/.ssh/vmqprostdb01_oracle_rsa \
+  -o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa \
+  -o PubkeyAcceptedAlgorithms=+ssh-rsa -o MACs=+hmac-sha1 \
+  oracle@172.24.114.139 "<sqlplus -S -L / as sysdba ...>"
+```
+
+```sql
+-- Numéros Digicel libres (stock 211) — candidats « numéro provisoire »
+SELECT msisdn_no, ST_MSISDN_ID, MSISDN_STATUS, MS_CLASS
+FROM PB.MSISDN@DBL_PB_MCST50A.BTC.COM
+WHERE ST_MSISDN_ID = 0 AND MSISDN_STATUS = 7 AND MS_CLASS = 0
+  AND rownum <= 12;
+```
+
+> ⚠️ `MCST50A` = MasterCRM **production**. Pour un test **INT**, si l'environnement a son propre stock, prendre un numéro libre dans **MasterCRM INT (`MCSTINT`, `172.24.114.205`)** pour que le provisioning à la bascule réussisse. Rester en `SELECT` (ne rien réserver/écrire).
+
 3. Vérifier en base INT : portage créé, état **En cours (3)**, et noter l'**`id_portage`** (MD5) :
 
 ```sql
