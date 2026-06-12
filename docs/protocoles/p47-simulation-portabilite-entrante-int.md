@@ -47,6 +47,48 @@ SELECT * FROM MSISDN WHERE msisdn = '0696301129';
 -- (aucune ligne = OK ; si une ligne existe, vérifier operateur_id_actuel = 1 et portage_id_actuel IS NULL)
 ```
 
+### Lister directement 5 candidats valides par territoire (absence de porta vérifiée)
+
+Un numéro est **éligible porta entrante** s'il est natif Orange et **jamais vu dans un échange porta** : absent à la fois de **`MSISDN`** (registre) **et** de **`DATA`** (lignes de tickets). Vérifier les deux est nécessaire : en INT, ~600 numéros figurent dans `DATA` mais pas dans `MSISDN` (portas refusées/annulées/sortantes) — un filtre sur `MSISDN` seul les laisserait passer.
+
+`+1234` vise le milieu de chaque tranche ; `LIMIT 5` par île. Préfixes : `0690` Guadeloupe, `0696` Martinique, `0694` Guyane.
+
+```sql
+-- (c1) Guadeloupe — 5 MSISDN Orange natifs (jamais portés)
+SELECT c.msisdn
+FROM ( SELECT LPAD(CAST(t.debut AS UNSIGNED)+1234,10,'0') AS msisdn
+       FROM TRANCHE t
+       WHERE t.operateur_id = 1 AND t.is_active = 1 AND t.debut LIKE '0690%' ) c
+WHERE NOT EXISTS (SELECT 1 FROM MSISDN m WHERE m.msisdn = c.msisdn)   -- pas dans le registre
+  AND NOT EXISTS (SELECT 1 FROM DATA   d WHERE d.msisdn = c.msisdn)   -- aucun ticket porta
+LIMIT 5;
+
+-- (c2) Martinique — 5 MSISDN Orange natifs
+SELECT c.msisdn
+FROM ( SELECT LPAD(CAST(t.debut AS UNSIGNED)+1234,10,'0') AS msisdn
+       FROM TRANCHE t
+       WHERE t.operateur_id = 1 AND t.is_active = 1 AND t.debut LIKE '0696%' ) c
+WHERE NOT EXISTS (SELECT 1 FROM MSISDN m WHERE m.msisdn = c.msisdn)
+  AND NOT EXISTS (SELECT 1 FROM DATA   d WHERE d.msisdn = c.msisdn)
+LIMIT 5;
+
+-- (c3) Guyane — 5 MSISDN Orange natifs
+SELECT c.msisdn
+FROM ( SELECT LPAD(CAST(t.debut AS UNSIGNED)+1234,10,'0') AS msisdn
+       FROM TRANCHE t
+       WHERE t.operateur_id = 1 AND t.is_active = 1 AND t.debut LIKE '0694%' ) c
+WHERE NOT EXISTS (SELECT 1 FROM MSISDN m WHERE m.msisdn = c.msisdn)
+  AND NOT EXISTS (SELECT 1 FROM DATA   d WHERE d.msisdn = c.msisdn)
+LIMIT 5;
+```
+
+> **Lire le statut porta dans `MSISDN`.** La colonne `operateur_id_actuel` donne l'opérateur qui **détient** le numéro aujourd'hui : `1` Orange, `2` Digicel/Wizzee, `3` SFR/OMT, `4` Dauphin, `5` UTS, `6` Free.
+> - **absent de `MSISDN`** → jamais enregistré = natif de sa tranche (Orange ici) → **éligible entrante** ;
+> - présent, `operateur_id_actuel = 1` et `portage_id_actuel IS NULL` → resté chez Orange → éligible ;
+> - présent, `operateur_id_actuel = 2` → **déjà porté chez Digicel/Wizzee** → **NON éligible** (le numéro est déjà chez nous).
+>
+> Exemple vérifié en INT (12/06/2026) : `0690773729` est dans une **tranche Orange** mais `operateur_id_actuel = 2` (porté chez Digicel, `portage_id_actuel = 221815`) → à **exclure** d'une porta entrante. C'est précisément ce que le double `NOT EXISTS` ci-dessus écarte automatiquement.
+
 > ⚠️ **Piège (vérifié le 12/06/2026)** : les préfixes « documentés » (`MSISDN_FINE_PREFIXES` dans `pnm-utils.ts`) sont **trop grossiers** — le découpage réel par `TRANCHE.operateur_id` est plus fin. Ex. `0696018834` semble Orange par préfixe mais tombe en réalité dans la tranche 208 (`0696010000-0696019999`) = **opérateur 3 (SFR/OMT)**. **Toujours valider le numéro à porter contre la vraie table `TRANCHE` (operateur_id = 1)**, sinon le HUB/DAPI rejette : si Wizzee appelle `/v1/createPorta` avec Orange comme donneur sur un numéro non-Orange → **HTTP 412 `DAPI_RECIPIENT_IS_NOT_SUBSCRIPTION_OPERATOR_OF_MSISDN`**.
 >
 > Tranches Orange MQ actives confirmées (extrait) : 147 `0696200000-…`, 157 `0696300000-…`, 162 `0696370000-…`, 177 `0696800000-…` ; GP : 95 `0690300000-…`.
