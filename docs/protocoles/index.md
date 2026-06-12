@@ -1,6 +1,6 @@
 ﻿# Protocoles — Index
 
-**Total :** 44 protocoles | **Dernière MAJ :** 13/05/2026
+**Total :** 45 protocoles | **Dernière MAJ :** 12/06/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentés de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, étapes détaillées, requêtes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -24,7 +24,7 @@
 - [P34 — Désactivation suppression Point de Vente](p34-desactivation-pdv.md) — Del_profil_Mobi, suppression items/packages/groups PDV
 - [P45 — Création d'un compte MasterCRM (nouveau collaborateur)](p45-creation-compte-mastercrm.md) — Clone profil compte source, Creation_compte_CRM_USER.sh, confirmer en O majuscule
 
-## Portabilité (13)
+## Portabilité (14)
 
 - [P08 — Vérification Bascule Porta MOBI](p08-verification-bascule.md) — EmaExtracter/EmmExtracter, emails vérification, version CCA
 - [P09 — Vérification Acquittements](p09-verification-acquittements.md) — PnmAckManager, fichiers .ACR, contacts opérateurs
@@ -42,6 +42,7 @@
 - [P40 — Vérification résiliations PSO non effectives](p40-verification-resiliations-pso.md) — Email automatique APP_OCS, vérification PortaDB/FNR, résiliation SoapUI
 - [P43 — PSO non résiliée suite au bug PortaWs (E610)](p43-pso-non-resiliee-e610.md) — Bug auto-annulation 01/04/2026, double facturation, résiliation SoapUI avec DateEffet rétroactive
 - [P44 — PSO clôturée mais ligne fantôme côté opérateur receveur](p44-pso-ligne-fantome-cote-receveur.md) — Cycle PNM complet mais provisioning échoué chez l'opérateur receveur (ex: SFR 0690446343), contact opérateur pour correction
+- [P47 — Simulation portabilité entrante externe en INT (Orange → Wizzee)](p47-simulation-portabilite-entrante-int.md) — MSISDN tranche Orange, faux RIO (algo CCC validé), 1110 PortaWebUi INT, 1210 simulé via PNMDATA manuel
 
 ## Facturation (2)
 
