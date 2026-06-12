@@ -74,8 +74,12 @@ def rio(op, typ, ref6, msisdn10):
 
 ## Étape 3 — Saisir la demande (1110) dans PortaWebUi INT
 
-1. PortaWebUi INT → création portage entrant particulier (`CreatePortaParticulier`).
-2. Renseigner : MSISDN Orange (étape 1), RIO généré (étape 2), date de portage souhaitée (J+2 ouvrés min).
+Admin Portal INT (`http://172.24.114.86:8080/PortaWebUi/`) → **Demande de portage** :
+
+![Demande de portage — Admin Portal INT](images/p47-portawebui-int-demande-portage.png)
+
+1. **Opérateur donneur** : Orange Caraïbes — **Type de demande** : GP (3 numéros max.).
+2. Renseigner : **date de portage** (J+2 ouvrés min, 08:00:00), **code postal émetteur** (97x), nom/prénom client, puis par ligne : **numéro à porter** (`069…`, étape 1) et **RIO Orange Caraïbes** (`01P…`, étape 2). Le numéro provisoire est attribué côté Wizzee/Digicel.
 3. Vérifier en base INT : portage créé, état **En cours (3)**, et noter l'**`id_portage`** (MD5) :
 
 ```sql
