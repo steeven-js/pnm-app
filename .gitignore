@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Scripts de test INT (contiennent identifiants/MSISDN — ne pas versionner)
+tests-int/

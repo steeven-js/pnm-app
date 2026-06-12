@@ -27,11 +27,12 @@ Seul le **1210 est simulé**. Une fois le portage en état *Accepté*, la chaîn
 
 Le numéro **à porter** doit appartenir à une **tranche Orange** (OPA = 01) et ne pas être déjà connu de la table `MSISDN` (jamais porté, donc toujours réputé Orange).
 
-**Accès :** PortaDB sur `vmqproportawebdb01` (clé `porta_pnmv3`, MySQL sans mot de passe).
+**Accès INT :** serveur `vmqportaprewebdb01` (`172.24.114.86`) — héberge Tomcat (PortaWs/PortaWebUi) **et** la BDD MySQL. SSH compte `porta_test`, MySQL via le compte applicatif (`-u application`). _Identifiants dans le gestionnaire de secrets / mémoire d'accès locale — jamais dans ce dépôt._
 
 ```bash
-ssh -i ~/.ssh/vmqproportawebdb01_porta porta_pnmv3@172.24.119.68 \
-  "mysql -N -e \"USE PortaDB; <requête> \""
+# SSH par mot de passe → via paramiko (pas de sshpass/plink sous Windows)
+mysql -u application -p<***> -t -e "<requête>"
+# (Accès prod équivalent : vmqproportawebdb01 / 172.24.119.68, clé porta_pnmv3, mysql socket)
 ```
 
 ```sql
@@ -82,7 +83,7 @@ def rio(op, typ, ref6, msisdn10):
 
 ## Étape 3 — Saisir la demande (1110) dans PortaWebUi INT
 
-Admin Portal INT (`http://<hôte-INT>:8080/PortaWebUi/` — _URL exacte à confirmer_) → **Demande de portage** :
+Admin Portal INT (`http://172.24.114.86:8080/PortaWebUi/` — hôte `vmqportaprewebdb01`, Tomcat) → **Demande de portage** :
 
 ![Demande de portage — Admin Portal INT](images/p47-portawebui-int-demande-portage.png)
 
@@ -117,13 +118,16 @@ WHERE ST_MSISDN_ID = 0 AND MSISDN_STATUS = 7 AND MS_CLASS = 0
 ![Demande prise en compte — état initial du portage](images/p47-portawebui-int-demande-acceptee.png)
 
 4. **Relever la date de souscription exacte** affichée (ex. `12/06/2026 14:27:43` → `20260612142743`) : elle conditionne l'`id_portage` MD5 du 1210 (étape 4).
-5. Vérifier en base INT : portage créé, état **En cours (3)**, et noter l'**`id_portage`** (MD5) :
+5. Vérifier en base INT et **récupérer l'`id_portage` réel** (table `DATA` du 1110 ; éviter le JOIN sur `PORTAGE` qui scanne) :
 
 ```sql
-SELECT P.id_portage, P.etat_id_actuel, P.date_portage, D.msisdn
-FROM PORTAGE P JOIN DATA D ON P.id_portage = D.id_portage
-WHERE D.msisdn = '0696301129';
+SELECT code_ticket, id_portage, date_souscription, rio, date_portage
+FROM PortaDB.DATA WHERE msisdn = '0696301129';
+-- Exemple vérifié (12/06/2026) :
+-- 1110 | 2edf2f024ad3bd81a8add0ef9de3a97d | 2026-06-12 14:27:43 | 01P301129T2P | 2026-06-16 08:00:00
 ```
+
+> ✅ **Contrôle clé** : cet `id_portage` doit être **identique** à celui calculé pour le 1210. La `date_souscription` (ici `14:27:43`) ≠ la date de **création** du 1110 (`14:52:44`, visible dans *Liste des mandats*) — c'est bien la **souscription** qui alimente le MD5.
 
 6. Le 1110 part dans le fichier `PNMDATA.02.01.<horodatage>.<seq>` à la vacation suivante (10H/14H/19H). En INT, il n'est lu par personne — c'est normal.
 
@@ -179,7 +183,7 @@ Champs du ticket 1210 (RP Accept, OPD → OPR) :
 
 > `id-portage = md5("02"+"01"+"20260612142743"+"0696301129") = 2edf2f024ad3bd81a8add0ef9de3a97d`.
 
-**Injection :** déposer le fichier dans le répertoire de réception PortaSync INT (équivalent INT de `PortaSync/pnmdata/01/`), puis lancer le traitement de réception (PnmDataManager) ou attendre la vacation.
+**Injection (PortaSync INT) :** serveur `vmqportapresync01` (`172.24.114.85`, compte `porta_pnmv3`) — héberge les scripts de bascule, génération et acquittement des vacations. Déposer le fichier dans le répertoire de réception (équivalent INT de `PortaSync/pnmdata/01/arch_recv`), puis lancer le traitement de réception (`PnmDataManager`) ou attendre la vacation.
 
 **Pièges connus :**
 - **E008 « fichier déjà reçu »** : la dédup se fait sur émetteur + date du header (pas la séquence). Changer l'horodatage si on réinjecte (cf. mémo Ack dégradé PNM).
