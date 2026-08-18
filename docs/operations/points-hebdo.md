@@ -22,6 +22,48 @@
 
 ---
 
+## Projets en cours
+
+État permanent, à relire avant le point. Ce sont des sujets de fond, ils ne bougent pas toutes les semaines — quand ils bougent, la nouveauté va dans la section de la semaine.
+
+### Options réengageantes (anti-churn)
+
+Proposer une option de réengagement aux clients arrivant en fin d'engagement, pour réduire le churn.
+
+La contrainte est juridique avant d'être technique : démarcher pour réengager est interdit, sauf à envoyer un avenant. C'est l'email qui fait office d'avenant, il a valeur contractuelle.
+
+**Mon périmètre :** la partie test, et en intégration la première étape entre le web service et la base MasterCRM — l'ajout de l'option en base sur appel du WS. La campagne marketing elle-même passe par Flytect, hors de mon champ et sans accès de ma part.
+
+*Où ça en est :* cadré le 08/06, accès à l'environnement d'intégration en place. Matrice de scénarios et questions ouvertes dans mon document de travail. **Statut à réactualiser avant le point.**
+
+> À dire : « mon périmètre c'est le test et la brique WS vers la base, pas la campagne. »
+
+### Dockerisation des mises en production Porta (initiative Willy, PIL-média)
+
+Packager les livraisons Porta — PortaWs et PortaSync — dans des images, pour que le runtime et ses dépendances partent avec le livrable.
+
+L'argument tient dans un cas réel : la mise en production du 07/04 a cassé la synchronisation hebdomadaire pendant deux mois. Il manquait une extension PHP et une table, et le flux hebdomadaire n'avait pas été testé — donc personne ne l'a vu.
+
+**Mon périmètre :** test et validation. En particulier, faire entrer le flux hebdomadaire dans la checklist de mise en production.
+
+*Où ça en est :* note de cadrage versionnée dans `docs/pnm/pnm-dockerisation-mep.md`.
+
+> À dire : « l'intérêt n'est pas Docker en soi, c'est qu'on arrête de découvrir en production qu'une dépendance manque. »
+
+### Wizzee — reprendre la main sur le support
+
+L'objectif n'est pas de corriger les causes racines, c'est de **documenter les solutions apportées par Katia** pour pouvoir tenir la position en son absence ou en renfort.
+
+Analyse faite sur 100 tickets. Livré le 12/08 : une application de consultation avec 9 résolutions documentées, 5 observations de logs sans solution, et 85 fiches mémo. Chaque entrée porte son niveau de preuve — documenté, observé, ou non documenté. Un blanc reste un blanc, on ne comble pas au jugé.
+
+Le chiffre qui change la lecture : **99 tickets correspondent à 77 épisodes réels**. En comptant ainsi, MSISDN_SWAP passe devant et devient la vraie priorité.
+
+*Où ça en est :* trois mesures restent en attente de l'accès à l'outil Tripica. La refonte de l'interface est volontairement différée, l'app est optimisée pour la justesse du contenu, pas pour l'ergonomie.
+
+> À dire : « le nombre de tickets trompe. Ce qui compte c'est le nombre d'épisodes, et ça inverse le classement des priorités. »
+
+---
+
 # Semaine du 18/08/2026
 
 ## PNM / Portabilité
