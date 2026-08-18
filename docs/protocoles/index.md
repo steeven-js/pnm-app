@@ -1,6 +1,6 @@
 ﻿# Protocoles — Index
 
-**Total :** 45 protocoles | **Dernière MAJ :** 12/06/2026
+**Total :** 46 protocoles | **Dernière MAJ :** 18/06/2026
 **Source :** Documentation PNM, scripts production, 30 tickets documentés de Frederic Arduin (2026)
 
 > Chaque protocole contient : contexte, étapes détaillées, requêtes SQL, commandes, cas particuliers, exemples concrets issus des tickets RT, et message de fermeture type.
@@ -12,7 +12,7 @@
 - [P03 — Libération SIM](p03-liberation-sim.md) — SQL MOBI, vérification ligne active, format ICCID
 - [P04 — Libération Offre](p04-liberation-offre.md) — customer_package + package_right, libération simple/avec restriction
 
-## Exploitation (9)
+## Exploitation (10)
 
 - [P06 — MAJ Fidélisation APP_OCS 11561](p06-maj-fidelisation-11561.md) — Réengagement 24 mois, report mois FID, MAJ date
 - [P07 — Annulation Fidélisation APP_OCS 11605](p07-annulation-fidelisation-11605.md) — Multi-étapes 2-3 jours, interaction CDC
@@ -23,6 +23,7 @@
 - [P33 — Réactivation forfait bloqué SM](p33-reactivation-forfait-bloque.md) — Multi-étapes : restriction droits + libération + FID
 - [P34 — Désactivation suppression Point de Vente](p34-desactivation-pdv.md) — Del_profil_Mobi, suppression items/packages/groups PDV
 - [P45 — Création d'un compte MasterCRM (nouveau collaborateur)](p45-creation-compte-mastercrm.md) — Clone profil compte source, Creation_compte_CRM_USER.sh, confirmer en O majuscule
+- [P48 — Création / clonage des droits d'un Point de Vente (PDV)](p48-creation-droits-pdv.md) — Creation_compte_CRM_PDV_COM_MAJ2.sh, clone 7 étapes/6 tables depuis un PDV source, profil PDV_ODL/IC, **matrice des cas** (A→I), DAPI hors scripts Oracle
 
 ## Portabilité (14)
 
