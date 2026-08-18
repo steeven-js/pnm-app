@@ -37,6 +37,19 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: 'success' |
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.7.0',
+    date: '18 Août 2026',
+    changes: [
+      { type: 'new', description: 'Codes E fichier complets dans Resolve > Codes : E006 à E011 ajoutés, seuls E000 à E003 étaient présents' },
+      { type: 'new', description: 'E006 documenté comme code surchargé : nom de fichier non reconnu, multiple points et For input string sont trois cas différents sous le même code' },
+      { type: 'new', description: 'E011 documenté dans ses deux sens opposés : notre relance à 60 min (sortant) et le refus « Ack reçu pour un fichier non-enregistré » (entrant)' },
+      { type: 'new', description: 'E008 requalifié en symptôme : chercher le vrai incident à l\'heure de réception du fichier, pas à l\'heure du E008' },
+      { type: 'new', description: 'Faux positifs identifiés : E011 du lundi matin vers Dauphin et UTS, qui n\'acquittent que le dimanche soir suivant' },
+      { type: 'new', description: 'Doc docs/pnm/pnm-codes-erreurs-operationnel.md — lecture opérationnelle des codes E, tri incident / faux positif, où lire quel log' },
+      { type: 'new', description: 'Doc docs/operations/points-hebdo.md — aide-mémoire du point hebdomadaire (Fred + Benoît), sujets ouverts et historique par semaine' },
+    ],
+  },
+  {
     version: '2.6.0',
     date: '28 Mai 2026',
     changes: [
