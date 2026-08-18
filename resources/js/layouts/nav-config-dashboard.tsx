@@ -71,9 +71,13 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Protocoles', path: paths.protocoles },
           { title: 'Requetes SQL', path: paths.requetesPnm },
           { title: 'MOBI / CRM', path: paths.mobi.root },
-          { title: 'Points hebdo', path: paths.pointsHebdo },
           { title: 'Progression', path: paths.dashboard.progress },
         ],
+      },
+      {
+        title: 'Points hebdo',
+        path: paths.pointsHebdo,
+        icon: <Iconify icon="solar:clipboard-list-bold-duotone" width={24} />,
       },
       {
         title: 'Base Tickets',
