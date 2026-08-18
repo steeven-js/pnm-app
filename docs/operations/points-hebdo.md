@@ -5,7 +5,7 @@
 
 **But :** aide-mémoire pour l'oral. Une idée par phrase, les chiffres sont là pour être cités tels quels, pas de détail technique — il est dans les tickets référencés.
 
-**Comment s'en servir :** le tableau ci-dessous donne l'état permanent des sujets ouverts, à relire avant d'entrer en réunion. Les sections datées en dessous racontent ce qui a bougé chaque semaine, la plus récente en premier, classées par domaine.
+**Comment s'en servir :** le tableau ci-dessous donne l'état permanent des sujets ouverts, à relire avant d'entrer en réunion. Vient ensuite la semaine en cours, classée par domaine — c'est le cœur du mémo. Les projets de fond sont en fin de page, on n'y va que si la question est posée.
 
 ---
 
@@ -19,54 +19,6 @@
 | UTS ne répond plus | PNM | 19/06/2026 | Relancé début juillet, sans retour | — |
 
 **Le levier du point hebdo :** les deux demandes chez PIL-média. #5263 traîne depuis le 30/07 sans prise en charge.
-
----
-
-## Projets en cours
-
-État permanent, à relire avant le point. Ce sont des sujets de fond, ils ne bougent pas toutes les semaines — quand ils bougent, la nouveauté va dans la section de la semaine.
-
-### Options réengageantes (anti-churn)
-
-Proposer une option de réengagement aux clients arrivant en fin d'engagement, pour réduire le churn.
-
-La contrainte est juridique avant d'être technique : démarcher pour réengager est interdit, sauf à envoyer un avenant. C'est l'email qui fait office d'avenant, il a valeur contractuelle.
-
-**Mon périmètre :** la partie test, et en intégration la première étape entre le web service et la base MasterCRM — l'ajout de l'option en base sur appel du WS. La campagne marketing elle-même passe par Flytect, hors de mon champ et sans accès de ma part.
-
-*Où ça en est :* cadrage en cours, accès à l'environnement d'intégration en place. La spécification du web service `InsertOption` est connue, et la matrice de scénarios de test est écrite (éligibilité, idempotence, données invalides, intégrité, légal, volumétrie).
-
-**Deux inconnues bloquent le démarrage des tests :** la table de MasterCRM où atterrit l'`OptionId` après l'appel, et le jeu de valeurs de test en intégration — quel point de vente, quel login, et quel identifiant correspond à l'option réengageante.
-
-Restent aussi à cadrer, côté métier : qui déclenche et teste le PDF et l'email, la définition de « fin d'engagement » qui rend un client cible, et si l'avenant nécessite une acceptation du client ou si l'envoi suffit.
-
-**Dernière trace documentée : 08/06/2026** (`docs/mobi/mobi-options-reengageantes.md`). Rien de versionné depuis — à confirmer de vive voix.
-
-> À dire : « le cadrage technique est fait, la matrice de test est prête. Je suis bloqué sur deux inconnues côté données, c'est ça qu'il me faut pour démarrer. »
-
-### Dockerisation des mises en production Porta (initiative Willy, PIL-média)
-
-Packager les livraisons Porta — PortaWs et PortaSync — dans des images, pour que le runtime et ses dépendances partent avec le livrable.
-
-L'argument tient dans un cas réel : la mise en production du 07/04 a cassé la synchronisation hebdomadaire pendant deux mois. Il manquait une extension PHP et une table, et le flux hebdomadaire n'avait pas été testé — donc personne ne l'a vu.
-
-**Mon périmètre :** test et validation. En particulier, faire entrer le flux hebdomadaire dans la checklist de mise en production.
-
-*Où ça en est :* note de cadrage versionnée dans `docs/pnm/pnm-dockerisation-mep.md`.
-
-> À dire : « l'intérêt n'est pas Docker en soi, c'est qu'on arrête de découvrir en production qu'une dépendance manque. »
-
-### Wizzee — reprendre la main sur le support
-
-L'objectif n'est pas de corriger les causes racines, c'est de **documenter les solutions apportées par Katia** pour pouvoir tenir la position en son absence ou en renfort.
-
-Analyse faite sur 100 tickets. Livré le 12/08 : une application de consultation avec 9 résolutions documentées, 5 observations de logs sans solution, et 85 fiches mémo. Chaque entrée porte son niveau de preuve — documenté, observé, ou non documenté. Un blanc reste un blanc, on ne comble pas au jugé.
-
-Le chiffre qui change la lecture : **99 tickets correspondent à 77 épisodes réels**. En comptant ainsi, MSISDN_SWAP passe devant et devient la vraie priorité.
-
-*Où ça en est :* trois mesures restent en attente de l'accès à l'outil Tripica. La refonte de l'interface est volontairement différée, l'app est optimisée pour la justesse du contenu, pas pour l'ergonomie.
-
-> À dire : « le nombre de tickets trompe. Ce qui compte c'est le nombre d'épisodes, et ça inverse le classement des priorités. »
 
 ---
 
@@ -183,6 +135,31 @@ Ajout d'un destinataire au rapport quotidien, sur demande du CC. Fait le 14/08, 
 Demande récurrente et sans difficulté, mentionnée seulement pour le volume.
 
 ---
+
+## Projets de fond
+
+À consulter seulement si la question est posée. Ce qui bouge dans la semaine remonte dans la section datée.
+
+### Dockerisation des mises en production Porta — actif
+
+Packager les livraisons Porta — PortaWs et PortaSync — dans des images, pour que le runtime et ses dépendances partent avec le livrable.
+
+L'argument tient dans un cas réel : la mise en production du 07/04 a cassé la synchronisation hebdomadaire pendant deux mois. Il manquait une extension PHP et une table, et le flux hebdomadaire n'avait pas été testé — donc personne ne l'a vu.
+
+**Mon périmètre :** test et validation. En particulier, faire entrer le flux hebdomadaire dans la checklist de mise en production.
+
+*Où ça en est :* initiative portée par Willy (PIL-média). Note de cadrage versionnée dans `docs/pnm/pnm-dockerisation-mep.md`.
+
+> À dire : « l'intérêt n'est pas Docker en soi, c'est qu'on arrête de découvrir en production qu'une dépendance manque. »
+
+### En pause
+
+| Projet | Dernier mouvement | Où ça s'est arrêté |
+|--------|-------------------|--------------------|
+| **Options réengageantes** (anti-churn) | 08/06/2026 | Cadrage technique fait, matrice de test écrite. Bloqué sur deux inconnues côté données : la table MasterCRM cible de l'`OptionId`, et le jeu de valeurs de test en intégration. Détail : `docs/mobi/mobi-options-reengageantes.md` |
+| **Wizzee** — reprendre la main sur le support | 13/08/2026 | Application de consultation livrée (9 résolutions documentées, 5 observations, 85 fiches). Trois mesures restent en attente de l'accès à l'outil Tripica. Refonte de l'interface volontairement différée |
+
+> À dire si on demande : « les deux sont en pause, pas abandonnés. Les options réengageantes attendent deux informations côté données, Wizzee attend un accès. »
 
 <!--
 MODÈLE POUR LA SEMAINE SUIVANTE — copier ce bloc au-dessus de la semaine précédente
