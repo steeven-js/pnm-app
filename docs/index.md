@@ -13,6 +13,7 @@
 | [pnm-crontab-scripts.md](pnm/pnm-crontab-scripts.md) | Documentation exhaustive des 13 tâches cron PORTA PNMV3 (vmqproportawebdb01), planification horaire, arborescence serveur |
 | pnm-porta-database.md | *(à créer)* Schéma et modèle de données Porta v3.0.15 |
 | pnm-porta-body.md | *(à créer)* Architecture applicative Porta v3.0.15 |
+| [pnm-codes-erreurs-operationnel.md](pnm/pnm-codes-erreurs-operationnel.md) | **Codes E — lecture opérationnelle** : ce que E006, E008, E010, E011, E610 veulent dire réellement dans nos logs (E006 et E011 sont surchargés par notre WS), tri incident / faux positif, réflexes, où lire quoi |
 | [pnm-dockerisation-mep.md](pnm/pnm-dockerisation-mep.md) | **Cadrage dockerisation des MEP Porta** (initiative Willy/PIL-média) : conteneurisation PortaWs/PortaSync, bénéfices (fin des oublis de dépendance — cf. #5239), actions Digicel (test/ops), points à clarifier — *document vivant* |
 
 ## MOBI / MasterCRM
