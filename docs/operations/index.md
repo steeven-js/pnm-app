@@ -6,7 +6,7 @@ Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 
 | Document | Statut | Description |
 |----------|--------|-------------|
-| [points-hebdo-vacations.md](points-hebdo-vacations.md) | EN COURS | **Aide-mémoire du point hebdo** (Fred + Benoît) : incidents de vacation résumés en phrases courtes, tableau des sujets ouverts, une section par semaine — *document vivant* |
+| [points-hebdo.md](points-hebdo.md) | EN COURS | **Aide-mémoire du point hebdo** (Fred + Benoît) : tous domaines — PNM, MOBI/CRM, tickets RT, outillage. Phrases courtes, tableau des sujets ouverts, une section par semaine — *document vivant* |
 
 ## GPMAG / Routage Orange
 
