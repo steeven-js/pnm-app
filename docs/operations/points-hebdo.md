@@ -14,7 +14,7 @@
 | Sujet | Domaine | Depuis | Où ça en est | Référence |
 |-------|---------|--------|--------------|-----------|
 | Accusé non généré (bug du web service) | PNM | 30/07/2026 | Ouvert chez PIL-média, **toujours pas pris en charge** | Redmine #5263 |
-| Fichiers exposés sous un nom provisoire | PNM | 18/08/2026 | Ouvert chez PIL-média | Redmine #5265 |
+| Fichiers exposés sous un nom provisoire | PNM | 18/08/2026 | Ouvert chez PIL-média, complété le 18/08 avec un troisième symptôme | Redmine #5265 |
 | Écart de synchronisation Orange | PNM | 17/08/2026 | En attente d'explication sur la bascule du 24/06 | mail Fred + Willy |
 | UTS ne répond plus | PNM | 19/06/2026 | Relancé début juillet, sans retour | — |
 
@@ -25,6 +25,30 @@
 # Semaine du 18/08/2026
 
 ## PNM / Portabilité
+
+### La vacation de 14h du 18/08 — le même bug dans les deux sens à la même seconde
+
+Le bug du web service est retombé à 14:00:09, cette fois sur les deux flux en même temps.
+
+Côté SFR, l'accusé de leur fichier n'a pas été généré. Côté Orange, notre fichier de la vacation n'est jamais parti, il est resté bloqué.
+
+Puis un effet de bord qu'on n'avait pas identifié : comme notre base n'a pas enregistré le fichier envoyé à Orange, **on est devenus incapables d'accepter leur accusé**. Ils ont bien reçu et validé notre fichier, mais leur réponse a été refusée chez nous et s'est mise à tourner en boucle.
+
+**Trois interventions manuelles pour une seule vacation.** Rien de perdu au final : les 15 opérations de SFR sont en base, les 9 d'Orange sont chez eux, acquittées deux minutes après le dépôt.
+
+*Où ça en est :* tout est rétabli le jour même. La demande **#5265** a été complétée avec ces éléments.
+
+> À dire : « le problème n'est pas qu'on perde des données, c'est qu'on n'en perd pas et que personne ne s'en rende compte. Ça n'a alerté nulle part, c'est moi qui suis allé voir. »
+
+### Un cas identique du 24/07 retrouvé, jamais détecté à l'époque
+
+En cherchant les fichiers restés bloqués, j'en ai trouvé un du 24 juillet au soir, vers Orange, coincé de la même façon.
+
+Personne ne l'a vu à l'époque. Les opérations sont reparties d'elles-mêmes à la vacation suivante, le lundi matin — donc pas de perte, mais un décalage de deux jours et demi qu'aucune alerte n'a signalé.
+
+La cause technique n'était d'ailleurs pas la même que celle d'aujourd'hui : deux défauts différents produisent exactement le même symptôme.
+
+> À dire : « ça montre que le cas n'est pas nouveau, juste invisible. On ne le voit que quand on va le chercher. »
 
 ### Les fichiers qu'on envoie sortent parfois avec un nom provisoire
 
