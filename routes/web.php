@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Changelog
     Route::get('/changelog', fn () => Inertia::render('Changelog'))->name('changelog');
 
+    // Points hebdomadaires (aide-memoire du point avec Fred et Benoit)
+    Route::get('/points-hebdo', fn () => Inertia::render('PointsHebdo'))->name('points-hebdo');
+
     // Operations Guide
     Route::get('/operations-guide', fn () => Inertia::render('OperationsGuide'))->name('operations-guide');
 

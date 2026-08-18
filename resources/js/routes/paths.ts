@@ -81,6 +81,8 @@ export const paths = {
     intermediaire: '/sql-playground/intermediaire',
     investigation: '/sql-playground/investigation',
   },
+  // POINTS HEBDO
+  pointsHebdo: '/points-hebdo',
   // OPERATIONS GUIDE
   operationsGuide: '/operations-guide',
   // REQUETES PNM

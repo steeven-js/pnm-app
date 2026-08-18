@@ -46,6 +46,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'new', description: 'E008 requalifié en symptôme : chercher le vrai incident à l\'heure de réception du fichier, pas à l\'heure du E008' },
       { type: 'new', description: 'Faux positifs identifiés : E011 du lundi matin vers Dauphin et UTS, qui n\'acquittent que le dimanche soir suivant' },
       { type: 'new', description: 'Doc docs/pnm/pnm-codes-erreurs-operationnel.md — lecture opérationnelle des codes E, tri incident / faux positif, où lire quel log' },
+      { type: 'new', description: 'Nouvelle page Points hebdo (Base de Connaissances > PNM V3) : tableau des sujets ouverts et compte rendu de la semaine par domaine, avec les formulations a dire a l\'oral' },
       { type: 'new', description: 'Doc docs/operations/points-hebdo.md — aide-mémoire du point hebdomadaire (Fred + Benoît), sujets ouverts et historique par semaine' },
     ],
   },

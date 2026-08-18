@@ -71,6 +71,7 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Protocoles', path: paths.protocoles },
           { title: 'Requetes SQL', path: paths.requetesPnm },
           { title: 'MOBI / CRM', path: paths.mobi.root },
+          { title: 'Points hebdo', path: paths.pointsHebdo },
           { title: 'Progression', path: paths.dashboard.progress },
         ],
       },
