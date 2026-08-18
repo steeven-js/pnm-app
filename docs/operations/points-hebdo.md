@@ -34,9 +34,15 @@ La contrainte est juridique avant d'être technique : démarcher pour réengager
 
 **Mon périmètre :** la partie test, et en intégration la première étape entre le web service et la base MasterCRM — l'ajout de l'option en base sur appel du WS. La campagne marketing elle-même passe par Flytect, hors de mon champ et sans accès de ma part.
 
-*Où ça en est :* cadré le 08/06, accès à l'environnement d'intégration en place. Matrice de scénarios et questions ouvertes dans mon document de travail. **Statut à réactualiser avant le point.**
+*Où ça en est :* cadrage en cours, accès à l'environnement d'intégration en place. La spécification du web service `InsertOption` est connue, et la matrice de scénarios de test est écrite (éligibilité, idempotence, données invalides, intégrité, légal, volumétrie).
 
-> À dire : « mon périmètre c'est le test et la brique WS vers la base, pas la campagne. »
+**Deux inconnues bloquent le démarrage des tests :** la table de MasterCRM où atterrit l'`OptionId` après l'appel, et le jeu de valeurs de test en intégration — quel point de vente, quel login, et quel identifiant correspond à l'option réengageante.
+
+Restent aussi à cadrer, côté métier : qui déclenche et teste le PDF et l'email, la définition de « fin d'engagement » qui rend un client cible, et si l'avenant nécessite une acceptation du client ou si l'envoi suffit.
+
+**Dernière trace documentée : 08/06/2026** (`docs/mobi/mobi-options-reengageantes.md`). Rien de versionné depuis — à confirmer de vive voix.
+
+> À dire : « le cadrage technique est fait, la matrice de test est prête. Je suis bloqué sur deux inconnues côté données, c'est ça qu'il me faut pour démarrer. »
 
 ### Dockerisation des mises en production Porta (initiative Willy, PIL-média)
 
