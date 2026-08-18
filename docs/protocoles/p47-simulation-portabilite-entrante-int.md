@@ -193,6 +193,20 @@ Le RIO reste préfixé `01P` quel que soit le territoire (code opérateur + type
 
 ## Étape 4 — Simuler le 1210 d'Orange
 
+> ⛔ **Prérequis d'ordre — le portage doit être en *En cours*, PAS en *Saisi DP*.**
+> Le 1210 ne peut s'appliquer qu'à un portage déjà passé en **En cours** (le 1110 a été émis à l'étape 3 via la vacation de génération). Si on dépose le 1210 alors que le portage est encore **Saisi DP**, le WS refuse la transition et génère un **ticket 7000 / `E610`** :
+> ```
+> [E610:0] Transitions disponibles : source:out, context:createPorta, ticket:1110 (DP)
+> ```
+> (= « depuis Saisi DP, la seule transition possible est l'émission du 1110 »).
+> **Pire — le 1210 prématuré corrompt la procédure** : tant qu'il est en base, l'émission du 1110 ne passe plus et produit un **2ᵉ 7000/E610, cette fois émis au partenaire** :
+> ```
+> [E610: L'ID portage existe déjà mais réception d'un flux non attendu dans la procédure (prise en compte avant ordre de portage)]
+> ```
+> Le portage **reste bloqué en Saisi DP**. **Un simple re-dépôt ne récupère PAS.** Récupération : soit **supprimer en base le 1210 prématuré + les 7000** (`DELETE FROM DATA WHERE id IN (…)` en INT) puis ré-émettre le 1110, soit **abandonner le portage** (« Clôturer » → cancelPorta/1510 → *Annulé*) et **recommencer sur un numéro vierge mono-portage**.
+> **Ordre correct** : (3) émettre le 1110 → *En cours* → vérifier l'état → (4) déposer le 1210.
+> Cas vérifié le 17/06/2026 (INT) : `0696096697`, 1210 A001 déposé à 09:22 avant le 1110 → 7000/E610 (09:23), puis tentative d'émission 1110 → 7000/E610 « flux non attendu avant ordre de portage » émis à Orange (09:29), portage resté Saisi DP.
+
 Fabriquer un fichier **`PNMDATA.01.02.AAAAMMJJHHMMSS.ZZZ`** (émetteur 01 → destinataire 02) contenant :
 
 | Ligne | Contenu |
