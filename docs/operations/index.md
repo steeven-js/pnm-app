@@ -2,6 +2,12 @@
 
 Suivi des dossiers et travaux en cours dans l'équipe Application Porta.
 
+## Point hebdomadaire
+
+| Document | Statut | Description |
+|----------|--------|-------------|
+| [points-hebdo-vacations.md](points-hebdo-vacations.md) | EN COURS | **Aide-mémoire du point hebdo** (Fred + Benoît) : incidents de vacation résumés en phrases courtes, tableau des sujets ouverts, une section par semaine — *document vivant* |
+
 ## GPMAG / Routage Orange
 
 | Document | Statut | Description |

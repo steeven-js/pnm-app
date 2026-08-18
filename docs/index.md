@@ -35,6 +35,7 @@
 | Document | Description |
 |----------|-------------|
 | [operations/index.md](operations/index.md) | **Index Opérations en cours** — dossiers actifs (GPMAG, PILMEDIA) |
+| [operations/points-hebdo-vacations.md](operations/points-hebdo-vacations.md) | **Point hebdo incidents de vacation** (Fred + Benoît) — aide-mémoire oral, sujets ouverts et historique par semaine — *document vivant* |
 | [operations/gpmag/gpmag-évolutions-arcep.md](operations/gpmag/gpmag-evolutions-arcep.md) | Suivi des évolutions ARCEP / migration préfixes routage Orange / dump FNR |
 | [operations/gpmag/sms-portes-orange-diagnostic.md](operations/gpmag/sms-portes-orange-diagnostic.md) | Diagnostic SMS non reçus par les MSISDN Orange portés chez Digicel |
 | [operations/pilmedia/points-actuels.md](operations/pilmedia/points-actuels.md) | Points en cours PILMEDIA / Max Morawski |
